@@ -1,0 +1,912 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{C61BC8FE-5E84-4F89-9D87-BF46BB015077}" GUIDREP="{103F698C-57E1-4228-8BCC-2D36E14C11BE}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="16470"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[
+Sub OnDataInitialize
+  'm_data.debugg=true
+  	dim sql
+	dim dimKontrakt
+	dim dimForvaltningsavtale
+	dim fradato
+	dim tildato
+	dim mm
+	dim yy
+	dim klient
+	dim database
+	dim utbetalingsDato
+	dim eiernr 
+	dim eiernr2 
+
+	
+	
+	if m_data.RunSubQuery("SELECT DB_NAME() as db", "sys") > 0 then
+		database = m_data.subqueryvalue("db", "sys")
+		database = trim(database)
+		dim pos
+		dim length
+		dim newPos
+		pos = instr(database, "_")
+		length = len(database)
+		newpos = length-pos
+		klient = right(database, newpos)		
+	end if
+	
+	msgbox "Denne rapporten er kansellert. Ta kontakt med Uni Pluss for å få tilgang til den. Ref sak7614"
+	exit sub
+	
+	m_data.AddInputMacro "{eiernr}","Eier nr:","",""
+	m_data.AddInputMacro "{eiernr2}","","","" 'trenger to input til bruk av rapport på BT
+	'm_data.AddInputMacro "{jobbfra}","Jobbnr fra:","getsql(select max(jobnr) from e..t_husleieavregning)",""	
+	'm_data.AddInputMacro "{jobbtil}","Jobbnr til:","getsql(select max(jobnr) from e..t_husleieavregning)",""	
+	
+	
+	
+	m_data.AddInputMacro "{aar}","År: ",Year(Now),,2,"select distinct year y1, year y2 from uniadmin..adm_Client order by y1 desc"	
+	m_data.AddInputMacro "{mnd}","Måned: ",Month(Now),,2,"select id, navn from utool..maaneder "
+	'm_data.AddInputMacro "{utbet}","Utbetalingsdato: ","3",,2,"Select id,utbetalingsdato from e..t_utbetalingsdato order by utbetalingsdato asc"	
+	
+		
+  	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	eiernr = m_data.getmacrovalue("{eiernr}")
+	eiernr2 = m_data.getmacrovalue("{eiernr2}")
+	
+	'for visning på Boligtorget
+	if eiernr = eiernr2 then
+		'henter ut eiernr, aar og mnd
+		if m_data.RunSubQuery("select  EierNr, Mnd, Aar From e..t_husleieAvregning where id = "& eiernr &"","sys")> 0 then
+			yy = m_data.subqueryvalue("Aar","sys")	
+			mm = m_data.subqueryvalue("Mnd","sys")	
+			eiernr = m_data.subqueryvalue("EierNr","sys")				
+		end if 
+	else			
+		mm=m_data.getmacrovalue("{mnd}")
+		yy=m_data.getmacrovalue("{aar}")
+	end if
+	
+	fradato = "01." & mm & "." & yy
+	tildato = dateadd("m",1,fradato)
+	
+	'Henter ut dimensjoner
+	if m_data.RunSubQuery("Select ('dim'+convert(varchar(2),ForvaltningsavtaleDim)) as ForvaltningsavtaleDim, ('dim'+convert(varchar(2),LeieavtaleDim)) as LeieavtaleDim from e..t_klientParametre","sys")>0 then
+		dimForvaltningsavtale = m_data.subqueryvalue("ForvaltningsavtaleDim","sys")
+		dimKontrakt = m_data.subqueryvalue("LeieavtaleDim","sys") 
+	end if		
+	
+	'henter ut utbetalingsdato
+	if m_data.RunSubQuery("select top 1 utbetalingsDatoId as it from e..t_forvaltningsAvtale where kreditorId = " & eiernr,"sys")>0 then
+		utbetalingsDato = m_data.subqueryvalue("it","sys") 
+	end if	
+	
+sql = sql & " select kdata.Kundenummer as leietakernr, (select top 1 name from c..c_name n where n.id=ku.nameid ) as leietakernavn,  "
+sql = sql & "  avr.EierNr as eiernr, (select top 1 name from c..c_name n where n.id=eier.nameid) as eiernavn,  "		
+sql = sql & "  avr.dato, fa.id, avr.Mnd as periode, kdata.FormidlingsNr as formidlingsnr,  "	
+sql = sql & "  (Select top 1 DepositumType from e..t_depositumType dt inner join e..t_kontraktsdata kd on kd.depositumTypeId=dt.id where kd.kontrakts_id=kdata.kontrakts_id) DepositumType, " 
+sql = sql & "   kdata.depositum,"	
+		
+sql = sql & " ((select sum(bruttosum) from " & getAarsbase(yy,klient) & "..Trans t where t.fakturanr in  "
+sql = sql & " ( "
+sql = sql & "   select distinct vf.fakturanr from c..VARELNFAKT vf "
+sql = sql & "   inner join c..FAKTURA f on vf.Fakturanr = f.Fakturanr "
+sql = sql & "   where vf." & dimKontrakt & "= kdata.FormidlingsNr "
+sql = sql & "       and vf." & dimForvaltningsavtale & " = fa.Id "
+sql = sql & "       and vf.Kundenr =kdata.Kundenummer "
+sql = sql & "       and vf.Varenr = '1' "
+sql = sql & "       and f.Fakturadato >= '" & fradato & "'  and f.Fakturadato < avr.Dato  ) "
+sql = sql & "  and t.Dato <= avr.Dato ) - "
+sql = sql & "   (select SUM(isnull(Kreditert_Sum,0))  from c..FAKTURA where Fakturanr in( "
+sql = sql & "  			 (select distinct vf.fakturanr from c..VARELNFAKT vf "
+sql = sql & "  			   inner join c..FAKTURA f on vf.Fakturanr = f.Fakturanr "
+sql = sql & "  			   where vf." & dimKontrakt & "= kdata.FormidlingsNr "
+sql = sql & "   			  and vf." & dimForvaltningsavtale & " = fa.Id "
+sql = sql & "  				  and vf.Varenr = '1' "
+sql = sql & "  				  and vf.Kundenr =kdata.Kundenummer "
+sql = sql & "                 and f.Fakturadato >= '" & fradato & "' and f.Fakturadato < avr.Dato))) "
+sql = sql & "    )  as skyldigVedAvregning, "
+ 
+sql = sql & "    ((select sum(bruttosum) from " & getAarsbase(yy,klient) & "..Trans t where t.fakturanr in "
+sql = sql & "    ( "
+sql = sql & "    select distinct vf.fakturanr from c..VARELNFAKT vf "
+sql = sql & "    inner join c..FAKTURA f on vf.Fakturanr = f.Fakturanr "
+sql = sql & "     where vf." & dimKontrakt & "= kdata.FormidlingsNr "
+sql = sql & "                  and vf." & dimForvaltningsavtale & "  = fa.Id "	
+sql = sql & "                  and vf.Varenr = '1' "
+sql = sql & "                  and vf.Kundenr = kdata.Kundenummer "
+sql = sql & "              	   and f.Fakturadato >= '" & fradato & "' and f.Fakturadato < '" & tildato &"'"
+sql = sql & "        ) "
+sql = sql & "     and t.Dato <= GetDate()) - "
+sql = sql & "      (select SUM(isnull(Kreditert_Sum,0))  from c..FAKTURA where Fakturanr in( "
+sql = sql & "     			 (select distinct vf.fakturanr from c..VARELNFAKT vf "
+sql = sql & "     			   inner join c..FAKTURA f on vf.Fakturanr = f.Fakturanr "
+sql = sql & "     			  where vf." & dimKontrakt & "= kdata.FormidlingsNr "
+sql = sql & "     				  and vf." & dimForvaltningsavtale & " = fa.Id  "
+sql = sql & "     				  and vf.Varenr = '1' "
+sql = sql & "     				  and vf.Kundenr =kdata.Kundenummer "
+sql = sql & "     				  and f.Fakturadato >= '" & fradato & "' and f.Fakturadato < '" & tildato &"'))) "
+sql = sql & "     ) as skyldigVedRapportKjoring, "   
+   
+sql = sql & "    (select top 1 st.beskrivelse from c..VARELNFAKT vf "
+sql = sql & "    inner join c..FAKTURA f on vf.Fakturanr = f.Fakturanr "
+sql = sql & "    inner join c..status st on f.status = st.id "
+sql = sql & "    where vf." & dimKontrakt & "= kdata.FormidlingsNr "
+sql = sql & "       and vf." & dimForvaltningsavtale & " = fa.Id "
+sql = sql & "       and vf.Kundenr =kdata.Kundenummer "
+sql = sql & "       and vf.Varenr ='1' "
+sql = sql & "       and f.Fakturadato >= '" & fradato & "' and f.Fakturadato < '" & tildato &"' order by st.id)  fakturaStatus, "
+       
+sql = sql & "       (select top 1 pu.Dato from c..VARELNFAKT vf "
+sql = sql & " 	   inner join c..FAKTURA f on vf.Fakturanr = f.Fakturanr "
+sql = sql & " 	   inner join c..status st on f.status = st.id "
+sql = sql & "	   inner join c..Purring pu on pu.Fakturanr = f.Fakturanr "
+sql = sql & " 	   where vf." & dimKontrakt & "= kdata.FormidlingsNr "
+sql = sql & "       and vf." & dimForvaltningsavtale & " = fa.Id "
+sql = sql & "       and vf.Kundenr =kdata.Kundenummer "
+sql = sql & "       and vf.Varenr ='1' "
+sql = sql & "       and f.Fakturadato >= '" & fradato & "' and f.Fakturadato < '" & tildato &"' order by st.id) sistPurret, "
+       
+sql = sql & "    (select top 1 i.ExportDate from c..VARELNFAKT vf "
+sql = sql & "    inner join c..FAKTURA f on vf.Fakturanr = f.Fakturanr "
+sql = sql & "    inner join c..status st on f.status = st.id "
+sql = sql & "    inner join c..InkassoInvoice i on i.InvoiceID = f.Fakturanr "
+sql = sql & "    where vf." & dimKontrakt & "= kdata.FormidlingsNr "
+sql = sql & "       and vf." & dimForvaltningsavtale & " = fa.Id "
+sql = sql & "       and vf.Kundenr =kdata.Kundenummer "
+sql = sql & "       and vf.Varenr ='1' "
+sql = sql & "       and f.Fakturadato >= '" & fradato & "' and f.Fakturadato < '" & tildato &"' order by st.id)  sendtTilInkasso, "    
+       
+sql = sql & "     (select top 1 case when f.Status = 110111 then convert(varchar,f.Innbet_Dato,104) else '' end from c..VARELNFAKT vf "
+sql = sql & "	   inner join c..FAKTURA f on vf.Fakturanr = f.Fakturanr "
+sql = sql & "	   inner join c..status st on f.status = st.id "
+sql = sql & "   	 where vf." & dimKontrakt & "= kdata.FormidlingsNr "
+sql = sql & "       	and vf." & dimForvaltningsavtale & " = fa.Id "
+sql = sql & "       	and vf.Kundenr =kdata.Kundenummer "
+sql = sql & "       	and vf.Varenr ='1' "
+sql = sql & "       	and f.Fakturadato >= '" & fradato & "' and f.Fakturadato < '" & tildato &"' order by st.id) sisteInnbetalt, "
+
+sql = sql & " (select count(distinct b.Objekt_id)  "
+sql = sql & "  from e..t_boligobjekt b where b.eierId = avr.eiernr "
+sql = sql & " ) antBoliger, "
+
+sql = sql & " (select count(distinct b.Objekt_id)  "
+sql = sql & "  from e..t_boligobjekt b where b.eierId = avr.eiernr "
+sql = sql & "  and b.objekt_id in (select BID from e..t_boligres bres  "
+sql = sql & "  					    	where getdate() between bres.fra and isnull(bres.til, getdate()+1)"
+sql = sql & "  							and isnull(bres.type,0)=0 "
+sql = sql & " 						) "
+sql = sql & " ) antUtleid "
+            
+sql = sql & " /**/  from e..t_husleieavregning avr "
+sql = sql & " /**/ inner join e..t_kontraktsdata kdata on avr.KontraktsID=kdata.kontrakts_id "
+sql = sql & " /**/ inner join e..t_kunde ku on kdata.kundenummer=ku.kundenummer "
+sql = sql & " /**/ inner join e..t_kunde eier on avr.eiernr=eier.kundenummer "
+sql = sql & " /**/ inner join e..t_forvaltningsavtale fa on fa.id=kdata.ForvaltningsavtaleId "
+sql = sql & " /**/ where avr.Eiernr in (" & eiernr & ")  "
+sql = sql & " /**/ and avr.Mnd="& mm &" and avr.Aar="& yy &" "
+sql = sql & " /**/ and avr.utbetalingstidspunkt= " & utbetalingsDato 
+sql = sql & " /**/ and avr.status=1 "
+sql = sql & " /**/ and (((select sum(bruttosum) from " & getAarsbase(yy,klient) & "..Trans t  "
+sql = sql & " /**/   	where t.fakturanr in "
+sql = sql & " /**/   		( "
+sql = sql & " /**/   		select distinct f.fakturanr from c..VARELNFAKT vf "
+sql = sql & " /**/   		inner join c..FAKTURA f on vf.Fakturanr = f.Fakturanr "
+sql = sql & " /**/   		where vf." & dimKontrakt & "= kdata.FormidlingsNr "
+sql = sql & " /**/      		and vf." & dimForvaltningsavtale & " = fa.Id "
+sql = sql & " /**/      		and vf.Varenr = '1' "
+sql = sql & " /**/      		and vf.Kundenr =kdata.Kundenummer "
+sql = sql & " /**/     		and f.Fakturadato >= '" & fradato & "' and f.Fakturadato < '" & tildato &"' "
+sql = sql & " /**/   		) "
+sql = sql & " /**/   	and t.Dato <= avr.Dato))- "
+sql = sql & " /**/   	(select SUM(isnull(Kreditert_Sum,0))  from c..FAKTURA where Fakturanr in( "
+sql = sql & " /**/			 (select distinct vf.fakturanr from c..VARELNFAKT vf "
+sql = sql & " /**/			   inner join c..FAKTURA f on vf.Fakturanr = f.Fakturanr "
+sql = sql & " /**/			  where vf." & dimKontrakt & "= kdata.FormidlingsNr "
+sql = sql & " /**/				  and vf." & dimForvaltningsavtale & " = fa.Id "
+sql = sql & " /**/				  and vf.Varenr = '1' "
+sql = sql & " /**/				  and vf.Kundenr =kdata.Kundenummer "
+sql = sql & " /**/				  and f.Fakturadato >= '" & fradato & "' and f.Fakturadato < '" & tildato &"'))) "
+sql = sql & " ) "
+sql = sql & " > 0 "
+sql = sql & "  order by avr.EierNr "
+
+  m_data.SqlString = sql
+  m_data.setupfields rpt
+
+  end sub
+  
+Sub OnReportStart
+End Sub
+
+Function getAarsbase(aar, klientnr)
+	getAarsbase ="uni_" & klientnr & "_" & aar & ""
+end function
+
+
+
+
+
+
+
+]]></Script>
+<PageSettings	LeftMargin="150"
+	RightMargin="150"
+	TopMargin="500"
+	BottomMargin="500"
+	Orientation="2"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="2400"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="*y..Bedrift.navn"
+		Left="0"
+		Top="0"
+		Width="6675"
+		Height="315"
+		Visible="0"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Sidenr"
+		DataField="= &quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="15420"
+		Top="945"
+		Width="915"
+		Height="195"
+		Text="Sidenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit1"
+		Left="4230"
+		Top="1170"
+		Width="7590"
+		Height="510"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[B1000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C71635C625C66305C6673
+			333220524150504F5254204F564552204D49534C4947484F4C445445204B4F4E5452414B5445525C62305C667332305C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= Now"
+		Left="15555"
+		Top="630"
+		Width="780"
+		Height="285"
+		Text="Dato"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lblRapportDato"
+		Left="14550"
+		Top="630"
+		Width="990"
+		Height="285"
+		Caption="Rapportdato:"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lblUtskriftsansvarlig"
+		Left="0"
+		Top="345"
+		Width="1410"
+		Height="285"
+		Visible="0"
+		Caption="Utskriftsansvarlig:"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="User_name"
+		Left="1410"
+		Top="345"
+		Width="1710"
+		Height="285"
+		Visible="0"
+		Text="User_name"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label21"
+		Left="0"
+		Top="1860"
+		Width="16500"
+		Height="540"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lbl_bnr"
+		Left="5625"
+		Top="2100"
+		Width="1320"
+		Height="285"
+		Caption="Dep / Garanti"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lbl_etg"
+		Left="7170"
+		Top="1875"
+		Width="1140"
+		Height="525"
+		Caption="Skyldig ved avregning"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lbl_Leiepris"
+		Left="9653"
+		Top="2100"
+		Width="993"
+		Height="285"
+		Caption="Periode"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; text-align: center; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lbl_Sistindeksregulert"
+		Left="10907"
+		Top="2100"
+		Width="1418"
+		Height="285"
+		Tag="oppfolging"
+		Caption="Sist purret"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lbl_Leiestart"
+		Left="14210"
+		Top="2100"
+		Width="709"
+		Height="285"
+		Caption="Betalt"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label24"
+		Left="15258"
+		Top="2100"
+		Width="1134"
+		Height="285"
+		Caption="Kommentar"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label26"
+		Left="8505"
+		Top="2100"
+		Width="1140"
+		Height="285"
+		Caption="Utestående"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label27"
+		Left="12375"
+		Top="1920"
+		Width="1425"
+		Height="465"
+		Tag="oppfolging"
+		Caption="Sendt til Inkasso"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label28"
+		Left="4440"
+		Top="2100"
+		Width="690"
+		Height="285"
+		Caption="Utleid"
+		ClassName="Normal"
+		Style="font-weight: bold; text-align: left; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="Image1"
+		Left="14115"
+		Top="0"
+		Width="2295"
+		Height="615"
+		>
+		<Data><![CDATA[010000006C7400009D0F000047494638396194002800F7000002556600566901566C04536A05566A05566C00586A00596D05586A05586D065C6F09566A09576C
+			0C566A0C576C08586A09586C095C6F0C58690C586C045B70095D700D5D71105A6E125E720D617413617315657812697D1865751B66791B6A7C226779236C7E0D
+			7C94146A801D6D811C70851A718A197D99246E80286F80227082237184267182257384247488257B8D2A71812871842A74842C72822F72842D74862B768A2E78
+			8A317485327688357789367886327A89337C8C347989347B8C347C8C387989387B8C3A7C893C7C8D347E923A7F91407B87437E8E3A829241808E42839342899D
+			4985934B88954B899A508994538E9E588A95588E9D51909B5B919E4793A54A90A25393A45B94A35F97A85C9DAE539DB05C9EB34FA0B455A0B45CA0B36398A564
+			9AA86A9BA4699CAB619EB263A1AF69A0AD62A1B366A6B96BA4B46AA6B96CA9BA74A1AD73A6B373A7B875A8B673ABBA7BA5B27AAAB67AACB97DB0BD6CABC06CB1
+			C37DAFC07CB2C27DB8CC82A7AE80AAB582AFBE8BACB480B0B982B1BE85B0BB86B3BD8DB1B78BB4BD91B0BB97B8BF9CB3B998B8BF81B2C285B8C587B9CA8AB5C1
+			89B6C48DB6C18BB8C48DBDCB91B6C192B9C192BAC596B8C094BBC696BDC195BCC592BECA9ABAC19BBCC298BDC69DBEC69ABDC8A0BFC995C0CC9CC1CB99C6D49F
+			C8D4A3C3CCA7C8CFAAC6CDAAC8CDA1C7D2A6C9D2A6CDD8AAC5D0AACAD4A9CDDAA9D0DBB2CDCEB2CAD0B2CBD5B2CCD1B1CDD5B4CBD0B4CED6B4CFD8BACFD4B3D1
+			DAB9D2D6BBD3DBB5D4E0BBD6E0BDD8E3C0D2D4C2D6DAC5DADECBDBDED0D6D6C1D7E0C4DAE1CADBE2CADFE9D1DEE2CDE1E6CEE2E9D2E2E4D4E4EAD7E8EDDAE5E6
+			D9E5EADAE8EBD9E9EDDEE8E9DCEAEDDFEDEED4E9F1D9E9F0DCEBF0DCECF0E0E9E9E1EAEDE1ECEEE5EAECE5EDEEE9EEEFE4EDF1E9EEF1EFEFF0EAF0EFE5F0F1EA
+			F1F3EEF5F8F2F3F2F0F2F4F3F4F3F1F5F6F5F6F6F3F6F8F5F8F6F1F8FAF1F8FCF5F9F9F6F9FCF6FCFEF8F6F6FDF7F5F9F6F8F9F9F6FCF9F6FEFCF7F9FAF9F9FA
+			FCFAFCFAF9FCFCFCFAF9FCFAFDFCFDFAFDFEFC00000000000021F904010000FF002C00000000940028000008FF005F44AA06AF5D3B7BFD122A5CC8B0A1C38710
+			234A9C48B1A2C58B0C0D24E0C1C91BBA76F8F8F1C348B2A4C993284F1E3060E0000C49D8F0E51B993221CD92376BE6D459F3E14A04070A5480116B1B487EF966
+			6214C9946448913D6D260DA993A9BE913343E27BBA73220196050C2030C04047A068FAE8D9C37751A43E7CF74ADADB77356AC27C6FD9F6EB6A919FBEABFAD6FA
+			BD47F8DE5FBE1137118110402C82AF0954386A7690AA4491F800DB430CF1705DBBF642AFD57B121FBDBFF6DCDD132DFAB3C579E20821213036C182B10D6A10F2
+			B697E14EA6F8BC398BB699B3C373BE723133BE141DB05DCDE68D641E311FBD74CA72193B680F97A14CDEE22EFFDD4B6E94920C0402204860204005108F9289B3
+			D7CE7043BFFAD04142B366184962FC75D28E5DF910A301064584638F6B4BD1250E061AACD08C3DE944310106BBE873923DF36C334A09098CA591010250800321
+			DDE07350530AE9B3CF39FBA1310C750C01D30518900C185581072C6083820CB64517381218304233FA8CF3440213E8A2214EFC84C60F39B12061417A2D091000
+			011FD0D10C3A822DF4D7398BA021238D0BFDB2051898E8D8138F0BB800245424F133A4040F7080A492065070CB3E74FEE61053FCD0438F8AF33C338A09EC1520
+			40021408D0800F7BA8B3D6687EBD58E6993611EA299DFD6493871EAC90F6A9A714F1F8809C869D4A93AB84FEFF45A4017AD2A38E1D229C808C6BA7FAC64F39FA
+			A8764F3E96F1930E284B3046E2010CACF48127D214624A2EC06446A69933DA145A3EFB74BB4F52C42A94CF5E9FE187973EF9ACB6208D70BAB0CD6A7F0506D756
+			36C54B176AC3CE2B8E0408E8B96D42F764361D6AF6107BD5567F25E5C42BF3E185904DEACCD34D273F5420004B632D10863854DC618529DC5ECBE95EF9B8E357
+			BAABC9346E8BF86C76173F2DB3B660C0A91273C0AADDB8131ABC0BD24BAE5FA9B5F6D63EF88453A49E08FFE54EB1046FE5B4CA2D17704012A378638F786E5D45
+			0F3AA334C11E4B0688618F25C32013CC989B66BB173FE21073CB2AABDC42CC7CA4A533CC30CFBCAA4F3ACDF0FF02372BB94473D4443C3240C21F7EC8D1861C83
+			C0A28D940A89B34A218AF3D10931A1CD4B64BF94D9930B28A07C33CFCAF8E8DC4C2EA370D2C9269860D289EBA32C5040001AB891CE933F47B915378F54600004
+			0488C15DCB768A3CCCC1E9DC52471A379A89461CBC9C93D93DCF80810628F218A6CF3390B081C61665DCC80626D8BC056A43851F904003012CB040031ADCC0CA
+			3949A1438B111B20B04000014CF00119DA9807D1F645AB09AD230B16C0C03000450F76D86319580881073240810A52C00215AC8006C0163CFBD8C421B8D8E004
+			022006F124046DD8BA073FD0910A3080A10C3044830BAD278B76BCE5195C00C327D0F19767D0E1465D88A10BFFBB40876E5C8533854B8004160000002CA02506
+			D0C02A42130B0D1060254D4400500EB00471A46B737AD2473BA6B00008F0822EF9B0C72E5630220400A04810905A0202B001B091F0761209A101462886748849
+			53D84A23805C088A6474A31BC4F8840CCF608C05E1B00B98E0A1381E613D3ADCA219DD68C62DE80006489EE3610F29DC0750310C653483189D08C21C61908C64
+			D4E00014C8012188A10C59886183772CDAD19034C632F2A21F84E9860F56820249E44219B57483060E20002628C38E25C4DD43F4C84713F6038532CA073BFAD0
+			C94F584A85FC500728C0E0054CA8837A5C80643AF8410C17BA213AA8994733D2E0426248137D368B53360EE2FFA27410830509A80021E8901E0D20031EF3084C
+			3A00010103A06018F6D817E7C4484633EE6335A5C0400142308C8FB4C352F000850510E0815B40138F11A1E61DFF683C7B28430D5DC80337EEF5977B9CC37B6C
+			B0063DA8914E4CDCCE11329C62BCF8419853DC0814F440A2CD56150E6E2D64145A62820D0CF0004CC0A3605099470F0A400047D0635661ECA545BF35070708C0
+			0D1EEC471AED0103A170029A699DA60849684D6C0E031FBE4043172A61A9ADC02C8D78301331FAC15348A2431E9C44C331040333170DA30B5D60449016D2AE70
+			D8F026C4A0C00196C9001400632D2BF38B1B08B00027B08D5F61ADE82F89D5060250A013807AD58296D08008FF3CE2A4F76C884AFBC8D2B4E96315E11BC53CD4
+			415CE2C6C31E8D78612EF051587396030E5D58C3848A6B90763C430D6880C364C5B55439092C21F880C6320FE08006F0E0199511D7280020800EE4C36805A4A8
+			2F2F9A0F3770351047D4563F80E000056082836270476E19B2DBBAEAA3A5AB806C224AC1E00633380E5FE8C22DF4D15C7588830D841C858319DC093580C10DE9
+			4A072E5C416257C4A228F7C8A79CD6055E686460252C198234DEF224989502009BED071879A95A60BA83101040C012C271B09835A30309C0C02838A8051EE671
+			AEBC6D112065740F54DCC88568081F64B78C0633E4621F8FC4C43A2E8C65196E19B2D6EB821A56A38C10F08FFF7F0410802BDAD1DD70B4EA2ED778F1571A0084
+			6C34C41EA808408EE19BDAF9AE26191D60491372210E75B4A31BA650420208808367B284005AF8E493F74857311D386D80CE211B0001884498FAD489A80320EC
+			19667790190D7DC803AA4F9D873C5CA287573082AE8D508424F8C21E2A9E9342F20CE30500411A0DC1C72A0010C57C48B4D06654EBDEE8F028086800073B0802
+			0E36B8000DC8621C8E21800D72614D1042D98F52365E955DA88AD408AB30A2214C98C7CC862EC4417085C9B7BADE628F8288A61DE970C73BEA7C67B5BAF8005F
+			61409F938D0A1C6B40C7BB94EF58EF010D1A10400113F88A0108909E042C6115E86047637EF7800F00C21B36FF5C90B7BAC50F5B6C10019D6ED1A7B1058F5740
+			D61373F9D4DA44126674A4A3DE6A6086867A751354DD25D82CDE4B33320014B1DC6019E852885F26B1800384C01EE178C044C57A46C35C42B38460C621A4B084
+			2538E110CC08075428409B4B1FA00ACA2898A1E64E8F79B89CD3513EE19421FA0B347CE111E870875206D5DCC043180CC428F74554C5AACFD463180A30920210
+			10025FA06B266E51836DB2708F6E8C05DA5DB7C723348B894FAA065C7EA1C92A84C0BE0434340121984320082188DADB5E0C13F85DCC4F38F36C5A03C3719850
+			B91AD2F37C8CE2A8E8308E527BB4E22386660E1B17C3127AA4064B5D2534DB20C1022E308AAFA296C786BE47FF2E3690000BB4200B971806CA2FEAB27EB4A319
+			59A000D81CD5BE37DB7F0005C8FD4AEBD50F3259EF78F000082E0409C5012BCD950E2E8565C6002B2CE2103C82008DC714BFF00105100194E0082C1101BD1018
+			22210E6300010B2003C8300FDC5075D0E61FEF706070C074CC04001BB00467A009051825EDB00EA560030E9000ECF11860D38350D41E622375E9820E8A9042F8
+			A00C18B60574500B77230CC9A10BAD900BF2406190E553F9700EA1B00566F209B9300CC4300CBB700BB7800A13C219F8000CB6D1258EC009A330096F200104E0
+			71E1800D4E807014800593B0098E3003012000134008AB110E64F1011352210400010BB420F640081160001FFF80031700005273335A300BE9700E812146C910
+			0521A2455FE38360A33F64502EC3320E8A603DBF802EED900B30D50566825D7AE5428D900EF9300D5BD0059FB00E99210EC9D54968008B580606BEA0780B810F
+			9925005C05011090002B0129310051F7800C1F80000550752BB100AE2506E74018DE408D1CF00CEE900E551087BC201AC0F0010DE001A6900CB340063B9001CC
+			58001DF008E22078E9921FA34002EAA33E3AD88FFE3847613020349114E7F0096C100783152FCDF009716026AE080669100774800AEAC00FD490066C700A2081
+			17E6900B74B00632244369B006719008650811E1A50429C00116E0281B6701291006DDB02081410D6DC002E8FF71881E1004A3C00EDD720FE09002247003CDC0
+			0EED40061F4002C74018F63007524307F0B20F11852C14800015000A8DB515A1310CAFF00AABD09560199660990C33D80FA1110ED2100DEA00185BA10ED1A00C
+			C7400CC8804CD2200E088817CF100DE2F00EA3B115E1F00CC8209773F90CD940379C1125DB900CC3900BB1500AA6302DC9A00E993154F8700CB9C060AFF00BD9
+			901999D10FF3900CC4900CED8097C4400C60A20FE2C00482860BF1A288FAC00D62200007500611411DAF921268721910719BB99912FAD00D40D02CBC302C0399
+			16A81067596017CAB99CCC7911F6700E59206897900E548114F6400F71B02564D080CDD99DDEA99C0B1209177A20002C300A4D910FED100B1DA0598C501CDFF9
+			9EF0891252E90D4770000760012B90046120064FC00218C04C4B1077BD199F044AA0A1910C5830018FD21E5B527509D004CAB04E053AA1140A110B6243E8300C
+			98D004484004448004502008C3301FA054A1265AA1F8111886610FEB300EE2B00E3A1325571110003B]]>
+		</Data>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="360"
+		DataField="eiernr"
+		GroupKeepTogether="2"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape1"
+		Left="0"
+		Top="0"
+		Width="16583"
+		Height="567"
+		BackStyle="1"
+		BackColor="14737632"
+		LineStyle="0"
+		LineWeight="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Eier"
+		DataField="eiernavn"
+		Left="15150"
+		Top="285"
+		Width="1185"
+		Height="285"
+		Visible="0"
+		Text="eiernavn"
+		CountNullValues="-1"
+		ClassName="Normal"
+		Style="font-size: 14pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="eiernr"
+		Left="15150"
+		Top="0"
+		Width="1185"
+		Height="285"
+		Visible="0"
+		Text="eiernr"
+		ClassName="Normal"
+		Style="font-size: 14pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit3"
+		Left="142"
+		Top="0"
+		Width="4110"
+		Height="283"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[A2000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C625C66305C6673323020
+			456965723A205B21656965726E725D202D205B21656965726E61766E5D5C62305C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field39"
+		DataField="antBoliger"
+		Left="13830"
+		Top="330"
+		Width="1290"
+		Height="255"
+		Visible="0"
+		Tag="antBoliger"
+		Text="antBoliger"
+		OutputFormat="#,##0"
+		ClassName="Normal"
+		Style="text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field40"
+		DataField="antUtleid"
+		Left="13830"
+		Top="30"
+		Width="1290"
+		Height="255"
+		Visible="0"
+		Tag="antUtleid"
+		Text="antUtleid"
+		OutputFormat="#,##0"
+		ClassName="Normal"
+		Style="text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit4"
+		Left="4485"
+		Top="0"
+		Width="4290"
+		Height="315"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[9F000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C625C66305C6673323020
+			5B21616E7455746C6569645D2F5B21616E74426F6C696765725D5C62305C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+<Script>
+<![CDATA[Sub OnFormat
+'1
+	dim eiernr
+	dim eiernavn
+	dim antUtleid
+	dim antBoliger
+	
+	eiernr = rpt.Fields("eiernr").Value
+	eiernavn = rpt.Fields("eiernavn").Value
+	antUtleid = rpt.Fields("antUtleid").Value	
+	antBoliger = rpt.Fields("antBoliger").Value
+	
+
+	dim a 
+	set a = rpt.Sections("GroupHeader1").Controls
+	' dim b as IRichEdit
+	dim p
+	dim i 
+	on error resume next
+	for i = 0 to ( a.Count - 1 )
+		set b = a.item(i)
+		p = instr(1,b.name, "Rich", 1 )
+		if not isnull(p) then
+			if p > 0 then
+				call b.replacefield("eiernr",eiernr)
+				call b.replacefield("eiernavn",eiernavn)
+				call b.replacefield("antUtleid",antUtleid)
+				call b.replacefield("antBoliger",antBoliger)				
+
+			end if
+		end if	
+	next 
+	
+
+End Sub]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="300"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="leietakernr"
+		Left="282"
+		Top="1054"
+		Width="1417"
+		Height="284"
+		Visible="0"
+		Tag="leietakernr"
+		Text="leietakernr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="depositum"
+		Left="5640"
+		Top="0"
+		Width="930"
+		Height="255"
+		Tag="depositum"
+		Text="depositum"
+		OutputFormat="#,##0"
+		ClassName="Normal"
+		Style="text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="skyldigvedavregning"
+		Left="7155"
+		Top="0"
+		Width="1065"
+		Height="255"
+		Tag="skyldigvedavregning"
+		Text="skyldigvedavregning"
+		OutputFormat="#,##0"
+		ClassName="Normal"
+		Style="text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="periode"
+		Left="9937"
+		Top="0"
+		Width="283"
+		Height="283"
+		Tag="periode"
+		Text="periode"
+		ClassName="Normal"
+		Style="text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field33"
+		DataField="sistPurret"
+		Left="10905"
+		Top="0"
+		Width="1170"
+		Height="285"
+		Tag="sistPurret"
+		Text="sistPurret"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		DataField="sisteInnbetalt"
+		Left="13785"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Tag="sisteInnbetalt"
+		Text="sisteInnbetalt"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field35"
+		DataField="fakturaStatus"
+		Left="15255"
+		Top="0"
+		Width="1215"
+		Height="285"
+		Tag="fakturaStatus"
+		Text="fakturaStatus"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field36"
+		DataField="leietakernavn"
+		Left="312"
+		Top="1344"
+		Width="1417"
+		Height="284"
+		Visible="0"
+		Tag="leietakernavn"
+		Text="leietakernavn"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit2"
+		Left="142"
+		Top="0"
+		Width="3968"
+		Height="283"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[A1000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C66305C66733230205B21
+			6C65696574616B65726E725D202D205B216C65696574616B65726E61766E5D5C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field37"
+		DataField="skyldigvedrapportkjoring"
+		Left="8400"
+		Top="15"
+		Width="1080"
+		Height="255"
+		Tag="skyldigvedrapportkjoring"
+		Text="skyldigvedrapportkjoring"
+		OutputFormat="#,##0"
+		ClassName="Normal"
+		Style="text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field38"
+		DataField="sendtTilInkasso"
+		Left="12420"
+		Top="0"
+		Width="1170"
+		Height="285"
+		Tag="sendtTilInkasso"
+		Text="sendtTilInkasso"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[Sub OnFormat
+'1
+	dim leietakernr
+	dim leietakernavn
+
+
+	leietakernr = rpt.Fields("leietakernr").Value
+	leietakernavn = rpt.Fields("leietakernavn").Value
+
+
+	dim a 
+	set a = rpt.Sections("Detail").Controls
+	' dim b as IRichEdit
+	dim p
+	dim i 
+	on error resume next
+	for i = 0 to ( a.Count - 1 )
+		set b = a.item(i)
+		p = instr(1,b.name, "Rich", 1 )
+		if not isnull(p) then
+			if p > 0 then
+				call b.replacefield("leietakernr",leietakernr)
+				call b.replacefield("leietakernavn",leietakernavn)
+
+			end if
+		end if	
+	next 
+	
+
+End Sub
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="0"
+	>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="120"
+	>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{0A973C33-7E79-4F69-9077-4A076A88CA39}" GUIDREP="{CC88314D-F8D0-4381-BEFB-822D73D60B35}" 
+	LICENSE="10000000"
+	PrintWidth="14490"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[sub onDatainitialize
+  	dim sql
+	dim omr
+	dim kat
+'	m_data.debugg=true
+	m_data.AddInputMacro "{fd}","Fra dato","getsql(select getdate()-30)","date"
+	m_data.AddInputMacro "{td}","Til dato","getsql(select getdate()","date"
+	m_data.AddInputMacro "{OM}","Boligområde ","0",,7,"Select boligomrade_id, omrade from e..t_boligomraade union select '0','Alle' order by boligomrade_id"
+	m_data.AddInputMacro "{kategori}","Kundekategori ","0",,7,"Select id, Beskrivelse from c..kategori union select '0','Alle' order by id"
+	m_data.AddInputMacro "","",""
+	m_data.addsortparam "{sort}","Sortering ","Område og bygg","order by omrade,navn,rom_nummer"
+	m_data.addsortparam "{sort}","","Kundenavn","order by v.name,rom_nummer"
+	m_data.addsortparam "{sort}","","Kundenr","order by v.kundenummer,rom_nummer"
+	
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	omr=m_data.getmacrovalue("{OM}")
+	kat=m_data.getmacrovalue("{kategori}")
+
+
+	sql = "Select distinct Omrade, Navn, Etasje, Etasje_Navn, BoligType, rom_nummer, B.BoligNummer, Oppgang, objekt_id, v.kundenummer as knr, name, fra, til, "
+	sql = sql & " kontrakt_fra, kontrakt_til, innflytting_dato, kontrakt_utgaar, avtalt_pris, TA1.Tariffnr, ta1.id, "
+	
+    sql = sql & " (Select  sum(pris*antall) as Boligpris from c..TARIFF t4 "
+	sql = sql & " inner join c..tarifflinje t5 on t4.Tariffnr  = t5.Tariffnr "
+	sql = sql & " where '{td}' between t5.fra_dato and t5.til_dato and t4.tariffnr=ta1.tariffnr) as Boligpris, "
+
+    sql = sql & "  (Select  sum(pris*antall) as Kontraktspris from c..TARIFF t4 "
+	sql = sql & " inner join c..tarifflinje t5 on t4.Tariffnr  = t5.tariffnr "
+	sql = sql & " where '{td}' between t5.fra_dato and t5.til_dato and t4.tariffnr=k.pricecode) as Kontraktspris  "
+
+	sql = sql & " from e..v_name as V "
+	sql = sql & " inner join e..t_kontraktsdata as K on v.Kundenummer=k.kundenummer "
+	sql = sql & " inner join e..t_boligres as R on k.Kontrakts_ID=R.KID "
+	sql = sql & " inner join e..t_boligobjekt as B on r.bid=b.objekt_id "
+	sql = sql & " inner join e..t_boligomraade as O on B.Boligomrade_id=O.Boligomrade_id "
+	sql = sql & " inner join e..t_bygg as BG on B.Bygg_id=BG.ID "
+	sql = sql & " inner join e..t_etasje as E on B.Etasje=E.ID "
+	sql = sql & " inner join e..t_boligtype as T on B.Boligtype_id=T.BoligType_id "
+	sql = sql & " left join c..Tariff as TA on B.PrisMatrise_ID=TA.Tariffnr "
+	sql = sql & " left join c..Tarifflinje as TA1 on TA.Tariffnr=TA1.Tariffnr "
+	sql = sql & " left join c..kategori_link  KL on KL.FK_ID = K.kundenummer "
+	sql = Sql & " where R.til > '{td}'"
+	sql = Sql & " and R.fra < '{fd}'"
+
+	if kat<> "0" then
+		sql = sql & " and kl.kategori_id in( {kategori} ) "
+	end if
+
+	if omr<>"0" then
+		sql=Sql & " and o.Boligomrade_id in ({om})"
+	end if
+
+	sql=Sql & " and ta1.id=(Select top 1 id from c..tarifflinje TA3 where ta3.tariffnr=ta.tariffnr"
+	sql=Sql & " order by id desc)"
+
+      m_data.SqlString = sql & " {sort}"
+	m_data.setupfields rpt
+  end sub
+
+Sub OnReportStart
+
+End Sub
+
+Sub OnFetchData(eof)
+	rpt.fields("omrade").value=rpt.fields("omrade").value & ", " & rpt.fields("navn").value & ", " & rpt.fields("etasje_navn").value
+	rpt.fields("name").value=rpt.fields("knr").value & ", " & rpt.fields("name").value
+	if rpt.fields("avtalt_pris").value="0" then rpt.fields("avtalt_pris").value=""
+
+End Sub
+
+
+
+]]></Script>
+<PageSettings	LeftMargin="1080"
+	RightMargin="1080"
+	Orientation="2"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="360"
+	>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1800"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="0"
+		Top="0"
+		Width="8000"
+		Height="360"
+		Caption="Boligoversikt m/priser og kontraktsdata"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 16pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		DataField="*y..Bedrift.navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="360"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="*y..Bedrift.arstall"
+		Left="11339"
+		Top="0"
+		Width="1984"
+		Height="425"
+		Text="*y..Bedrift.arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="= &quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="11622"
+		Top="283"
+		Width="1701"
+		Height="426"
+		Text="Sidenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= Now"
+		Left="11622"
+		Top="567"
+		Width="1701"
+		Height="425"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="User_name"
+		Left="11622"
+		Top="850"
+		Width="1701"
+		Height="426"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="0"
+		Top="1134"
+		Width="425"
+		Height="283"
+		Caption="Fra:"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="{fd}"
+		Left="335"
+		Top="1134"
+		Width="992"
+		Height="283"
+		Text="{fd}"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label14"
+		Left="1417"
+		Top="1134"
+		Width="426"
+		Height="283"
+		Caption="Til:"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field22"
+		DataField="{td}"
+		Left="1738"
+		Top="1134"
+		Width="1133"
+		Height="283"
+		Text="{td}"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label15"
+		Left="2835"
+		Top="1134"
+		Width="708"
+		Height="283"
+		Caption="Pris pr:"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field23"
+		DataField="{td}"
+		Left="3543"
+		Top="1134"
+		Width="1134"
+		Height="283"
+		Text="{td}"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="840"
+		DataField="omrade"
+		GroupKeepTogether="2"
+		RepeatStyle="1"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field6"
+		DataField="omrade"
+		Left="0"
+		Top="0"
+		Width="12189"
+		Height="283"
+		Text="omrade"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 12pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="navn"
+		Left="6236"
+		Top="0"
+		Width="851"
+		Height="283"
+		Visible="0"
+		Text="bygg_navn"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field8"
+		DataField="etasje_navn"
+		Left="7087"
+		Top="0"
+		Width="850"
+		Height="283"
+		Visible="0"
+		Text="etasje_navn"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label2"
+		Left="0"
+		Top="283"
+		Width="709"
+		Height="284"
+		Caption="Romnr"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label3"
+		Left="709"
+		Top="283"
+		Width="850"
+		Height="284"
+		Caption="Oppgang"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="2458"
+		Top="283"
+		Width="992"
+		Height="284"
+		Caption="Boligtype"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label5"
+		Left="3993"
+		Top="283"
+		Width="851"
+		Height="480"
+		Caption="Kontrakt start"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label6"
+		Left="5044"
+		Top="283"
+		Width="992"
+		Height="480"
+		Caption="Kontrakt slutt"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label7"
+		Left="6043"
+		Top="283"
+		Width="1134"
+		Height="284"
+		Caption="Innfl. dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label8"
+		Left="7215"
+		Top="285"
+		Width="855"
+		Height="495"
+		Caption="Kontrakt utgår"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="8385"
+		Top="285"
+		Width="720"
+		Height="480"
+		Caption="Bolig pris"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="10125"
+		Top="285"
+		Width="735"
+		Height="480"
+		Caption="Avtalt pris"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="11103"
+		Top="283"
+		Width="2268"
+		Height="284"
+		Caption="Beboer"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="0"
+		Y1="780"
+		X2="14445"
+		Y2="780"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="1665"
+		Top="285"
+		Width="855"
+		Height="285"
+		Caption="Bolignr"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label17"
+		Left="9240"
+		Top="285"
+		Width="855"
+		Height="480"
+		Caption="Kontrakt pris"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="285"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="rom_nummer"
+		Left="0"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="rom_nummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		DataField="Oppgang"
+		Left="709"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="Oppgang"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; text-align: center; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field11"
+		DataField="Boligtype"
+		Left="2409"
+		Top="0"
+		Width="1560"
+		Height="283"
+		Text="Boligtype"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field12"
+		DataField="kontrakt_fra"
+		Left="3978"
+		Top="0"
+		Width="1276"
+		Height="283"
+		Text="kontrakt_fra"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="Kontrakt_til"
+		Left="5025"
+		Top="0"
+		Width="1005"
+		Height="285"
+		Text="Kontrakt_til"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="Innflytting_dato"
+		Left="6030"
+		Top="0"
+		Width="1125"
+		Height="285"
+		Text="Innflytting_dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field15"
+		DataField="kontrakt_utgaar"
+		Left="7200"
+		Top="0"
+		Width="1125"
+		Height="285"
+		Text="oppsigelse_dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field16"
+		DataField="Boligpris"
+		Left="8377"
+		Top="0"
+		Width="851"
+		Height="283"
+		Text="Boligpris"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field17"
+		DataField="avtalt_pris"
+		Left="10110"
+		Top="0"
+		Width="825"
+		Height="285"
+		Text="avtalt_pris"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field18"
+		DataField="name"
+		Left="11085"
+		Top="0"
+		Width="3375"
+		Height="285"
+		Text="name"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field19"
+		DataField="knr"
+		Left="13356"
+		Top="0"
+		Width="283"
+		Height="142"
+		Visible="0"
+		Text="kundenummer"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		DataField="BoligNummer"
+		Left="1575"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="BoligNummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; text-align: center; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field25"
+		DataField="Kontraktspris"
+		Left="9240"
+		Top="0"
+		Width="851"
+		Height="283"
+		Text="Kontraktspris"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="180"
+	>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="420"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="9213"
+		Top="142"
+		Width="1275"
+		Height="283"
+		Caption="Totalt antall:"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field20"
+		DataField="Rom_nummer"
+		Left="10488"
+		Top="142"
+		Width="1134"
+		Height="283"
+		Text="Rom_nummer"
+		SummaryType="1"
+		SummaryFunc="2"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="0"
+		Y1="142"
+		X2="13606"
+		Y2="142"
+		>
+		</Control>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

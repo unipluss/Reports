@@ -1,0 +1,954 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{7504CDC2-C708-4179-9975-6CA6E01F4A74}" GUIDREP="{B1D09009-3DE7-490F-B510-50DAD307E8A0}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="15030"
+	DocumentName="Differanse i saldo (akkumulert/transaksjoner)"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[
+Sub OnDataInitialize
+	
+	dim sql
+	dim oppsigelsesKategoriWhere
+	dim fraDato 
+	dim tilDato
+	dim visningsKategori
+	dim oppsigelsesKategori
+	
+	m_data.AddInputMacro "{vis}", "Vis:",1,,2,"select 1 as id, 'Både oppsigelser og utflytt' as navn union  select 2 , 'Oppsigelser' union select 3, 'Utflytt' union select 4, 'Planlagte utflyttinger'"		
+	m_data.AddInputMacro "{opKat}", "Oppsigelseskategori",0,,7,"select '0' as id, 'Alle' as navn union select * From e..t_oppsigelsesKategori"	
+	
+		
+	m_data.AddInputMacro "{FD}","Fra dato","","date"
+	m_data.AddInputMacro "{TD}","Til dato","","date"
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+
+		fraDato = m_data.getmacrovalue("{FD}")
+		tilDato = m_data.getmacrovalue("{TD}")
+		oppsigelsesKategori = m_data.getmacrovalue("{opKat}")
+		visningsKategori = sflong(m_data.getmacrovalue("{vis}"))
+	
+		if oppsigelsesKategori = "0" then
+			oppsigelsesKategoriWhere = "= 0 or (1=1))"
+		else
+			if left(oppsigelsesKategori,1) = "0" then
+				oppsigelsesKategori= right(oppsigelsesKategori, len(oppsigelsesKategori)-2)
+			end if
+			oppsigelsesKategoriWhere = 	"in (" & oppsigelsesKategori & "))"
+		end if
+
+	
+	sql = " select kd.Virkelig_utflyttet, kd.Planlagt_utflytting, kd.Planlagt_utflytting_klokkeslett, kd.oppsigelse_kategori_id, kd.Oppsigelse_dato, kd.Objekt, kd.Kundenummer"
+	sql = sql & " , bo.Objekt_adresse, bo.Objekt_postnummer, bo.Objekt_poststed, bo.leilighetsnr, bo.Oppgang, om.Omrade, et.Etasje_Navn,"
+	sql = sql & " kd.Kundenummer, kuna.Name as kundeNavn, kd.FormidlingsNr, "
+	sql = sql & " (select top 1 Phone from c..c_Phone where NameLink= ku.NameID and phonetype = 150101 and abs(standard) = 1) as kundeTlf,"
+	sql = sql & " (select top 1 Phone from c..c_Phone where NameLink= ku.NameID and phonetype = 150102 and abs(standard) =1) as kundeMobil,"
+	sql = sql & " eierNa.Name as eierNavn, eier.Kundenummer as eierNr,"
+	sql = sql & " (select top 1 Phone from c..c_Phone where NameLink= eier.NameID and phonetype = 150101 and abs(standard) = 1) as eierTlf,"
+	sql = sql & " (select top 1 Phone from c..c_Phone where NameLink= eier.NameID and phonetype = 150102 and abs(standard) =1) as eierMobil,"
+	sql = sql & " kd.Kontrakts_ID,kd.Kontrakt_fra, kd.Kontrakt_til,"
+	sql = sql & " fa.Id, op.Oppdragsnr, isnull(opkat.navn, 'Ingen oppsigelseskategori') as oppsigelsesNavn"
+	sql = sql & " From e..t_kontraktsdata kd"
+	sql = sql & " inner join e..t_kunde ku on kd.Kundenummer = ku.Kundenummer"
+	sql = sql & " inner join e..t_boligobjekt bo on kd.Objekt = bo.Objekt_id"
+	sql = sql & " inner join e..t_kunde eier on bo.eierId=eier.Kundenummer"
+	sql = sql & " inner join c..c_Name eierNa on eierNa.ID = eier.NameID"
+	sql = sql & " inner join e..t_etasje et on bo.Etasje= et.ID"
+	sql = sql & " inner join e..t_boligomraade om on bo.Boligomrade_id = om.Boligomrade_id"
+	sql = sql & " inner join c..c_Name kuNa on kuna.ID = ku.NameID"
+	sql = sql & " inner join e..t_forvaltningsAvtaleHarBolig harBo on harbo.boligId = bo.Objekt_id"
+	sql = sql & " inner join e..t_forvaltningsAvtale fa on harBo.forvaltingsAvtaleId = fa.Id"
+	sql = sql & " left join e..t_oppdragsAvtale op on fa.Id = op.forvaltningsAvtaleId"	
+	sql = sql & " left join e..t_oppsigelsesKategori opKat on kd.oppsigelse_kategori_id = opkat.Id"
+	sql = sql & " where (kd.oppsigelse_kategori_id " & oppsigelsesKategoriWhere & ""
+
+	select case visningsKategori
+		case 1:'Vis både oppsigelser og utflyttinger
+			sql = sql & " and (kd.Oppsigelse_dato between '" & fradato & "' and '"& tildato &"'"
+			sql = sql & " or " 
+			sql = sql & " ISNULL(kd.Virkelig_utflyttet, isnull(kd.Planlagt_utflytting, '01.01.1900')) between '" & fradato & "' and '"& tildato &"')"
+		case 2:'Vis bare oppsigelser 
+			sql = sql & " and kd.Oppsigelse_dato between '" & fradato & "' and '"& tildato &"'"
+		case 3:'Vis bare utflyttinger
+			sql = sql & " and ISNULL(kd.Virkelig_utflyttet, '01.01.1900') between '" & fradato & "' and '"& tildato &"'"
+		case 4: 'Vis bare planlagte utflyttinger
+			sql = sql & " and ISNULL(kd.Planlagt_utflytting, '01.01.1900') between '" & fradato & "' and '"& tildato &"' "
+	end select 
+	
+	'sql = sql & " and harbo.fradato between '" & fradato & "' and '"& tildato &"'"
+	'sql = sql & " and isnull(harBo.tildato, fa.forvaltningsavtaleslutt) between '" & fradato & "' and '"& tildato &"'"
+	sql = sql & " order by kd.oppsigelse_kategori_id"
+	
+	m_data.SqlString = sql 
+	m_data.SetupFields rpt
+
+End Sub
+
+Sub OnFetchData(eof)
+
+End Sub
+
+Sub OnReportStart
+
+End Sub
+
+private Function sfLong(v)
+    Dim rv 
+    On Error Resume Next
+    rv = CLng(v)
+    If Err Then rv = 0
+    sfLong = rv
+End Function
+
+private function sfcurr(v)
+	on error resume next
+	sfcurr=ccur(v)
+end function]]></Script>
+<PageSettings	LeftMargin="1000"
+	RightMargin="800"
+	TopMargin="720"
+	BottomMargin="720"
+	Orientation="2"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1035"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="=&quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="13323"
+		Top="0"
+		Width="1701"
+		Height="283"
+		Text="Sidenr"
+		SummaryType="4"
+		SummaryFunc="11"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="=Now"
+		Left="13323"
+		Top="283"
+		Width="1701"
+		Height="284"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="User_name"
+		Left="13323"
+		Top="567"
+		Width="1701"
+		Height="283"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label25"
+		Left="0"
+		Top="0"
+		Width="7937"
+		Height="567"
+		Caption="Kategorisering av oppsigelser og utflyttinger"
+		ClassName="Normal"
+		Style="font-size: 16pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field78"
+		DataField="{FD}"
+		Left="1134"
+		Top="567"
+		Width="992"
+		Height="283"
+		Text="{FD}"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label26"
+		Left="0"
+		Top="567"
+		Width="1134"
+		Height="283"
+		Caption="For perioden "
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label27"
+		Left="2126"
+		Top="567"
+		Width="283"
+		Height="283"
+		Caption="til"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field79"
+		DataField="{TD}"
+		Left="2409"
+		Top="567"
+		Width="1134"
+		Height="283"
+		Text="{TD}"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line5"
+		X1="0"
+		Y1="992"
+		X2="15024"
+		Y2="992"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="1290"
+		DataField="oppsigelsesNavn"
+		RepeatStyle="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field80"
+		DataField="oppsigelsesNavn"
+		Left="142"
+		Top="0"
+		Width="7795"
+		Height="283"
+		Text="oppsigelsesNavn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line4"
+		X1="0"
+		Y1="1276"
+		X2="15024"
+		Y2="1276"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field82"
+		Left="0"
+		Top="425"
+		Width="1134"
+		Height="567"
+		Text="Oppsigelses- dato"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field84"
+		Left="1276"
+		Top="425"
+		Width="1133"
+		Height="851"
+		Text="Planlagt utflyttings- dato"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field85"
+		Left="2551"
+		Top="425"
+		Width="1134"
+		Height="851"
+		Text="Virkelig utflyttet- dato"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field88"
+		Left="3827"
+		Top="992"
+		Width="2409"
+		Height="284"
+		Text="Adresse"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field93"
+		Left="6520"
+		Top="992"
+		Width="2551"
+		Height="284"
+		Text="Leietaker"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field97"
+		Left="12331"
+		Top="992"
+		Width="2551"
+		Height="284"
+		Text="Eier"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field98"
+		Left="9213"
+		Top="850"
+		Width="992"
+		Height="426"
+		Text="Kontrakts periode"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field105"
+		Left="10488"
+		Top="567"
+		Width="1559"
+		Height="709"
+		Text="Kontraktsnr / Oppdragsnr / Formidlingsnr"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="1245"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field81"
+		DataField="Virkelig_utflyttet"
+		Left="2551"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Text="Virkelig_utflyttet"
+		OutputFormat="dd/mm/yyyy"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field83"
+		DataField="Oppsigelse_dato"
+		Left="0"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Text="Oppsigelse_dato"
+		OutputFormat="dd/mm/yyyy"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field86"
+		DataField="Planlagt_utflytting"
+		Left="1276"
+		Top="0"
+		Width="1133"
+		Height="283"
+		Text="Oppsigelse_dato"
+		OutputFormat="dd/mm/yyyy"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field87"
+		DataField="Planlagt_utflytting_klokkeslett"
+		Left="1276"
+		Top="283"
+		Width="1133"
+		Height="284"
+		Text="Oppsigelse_dato"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field89"
+		DataField="Objekt_adresse"
+		Left="3827"
+		Top="0"
+		Width="2409"
+		Height="283"
+		Text="Objekt_adresse"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field90"
+		DataField="Leilighetsnr"
+		Left="3827"
+		Top="283"
+		Width="1417"
+		Height="284"
+		Text="Leilighetsnr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field91"
+		DataField="Objekt_postnummer"
+		Left="3827"
+		Top="567"
+		Width="1701"
+		Height="283"
+		Text="Objekt_postnummer"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field92"
+		DataField="Objekt_poststed"
+		Left="3827"
+		Top="850"
+		Width="1701"
+		Height="284"
+		Text="Objekt_poststed"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field94"
+		DataField="kundeNavn"
+		Left="6520"
+		Top="0"
+		Width="2551"
+		Height="283"
+		Text="kundeNavn"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field95"
+		DataField="kundeTlf"
+		Left="6520"
+		Top="283"
+		Width="2551"
+		Height="284"
+		Text="kundeTlf"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field96"
+		DataField="kundeMobil"
+		Left="6520"
+		Top="567"
+		Width="2551"
+		Height="283"
+		Text="kundeMobil"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field100"
+		DataField="Kontrakt_fra"
+		Left="9213"
+		Top="0"
+		Width="1133"
+		Height="283"
+		Text="Kontrakt_fra"
+		OutputFormat="dd/mm/yyyy"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field101"
+		DataField="Kontrakt_til"
+		Left="9213"
+		Top="283"
+		Width="1133"
+		Height="284"
+		Text="Kontrakt_til"
+		OutputFormat="dd/mm/yyyy"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field102"
+		DataField="eierNavn"
+		Left="12331"
+		Top="0"
+		Width="2551"
+		Height="283"
+		Text="eierNavn"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field103"
+		DataField="eierTlf"
+		Left="12331"
+		Top="283"
+		Width="2551"
+		Height="284"
+		Text="eierTlf"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field104"
+		DataField="eierMobil"
+		Left="12331"
+		Top="567"
+		Width="2551"
+		Height="283"
+		Text="eierMobil"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field106"
+		DataField="kundenummer"
+		Left="6945"
+		Top="850"
+		Width="2126"
+		Height="284"
+		Text="kundenummer"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field107"
+		DataField="eierNr"
+		Left="12756"
+		Top="850"
+		Width="2126"
+		Height="284"
+		Text="eierNr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field108"
+		Left="6520"
+		Top="850"
+		Width="425"
+		Height="284"
+		Text="Knr:"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field109"
+		Left="12331"
+		Top="850"
+		Width="425"
+		Height="284"
+		Text="Knr:"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field110"
+		DataField="Kontrakts_id"
+		Left="11055"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Text="Kontrakts_id"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field111"
+		DataField="Oppdragsnr"
+		Left="11055"
+		Top="425"
+		Width="1134"
+		Height="284"
+		Text="Oppdragsnr"
+		ClassName="Normal"
+		Style="color: rgb(192,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line7"
+		X1="0"
+		Y1="1134"
+		X2="15024"
+		Y2="1134"
+		LineColor="12632256"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field113"
+		DataField="Oppdragsnr"
+		Left="11055"
+		Top="850"
+		Width="1134"
+		Height="284"
+		Text="Oppdragsnr"
+		ClassName="Normal"
+		Style="color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field114"
+		Left="10488"
+		Top="0"
+		Width="567"
+		Height="283"
+		Text="KId:"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field115"
+		Left="10488"
+		Top="425"
+		Width="567"
+		Height="284"
+		Text="Opp:"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field116"
+		Left="10488"
+		Top="850"
+		Width="567"
+		Height="284"
+		Text="For:"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="30"
+		NewPage="2"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line6"
+		X1="0"
+		Y1="0"
+		X2="15024"
+		Y2="0"
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="0"
+		CanShrink="1"
+	>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

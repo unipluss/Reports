@@ -1,0 +1,2219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{266166CD-80AE-4AF1-976C-805932DB29D3}" GUIDREP="{ADFAE643-1964-409A-AD52-1DA093DC65A3}" 
+	LICENSE="10000000"
+	PrintWidth="16305"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[dim kategori 
+'<summary>
+'  Returns a hidden parameter which contains additional information
+'</summary>
+function p_CheckMultiInput()
+
+	'Create c_text object
+	set ct = CreateObject("c_text.c_text.1")
+
+	'Get the macrochunk
+	ct.textdata = m_data.MacroChunk
+
+
+	'More than one param?
+	if ct.rows>1 then
+		'Is this special information for multiprints?
+		set tt = createobject("c_text.c_text.1")
+		tt.textdatacolumndivider = asc("|")
+		tt.textdata = ct.textarray(5,ct.rows)
+		if tt.cols=2 then
+			'Yes, it contains a PIPE, lets return the second parameter
+			kategori=3
+			p_CheckMultiInput= tt.textarray(2,1)
+		end if
+	end if
+	
+end function
+
+sub onDatainitialize
+  	dim sql
+	dim jobbNr	
+	dim dimKontrakt
+	dim dimForvaltningsavtale
+	dim subSql	
+	
+	valgteEiere=p_CheckMultiInput()
+	
+	m_data.AddInputMacro "{jobbNr}", "Jobbnr:","" ,""
+	m_data.AddInputMacro "{jobbNr2}", "","" ,""
+	
+	if not m_data.ShowInputDialog("") then exit sub
+	
+	jobbNr = m_data.getmacrovalue("{jobbNr}")
+	
+	'Henter ut dimensjoner
+	if m_data.RunSubQuery("Select ('dim'+convert(varchar(2),ForvaltningsavtaleDim)) as ForvaltningsavtaleDim, ('dim'+convert(varchar(2),LeieavtaleDim)) as LeieavtaleDim from e..t_klientParametre","sys")>0 then
+		dimForvaltningsavtale = m_data.subqueryvalue("ForvaltningsavtaleDim","sys")
+		dimKontrakt = m_data.subqueryvalue("LeieavtaleDim","sys") 
+	end if
+		sql = " declare @utbetaltMnd  int;"
+		sql = sql & " /**/ declare @utbetaltAar  int;"
+		sql = sql & " /**/ set @utbetaltAar = (select top 1 aar from e..t_husleieAvregning where Jobnr ="& jobbNr & "	and Aar = Utbetaltaar);"
+		sql = sql & " /**/ set @utbetaltMnd = (select top 1 mnd from e..t_husleieAvregning where Jobnr ="& jobbNr	& " and mnd = UtbetaltMnd);"
+	
+		sql = sql & " /**/ select "
+		sql = sql & " /**/ isnull('0'+bo.Objekt_adresse, '9999') as sortParameter, "	
+		sql = sql & "  /**/ huav.EierNr,huav.InnbetalingDennePerioden, huav.Id,huav.Aar aar,huav.Jobnr,(huav.husleie *-1) as leiepris,"
+		sql = sql & "  /**/ (select case when max(h.InnbetalingDennePerioden) = huav.InnbetalingDennePerioden then huav.InnbetalingDennePerioden  else 0 end from e..t_husleieAvregning h where h.EierNr = huav.EierNr and h.UtbetaltAar = huav.Aar and h.UtbetaltMnd = huav.UtbetaltMnd  and isnull(h.status,0)>0  and h.KontraktsID = huav.KontraktsID ) as betalingDenneMd, "
+		sql = sql & " /**/ (select isnull(sum(nettoUtbetalt),0) from e..t_husleieAvregning where UtbetaltAar = huav.UtbetaltAar and UtbetaltMnd = huav.UtbetaltMnd and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID) as nettoUtbetalt,"
+		sql = sql & " /**/ (select sum(provisjon) from e..t_husleieAvregning where UtbetaltAar = huav.UtbetaltAar and UtbetaltMnd = huav.UtbetaltMnd and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID and abs(HusleieBetalt) = 1) as provisjon,"
+		sql = sql & " /**/ (select isnull((sum(husleie) * -1),0) from e..t_husleieAvregning where ((UtbetaltAar = huav.UtbetaltAar and UtbetaltMnd =  huav.UtbetaltMnd and abs(HusleieBetalt) = 1) or (isnull(UtbetaltAar,0) = 0  and isnull(UtbetaltMnd,0) = 0 and ISNULL(status,0) = 3 and Mnd = huav.mnd  and Aar = huav.aar)) and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID ) as husleie,"			
+		sql = sql & " /**/ (select isnull(sum(isnull(husleie,0)) * -1,0) from e..t_husleieAvregning where ((UtbetaltAar = isnull(huav.UtbetaltAar, huav.aar)  and UtbetaltMnd = isnull(huav.UtbetaltMnd, huav.mnd)  and abs(HusleieBetalt) = 1) or (isnull(UtbetaltAar,0) = 0  and isnull(UtbetaltMnd,0) = 0 and ISNULL(status,0) = 3 and Mnd = huav.mnd and Aar = huav.aar)) and EierNr = huAv.EierNr ) as totalHusleie," 			
+		sql = sql & " /**/ (select isnull(sum(isnull(husleie,0)) * -1,0) from e..t_husleieAvregning where  UtbetaltAar= (select max(UtbetaltAar) from e..t_husleieAvregning where Jobnr = huav.jobnr) and UtbetaltMnd = (select max(UtbetaltMnd) from e..t_husleieAvregning where Jobnr = huav.jobnr)  and EierNr = huAv.EierNr and ABS(HusleieBetalt) = 1) as totalHusleieSomUtbetales," 
+		sql = sql & " /**/ (select isnull(sum(isnull(provisjon,0))* -1,0) from e..t_husleieAvregning where UtbetaltAar = isnull(huav.UtbetaltAar, huav.aar) and UtbetaltMnd = isnull(huav.UtbetaltMnd, huav.mnd) and EierNr = huAv.EierNr ) as SumForvHonorar ,"
+		sql = sql & " /**/ (select isnull(sum (isnull(EkstraKostnadPris,0)),0) from e..t_logHusleieAvregningEkstraKostnader where EierId = huAv.EierNr and JobNr = huav.Jobnr and (EkstraKostnadPris < 0 and isnull(EkstraKostnadTypeId,1) = 1)) as SumAndreTrekkKostnader,"
+		sql = sql & " /**/ (select isnull(sum (isnull(EkstraKostnadPris,0)),0) from e..t_logHusleieAvregningEkstraKostnader where EierId = huAv.EierNr and JobNr = huav.Jobnr and (EkstraKostnadPris > 0 or isnull(EkstraKostnadTypeId,0) = 4)) as sumAndreInntekter,"
+		sql = sql & " /**/ (select case when huav.HusleieBetalt=1 then 'Ja' "
+		sql = sql & " 		else 'Nei' end ) forskutteringDenneMd,"
+		sql = sql & " /**/ huav.depositum, huav.husleie,huav.StatusTekst,"
+		sql = sql & " /**/ maa.navn as maanedeNavn, (maa.navn + ' ' + convert(varchar,isnull(huAv.UtbetaltAar, huav.aar))) mdAar, "
+		sql = sql & " /**/ eina.Name as eierNavn, eiad.Address as eierAdresse, eiAd.Address2 as eierAdresse2, eiAd.City as eierPostSted, eiad.Postal_code as eierPostNr,"
+		sql = sql & " /**/ (select top 1 phone from c..c_Phone where NameLink = eier.NameID and ABS(standard) = 1 and phonetype = 150101) as eierTlf,"
+		sql = sql & " /**/ (select top 1 phone from c..c_Phone where NameLink = eier.NameID and ABS(standard) = 1 and phonetype = 150102) as eierMobil,"
+		sql = sql & " /**/ (select top 1 mailadr from c..c_email where namelink= eier.NameID and ABS(standard) = 1) as eierEpost,"
+		sql = sql & " /**/ eier.bankgiro as eierKontoNr, "
+		sql = sql & " /**/ fa.Id as forvaltningsavtaleId, '('+ convert(varchar,fa.forvaltningsHonorarProsent) + '%)' forvaltningsHonorarProsent, "
+		sql = sql & " /**/ isnull(bo.Objekt_adresse, isnull(ekstra.EkstraKostnad, 'Andre kostnader - inntekter')) as Objekt_adresse, bo.Objekt_postnummer,bo.Objekt_poststed,bo.Rom_nummer, "
+		sql = sql & " /**/ isNull(leiNavn.Name,' ') as leietakerNavn, "
+		sql = sql & " /**/ kd.Kontrakt_fra, kd.Kontrakt_til,kd.FormidlingsNr, "
+		sql = sql & " /**/ isnull(kd.Kontrakts_ID,ekstra.Id * -1) Kontrakts_ID," 'super hack for å vise ekstrakostnader
+		sql = sql & " /**/ case when UtbetaltMnd = 2 and utb.UtbetalingsDato=30 then '28' else utb.UtbetalingsDato end as Utbetalingsdato, "
+		sql = sql & " /**/ st.Status as kontrakt_status "		
+		' optinmalisering 'sql= sql & " /**/ ,(Select count(*) from e..t_logHusleieAvregningEkstraKostnader where e..t_logHusleieAvregningEkstraKostnader.JobNr = huav.Jobnr and "
+		' optinmalisering 'sql= sql & "  e..t_logHusleieAvregningEkstraKostnader.KontraktsID =huAv.KontraktsID and huav.EierNr=e..t_logHusleieAvregningEkstraKostnader.eierid) as antallkost"
+		' optinmalisering 'sql = sql & " /**/ ,STUFF("
+		'optinmalisering'sql = sql & " 	(select ',' + navn as [text()]"
+		'optinmalisering'sql = sql & " 	from utool..maaneder "
+		'optinmalisering'sql = sql & " 	where id in "
+		'optinmalisering'sql = sql & " 	(select Mnd from e..t_husleieAvregning "
+		'optinmalisering'sql = sql & " 		where KontraktsID = huAv.KontraktsID" 
+		'optinmalisering'sql = sql & " 		and utbetaltaar = huav.UtbetaltAar "
+		'optinmalisering'sql = sql & " 		and UtbetaltMnd= huav.UtbetaltMnd)"
+		'optinmalisering'sql = sql & " 	order by id"
+		'optinmalisering'sql = sql & " 	for xml PATH('')), 1,1,'') as avregneteManeder "
+		' optinmalisering ' sql = sql & " /**/ , (select sum(ekstra.EkstraKostnadPris) from e..t_logHusleieAvregningEkstraKostnader ekstra where ekstra.JobNr = huav.Jobnr and ekstra.KontraktsID =huAv.KontraktsID and huav.EierNr=ekstra.eierid and (ekstra.HusleieManed in(select distinct Mnd from e..t_husleieAvregning h where h.Jobnr =huav.Jobnr and h.EierNr =  huav.EierNr and h.KontraktsID=huav.KontraktsID) or isnull(ekstra.HusleieManed,0) =0) and ekstra.EkstraKostnadTypeId in (2,3) ) ekstraAndreInnt "
+		' optinmalisering ' sql = sql & " /**/ , (select sum(ekstra.EkstraKostnadPris) from e..t_logHusleieAvregningEkstraKostnader ekstra where ekstra.JobNr = huav.Jobnr and ekstra.KontraktsID =huAv.KontraktsID and huav.EierNr=ekstra.eierid and (ekstra.HusleieManed in(select distinct Mnd from e..t_husleieAvregning h where h.Jobnr =huav.Jobnr and h.EierNr =  huav.EierNr and h.KontraktsID=huav.KontraktsID) or isnull(ekstra.HusleieManed,0) =0) and ekstra.EkstraKostnadTypeId in (1,4) ) ekstraKostnTrekk "
+		' optinmalisering ' sql = sql & " /**/ , (select sum(ekstra.EkstraKostnadPris) from e..t_logHusleieAvregningEkstraKostnader ekstra where ekstra.JobNr = huav.Jobnr and huav.EierNr=ekstra.eierid and (ekstra.HusleieManed in(select distinct Mnd from e..t_husleieAvregning h where h.Jobnr =huav.Jobnr and h.EierNr =  huav.EierNr ) or isnull(ekstra.HusleieManed,0) =0) and ekstra.EkstraKostnadTypeId in (2,3) ) totakEkstraAndreInnt "
+		' optinmalisering ' sql = sql & " /**/ , (select sum(ekstra.EkstraKostnadPris) from e..t_logHusleieAvregningEkstraKostnader ekstra where ekstra.JobNr = huav.Jobnr and huav.EierNr=ekstra.eierid and (ekstra.HusleieManed in(select distinct Mnd from e..t_husleieAvregning h where h.Jobnr =huav.Jobnr and h.EierNr =  huav.EierNr ) or isnull(ekstra.HusleieManed,0) =0) and ekstra.EkstraKostnadTypeId in (1,4) ) totalEkstraKostnTrekk "
+		'''		sql = sql & " /**/ ,(select case when ekstra.EkstraKostnadPris <> 0 and ekstra.KontraktsID > 0 then "
+		''''henter ut sum av alle inntekter på leiekontrakten
+		'''sql = sql & " /**/ (select sum(lek.ekstraKostnadPris) "
+		'''sql = sql & " /**/ from e..t_logHusleieAvregningEkstraKostnader lek"
+		'''sql = sql & " /**/ where lek.KontraktsID = ekstra.KontraktsID"
+		'''sql = sql & " /**/ and lek.JobNr = ekstra.JobNr "
+		'''sql = sql & " /**/ and lek.EkstraKostnadPris > 0"
+		'''sql = sql & " /**/ and ekstra.EierId = lek.EierId"
+		'''sql = sql & " /**/ ) "
+		'''sql = sql & " /**/ when ekstra.EkstraKostnadPris > 0 then ekstra.EkstraKostnadPris else null end) as inntekt "
+		'''sql = sql & " /**/ "	
+		''''henter ut sum av alle utgifter på leiekontrakten
+		'''sql = sql & " /**/ ,(select case when ekstra.EkstraKostnadPris <> 0 and ekstra.KontraktsID > 0 then "
+		'''sql = sql & " /**/ (select sum(lek.ekstraKostnadPris) "
+		'''sql = sql & " /**/ from e..t_logHusleieAvregningEkstraKostnader lek"
+		'''sql = sql & " /**/ where lek.KontraktsID = ekstra.KontraktsID"		
+		'''sql = sql & " /**/ and lek.JobNr = ekstra.JobNr "
+		'''sql = sql & " /**/ and lek.EkstraKostnadPris < 0"
+		'''sql = sql & " /**/ and ekstra.EierId = lek.EierId"
+		'''sql = sql & " /**/ ) "
+		'''sql = sql & " /**/ when ekstra.EkstraKostnadPris < 0 then ekstra.EkstraKostnadPris else null end) as kostnad "
+		
+		sql = sql & " /**/ ,(select case when ekstra.EkstraKostnadPris <> 0 and ekstra.KontraktsID > 0 then "
+		'henter ut sum av alle inntekter på leiekontrakten
+		sql = sql & " /**/ (select sum(lek.ekstraKostnadPris) "
+		sql = sql & " /**/ from e..t_logHusleieAvregningEkstraKostnader lek"
+		sql = sql & " /**/ where lek.KontraktsID = ekstra.KontraktsID"
+		'	dersom man avregner måneden etter, så man sjekke på begge jobnr for å finne ut hvilken man skal benytte
+		sql = sql & " /**/ and (lek.JobNr = ekstra.JobNr or lek.jobnr = (select max(jobnr) from e..t_husleieAvregning av/**/where av.UtbetaltMnd = huav.UtbetaltMnd/**/and av.UtbetaltAar = huav.UtbetaltAar/**/and av.UtbetalingsTidspunkt = huav.UtbetalingsTidspunkt))"
+		sql = sql & " /**/ and lek.EkstraKostnadPris > 0"
+		sql = sql & " /**/ and ekstra.EierId = lek.EierId"
+		sql = sql & " /**/ ) "
+		sql = sql & " /**/ when ekstra.EkstraKostnadPris > 0 then ekstra.EkstraKostnadPris else null end) as inntekt "
+		sql = sql & " /**/ "	
+		'henter ut sum av alle utgifter på leiekontrakten
+		sql = sql & " /**/ ,(select case when ekstra.EkstraKostnadPris <> 0 and ekstra.KontraktsID > 0 then "
+		sql = sql & " /**/ (select sum(lek.ekstraKostnadPris) "
+		sql = sql & " /**/ from e..t_logHusleieAvregningEkstraKostnader lek"
+		sql = sql & " /**/ where lek.KontraktsID = ekstra.KontraktsID"
+		'	dersom man avregner måneden etter, så man sjekke på begge jobnr for å finne ut hvilken man skal benytte
+		sql = sql & " /**/ and (lek.JobNr = ekstra.JobNr or lek.jobnr = (select max(jobnr) from e..t_husleieAvregning av/**/where av.UtbetaltMnd = huav.UtbetaltMnd/**/and av.UtbetaltAar = huav.UtbetaltAar/**/and av.UtbetalingsTidspunkt = huav.UtbetalingsTidspunkt))"
+		sql = sql & " /**/ and lek.EkstraKostnadPris < 0"
+		sql = sql & " /**/ and ekstra.EierId = lek.EierId"
+		sql = sql & " /**/ ) "
+		sql = sql & " /**/ when ekstra.EkstraKostnadPris < 0 then ekstra.EkstraKostnadPris else null end) as kostnad "
+		
+		
+		
+		sql = sql & " /**/ , (select sum(h.InnbetalingDennePerioden) from e..t_husleieAvregning h where h.EierNr = huav.EierNr and h.UtbetaltAar = huav.Aar and h.UtbetaltMnd = huav.UtbetaltMnd  and isnull(h.status,0)>0 and h.InnbetalingDennePerioden > 0)  as totaltInnbetaltDenneMd"
+		
+		
+		sql = sql & " /**/ "		
+		'####################################################ANDRE TREKK START ####################################################################
+			sql = sql & "/**/  ,(select sum(log.EkstraKostnadPris) From e..t_logHusleieAvregningEkstraKostnader log"
+			sql = sql & " where log.EkstraKostnadPris < 0"
+			sql = sql & " and log.EierId =  huAv.EierNr"
+			sql = sql & " and log.EkstraKostnadTypeId in (1,4)"
+			sql = sql & " and (log.HusleieManed= @utbetaltMnd  or isnull(log.HusleieManed,0) =0 or log.JobNr = "& jobbNr & ")"
+			sql = sql & " and ( log.JobNr = (select max(jobnr) from e..t_husleieAvregning where UtbetaltAar = @utbetaltAar  and UtbetaltMnd = @utbetaltMnd and UtbetalingsTidspunkt = huav.UtbetalingsTidspunkt) or log.KontraktsID in("
+			sql = sql & " select distinct av.KontraktsID from e..t_husleieAvregning av "
+			sql = sql & " 		where ((av.UtbetaltAar = @utbetaltAar"
+			sql = sql & " 		and av.UtbetaltMnd = @utbetaltMnd"
+			sql = sql & " 		and isnull(av.status,0)>0 ) "
+			sql = sql & " /**/ 		or "
+			sql = sql & " 		( isnull(av.UtbetaltAar,0) = 0 "
+			sql = sql & " 		and isnull(av.UtbetaltMnd,0) = 0 "
+			sql = sql & " 		and ISNULL(av.status,0) in (2, 3) "
+			sql = sql & " 		and av.Mnd = @utbetaltMnd"
+			sql = sql & " 		and av.Aar = @utbetaltAar"
+			sql = sql & " 		)"
+			sql = sql & " 		) "
+			sql = sql & " 		and av.EierNr in ( huAv.EierNr) "
+			sql = sql & " 		and not av.Jobnr = (select max(jobnr) from e..t_husleieAvregning where UtbetaltAar = @utbetaltAar and UtbetaltMnd = @utbetaltMnd and UtbetalingsTidspunkt = huav.UtbetalingsTidspunkt) "
+			sql = sql & " ))) as totalEkstraKostnTrekk"					
+		'###################################################ANDRE TREKK SLUTT######################################################################
+		sql = sql & " /**/ "
+		sql = sql & " /**/ "		
+		'####################################################ANDRE TREKK START ####################################################################
+			sql = sql & "/**/  ,(select sum(log.EkstraKostnadPris) From e..t_logHusleieAvregningEkstraKostnader log"
+			sql = sql & " where log.EkstraKostnadPris > 0"
+			sql = sql & " and log.EierId =  huAv.EierNr"
+			sql = sql & " and log.EkstraKostnadTypeId in (2,3)"
+			sql = sql & " and ( log.JobNr = (select max(jobnr) from e..t_husleieAvregning where UtbetaltAar = @utbetaltAar  and UtbetaltMnd = @utbetaltMnd and UtbetalingsTidspunkt = huav.UtbetalingsTidspunkt) or log.KontraktsID in("
+			sql = sql & " select distinct av.KontraktsID from e..t_husleieAvregning av "
+			sql = sql & " 		where ((av.UtbetaltAar = @utbetaltAar"
+			sql = sql & " 		and av.UtbetaltMnd = @utbetaltMnd"
+			sql = sql & " 		and isnull(av.status,0)>0 ) "
+			sql = sql & " /**/ 		or "
+			sql = sql & " 		( isnull(av.UtbetaltAar,0) = 0 "
+			sql = sql & " 		and isnull(av.UtbetaltMnd,0) = 0 "
+			sql = sql & " 		and ISNULL(av.status,0) in (2, 3) "
+			sql = sql & " 		and av.Mnd = @utbetaltMnd "
+			sql = sql & " 		and av.Aar = @utbetaltAar "
+			sql = sql & " 		)"
+			sql = sql & " 		) "
+			sql = sql & " 		and av.EierNr in ( huAv.EierNr) "
+			sql = sql & " 		and not av.Jobnr = (select max(jobnr) from e..t_husleieAvregning where UtbetaltAar = @utbetaltAar  and UtbetaltMnd = @utbetaltMnd and UtbetalingsTidspunkt = huav.UtbetalingsTidspunkt) "
+			sql = sql & " ))) as totakEkstraAndreInnt"					
+		'###################################################ANDRE TREKK SLUTT######################################################################
+		sql = sql & " /**/ "
+		
+		
+		sql = sql & " /**/ from e..t_husleieAvregning huAv"
+		sql = sql & " /**/ inner join utool..maaneder maa on isnull(huav.UtbetaltMnd,huAv.Mnd)= maa.id "
+		sql = sql & " /**/ left join e..t_kunde eier on huAv.EierNr = eier.Kundenummer"
+		sql = sql & " /**/ left join c..c_Name eiNa on eier.NameID = eiNa.ID"
+		sql = sql & " /**/ left join c..c_Address eiAd on eiad.NameLink = eier.NameID and eiad.id=(Select top 1 id from c..c_Address eiAd2 where eiAd2.NameLink= eier.NameID and abs(isnull(eiAd2.mail,0))=1 )"
+		sql = sql & " /**/ left join e..t_kontraktsdata kd on huAv.KontraktsID = kd.Kontrakts_ID"
+		sql = sql & " /**/ left join e..t_forvaltningsAvtale fa on kd.ForvaltningsavtaleId = fa.Id"
+		sql = sql & " /**/ left join e..t_boligobjekt bo on kd.Objekt = bo.Objekt_id"
+		sql = sql & " /**/ left join e..t_kunde leietaker on leietaker.Kundenummer = kd.Kundenummer"
+		sql = sql & " /**/ left join c..c_Name leiNavn on leiNavn.ID = leietaker.NameID"
+		sql = sql & " /**/ left join e..t_utbetalingsdato utb  on utb.ID = huav.UtbetalingsTidspunkt"
+		sql = sql & " /**/ left join e..t_status st on st.Status_id = huav.kontraktsstatus_id"
+		sql = sql & " /**/ left join e..t_logHusleieAvregningEkstraKostnader ekstra on ekstra.JobNr = huav.Jobnr and ekstra.EkstraKostnadTypeId in (1,4,2,3) and ekstra.KontraktsID =huAv.KontraktsID and huav.EierNr=ekstra.eierid and (ekstra.HusleieManed = huav.mnd or isnull(ekstra.HusleieManed,0) =0 and huav.KontraktsID = 0 )   "
+		
+		sql = sql & " /**/  where ((isnull(huav.status,0)>0 )"
+		'de som enten er avregnet eller de som ikke er det
+		sql = sql & " /**/ or"
+		sql = sql & " /**/ ( isnull(huav.UtbetaltAar,0) = 0"
+		sql = sql & " /**/ and isnull(huAv.UtbetaltMnd,0) = 0"
+		sql = sql & " /**/ and ISNULL(huAv.status,0) = 3"
+		sql = sql & " /**/ ))"	
+			
+		'''org'sql = sql & " /**/ and huav.jobnr = " & jobbNr	
+		
+		'##################### Finner alle som er med i jobben, eller som har blitt utbeatalt samme mnd som jobben ##########################################################################
+		sql = sql & " and "
+		sql = sql & "  (huav.jobnr = " & jobbNr	
+		sql = sql & "  or (huav.UtbetaltAar = @utbetaltAar "
+		sql = sql & " 	and huav.UtbetaltMnd = @utbetaltMnd"
+		sql = sql & " 	)"
+		sql = sql & "  )"
+		'''sql = sql & " and huav.EierNr = 70001680"
+		'##################### slutt ##########################################################################################################################################################
+		
+		if kategori = 3 then
+			sql = sql & " /**/ and huav.EierNr = " & valgteEiere
+		end if
+		
+		sql = sql & " order by huav.EierNr,  sortParameter, bo.Rom_nummer, kd.Kontrakts_ID desc, huav.mnd desc"
+	 
+	m_data.SqlString = sql 
+	m_data.setupfields rpt
+  end sub
+
+Sub OnReportStart
+End Sub
+
+Sub OnFetchData(eof)
+	'if sflong(rpt.Sections("GroupHeader2").Controls("Field66")) = 0 Then
+	'if sflong(rpt.Fields("Kontrakts_ID").Value) = 0 Then
+	
+	'rpt.Fields("AvsenderNavn").Value
+	
+
+
+End Sub
+
+Function sflong(v)
+    Dim rv
+    On Error Resume Next
+    rv = Clng(v)
+    If Err Then rv = 0
+    sflong = rv
+End Function
+]]></Script>
+<PageSettings	LeftMargin="260"
+	RightMargin="250"
+	TopMargin="300"
+	BottomMargin="300"
+	Orientation="2"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="825"
+	>
+		<Control 
+		Type="AR.Image"
+		Name="Image1"
+		Left="0"
+		Top="0"
+		Width="16305"
+		Height="810"
+		SizeMode="1"
+		PictureAlignment="0"
+		>
+		<Data><![CDATA[010000006C7400000A7E000047494638396134084E00E7FF00004A6A054B6600506F084E6F0053730C526D005676005771005878005973125570015B75005B7A
+			065A7A045C76005D7C075D77005F7E095E7800607F00617A00608600618000627B0C5F7900628200637C0E607A00647D125F7F165E8510617B00667F0D637701
+			668512627C0067800F64780E65730B667400688115637D0369831A656D18657F1B666F096988196680096B8526666A23686619697D1D68820D6D862E6866106E
+			87346963136F890F71841E6D81176E8E236C873A6A5E16718A416B5B237084456B561A738C1775884C6B561E758F516D53287488566D4F2278911F7A8D5E6E4C
+			257A932E788D656F48247D906A70446F6F44287C956E7045327C907471412980932C7F9979723D80713E367F938173392D839738809531829C8574353A82978D
+			743492733231869A4581973585A097752E3D859935899D47849A3888A23F879B9E772A41889D478797A47725AA7626398DA0AF7821448BA0428D9C468DA2B779
+			1C3D90A44D8D9DBF7B174990A5C47A175190A04893A14B92A7CD7B134E94A9D07E06F175005494A4D77D0C4E98A6DF7E005197AD5797A7E67E075C97AE5A99A9
+			E98100569BB1EF8000F081005D9CACF78005F28201619CB35F9EAEFA8200F48400FF8100689DAFF0860360A0B063A2B270A0AD6AA3AE6CA2B365A4B468A7B76D
+			A7B170A6B777A4B77CA4B270AAB574A9BB78A9B574AEB977ADBF7CADB97FB0BC86AEBC82B2BF7DB3C587B3BA84B5C18BB4C285B6C38AB6BD88B9C58FB7C68BBB
+			C88EBBC292BAC88DBECB92BEC595BDCB9ABDC697BFCD96C2C998C1CFA0BFCF9DC1C998C5CC9CC4D2A0C4CDA3C7CFAAC5D0A5C9D2ADC9D4A7CCD4A9CDD6F9BF7F
+			B0CCD6B2CED9ACD0D9B1D1D4B8D0D5B5D1DCB1D5DEB4D5D8B8D4DFBCD5D9C2D6E2BCD8E2C0D8DDC3DBE0CBDCE2C5DEE3C8E1E6CFDFE6D1E1E8CCE5E9D3E3EAD6
+			E3E4D0E5E4D5E6ECDAE7E8DEE7EFD8E9EFDAEBF2DEEBECE2EBF4E0EDEEE8EEF0E2F0F0ECF1F4E6F3F4EFF4F7EAF8F8F1F6F9F3F8FBF6F8F4F4FAFCFFF9F2F9FB
+			F7F7FCFFFBFDFAFFFCFBFFFCFFF9FFFFFCFFFBFEFFFCFFFFFF21FE114372656174656420776974682047494D500021F904010A00FF002C0000000034084E0000
+			08FE00FFD91B48B0A0C18308132A5CC8B0A1C38710234A9C48B1A2C58B18336ADCC8B1A3C78F20438A1C49B2A4C9932853AA5CC9B2A5CB973063CA9C49B3A6CD
+			9B3873EADCC9B3A7CF9F408352FCC7ACA8D1A348932A5DCAB4A9D3A750A34A9D4AB5AAD5AB58B36ADDCAB5ABD7AF60C38A1D4BB6ACD9B368D3AA5DCBB6ADDBB7
+			70E3CA9D4BB7AEDDBB78F3EADDCBB7AFDFBF80030B1E6CF59FA6C388132B5ECCB8B1E3C790234B9E4CB9B2E5CB98336BDECCB9B3E7CFA0438B1E4DBAB4E9D3A8
+			53AB5ECDBAB5EBD7B063CB9E4DBBB6EDDBB873EBDECDBBB7EFDFC0830B1F4EBC38E67F83922B5FCEBCB9F3E7D0A34B9F4EBDBAF5EBD8B36BDFCEBDBBF7EFE0C3
+			FE8B1F4FBEBCF9F3E8D3AB5FCFBEBDFBF7F0E3CB9F4FBFBEFDFBF8F3EBDFCFBFBFFFFF000628E080041668E081DAFDF3C8820C36E8E083104628E184145668E1
+			851866A8E1861C76E8E187208628E288249668E28928A6A8E28A2CB6E8E28B30C628E38C34D668E38D38E6A8E38E3CF6E8E38F400629E490441669E4914826C9
+			E13F9034E9E493504629E594545669E5955866A9E5965C76E9E597608629E698649669E69968A6A9E69A6CB6E9E69B70C629E79C74D669E79D78E6A9E79E7CF6
+			E9E79F80062AE8A084166AE8A18826AAE8A25EFE83C9A390462AE9A494566AE9A59866AAE9A69C76EAE9A7A0862AEAA8A4966AEAA9A8A6AAEAAAACB6EAEAABFE
+			B0C62AEBACB4D66AEBADB8E6AAEBAEBCF6EAEBAFC0062BECB0C4166BECB1C826ABECB2CC360BEA3F96442BEDB4D4566BEDB5D866ABEDB6DC76EBEDB7E0862BEE
+			B8E4966BEEB9E8A6ABEEBAECB6EBEEBBF0C62BEFBCF4D66BEFBDF8E6ABEFBEFCF6EBEFBF00072CF0C004176CF0C10827ACF0C20C37ECF0C3E2FED3C6C414576C
+			F1C51867ACF1C61C77ECF1C720872CF2C824976CF2C928A7ACF2CA2CB7ECF2CB30C72CF3CC34D76CF3CD38E7ACF3CE3CF7ECF3CF40072DF4D044176DF4D14827
+			ADF4D24C37EDF4D350474DF23F31546DF5D55867ADF5D65C77EDF5D760872DF6D864976DF6D968A7ADF6DA6CB7EDF6DB70C72DF7DC74D76DF7DD78E7ADF7FEDE
+			7CF7EDF7DF80072EF8E084176EF8E18827AEF8E28C37EEF8E390472EF9E466FFE3C1E59867AEF9E69C77EEF9E7A0872EFAE8A4976EFAE9A8A7AEFAEAACB7EEFA
+			EBB0C72EFBECB4D76EFBEDB8E7AEFBEEBCF7EEFBEFC0072FFCF0C4176FFCF1C827AFFCF2CC37EFFCF3D0472FFDF4D4578FFA3F1664AFFDF6DC77EFFDF7E0872F
+			FEF8E4976FFEF9E8A7AFFEFAECB7EFFEFBF0C72FFFFCF4D76FFFFDF8E7AFFFFEFCF7EFFFFF000CA0000748C0021AF080084CA00217C8C0063AF081108CA00427
+			48C10A5AF082EAFBC70736C8C10E7AF083200CA1084748C2129AF084284CA10A57C8C216BAF085308CA10C6748C31ADAF08638CCA10E77C8C31EFAF087FE400C
+			A2108748C4221AF188484CA21297C8C4263AF189508CA214A748C52A5AF18A58CC220B35A8C52E7AF18B600CA318C748C6329AF18C684CA31AD7C8C636BAF18D
+			708CA31CE748C73ABA918B76CCA31EF7C8C73EFAF18F800CA4200749C8421AF290884CA4221729473C32F291908CA4242749C94A5AF29298CCA42637C9C94E7A
+			928C8EFCA4284749CA529AF294A84CA52A57C9CA56BAF295610C252C6749CB5ADAF296B8CCA52E77C9CB5EFAF2971F9025308749CC621AF398C84CA63297C9CC
+			66C25298251C81343FA0810D46E0010B58000430504D6A76B3831A086735A539820D8AF303E4F4E637D5194E0E92B39C2E6CA7082D30027A8A739D2EFE2CE739
+			DF594F184E139EF0F4E03DDD994E82A2D302EC74A64217CAD0863A7484E7FC203F4F384D8916D49B1FA0674537585079A673A0EDC42725B5D7C189A2F39DEC1C
+			2807230A4E91AE7304F78CA908375A4479AE949A30FD2042DDB94F805694A5F1046A4A451AC48B1234A027A5A73A398AD4109A34A6365D6344373ACD7606347B
+			160D615413BA5299BA10AB2545E949695A43696AD4A802652954891A476892B09EFAD4400AB29782705280021BD8C0495BAA81BB1E14A103852B3B911A5892A2
+			73852A35A74DB59702986EF5845345685EFFBABD0FE89585F5C42A3D95CAD7706696AE1CE8A660492AD4879AF6B4A84DAD2DBDEAC1CF7296B54C6DFE2A47357A
+			D38C660FA9A4B52A49F3BAD6C746D2B0DD23E85C011B4EDECA54A5E404AA3C353082D0F6F683BA95ED0F61EBCDD07AF0B687B5EC64FB69DBC63A96B930DC8050
+			35C081F216978886D5E96D35A0D7CF7AF3B21BB4C064316A59A61AF6AE7815276FD5F85D69A6A0B14CD52E4729DB5AE926D6B2CA25AF73F1DA42B0DAF6B63B45
+			E77FD3CB420A3FF8B6EE55AC62D99B57F1DED3BA79742B098B4B5E15FC000B6C40C312389000043CE0011BF8AE3A277B4E7C4638B9D324AE38A98A587162B5B7
+			DD3C2B66F989DBBA965685EEDDAC63BBEA63ED49F39CEB05A758554BE52A5BF9CA99ECED93ADFACEB56615BA578D3075536A56B0EE38A06C65A4FE4C33BCE120
+			5393839C1DB03789FCDD6A7A16A639E5EB5E4FFA4D210B31B1558DE89DB7BC41F82AB69EDE9DB20C038AE731F7D0C1205CEF9923EDE0FDD616AEECBD2B7C0F6C
+			462203D8CED065EE47413802006F389A75F66D09A15A59265713D22824A785DBFC6AB28230A48AA6A3884568570C7C8005370803276C510B50A461083000C108
+			22800109480003ED85A74A490BE7E48A9AB4E5756E5099AB3DE3C634AF088D730A33FBE4ECAED7BCAA3621B9C7BAE4954E16BB31B5400474FC57B462F9DEF8CE
+			B7BEF7A8D270A23BB1E926A1875F0DEFE38254B7182EA7742B09D55297F3B2E2C4AB78152E6BAC5E56BE631D3448C7EA4E27CF76D6B14562A9FE4DDD592F3339
+			A3785EB73F017A5D0CA75987FACC6F76DBA954A8721CE5E5F63657EDCAE083B63B8D9F55F8A95D6DF30FCE95E4A45E78C25908D5B90A78C6F31DB2BDA14A0151
+			0BDDA250C6AE1E773DC20D409B033FA0432CB4710E6D2823169CB0831258F08004240002143868A1C78950694339AE3BC67873BD7B64752735DC43EDB0A1915C
+			6AF3BA33B60AE7B4BAC59DD28CD6F7C16DB6AD3ACD2AE37D5BFEF298CF3C7FAB6AF790BE5CDDE3EC289001BDD240F79D91A637FDE8156F505A0FFACD94B500D2
+			B94774B8DABA874127ACCDA77CE756C7B09A9B8E699941DEC388BF3EF6333F7397EB9DF1D1FFDDDE407732A1433ED4D64A1FCD8F5FEBF019FE4FD12D8B7AA8FA
+			3D3D447D9BE0702AB9FCF115FF1D319B3D18A7E0077BC8453AFC41FF77704318A2D8C31690CD010C40E0FFCFA657B9D54DE46567DEF65273156852E7594ED657
+			D1F65EE2954FE6355F0CB83DACF7568C27532445711C7566F6147A5CA57922388224588222B73D83E76A308455FD554E1BB84E9C267C71A56D95945B8E5780AE
+			076454B55107367DB6E77D1EE55E0A665D7E0644A5366BAC856183457B176842C0377026477C3B744F55E770F135728DB53D2DE87DF1C53D78B75C1EA8846954
+			58D23755DC456B2D4757D8B7015507645D186129D4801DA86DA9C65C9F776B8A5781928673A9064E8A056276C4752324011B00767BC00BFEEB407FF4570FEBE0
+			0DD5200CAA90085B00031290000BE000DC7458F7D465766673A05667828558F6953D03B58741B557EC7568B75761E2D689DCA63DAB874E1C004F506882B6788B
+			B8988B33A4857B7673D0077A75A8571BA05113A651F7D461DC666DECB67090646DE3444DA1456ECA97679F286BFDF463340784765679BD5559EAE74346E57915
+			056E333679C9E8684E286A045852C6485F35157ACED87B8E556675F6715AE8556B566E6A2483C6187EE7D461CDC752623569E644501F187023947A30E55CD278
+			672D244F351758EF445BC9388ADA78876D2488A14601CFA601379006ACB00DF7A08824590FE4A00CAC10096C00053AA0021B00019728FE013D47915D85671E84
+			010FE0000E4001BEC67DE9B84112D0000CC0000FE06B2D655BCC387E204880E124010B6089DBE493261465D9575EC3953DE2450110E00010F06C850693099093
+			10307099A58B667996688996F7286856E7722BD4680A565CD8E85ACDC55E7D957792C665AB08496B367979498F03A67C5E287498A65606D7706BD95543445485
+			556827078BFB848EAB667E3BE55A9019974324874CA57D9D489766E878A8C8968629559B887772E75502B853AC277C3BA564DCE36F80A84232B8897FB99725E4
+			72075681FBF43DA098946FA49120E47578C5014A9008BCE00DF240928A880FF0700EE0200DBBC00969F0031CB0955D498EFAA5983FFE684D2FE66C3D8759DEA4
+			950EF062F3D6662A278A8AA95F12F0620F4088D9856411C9574728593CD96C01884E5EB795EDA9574D9896FEF99F008A6544064E50F85375786441769094A94F
+			6FD84EFCA90121A071FDC97036755ED2846E01F687CF184209E7510378661F269714E69B37F47D3038844166685C66830B198DB6A9554DB6744CF56F1879433F
+			A57D669502B3E882AEB5543FA5987A46A264945C2E1AA3F6E461E6A69AD9B655FE4673EB8554E5B4A435DA5A43979D174A83BFB74E71265A7D98A1978674BAF6
+			4292F5012AB0047D800AC2200DDC700EC9A99CF4B70ED6F00BA690086CB00430B0010B80000DF0006D987430056D26360566C006FE5710041CC0932B8461659A
+			0684100874D00437600118D0A7E78964AEB60112A00130A00466B0066C3005393002D0F696F179696599022A30045B80066830053F00021C900357600784F007
+			6840042A4062531AA0BCDAABBE8A4C79F75107F86A9A687202D5855F085EB0A78957985040787297A49A5CBA8D38C861433761F4558A5AC76EE8A47D6B6997DB
+			F79ED3F566A046AEE5455311458C66C685B4259BC5358CD2B761581A449775A31A983D1DD0015A387C73477B08C6A45605478275671ECA838076A1E5FA4DC798
+			9AFAB87BECB7541A6687D6958A2F449B1E77785A068103C751603A47C0697DA455023B10045040079C900BD9C00EF8E0A6FE30FE0FEE900EDC600CABD0074AA0
+			02F2160100F97118B501451976A7200CC6E00A76000397B842F04A9C91600CDF100ECD000A5BC076997861F9F4646C88A909A001555009BCE00CC6A00A68C062
+			1040AAF6047B0EF90118100123A0024A1008AE500CC2B00A74F00330D005A9600DE5C00DBE4008D4895FBBFAAB7EFBB7804B4B71499705494D32074E349A90D5
+			140138DB78FE954E6A88601C979A3AD6B7888497B5858CF7BA8799168178F86F1CE475D036989B0B8741A4B0A0B6A176278CD858637EB9AD299475ADB6B94044
+			9088076717EB7003056E6BA9690017B06FF459BF9B75A756510C3ABC099A5EF106BB4CC7808ED94D3A67A9B1F55A10496F85FE2678C3FA471FDB710D38A94FB9
+			0023F0036850096D2B0DDFE00E2CEB0FF0E00DCA506C81E005D4F900443996EBB6B80880014BB009CAC00EEE900D9C9003079000461B632A1006B1700EF5B70B
+			72000208E0002C65BADD374D7915770F60001AC00688580FF0A00C81000206B0006F995CCBCA67668B012300035E700AD6D00EEC600D9CE004F0670CF5407FDD
+			300A4D70A8EE29A481BBC33CDCC3A41471CEF600F3D68E19258CA20B6DB0D984E1F4000D60000680000B70577A984E298794907B4D0F008052AC49C4554FD7D4
+			622EE60084C88612F07F10409E05F7AE81B9944DFA9215ECC406A0006F378CF4E85C7A08C17FB6A13C655712E0000C8000FE08F0766DE87983F6A2E3075398CA
+			9EFBA9AD789C433F97BC24450121B00231600332100326A001072980FAAA01946CC92B90C93CD5AD9F28B0FCB48954E8C74F2CC86D48568A575165CC9E1D29BB
+			3AEC87F13567F2E6002DC6000DB04DC6F5961D576ABBBB9E800C953D69B6FAA94DBE66AC21069E1AE675657C9D1C60625B1008ACA00CE2000F33AC9CF9A0C1E5
+			600DB510096430042AC09095256FF70B05A2600D23E90DA3F00306C000037CC261A00ADBB0B2E3400B0B0CC5E235AFEEFA661E36020F40001F6007C9B0B2FE60
+			0D8CA00204C000290859D5DB555E77C268C00ADC3092DFB00A571076BCD00E2D5B0D9F70C31C1963B5ECC3267DD2280DFE49C25975788501F4A4A31C605BF316
+			71C2D9A4DA35781ECA022000AB186A99A6495700E65F306D5E865C46D0EC6C489DD41830AA3D067993A5A32AA0022F20022C80C8B0C90265587481465A550BAF
+			22F002511DD53C7DAE1FFA60255D43FC987D0EC85C1C0002517DAE128DA8CF3A64763C022CC0028D45835288431617D0B84B8A2680034910055C60054720031A
+			A0AF5B564F1DA00136700456C0055270043150021AD58F1037C2A4C95C00469657D8D62A00AB2C6057E91A90CBEA7DA576D75C08794DBD5B1B94026EAD022240
+			D5671D6A3EA7AD2CC0012FD0D61C80D7B2A6A3773D8B0D68787BB4BD91B70111D0C761C9C46DE77618700358F007A0FE500BC6A00DED80D0CA490FDF1CB49B40
+			0776AA01E5F96A0F8000120005A8900DF4170EEF6C0002FC4179B5D44C1DBAE205024AE008BEA00DDA600C9C70052CB0A71EA66D47FCD04E956A024D0016B007
+			CDA088D9C00820400006D095F17D42EFBDD4434C5CBC050315ED0DF4470EB110063700059FA00CDA500DB6B0073F90025E87A429BDE22CDEE28CD4C712C00130
+			70032A505F836B01F96A01B1FD7003E57F5CE99EA12B012C30047410099F100976B0D144D8801EE87DE265624DD0055DB0054AF0033490026C344D10C00070DC
+			E55E7E000B00E42884B9FEA7014190068CF00999F007F09B0218C0014470056C6006AE0A028679A242A80195F800FE20D0047BF009A8100BB1700A8E80064850
+			CEF05AB901F68D3394783F27667D45012940034AB00688C0099E400857A0022F265FFE679D11A061890A58D37C0343D00458B0055340043710D3FD68B934D454
+			B765023E10056D70077C300759E0032150011F98598ECD0467C0078070075CE00396AD648EC5606625EA6308BC1BBB010D60013FC0068C000A95B0075FC0032F
+			F001524CAC2D3591D068624A30055F40E53FA0022340C7101BBB7A58C61CB0047550099F400976300537C0028FD7639AACA0C3D8034AC00681C0088C60AB43C0
+			01C378034A700568400655F0AA8C4B4FFE5C47C69D50D90302334EE3F266C68468012CA0B674200AC2A00DE9A0FECD6E8A0FF7E00EF71709500002C8A857152C
+			014BB0CEF9E00FDFB0DEED0DCD10DE41980AE10FAAA95310089FF00981B005910A6396659F5E79583D5F94024E50445DE0166007094E7FD690081C50000920C1
+			CDB6F3C119CD84E8A0ECB94D1C26E315BD0D1B1E0B6410D55B9008A0B0097BA00422205F13DCF5FFA7C8666CC66229E62EDEF77EFFF766C4023F10068110087B
+			00BFFDD7CAD9E3024DC0067B60076650B3987A59E505AB4857891CC006B1900DE1900DBC50095300031C3680C8BAEC77450478100A82AE0A2A49CE1F20013004
+			EB23164F25A50237F0034390FBBABFFB3F9003E55CB8E948771650891A7005751B0EDB400C9FF00551BD0484FEC00ABC600BA3600748300304F781E10E8BC228
+			012AB005A0600CDEF00E35FF0ED2A00A6C10047A5ED62A58528E6C7B0E4A817D458822C00376A00ACD000EE0600C9530044CFCA0BC8D9000F141E040821F4658
+			D82081830E34914EB58A852AD11515181E7CD0905143418E1D3D1AFC2850E3C111234466B4D041838D28730A3552C4878B8F10152C603C6841438C24630059B2
+			54E80C9012166E961CA17163CE9B19433E851A55EAD48E1B0766DCB0E1C3030416BCACB2264E1B314A6678A4A040C1A940A3274BB695400106943FA358C562B5
+			890D120D0FB42A7D6A95A0C60F462D384830A30E2E6DE1AEE58AD444C588AC54AF6A20F941AD060A12580CFED9B3CA98356BC646A1519122079B48AC6EE14245
+			E7C68306165210B69C5BB754C1BB05FEDB2D98C58D2984386DDAA384830408103048E08AE0810A25691289C205ADDC3D7FDDBDFBBB472E579F1F2C3460D82C01
+			81842AA1ACE5F3E76DD48F0309B2D2669000C20815397EDCE0008304104840028C36B28005186E70C105DB4A12C822040C7880BF1FFE7B21BA0720D8ECC0C28C
+			424A030E347AC0000BEC50C63B6B08E12001108650E207153E582081041CD8E0ADA4388320010318A040051D88C8A1A204EA7B00830836E000063458D9061F7F
+			C889858D163750E106185430ECA6847AF4D10031C724934CFDB4F22D4D35D764B34D37DF84334E39E7A4FEB34E3BEFC4334F3DF7E4B34F3FFF0434504107FD33
+			A10F6098C2915A9CB1461A5F12F901310C30C8F186303E29461A698CD944090810C040031590D8028D2F94E8C1BCAC16308003429EA9C79F7AB259058D1B28CB
+			31A703B5624A27090E90600B57BA39A79C6D88F9C40B1830C0F1C0B50C2A09B793B0526A2DC07465CB3093A0AD5644ACD0B40042C034C84AAB071650010D5072
+			114698628C81375E616E5125902966CC6AA97077ECD629A61E5040833A7E8147D66D64B163882512F9259C75CEC146153672E0608308407476A070DB4A080316
+			7E60039566D8F9CE1F747C4144390724D0F6DB9B4E3248A314B475765B6701E388B0B690CA58A0BF32FE7A4E54251C21469DEEC8616589239984418930D0B822
+			081546AC36279B0742CAA492244840832D4031C69B73C8C9A6963D7278C0AF6A0DC3F9C3B67012575FC33ED8A05A9F29D0AA2DC02AA8208422CE2804A843E078
+			C2060D3A085783942C08C1872CEE50C49247F4C802070D6C12885F04C315296BCDD1C42DC46EBBCC78DF14A2058CF36795B25A73AB5AB676A3CA50AFAC440DE4
+			30461E59BD91658D1F38E84C2D8D4164DD020C169040073F6AC9869C73BC310614283460C0409D49D2F740BC313B3DF3ACB752408544A2E16E1E6B4E09E3060B
+			22C0006B084BD7DB5F8CEBD680390E944884976EE091E71B5CE4B8810ABC300A637C231DE9B0C627FE868080AEEC4B5C18711F88F8C533A4BC6C5FFD1A4CF6FE
+			F2BE9134456EA873CADBBCF7BE90002737100A950A40138B6864A318A2900314648490256DE0391260520EBAC0085A44C31BE98047ACBC238F66644232E74193
+			8024D0845160033EF2A1CF01303082E10C610B6CE8432438C1894A10420E5B50C20D5850990F0C4709539882128A543F1C36E9074D40C31E22F1894F6C221074
+			D842137E0082E7FC6C7373538A034CB4871475A71BB1F0622442110A5038C20E5053020CCED33ECDA8050437508217FC60084F88821389C88317AA30041A8C20
+			6D23701294A4148E58A0E10512808113A0304A18B0C024ED6BD210A070052F78C10C61F04217BAFEB0852D60C1985B186500AF46286636D399CF846634A5394D
+			6A56D39AD7C46636B5B94D3C31EB03A0A9853684C88E58348101144AD26712218C7674671EBDF0020204F0001020C10EA3B0852C3E61861F686001AC22C00B12
+			610DEF78C3156CB8410AF2F58108A46D430E7040DAB425010348C00BB548C73CEAD18E6698C25612C0D18E3A03518726096F99BB19FDA86615A724C4A10E688E
+			042E0612EF916B5293620E04600A1D8752CA29B2A3DB396F90096BD0A36425AB07399A710A3AFC4E02ED2389979ED31C0848C0AA94324C892840076348694AB6
+			48CE1422A10C77DC23A9B9D8C3EF28D03E844C35A6D0B921736C64812970C218E9D0873FE4B1FE0E7268C318B1198206AA6AC3B4E934A20EA5DF41BCB5819EE2
+			54A7567DEA53D19396BCF92CAE4AD289CF1E90530838B4AA94B2A1A89A508966E8CE1FEB88C5120E50000A808C13B188C528E44004105060B0E56A28FBB2F29C
+			B441D6A71260400AB6800A6BBCA31EF320873020F580025D36B79C6DCE032E36378318C5AD696B406FABFAD4BAED2873F14349053AB08227DC01129878C41DAC
+			E00313E8EA20E25D4112CE2088473402106238C20A4680B9988D282157A55475BBF75FAB2E49235969E866251B57E97A90B0492A17FD306301057706C071C12A
+			C72C7CD55CF937A7923D29083702300DF8A1905FB5835A7148378B78D6AA27FD00D7244004FE4308A31C1A7587355071050DE867208C75B15521CC99C46EEB81
+			5B31800A22910DEF68A3562AE00A0376BA810BEACCBA902DE9A4E8C71C16E0AF17E490523A7A61072D3DE91AF0C0473DBE718A054AF143ECFB3064851C816965
+			A624034EDBA4D29216DE6E88BBD5BDCA2DE5EC50EE4A50731FBACA8796D91113EA660396040D2FCA218F767C4319B14844135E30D8B53207A218E0C00FAAC01A
+			573CE31CA6F5C73C9CF1892306F8034A64A213E3338A1C10C000879A02235C618C6A68A31BDFF88637B4918D66D882114DE000FB46F0833EC4025E98AE8206EA
+			73BF3DA04218D3D08637BE118E6F70231BCFD80528C2A082CE36A56ED5851D0516408011FEECA1194284475F7D4D0E727C631BD988863158D10724300BB21AF8
+			011A3E918B6664A31BE0A8F7BD9D210CA6FEA0A18722032BB821A56FB0620B301842226EA10C639C02A174C3521502718A5F40A31AD5204DCA1BA5294D096314
+			76500208ACCA4D9AD7DCE637C779CE75BE739EF7DCE73FCFB9378710885C78C33BF0B0C5144A94B608DC8F11C628983FF2210C341C400010F8011D58210DE749
+			031568E0C001C44E00100CB4A007559F96190B1D9D2EC0A14B12484331A0844D18A31BE5E086302201858A1848279CA10049B3BB599F6626676B3109B91CFACF
+			7F4EF959E86E6867211ADD924AF7663989C0847E300A707C071FF070873B84D81D7770FEA316758041021ED0A5B67A1AA230FDECBE2060800D70D5ABE4B80599
+			6FC0065768231DE770C629CC90D0476BA5CF0F80BD90374B011BB1600BA390863BF4CA0D5E6CE28B3152C1248F3F7887C22D715FDAAE551DE0F6CFF2F4C56A79
+			0BC89963D5083F18F935727B9E77CB9FD12AC3B4ED8885120420000EA06115D5181B675805360802E68380248A294A9994974A401B72000B500242A8056B2087
+			70900656A0031838AC87AAAA25798EF15B00989A94CD799F2FD940CFC2AE8B601DA6E017C3681C2E00044CB08446688323308196290C9BB0012BD00348B08443
+			980329C081F6D21B9EF9AFCF2A0C23E4AC06A31BA069B1CFC229C8F2A307FBAC7279FE33051BB4AADAB3247C35AA92428CF02F0CE8AC21EB9681203142F20EDC
+			4BB114788EC248B0D79BBCA7B2AE95D18134188563F00672D80661A80428E000B7EB12310441D84B9282E897106A0003808148D006EFE00656400DAE41800540
+			42DB38B009FB9297EAA92D73802E43045F2007F848075FD80318F80022600461F0067420076388841FA811B5B88FB6DB29ABF2C2BF40B7C4E3000E30090AEBAD
+			9B628E92D2C28CA020ACD82C9D22345743131DD11A9320A34563B4E0089E50B3835B2807EFA8876EC0053B5081045880BA91B08348307A0A8353788675F02A78
+			68864A68B5242A90587BA251B8010130801CA08355688674C046799087D1638766FE18C05BD1802A58856E389A56E2000500812BE084620007AFC207798007A3
+			EA8E78C88658D88321F0C5F621C65E71C6756BB777EB8E7CA807898407D043357F288762D83B1550B711183A5BC886A88BC820C2C66EE0438AB00010F00289A3
+			388BFB8134D88576BA076BD884C0E20022E80356308670302D7C988789E48EA34A2E46580210E82CA0D3CAADE4CAAEF4CAAF04CBB014CBB1F44AA1DB8358D086
+			79E80ED4828212810E26193A615887EE80875CF08204081F32000565984B7F780765A88425500116F88004101F82EA8E4744A814481B1CB9A42170822AD88234
+			9211226B280BC88134E0845AF8855B10053A500215B0A1C803B51C5002C94CA3FE21F80118081099C21A8C218C8470008FB901188182DB5C0222D001976C8E1A
+			E22D0B70811C80112550022750CD0B414ED66C41A38880035080CDEBBCEE40205F900559E085661007E9EB0E6DF0841FF8110FDCAC0FE88F25D8A52B204E1931
+			A5635480DAEBAAEE28075CA0032EF9814090056320867A918C00690EF1FC81E1244EDD44CE1F080218689A3FB0856D08A27F1C8571EBAC3813951F3823345202
+			D59C119DA2A411000118F801240802A9A9CD2648CD00FD811CD8921111881460011558900BB90110388F0F10011810CEC844A60905900D18BF0D78012518ABA8
+			4B0757500203400025F88466D0CE7338864F40831F78011660010EC8D01BC8FE012D51812C81501055022460CDCE80000BB8812B480456E0055F788548A088A7
+			12011AB8012A55D1DA5482266802EC039E936A2B0DC8D02B8DD3E344CE1BA08195EA1567318C12B00126808343B0844B10042EC0010BC09C3F320121388343C0
+			044C28843128021398B068F91011B8810DD501121D4CCA08954BEACF1C6810D58152191D02D59CD24E65D1A979D11475D5299D9A11B0080B7881DA3CCE1CE0D5
+			0B21510E60A80FE0002B6551180001E069230D55CD005A29F7F90041FA003B308634B48535A48DD57323F2BC0228708219CAB3B8A00E3AF8045BF0855C783922
+			E080AAA28DDAB88125A802DC8C11D614C38B9816BBB180445C4426EB0E5AFE61032770D72AD85624988CF0C40A0BE5003705D12BA025C2B42AB7F3445F08877A
+			C0877320C5D4E3802BD804822386516003188000E479AA14500108AD8238BD9020D0812000D55D741F1123550AE50016A0010895D0CAB42AEED900834558346A
+			822110A308D829B7490A5E74C6EDE98D8F68B4DCE89814F8813DC88573F88E74F8053FD80106A88D97F92E0A4BC407C838FD81B7756CC70879C726828F6E0885
+			1B68153AA8057040337F88376B500665A040D3820771D84619E9C96F70CF5A70A517F03F696007AF62876DE0B8681007D3AA8773E01425583AD7C9168458B768
+			6D86A974876D688678310665E0867718C976800653E80210D880216004FE623807B5F487C1BD5C68008778E88E7A78075A71250BD88255E08658110756B8821F
+			90835F903E7CB0064E08CD25783A20322B7708076CE03865C886D3FD0E79C0865420832008104A22CBEBC5DEECD5DEEDE5DEEEF5DEEFBD26B3444BD4452D7332
+			80C1FA8C40904BD2CB852DC08014C0D85FE006D3A2076ED8054EE803341802FE208468F08E6D6005844ACF0FF8812E300ED7E0855A38054620032280811148B0
+			1B688854600554A804D0E41205D3801CD8024458855AE8855B60055188843A5882743D40C2982016C32144D9034E588558C0055A70055460842565012D4B0B1C
+			C98130408451500556608553F8844860844840624258D2FAA1B297C1FE00E7CC8151D05BF0C8060C244E2C40845BE886DB9B0F03B08F03512132480454A8855D
+			C00556088548900325F045070818DC99CAF7AC8319B1477C8A0550F08325604D095800CC44834400855560855518054E30624660844420843CC8834888856A08
+			DC7A60876CE88551D8832A30C5A7D280A6618D0FD6855A608551600436F88111A044E6488121A0032D8A843EA8033F08855850E0480884404884445662279024
+			1C52A12FD80344486436084D0EC8012CA08340000556D80561C885500E842B80011903011E55061F5D0525804946D0856E10A2CA0D0655600433082315200232
+			200446F022326003393A0559B00556E00439104C3EB680B9E80318FE1EE28910CDFB61034248843E900375EE834D88615938854C608321A82D1CB2AA50BB0239
+			3205D85A054E486446A8844A08842DE8BB6CA10C9DB1894705033E50044800C227580146CD2CA3480113C0012998834690413D90821890A01F7B00A60D0342A8
+			844848043CFA9DB4E1802A18684E40043A680218389D14808126A00344D8844AE8693638664A68E5A8613E0246034240E2449083DD65019D520128D8034AC804
+			46F8033BD883738E044248038D940E18D802398A0444D80332180215E01A0D50E54A28620C2E086D81563B3886DBAB056B45800DF8D281F664118E0461AE25DB
+			928017310347B00B789E2D7FC2A17A9E8240408558D8855D88ADFE4AB083ABEC2C3A1BDA9522C67B4DB225FBDF5840625188855CB80557D08B1CD88005982208
+			DE2C15B8823FF8845378055D006D50D88329F89DDB6680FB49048895588A2D4507E0802618B97CCA0434D0C005A0808355023AD80457B8055B38054AB8E54880
+			6AA306902644B7FAC9EE2558E54F60043AC08229A0834A708DD9AE0434C801310C95FA8928B8BEE7CECE855C88854F28EE1CC8E10CD3895DC40CD739DA68DC8D
+			A5FD013BC80572C0C67298DA1D4880DA002168B1D5D56B5AB4A4487564C7EC7335581B85F7F0876EF88452BE02DBA54B6FF0855148843DC8833116066D88BA71
+			8805D0340355D006EE100757F002E238051C77DB6FD0B748D8FE033B20844EC0856CD04E7730863F988D8B6170B7790002D00014F18E6F402434A08330EF834A
+			70857C9412797806AB1CBA62D0C77C98E45CC8843DA00342D884587886729092A264B51EF0021F0772DDCD3A7672DB66E0842B58023FF8057DF48776B0865A00
+			854090F33D588451C8856C20197F9072489914F0E5F44EF7F44F07F55017F551DF39F14DCBB58C05283812F4CDB8F5C5745BD882CF48456E28ABEEB887772887
+			6C308655C84018E803FFED0E002683EC3B942DA8845A50066D2807FE71876F78865E480542680216908E21F803A6340661600546C082684E000E400239080582
+			0B0777A00777C03B68F8054E489F39ED178480800FC80134FEA87363689E7678877748076F68865C3885E448014A14152848845868066E208703FA066D888666
+			78066978065F28F41659BD81786203D83CA3038F66600415D8BF07A8DD6C98CA6FE8E203609202668455E88566F0867600BD72E88669F80555F8032578017992
+			00AE1222DC9383C9E0516168867EAF842ED801CCA0812640043BE7867250786D9086A07F866CBF855B30066D680729C90779600772E0770C94911F0883D61006
+			AE7B87787887BE7A065E18053A1882B0238014608357601467C876CDFD3D6C20065BB0056188DB614885E4F880F38DF05320866650864A06CD0EAE056390866E
+			58077A38F7BE328654F0032418A32EEBD1A3398518F103FE61E8867798CA79700773F006677885E4180232E0845F780665F8055CE885D130A07DB70661E0048D
+			5EBD79AF8458280665100654E8D8434903542886A8DF855B58796D48F8E79106C8D0682D53812A600467B3867168877628076D08FA66B0065D7FC51AA92CEFDA
+			880EF0800E888128B88343808498000321B8C1C4F9800EA8809DE8094078044B50043848829AA880A4B0F80700080D4A12D96A6630D7262F2A1E34F891A89735
+			6BCA5C115A0222858A298E6229ABD62CD7284EA77C3973660C14940402246C09652C9A4957899AA870B06149255FD23CE652B5AAD7B367CA58B11931C0C09048
+			BA9C4933666B53981B121CE4D8634B1A3669AEE8DCD8FEB0E1C38711232C8875A0E0831D63F8FCF923574BCE0D0B11684C49E4CA583672EEE6C123274D18AB44
+			5B6A3A50D12490AA5EC68CD562A484C2010A3FD27092D5CC1B3B79F2D079B3264C949C1F1CBC86D5601A2CD8B10D0CA860948DADBF73D59249F3D6CE5D3B72D6
+			6A1152A2E2C383071B72A0A914CB18366FEBE0C54BA7CDE9283B4A522CE030B057B87AFECA09DB2315069B51BE0CDA0A74E34002155D22C512962D1D3C77DFAE
+			357B16B159AC40BE3F50A060DA82051F3890C00C72C4128D35CDF8228B2CC464534E3BEB84234D2CBDFD362005C419879738E9B8E3CE39CFD912DD102F04F881
+			69A7A126568AA8B9F8E23F2FCA38A38B1248A0C10FFE7BDC520E6CF590230C213724B04069291A898103160CF1472DDAD0C3163CCD64429306187CF501060948
+			504528D6E4E38F369B0CF10323D0BCE38F3BD6A842070F00A6C0411069AC528D3BFEBC43CD2A7BD8710A36DA89C3CA1543EC618C3CFEE093CD2A6C0CA1020B8D
+			B2B00427D268B78F36ABA071430A1860601A051B9CE6D506AB69E08732B065534910128CA0820A2FBC300421C2A4C39637A8D041482EE47C998E32A2A09183A3
+			2C0C11082FE4B015CE2D814CC1C629DADCE3CF9F58FC40C72FEDA0D90C2769D4918A35F1E0538E31956071030B2FA840C30B748DF29A3FF728B3470A06404023
+			BDF5DA7B2FBEF9EABB2FBFFDFAFB2FC0010B3C30FEC1051B7C30C2092BBC30C30D3BFC30C4114B3C31C5155B7C31C6A821F981A0B26C330F5BEBC402C50207D8
+			4801074418F2CB3A6CB953CB152A28F14933E93C0B1B3EF5C0B30D2F84E470431FCDC0B60D2B6880A0810E75C4620D7CF2D4F3F4D3F2B8C36B25432C00014ECA
+			78584E33A7A001830418E064CC39EE380D753DF3C8B38E35B2EC8104060BDC68E407007E70C31EB97863F6D339E75C8FD4E82853750209C080C628CA9023CF3C
+			F5D0A3B6669AC1B34E35AB84C141020F8405D6060C18F08328DEB0558F349F3431420A4A30228C386B911EC979077030841DAE58C30EDFF7E473CFD37C713DCA
+			161100D0001B6AB1454E2E74B0B0C116B1C0E7FE8E37B6E401C3062A8491F8E28DA70DB966F255A38C32D62CCED63E7FCB934E318C60B105214DB2034FE3F8C8
+			1FB57CC66CA2844A1C10D20CE3F2C0038FD3F0E10E7034052FE988C73AA0618A2D5860000898C229E8743E6BB8221074888430CEF13FC6D5E31EBCAB473CBA21
+			8C4A34E1052318822394018FE38D42094AA84434DAA11DB6FC6D1EEA08171696D0875A74433311720700EB21BF9CB1A3199FA802807E60875864631DEE08472F
+			FED0951B044218E5F0A11339888F7CA4ED869198CE0768B085C4356D1E1E841C00D5D68D510CE10091D14058C452371459A00216F081180A61094B14020E4FB0
+			4109ECF6950E54400338B0C21D0EF10845E8FE810B3E2841053A3002D388254B1AA842258C418EFF91831881C8810358C0865888A371F0B0062BD200030EE428
+			17DBD8CB399AC18A50DCA2875213861C1610000C0CEA1D6A4B072AD900030CC0600FBD20C73CE651445BD8C21A91B3462440000005346F1C3ED4462EFEF0830D
+			70800CACD046E3E4A10C42C000029B6A11581C40000AA40536E2A0451D6060811EB06115CD284710D1E6BF7538631453D8C00254B0854F681237D240C5163A97
+			832A8A0388DA839A3CDEA18D5B2462091C70C00302042A50D50D01AC714D8FFC17401ACA831CC6F884420CA00018F48117DDC80CD4F2B13B9DB9035C955042A3
+			60F50B713C2B1DBFD803F5C8540CF8EC8CFE8D0678C01656818D76E4137022D5CC3A94B18929FCC64A1AE000073460018FB6261AFD63473ACE91999BE1631EDE
+			F005239AC0020318E00684E8C54B3928C4BFC5C7A495A02A96AC841AD2D82D5F31EAD7083EB081B0A54089B630D6E8B8D307180C292C1648015934D01FC93EE0
+			848168D293FC11A529A9A04A57CAD296BAF4256D546D0AAB0807EFB8C10A2C58C000031880000250000D786115DA90C73DCA518C4D046214D578D63856710525
+			44825DEDD80519202080E51640000038401556B10D78EC43B78CB0E8801CB0802135A0010F588003208000027C600F42638B3508A181021C00BC0810000286F0
+			0969AC901CB6A8C42AB231C36C78C209FE1B4880013C0A5F32194386EC50C628E840875364E359D19AD62EACE50E6CD121113C84473B06A784D61280010C2180
+			0030C0865F9CE91ECDB0830508A0B98CB1B8C52E7E318C632CE319D3B8C636BE318E73ACE31DF3F8601BEBD8C7D8C28E58542101269300CA88900861B40C4DB5
+			E8020B7E40085B341164FEA8473BBC510D5F84020D2A804120A4011BD586C15C69A0053840E6A367F02217C6F0C60CCFC10B3AFC6609A0B0C6B3EAA18DA2AD32
+			08892830949E730B6148A31CDA91C7376211860818A001283A8DA6A24C8758888E86E7C8C6336A5327B6B443187EA0DE1032510D76B0A51C7F21348F46F70DB4
+			2A4103727BB40622C0800380AED2F8FE3887336EC10A56E0221AE280473DD0210DE0A540000680811D6A0167D8B4431BD0A04637ACC5167938831343386AF16E
+			863C3A648A0CC2F8129A84F107156060089CB0C699F0410E6708831885868D3CB4C10B559C2217D2488776F071BE6F3C07146CF0C2EACA01EEDC62BA1ADFD8B4
+			3FDA618C44C040011C00296CA64D8E6C28431883B6C6A68FCB860700000168E8C5A6E1A18C4FD0810DA068C63ADAD18D67F862D0D2208776F2910E5FD861983F
+			88840AD9728E5328E10674A84536D891EFF381431BCA5085749440886A45DC1FF420C736C6773C5BD43CCA7BD00562DDB1F01C6020078B48C60A230E0F7070C3
+			D04373051AD0A5044E34A34E32B7FE863150DD235E31220785DB1458FA1AC711AC20097068842530C1872CF82004003A511D2B1082229CA11090800420C47084
+			1818FE44298A9B40024E436EB0110337CF395BD2610C462CAA09A370A63FF2F1234E44A216A9F6473522D1701844C21A1167873110918311CC4C1A5676473146
+			A10A76B565154E40C007E8608CCC6AF61A9FD8B05B01DD2E658C3B0110A0DB571E40800DC8C118EE7C0B0C4090546D84FD1CD2E8452D84417E4E7B3207161028
+			2AE84BAB556C8103C8E645AAE5E10D63E48217CD40E69595C32FD40107144080CD9A1B21007A648E0110406B6043D3DD433A6C43D9158AA1145124E400028C00
+			1AD402625D9973ECC4DEC0C681FE7D110DFCC01FEC543DE8C339F802507DC0DA41C3CDAC832A288104DC1CFFE85C33088330DC0E6C8450B20C01080896A76015
+			1CAD060C6C023744603A744337ACC3CDCC0337C4823035000BA481EBF5C83960C3334C0338845DC24915145C14045CC9A33996BEFC15BF04D6606D4061D9C161
+			C1466E01090C3040031C9E9B8CC006740A0654D610ECD06D414933905067E915966809977809987C111ADC82B5DC83358849608145956880CC6442DBA1098205
+			429700572A6C41A86DC3F1C4C215504002142106400007540127680D96290327C44CD85840A3BC8008B8C00B800007B0C06A8C801D34C33EB045352442011E80
+			9588D703A060AECCC33914C3FE2AECC2378C8E31C8810628C0031CE30244C0E1D8567C68437EEC018369C737ACD60FC801D34D5826DC8A2D78033CA0833104C2
+			105840032080773D40036A001BE0028FE04333ECC108108003F498400E244116A4411E244226A4422E244336A4430ACC8FED412C809390B9421378D4C9700012
+			C44A93C1432E7441D8284120C482344061C2510822A0C11448850A84196CECD9A510973480DB8F30C21428C11ED44234A24935F8930A2CC126789566214A18C0
+			80CF511AC8CCC39ED9411374012718C3ACA4DE3304820834DA9588050440800AA0812A8CDAE878432E44021DFC012A3CC399F88314C6021964042B48DB71F5C1
+			1028012218C3A6ADC32F24FEC210B0C00744C0E678050628E00F844237C821E000103D805B3D80A57EFCA30128C12868C30C219A3080821FF48128900D6C8443
+			2ED8810A70401A0883B6DD021D70000674412F58D93AB8E00B3C4015C402A9F9033BE8C21EC425231843F9F1827E28811DB002BA5D19AEC50227D0C10FA88017
+			B84238C0063C4C5425EC0121D893B4E1C39E798125124234445C3DC4522C8002EB310227F0C24EDEC33310020710000B108232681B15FE004EA2422FEC8229F8
+			C11540011B7CC2319C83EB484306DE20CE955F0D3E800AD0012BD0C93ED4433A44432D70C21E4CC10FDC80D2FD4254FA833C80CB2A7C822C5CC30C895E253881
+			0AE4801DDCC2373C0BEEFE2502D7E5002210C36B6AD6377C8628E04237D0A43004C20F1C4E2C1CA73F88DE2234C14018433C945AB84C01083C4019A293635980
+			06AC001070811E4082253C021C24810954801D890580748005ACC013E8C11E41C21C30410CC0D10658C057A4080548C0DDD4933558593AB0021408D42AA01E5B
+			BC4336A04215C0401878603EE803AF7842177481286883A9A04218FCC016344BC4E1C336B4908C724352564328B0412018C30CB9851DC4652434839509992D98
+			010C34012848C3A685835A6A800138408B6C4004C8A30168405A805B38D4021DE400AC18839529DC266C8113B0C1373D8B3C5CC32B98410FD04015884226DE83
+			36A00214C0C0F8154AFE62D6C21F54C114AC0E8DFA4336C04E36B28AB55E2B0B40C04711DF3DB84336D80228AC68363C2739AC421518C62878EAE86C432E64C2
+			1E24823DA5C35AD4E82F7005DEF04276EC8339B820F510C1263C8395ED9C8616E7B2CDDC6C42012738C38ED24337E0C24CFC46DE4D528A940C0C5402F1A16537
+			DC42B80AC337800C3E881E8C8AC014A46B66CDC335D80225BC6B2A40C33A805B3A789A0A1C8070A4C655659506ECA119D28B1AEE8B1C59092BC1E107D6037704
+			0943E0610A1C6DCF5EDF1F36890546092162C9676989E929A2367C91F2C55C9CD2C116A0411A742D1AB081A3B6699DB8C3338402275A837680C32A4C41281E4F
+			2E2482176C2DD8A2FEC1D726022B40838141432C76E60F60011B289882C9811CA4C116DCC00370405A04A33F600323A880019CA21E06470ED0812B70033CF04A
+			2D60668DC28C3A55961E628005D040136C42DBCD612510022AA0AD3F8CA3B49863CBB8032CD24120D8C274796B2A78C1781A1B5BB9110CFCD9A649431F546340
+			3E24F116AFF11E2FF226AFF22E2FF336AFF3CE48444EE40CA9C32B5CE45121D9EC04822FA00394E4821724000180C0156412CCD5A83020C210A4C00848C001A8
+			4022D81E5B544A1A2801578A225B7C432DECC11234C11EF0A63B70510BEE817A468233AC503C64432AC4CC1030C2B0B2C341D94115400121E0C24EFA03379C42
+			1358808D780A64FE3D4002EC002114D8B3345B2C08F0FB9141EA0A1D3E645822FCC014C48205968328FCC0516C812D485B39C4C216CCE3A96E0E59448047FDC0
+			28549AA1C80FB8DD1E36B8821DFC8003604018DC305B48612E54C40C700050E6206C2A43242CCA6786261D584069F282051AAC083C0016E4C20C898328DC80B1
+			75012E481B39B082F52605A0D5C337F0824DAA00038C80F259A03B60032BD8011160D515A00264965A77C0000C100234C0863B60532478C1104CF210B404F169
+			833FF5C0148402BB1C0A27FC800458C00F34011AD4411A7401145C011D70822F78C3BC7AC30C43009980DE39B08212108002DC9C31B0833ED443380843246C01
+			F55000082C09FEFEB1C53D6C432C4C2AEDC40237FC2F3CA8161918251DACA33CE8C33ABC63573884F4CD8335240A12380121ECC238C0433EB8434F36410EB041
+			2ECC4A3D6C832A5CE40374C12E9C6537F0D9FA4A80A71889945A4009C8C013C081E335022080810F680094B2088068800900411E61022628C21900810650291C
+			694060A5C85714D61F08C3A6B943F26C4120C09505B6CB3AE44254F471EA69832BAC650E24823258D936D44222B00122DC0211EB5CD134416DE29B3CB42A1D0C
+			410736996E6D021DECC19C5C2A84764713245BC7BEE2262CC1072080E6A808803C8002A8AA31805BA249C7168802FCC6862F20028EB2012AC4900745D5171906
+			CD584B3D64FEC3285481123199CB64432C34EB122CD112DEAFA5288119FC012354C2266C022770422504021A8072EF86F53A48832AB0811220411DB04236F871
+			2FD8C1150482DE68073D88432DD8C10D8CC00D204ECD20B33538420EDC5F76DC1A2FD4DC06204125809E0C2F010CD041AE008E3684C20F1863F7B5433E1C70A2
+			DC4004CCCBE189456051ACC5C206DBB0021D28411530822F7C837628252720416DE7C287A265F4D8410F8C400EA4012A384393DDC3A9C040806DC05890857173
+			4ECED2C8CEF22C11B2928E042D39F4C21EA80055BB08464396FA22890620411FD842206AD620D204D4820568991E367C493638C61E38036C989A30ECC22FFC02
+			0FB61B31FEE0C56B92AD28184297684738AC6DDBC2A6D1F9022FF8028AA3B830344313711A346CC2B94ECB28C4422EE4C22D50B8AE558242A840F7E9035B30AE
+			E326806309C7B4B8C274AD4334F882329C83A16C03FD61C05189C50660C00780801250423390DA8175B829A8EE386E4139B28C663D43B6D04178FBF69D24CA0F
+			F4C00DE4C00F100114F8C12E20563D18031D88EAF03EAF9EEF399FF7B99FFF39A007BAA0F3D88FF94193CC90C858EF35A2CCB0F84254C2432F6CC17BDDC4EAC0
+			DCADF1AB0727800280C0FB9ACA2AD041662B1B6C14E82DB842FA494338F87133901E7115B03F1C7002FF649FE61BF4448330D4822BE4820FDE2F15C28006848D
+			0640D6FEAC05C12658C35AE0833724CB86A9D80FF4014E5FB33C4843D534C1299C434FDDC21E28C11670C2333CC93D7483280C814751696A1C9E47E5C0109360
+			379844F8D806B05D9937D4025CE6882F64DC8B0E01072C400144001AB433A791F9126C2568BAED174780178871E875870B74C014B082CD7C2C2E484717800234
+			3C093E7043280CC1722D32543A5DF498B003DC9C33CCAB7D718506181908F481319C25B8E81E0CFCC179F94338E0264E054770B46433A4B12E44C21E44022F78
+			834C695D1FC42C02BC40DFF6BC29C4422DFC02729C03B8A9F1103C400EA450D8A5832B2C4173811931A4833EDCC31DC3E3C93B40F6F202933B9D31D881061080
+			D844FE823194434F09031EFCCCCF79C33CEC43367FD206FC8021ACBCCBE4021AA8530A5C0128684D3EE003A85E4A5271C3D384832F38C2D682C233E45B363C5F
+			A66C708A64D5584492090881180042233C421FFD51201169DE598009F88015CCC121588224F08116E0401D5980CD8EC524DEEC35367CD6D90FBC3A83CD1471CE
+			344320544171217333C00E0288D2617950391CC384AA8226F9B8CBE642208C649065D8FDA800147032885A43768E022F6C43CC7D89382D67BABA033EC04336B0
+			4268004746C908041C8056BF72096FC11EB882B3081936F8822BC4822F3C4337841D40D0B3260A8A8A2A9F9AB5F3572F5BA82643124593E7CF1FBC70D28AD562
+			55FE0B5A3A8AFEC8C50AF44795B16ADCBC7503374E9BB1556C54DC4864ED23B75874727C80A0A28E3085FEDE098BF46794B172F4EEA53316690802021B7ED889
+			C5EDA3B6483F60D8E115AE9EBF74BEECC0C030A492327814CB895A02620B2B6DF2E479ABD5E78A9C54D8E60185066A8B8A070E368CF8602182050B1B12288051
+			295BCD586C60586031E593B389FECAA172F22390B174F8F0A53BB6E8C781021B86ECA9B5AD26A71B0610041E21F8C3EC0FB771E7D6FDE1DF6EDFBB47A438BC81
+			C38F3CB7C87DA457AE979D17061204B6304243F511D33138D08084502D6E792B36ABD44485060C1B6E634820A1C9286CF9FC6563B4A44FB48FF5E0B98B078F7F
+			FE7F78F2F0F9889D66403124946ABAFA669529C8D286A27AE691079EFDF87387BF79EE115019A6545022125EA4C9469B11B9C9469958F6B84105398CF9C81A46
+			5450E001C3227800831FE870651B78D891C697663C62C814283638E081DA36908002168688441976FC71A799510239C59AAEC461050B1C7959A7A26738B98288
+			3C7029872278BC49C6165656312515577691E6B328B551058B0F1080E0B73DF9ECD3CF3F010D54D041092DD4D043114D54D145196DD4D147218D54D24929ADD4
+			D24B31CD54D34D39EDD4D34F71CBEE8321FEA8451BF0D6716589030CB091B82102D1C5A38A7AD9C28001244022915EB8DAA79C5FF650018161090061A68FB0FE
+			39C50E363611C6CC07DD61A79D76E2015040630821A2C966CE7227D9290C72251D7D28BA474277DA49879DCB28FA86952ECADB00BD111033E08751BC79301B54
+			D080E101021050018D55AC7167A16A2851A2C968DEC9A71E72AA69A6196EA0ACA79C6212C9A101042CF8A03ADC8A54E0DE7CFDC1871B5C22A9830C360261A519
+			2FFDA1271B56F640231263CEF22A962D3660C0A906A658859BAEDAD96B098185E90AA45CE86061032F78C9391D61FA5021822138A9869D7BE621C71A659CE946
+			A187890904060104508190623C9AC71B5BECC8A1632844698CA26E46516263030418818D5B9E552A11ACFE68A62656FA7D00019F0DF8000D59BE01701D68FE62
+			49A51639F1D3861532383820852922B9E5996CBE49A79D772C54DA9F70501902821C1851C660AF5C71A280B40321E61C7FEE0147974086C0C080053820D597DD
+			FD9147982E14002001EE76F9866861F6C8E1063A6CF126AF768C092487087248C4989FDA89C509010078C04361CE09B09C5A201B8211CFF023279B66A4D9E61D
+			8ADC31660F1A1200010C5080021BD0406DAE63810A5860054FB803242CF1083E7041082BD080616663810E5820064C8043211EF18842C081093150E0740E6898
+			E9780C038BFB0127A4311178442316AC300639E4612E77B8A31EFBD8862B22110B7150441EC5A00306048001CABC0C3FDE30862E88518D75DC831EA7ABFE473B
+			94E1A667E48C1CB6A0830A3EF00343382B42E770862F78D10C7244685AF510082B46C1BE00B1E318F329CF793680010948E03C1AA0C0013450076304C81FDE78
+			C51ED810895E744369F869C73ADAE10E79A80E1ED2E0841254E0044E3CA362D900851294C0096FC06721F3C8CF23DB91338A84836688D045E43EF2117294CD7A
+			84B00F45B2910A783D4000075882B828F28E62708211AE2898B96C2207151880003BD98228AC41486E54022B5AE10A66A877030B0C2113DC428B2996B0CD6EBA
+			031FEE0887359A618D6FCC8E1CB590430E46F08007A00703F58C80BC16A0001544C26EF131C5145830A32699052D9A41C226AC311179D8E48BCCDC89FE174E81
+			8D8F78C335B0E998C7AA7340DCD0864FBD215402EFC9821FEC2117C929D73A945109254820010B7080043640817ACA2B4909B8916AB4418F3389873CE641CF07
+			D4C31EF7C0473EF481C647CCA98D6D6CA31B4DEDC6529FCA0D6D58A318AA08041E4C918D042DA841674A0738B8B10D6FA4A41B63F5C636B82155639C820E3700
+			416A50718B5E0883AEC510462C3E81061580800E2DA2C88B6234230DCE1347AED0063CDA210D61002966DC58C5153070003D6920491B6052ECA0C48E647CA24A
+			D8C0122BB6C0252FC9C3924DB8011958F18D92E1275AE92A4739D2E18E79D4C39CCA60EB0F2C602350ED96B7BDF5ED6F811B5CE10E97B8C535EE71FE919B5CE5
+			2EF751A2C2112BB27199F25D21010748006C46308431FE641EBDF0C2AD30A0845D5DB31CBBB0C3320DC04C63D18422D820851DE8C089623CAB22E450EA88B491
+			0DFD36C3179CD8020C9050896874EB5B2AB8422C66850F78A4E31B525D6A7EF56B8D5BF881082934CC072850DD7BA97621D95845BF1CD04B81A9221B0623ED27
+			40190968B4A31E109AC78BE5E18E7464A31689A8820AF498511DFFF1003F0805381E64C92568E000023080124E4115DE95C318A3D843248A31BB74EC2C0208B8
+			15D058C1487FB4231A9F449AD2C8718BA67D006A52FB451F6EC0822670C2192C76318C658C0D5B04A2092C48EF0D72A78E7DCCE31BB9D8C30F82FE530554F413
+			6F7A63E6002CF0B7C01983113FB8C11F9C71B87E11A6A61F50C226E8178F713C4319D2C0E1C37A912D0EA8A00BA7A8C659687B0E6F70A31BE5700729BF310AD7
+			FDC04952738512043000180442185EAA87376EF1670810200129F8C11F78312BE59121010290801208D10BE979451876B8C1F56AA1BD2D1B2363E043C4F88259
+			0B282840001650022574570F7C84840C00BE19395A2CA11CCA831DE7D08630548A1898D2F4362A344C087C0006416002138A20610C4270C1E95CA7021F904116
+			F800C143CCC10A3E3081062F3A180CDE66030878C00DFAC00B78CB431CD0800638E0518F779063A9EA90473BBE668D76E0E361B1B8C2029C1DFE95589CAABEF9
+			25077FC6610D6D9C8E1BCA80C6B37C98B73DC2A00BA870863BF67C8E6D60C31BEB3A8735AC510E788883D3DE50DA396CA1577E8F800365A78E061C00483B0CF2
+			6EAEF8432277D18D0C25AF1CF9DDC688F49B0DC59E820D37A0C11440018D4E8262094B0005C9F0218F7584A31BF8853036B2918B3E40210DAB780638D291F9CC
+			93C319AC80090C12218DAAAC820C2A6800C0A0100B9805A512896045C114DC8D9BA88000027000A9072D4D6A66652B192A8730FC708351753367E740C512B28B
+			10724668B68E943A2F123104F3CC540365E700C7F3B9CF7E66C3145B0081613C445090E42D94094D9EECBF4800023C40056138453648C90DFED71C80631F3060
+			46E5751B8EEEC9A3834AE08C448AA44CEA41C8C1171C410958C00102A89EEA49A6F488016ECA542E031E78EA8E7E2AA8DAE33DE2231294600F94A15CAC0115EA
+			400DE8600F4C700FFCC00E54900EE8800CB6A00994800D54611BB0E4B12E8D2AF0A11B6E2112E8800DEC600FF22008F76005E9400EC840096EA0EC54E0079A60
+			0BBC200CC8000DC8C00BAE400968E00152C00E92C14518010414203A3EA046C0470EDC02B17C84B1F2211D6AC10B840702320A033EE0B29A811DD2D01838A1B3
+			3EEB0A442B3C38010B9A20107CA11CF0A31CC0411CDA013C58CB1CB6C1185281108EE63A2280B924711229B1122DF11231311335711339FEB1133D515136404F
+			60E00A40618BF8876A6E000212006054E0999E6176E4A117C200010460039480118401DE30A317F220460CE0008AE558704915E8000D186117868822B88115EC
+			A00CDE8005D9000DD0200C188405462094062C4AB2E114FA620944A11B02641EC0C1184C21117A101AA5110DAAE007AE2F812CC08F1220015E081BF6C11FF6E1
+			1B7681108640027A290748EA1BE6211FD8E11936610BD020B55A8C1DC8E11BC0A11BB8C11A840115FA8E5EE4450338AA3A32CC5EF0E5419C21DF0A000006E085
+			B4AA64D6614AE820107A6176DA411808E10722E05620000D7261E6B6CC1950ECCBD042CC38E06978E132D2A117FA002BD8A016B8E28AFECAE11BC64A1B7C24AF
+			6E001E1300CF8C011D16421C7681C2344002866013440F2D6A810E6040026ACF023CF032980C111C8D109E61F4C8E00628323BA0020F760E1EF0611ED2811CD2
+			611E12AF1A3EA109520004AAA0147FA2245981119ECC549426D666ADD628221D6AE77660606D7C0DD8FE4C021480786025D928621E8481D99208DA7861DA7ED2
+			DAB04DDBB8C77B2C2007BE6D7FFC811D6AE10A8A6C049A201272F11EF4411C64C10B72000D62211C00841DBC411BBCA11CBAA1196C2113D8000938000320003D
+			3E46FF2E2C043AA80D0E01132C0110B8000738608366E380AE230480400C0EC11230A110C4A08214EEC2F4CF630CE803E48906D000FE15A481C55EEE1055AE1B
+			9441188C411B78283FE0816BCEA1192EC9010C400254000A36A1192E83B6A8A51E94C21578C1EB5EEE1D948602CD66788A831084C123F64141650BE6622116AA
+			4192A22541B541D6E429305EE00694A00918E4065EC00108C002ECE018EAD11F646F0FC28010768E94C80117FCA00C48B007A3310CAE000954C00268000B1042
+			21EE211BD4820822811ABAE261946115CC910DD0110DCCA00972000686200D182114568115C894154E8111DA2D601881BD6CD49D6E00033E6E6D54D21712C10E
+			444119D2A1C5B8871172A0F62460A4B2ED23B2E12A6EC00E7C411799C30F76602C2AC19B40422D6E400EB20D2ECE4125CA611CB2FEC118F08A0E862005F8A83A
+			967009AEA00A8600065820010A40FB041515FA62035220FC722633148611E6301FF0614F83E0761E60A4B247503721080E80010243A3B6B339FDA4FF04453092
+			C430A2221790E73EC8411954E10FAAC0ADAA8F05CA0E044060275900DA6C811B26B002A7EF8082AA0A42C11A888A03E9A018BAE21E8C810EF851001480FEE231
+			0118E700F07527C26006BB621C6C9013BAA164B441147E007D080036EAD5CA7ED1BAE42954E4690120D6011CC0A520C02946C003B950050E6001AAA3E33ECE0E
+			6A011CE8211D4E84184C4A1E7C010D228000B4C38F204002FE6E1442741EA83212F620A2B64A0FE5A04BC2E3137C5015429441FE21721776013F8DC1176E2116
+			546113FCA02024C001F4E413A5766AA9B66AADF66AB1366BB5766BB9B64FE050037E404E1F441B728111BA60087A4009E8601494E19AEAE11C6C0E553720364D
+			36408AC613AE20087240057622F4468F0D96800C031697504C8F5C95067E60081CCD023C4E0940611AE2411B1F4B05A0F41926A21EBE4128A000040488055420
+			077E002B5840E316CE3CE21176642798B4A11608C109662008C8B0C496EC17D014430DA61ED8E17E8C61777B611508E1C620006A29C0222FAC6319402381CC1E
+			B38118952074AB8011788594CE811810A109D820167E821EB8A11722010B728006A0C013AE8422D6A17B7A8005D02069D002FE17E82039BBA02717B32AB5A533
+			CE222974777773E114E84C059E765EA1D2D7F0315B304001402010944169DC211B628110A0C0EFBC4015940C246C0126D4E6A8949115D2A02919908F4060099C
+			6476680E8189C10E2CC0005E800E6A411C32841E64AFEF60E0204772754C94D6C48F3195C03131341DF221299A4115F600935400069400D990473399AD00C28B
+			103EB32B42F3DA24B51BF2821DBA476E50D318549335AB806F6013CACEE11EF6211C5A21B4FE401902041FCE411A8CC1E48CC1163E810E9C4005F2080EF7AFDF
+			DE710584000CF44011244111E6800956A00316C83AB6B383E2A011A8930FA42006DCB1630EE86328AB3AF688059620DAC2FE219616225A63E11462E1652C3981
+			63C10E7E409E6C242B8461764A061FEE211E92251064B64629221FF86C8253E00B212005DA62007927F1BAA1C6A04C951E041DB80D06D2CB026E600AFEE0135A
+			E115F457091E60001E604649691C3EB909D0E0FD3E4241AE209E2C200596507193F06555E00B4621213A4C2D74C00FACB864CEC10EFBE265B9F90642D754B7F9
+			738740099CA0F04029098BEC0518A19FD6A11A68A60AB6007AB5CD2BBC680A7665DAF2211C826D08680009F68015AA4121122F19FEE0DAF6401774F127F3402C
+			C842FCC8211414261238093FCE091A38AD18628113E840095E409441E007BC201150A18646019469515529421B56C10BFE54607861B5A096A050450E3EF0E11B
+			6AC10F8280063AD015B081A2E541191261078C2430E8F8EC8CB5A30AA56331A03060800DB28C90EE031EC8411A6A2112D8A00AAEA00BD8BA0BB6600BA6600BFA
+			A028BE41A7C2633C402049E010A8D6C31BD1D51FAC4209BA00C13A6C14AAA0E3E6D5BA1860B1EB351E09D40C663040C62115AE802C94AC1D5A13E7D20B01E2D1
+			678685015AEA6541460282176A21E0B4E5A9010CE0623FF0AF1241636D2A493CAE49C6E71ECAE1163841151CA4649A21105251492840154725110E751EDCC11A
+			56C104232A43BC6115424B0E7AC14BA4C467FF00BA78281DA20117448111E4000DFC506186606F931302E6C963BAF6FEBCD13BBDD57BBDD9BBBDDDFBBD2B3114
+			6D391606F06DA5C11646E1134EC117F4B32BBA662986005529C00918C117C2214092021A58C11318A15F766D2B011B7174207CFDB91958C11CD1800E16E114E0
+			E80F94E03094C013A841863CAC0B604007F66017C2212FE6E11CAA9410A4D10E1C01144EE113EC6008B43905A8238F1EA00160800E76CE6060591C8C011522C1
+			136A21BAF8071A52410EAE207766C722B2C1E4A041197481152AA1A5394049B23A0CAD6CC33E221C5C8213F49B17AC214FCFA41A54E10B60A009BE919418D4C2
+			C93C163AE223BA61159A000122800DD80E3376A17D25E07D7DB22A41497C7286ACF54E1A9AC1186E61152A410E94FE8003EE4C7C00381F8347001E000D6E6156
+			FC81661971133EA116AA4135F3C11A38A134388010D874193378040C174E218005C2C016383D96C2C115A6800104800580BCA095A212D8E00F5C211BA08422C4
+			C144734031FD611D6201D7D2660F7A411C744AE5EECDC9B6C00986D8591FA418D260010AE0D902612B98182CAE0D85BD6E35A7182AC46776DCA116B278005220
+			368DA17DF6811C6421B4D09290CC291BB02E1A8C81175801AD874005A80337164EE3344006A2600E0EE11114618280E0E23A2005CA4E383E60058A000CF8E011
+			2CC1E092C0042A60811839A3AEE336B85A035A111576FB23E6811B78E10EE5ABD6D17D13C0A546144702B62016FE9E3533C98117F6600A02C17062C9B6EDB00A
+			4680011410017EE013B4815C3E2229526A0BE800174C9922600E83D14B049A801178411BD8811DD6A118ECE001D2870E5ADB1FC4A1164059091CA119E6CE9379
+			30C3136114CC94CE925305B060149CA16206160A82800C62A11B2E371D2C3C11A4910E12811344C113FAE0C36D44035220F22B1E129DC205F8E923126F1C8C81
+			15E81CCD79A7449B0006BC806072A61EBAA1C833E11372E1B0E0C31DEA84CD7FA00F72B12BCE817A708C2C2C9722C8611496802CE6F01EEE21A9ACA11AA42119
+			726114FE600B84CF0260600B3EC118BE615ACA2116B0C0000080032E7FA77BFAA739C009CA426A56E168B660FE1594BCD34F1F152A2114565F1E5A5F73D24005
+			12E048CCBB5833EA4F9035503A36FF3800A259C11978D39201C25FBD73D284D5AA756B97C25CB76AE512E6CC1BBB7BFEFCC16B96A9C98B0D12307CB080218184
+			2AA1ACE5F3A7ADD21025A0B2C9CBC7CED9A82F2A10142040C080CE041F38B0D0F041459855DBF0F903B7EA0A9244D2EAF9CB676DD4141A0F0C1050A0E0800191
+			2C40B018810183050B233468D8A06184DA11163E3C5030628FB28AFEACF9811040C04D050B6EECC9F5CDE8B7557410197357911CAF4043341C2870C0C18F3DB5
+			BCCDF3974E18A32D6C5465733A784B0E36BDD2596CC6A9CB1646BCBEC98317CE9AB15BAB3821B283668A92FE1C1C243C40D000ED880FC48B1B3F8E3CB9F2E5CC
+			9B3B7F0E3DBAF4E9D4AB5BBF8E3DBBF6EDDCBB7BFF0E3EBCF8F1E4CB9B3F8F3EBDFAF5ECDBBBCFBEE181841F817C85934737DF3A6FDCC221AE984F38C244D284
+			0A0E20B0C10D6CACA28D5115C5330E34B720F2C30D815843D737B2A0A1020C69C4020E7E02A5A3CD33CA38B3CD39ED70630B1D2A7CA08428D954740F37AEB071
+			03084A30224C3974D5438E35CD34238D36E404C90A191C30F0805A66C5F7000B43F8110B374E55E4CE37D96853CE95F264C34A1A37DC40C72DEBD0750F3CEFAC
+			990E38DA14340A1A3F70F001061B7CB0D6065AFD300A3968EEA7CD36E488E80F3EEB58B30A1B34440003FE1DB57443E83CE568C34D3A97F9330F39BAEC018200
+			0FD0315745ED0863070718A0210C5DEE0813488574E4726645F5C0E38E3BEDA4F38D36D608030A192F3C904322CAC053513ABF24A24404033C304422C2904351
+			45B069D3CD3A57BAB38D2B68289B0223DAD0154E2C38A68081041B6C800102090C310A3727D16591349C0C6140011C5CF14933FFF9439031D29CB30FBCE9AC32
+			04043F54F2CCBBEED4A20401027080062AD610ABAA36B56C360521C2B04397316C242000064A2022CC39581AB3C79874F0E2A33FF22893C80F18FC10893257CE
+			93CB14060C90C2149B28D34E45EBD482460E7408D38E53F8E4538F3CEEB0930E39DD58C3CB276C0C01FE020512E0A9D6471568E0831885486249216D30114308
+			6395C5D6D7385871C7218F28A2071740945041056DA165D6716501850104393022CDBB7465B30A1A4AB0618BC9F0B6930B1D308C806E550C0C21E39515C9A3CD
+			2A5BFC7034C5747953CB1E438C205F0206A8104832FB56144EE43F6CC14ACB74A5634C2450706000022AA0B14A36D1FAD34D241800B0C01ECDDCAE8B1D37D0E0
+			852ADAFC97CF8ACF0CC9253BDFF042C80F1AA8B0C528D588E80D2B578070831F80A1594E36CA28F34C36DFB44F0B1D2F20F0C0B912ECCF7F041620B0BA4A8C03
+			5E0F2A473AE8911F72E4C20E3090000CE4108B6D100A1EE408543A1C340F6DB0820D3DE040B38A61FE1A7FB8036530C0C01038210DBAACE3144EB8811D7A118E
+			4BE5631EF0A0153B82648C5C70020B2AF85D2CBC01AF66B0C10000E0C026BA313A5670A8274AE0C433A2E58E582CC1012FA043040905214A8510531AA4C30F52
+			F0008FACE5036629E3709CF38FEBDCE90368E1800A94D0075758231DF570D08F5E53C33CEA511EF3A887E12E92092580203EFEB3C06F24D08451CCC81FDBE0C4
+			0F6850267150C41DCE38051D86D0430E8000042AC8C114D0E085DDFC007845F107395CB1851BA02116DF700A3BA4A18A404CE1062AD864877ED00434AC010B39
+			484121FF9696B18C85380E30C007E472B84AE400023DE1000CAA90885B74C328FB904624AA10BEFE6A042D1FE948C627B6A00267560111B9B05245B2218A2E8C
+			5215DB38C93858211AD2044D1ED6E04481A0000A6910AB69EFB8553AC2A18D660823169CA803146E2002CABD67A10C6DA8431F0AD1884A74A214ADA8452F8AD1
+			8C6A74A312DD9F07EDE00A6CB8C328F9B8073DE8510F3FDE035BB940C41052B081083C200223F881C6CA810FA3E0831EDDD045AB60A0BC7ADC031F9D0B830A2C
+			60B45754E31D29ADC73CF0C8C77978435C2FB0801236018D77DCA31D88C2D10398C5A3FB30AD697994873C0E958A2E70007FC4292371EE94033BD4421BF158DA
+			3D9AD6C794A603516980C10258C0865B84101F34AC953BE011557654E31576F8815B30004C0AFE24E00039D88435528A0FA7BE868F42C5C73BB8210C4E780106
+			0E780052D9C00A91E6F4AEF4C86B3DDE918D58FC610812288004D8608CCE86E31674E0C006B6900B77DCE31EE5C8C51E72000336D4C264392D6CAD103B8F79B4
+			A31A4A84410EF6F08B2EC9A31BB760CCFFA234995A70831EF9C84766E5D1D47BB0A319A760430E1A3000163025A7444DDC0DC82581272520013720C42FC4218F
+			A1E2831DB1B5430E1C70000D04810EACC8063C52EADC5AC923A7F5F0C6287E301F461C66A8E56085121450000D0C8132DC988783EAD10E6350020B4DE8432DA0
+			952661A0E101215302216EE18D0097A317924BAE78E1718F7414C3103988808584B18EE1AEFE23163A13C008AA1089FFA2D41BAE08C30F941B437FDC8386B4AA
+			6154D7115B3904C1010EE0DB70C6628224C0E11196C0041FB2E083107C64981FE840054A5084361CC2128F00C4199210030D74A00316706B5BD3B216B5542505
+			6CC80539EA38DC771823113778C00F3EA18DA6A6941BA748D6D6D8880007E4A00FB8E0C63BF0315C72E40E9353F08C7087EB8E668462B486C4800312F0BB5548
+			031D751CB03446C1C321D48C8EA8AE87365CE1450DEC177CA050C616A541080A04000272C8ED70BF110BC9690006116B06AF210CD5E892C31784C8C10898EDEC
+			A6216E0BFFBBC11F72D18D789494AC5E96073BB4118B34802001A63DCEB9EE54151530C2FE1A14E63262FD58A87B7CC3A74AE04002446D875860831D90766A1F
+			51ED8E6CB8220D2A68921202918B1CDF43530CA400112AA18C577F23144EF09078F1E3D43DF2F135DC3005146070055358E33FF2F0051A0C10000E4482E077C5
+			C629BCA08211B0400991384C663BBC8402140006119FF86A5BDBC7486B9C0D308880FF104D16B70AF38CCC49A375EEF46F0A3840022A80A62B94F10DD11170EE
+			74DF1C469A00820F74842DBF79401550B10DD88D220708E841220EB3396F288317B188852B1A1F8B5C14A319BC40C51EBCC06020F28B682A80642E1C07A482D4
+			C2F1B088052D6E210C6524C3157D200207C6C237E2748D8D1A808031FD000D5549A316FEAD68052B5A110B61CCB12252D5160CC027319E6FC318B160452D8451
+			8D0BFA831EE2A8051D681906577CA322E588C5E78E86987B6463144DC079E604B20E7074A31CF1F8513BBAF18C5D9C620F05DA0004D6C8D1FCEB7FFFFCEFBFFF
+			FF0F8001288003488005881E1B400114B06D5B9009AC907AD6C00DE0200EB9F20C03C5096CF00323B076C521011C60636F0781DEA00DC610273D143EC7F03EB1
+			802C22E03F37800591100BC3000DDA000EDF902B42220CAB10084A30163F5007A9200CC6E00BB1341555B101A0F309B6600C10180EE4100EDE800DCA500B9F90
+			0641803A0F404666340211E00018A04A30280CCFA00DDE100EDFB00DCE400CACB019FE2A005957A50CEF2010DF600CAE400AA4100BCAF06858320DA3B00529C0
+			005B53461AE0000BA00269700A41680CEFF30C8BB888C6800BA8100974E0046C281F1110142F187CCA900DDEF00D22380DCC570966C01B147000183005A09088
+			52A83B29605599907AAA880543B00595600C1C230F72E80AA5608778782DF2A2042AE0048C500BC6400CB550095D606E1D21014686069C700B9337869D980D02
+			C50A89500593531510B30AEF338784F08BC3F437FB030250C0080E988839340A74F08BE5A2011C304A95308C455286D5400CB9E00BC6808FAC203918905CA320
+			0C43720B31B30009F03D434007A7400CCE900DDBA00DCAB00A7630043F70059150FE0BCA20509C5005107000478806F0888FB4C00855D043530083C5600CBBD0
+			2B30B001BFC309BCF03EBEC00843D00006505369E009B8600CC2C00A81D00424A90CD6820FDF500CAB500AA8A084DBF01FC6260A44900008405373F60121F036
+			7A600996200973C0042B600184B6367566012DF00477509590700756800325A0016B03146CD4565DC33660D10011300484608E16E90B9F30051B60001C9006AB
+			808F7F491830D00058381C33F5467D600ABBC08DB15009E0C402A0230ABB908AC2200A45C302B0572E8FC90649680CCDB078E9F803160003B3580BC3C08DAA60
+			3A7402011D380469C009C398937CB801B6B505A1908AB5100953A00209D87689FEE080CD700D9C688642520CB180085550553A8207A7C00BC7600CACE08D1160
+			0096C606AFE92FDAF00D4EE80DD9F00CBA200A7980041C000118A085C3F12410F0002F805AF868108FB784DE0085CDE00BE938041C20880BE085611009BF899D
+			E4B09D02E50A91B005A485001AF08EB0790B95A09B5E9806A2F08FCD100B72F0034BC009D04047EEA00DC5B90AAB100BC61018B202334AB00475200ABD808FBC
+			10094A9000F6825ADCC80A7FD0703D910369100A88580B7D90030740000F7003FAC90AC5200DDB909D2208A002DA710DD01686A6806B294C68541D7F732E64C4
+			461C21013AB207ACD00CE4F06075C7A5AAD20C9550201AD011691101F8E304FEA0100D28C50DA070030260004DE46CF08075AEF5549B050FDE500C56C306A3A0
+			4FF5D00DB180062970002AB007AD015D4D9575278547EC000D9E70052F1216511A887C2301092607C5F00E7955A79A0A6EED100D8491810FA00157200ACD900E
+			E885A8D1155DF2C055B1D0584A7705C1835EDB800A5BA00372800B5DD20ECAB0622F680C17C439DEB90991F90CDE700E12D634AA86971CB0009F6680CF0AADD1
+			2AADD34AADD56AADD78AADD97A1D4F622705B9057B1009A0600AAB800A9CF0076130042E6001E742017CB3962CF04C755009A2700AE6FA391CC0012E68077B20
+			075DA00430C0027306AF4B40067EC009A3800AA3B0098940075B30043060FE0196A8024470057460076BF0054A7003BEB53F6201034A900689000AA7A00AA7F0
+			0988C006FF0A53C41176F6C916C3842E413104644008075BB2941008E8AA0232F501430072DF4011F2F00CF6A40016D004F9F21FF4C00DA9A02407C04C66A116
+			E8C201395005684007576B0759BB077B800764B00430402740D1166FF50129A00243D0057B9009A3C0B69C600869F0B5B097801B00035340077F801B4D7003C3
+			01034D40075B8BAE3F004DBAE00D4E010FCEC0094BB00123708ACEF01F19E439BE353B6CB00668500541A0021A30B762E14C4A80068170B0A7300A9570AE9874
+			16FAC30141B005FB6A0761F08BAF3776C561012A800455FBB7B8A1B1F6FED93778823E4D10B2233B0A8880065BD0056C40076CA0B76321023F30056BB0B529BB
+			9BE4B9B86F840688F009A3C00984D00598D4BB68B0B574304B9AFB3DCC9B067550074AA1025D71035540067260076C300573D28E3F00056CB0B570AB02BE31BB
+			48700569C006663005436090B1E02702F10C8CE0583DC080CF4217E4900A44A015A635161DA00136F00470500855590862200421500184A61664F10126000462
+			00089860098DD00647600263614664CB35C5E15677E28E042B07CFDB042EF0550A0605567BB569300539C002F98327C264012C70034D4006AC1B4A106B01534B
+			B07FBB07F81B537456C42E30045F20C596BBB11F00AF4A700572E007FE7B00BEF715A564E14C4ED0BE74A038108B9FA379B77BA03837F01318A08067FBAD9430
+			0AA2CB090CEBB010EB7548BC049C71B55ED072A8E37541B1046C90089C800AE40A0A91200750A00374726840B11649AA0118605A3FF00559AB383FB0388C800A
+			26FB079F13B068712E181001290003488006357B0AABA0B08480AE83542EF90502B8E4C368D0043DB0AEEE3805F6BB0703AA0276600C08E40FE5A01950F0039E
+			F433FF710FD1B009FF9A034A400657ABB318B00035F5C964FC059894026631B157C006EF1BBF831401523B03B01C089440B20AFB075EF0032010017682278178
+			16092876635B76DB7A16FA2C0103C98F55B007A3400CDA900EF1B0FE260D5D2BECC00E0DFD0EECF05C14A4198254277742395D3897B6600DD9200C84A00239C1
+			014EB007A8D00BD2E00DE9B0A5C4C70EE7E09FC9B00AF4D70481500BD24035046201D3391AA050910AFD60EF9226E56086D5500B84E07A756289406168641112
+			1A00059CF08FD5B07E99EA20F7200FE900D2AB4008D7C8029CFC002A300581C00AC6900DE5000FF8B00FF5E00EE4900DCC17095EB0B71ED12CBB600DD6900B89
+			F0B0515D0CD6A00C968405818063AF816F7B50053F80045D600789F009AB200CDA4031EC600CAD1216DA6AD9978DD999ADD99BCDD99DEDD9CFCA166C2401A515
+			2530B0124B50054A30041B2B01EA727F8118C25F25B34BD00443FE90033410B62CA0022E70033B104E5D29535F85C42BA1044A80044130039BCCCA6D81AF3D44
+			032E40032FA0BB670101F883012A30A150A01BB6CD825FF5698916C264413912B05F1090AF44E004555005AB6D2A0742934D4009BF2A2B5DB41220A50D97F20E
+			D0200A57A0014C12767D53461CF002CF4D03CEDD43604BDE07D0AC6BF424A3DDACCE44DC4A4004390002163098E662160AF802BC7D7CF80A149AA4023700B61B
+			F00253408B2D530F6022074360D2AE9069A2F20CA0B03B5CE102D00D02D3DD3711809E11803EA7BD040F3BC45F858501DE21B4144E2E3B767DB3166E0403C7F7
+			025F217B6794CB4111044E00054AF0032F30026E544B29C016FE5B2EE02ED0E4E124B6EB5A2E16F002A2ACDA39104E5E9E022F50E42A20DD4C2A0270DEE17432
+			1620DE433DF4136601E230404BF8FA11ACA8E71CB0E53FE007BF103485620DA680064330057FC00A3BB739D9C00941A0153435028366024570066363098A3007
+			5160031AA0372C4B682580035130078A80C282C00538F0017AA3CF69C1358926DEC6A1804C7E7C01BBCEC4D1DC1D124E94337663E43F29C049C777E373A616C8
+			DE211D5E2E8534B6E8B20147FCEC647E27C2A4DB801E4E752216304B014C9EBEAC384CCE2EE2473E1C1C0101A5E5CA116EDB99FB008349682990025CBEE7376E
+			E886C40022A1024180044B00054E40043FA0021BB0000B20FEC1671488C791E7CFCE0142BECB4A50DB3720885F459EC1F4550E10EE3730044DD00402BFB1BF81
+			00E692857ADE4355659E202EE23B6D0181500D2AD40CA8D0B057D00793AECCF7600C7F0003E359E8F6C99668CEDB7CAEF0EDC849424FEF940301072F0122C003
+			12BFDD1B0B0109F087460C4C528A808B3B7BFF0CD0B59EE1099802A0330ABC808FC5500CC240F6675F0CC3300CBF200CC2400CC7700CBD000A6930276CD49576
+			329A7FC009A090085300020FB09A1060A068B008A3E00AA8F797BF100BAB60B28140CF6E04057FB0099BB007BC64011D3B023000057D000AAEA00B88680CC370
+			0BAAF0099CC008EAF822643BF463C711DBE6B788C009A2FEC00AB1B00BA0FF0BAE500972622A1D411C5E279A4B60079CC00A929793B9C00A95B007B39402FB73
+			272AB0F9939FFCE174035B50B38C202753C009D1801F99D13D1FB0000C40666BC701E1D31415A10D52F10253FAD9EBCFFEEDEFFEEF0FFFF12FFFD5FAB265F156
+			74862E91BACAE7B2BB23E0E52F0B10113660A08061830584233E2C5C58F0A0850F234620B41001E1068C18086AE0187121C2080237741CA1A1E4060A1430AEC4
+			889021438E1219CA5CF981E5C6942937487030E2871D57D9E0F9F327AFDB3361C29A7D93E7AF5EBA67A6D2FCD0F0C0A24D8E596D6E081912C30309063FA4D4AA
+			E143560D14D23A5C49E123C4851C5752DC10B7E3400AFE101E5818B2279650A2F0BC294BEA0C5C3CA7E79449D5A1416FC895662D48D4BAD525C682184226949B
+			D260DD851C38687089F6A54DB110657A5C8839A7C681B0ED8EFE6001EFC88970310AD44931F7598C36DF960E1E11A106940E6B2B343B7CE18814136DA6942041
+			C38D3AB1BCD5231AAF9B325FC49C91A3E7349D34556C542C58507744070B2692C029D4A8D09D2C4056901ED1B2427C21B8B8A3904304698389182CF80F2D9312
+			9A4926CA38F24CA4B8DEC24CAC9A586388A2083422AB418A84BB48B5C95A2B6E2B0FD5CA6DB38124200BBA14201AE82E956A73692B86407BC9B69C4E6CC937BC
+			7AB320050E14122EB9B626B468B2101934EBB7E47AFEB3A8B8816AE288228874822C271B216A2E478D4E83C9260408B0C00E63DCE10E1F76BC69A61863A21927
+			9E7BEA71471B549478C000089074B2B6ABCC92CCC40C252A692DAE96AC0DA3B06AC4D2CB278D8C6835315FFAA7524C333DD4A44329E0C9010B5450620B34C840
+			238C2EBA20635556DF60150D58B750E286D1244B08220E54F86188217E50810585785A0003117A50A2092CBC80958C2BA058628921725021850F72DD355A155E
+			986C270720E0E086219AB842D555BBB84209257A8541DB4DDD7B74530D520041851C8670028A2BC65D768B267CFD0A0217CDDAE001825380215C2CC240C3DC25
+			908081030900C6403510EAED75DA1158D035DA14FE5298C2146DF2F1271D5FF6B84182030C5059810204D0808E5DD221AA1B56D08061843033D579679E7BF6F9
+			67A083167A68A28B36FA68A493567A69A69B76FA69A8A3967A6AAAABB6FA6AACB3D67A6BAEBBDE39B7210F1D8860B201D6F12CB42445CD450824AE4B600CC24A
+			6DA2DC5A84A05BB03EAB50A28A1E885BAD060F2D81A308C0BA1BEF913A9AD45006C52C3CE2B62556C9D30D38E82B166D8622AA1E79E4E1CE1F78B6F185922960
+			48E14BACD0364BA3EA58AF4E02BF13675021D991239BE0B0CE561C358DF406EE75D82D60E1F2CC8972AAF3CFDD113D122C4CD7A0F7146DB580C1D8088E5C82AB
+			CE321435B223B08BA493DC02E9F51AB33252BAFEB11F70C00117D337E843E4E2CE3DA6E61885BC75D014F234B38726F36C6207B586201AB1084D62231B4AC546
+			6E2320022170A18D7718AF1EF080C7E7E8C10D5E50020B3D48814624031F1314410B7098C319AC50841584806E57FA8F0980608533C0A10D6278020E4CC09998
+			60C94931811757C88601D575293621C14ADA2455910E55E939752BC8665EA2951B55E9336F9B88DF801730D170E0341519605DE0F23AB12C873970AB8EA7B017
+			1C1E7E407E9909D4F604F880B6813180CD2909E3CCF7BBD67D642700939BEA3A12C08135407D104889716C9338426568432121580234D0844F1CC31BEE9020F2
+			FC918F7668C3179CF0820A1E900009B00423FE1C11CD070AE7378278912E73810914C102393E86D27C608B08F8B0D4B34B198D6E6033CD42E2E680DBADAF6DEB
+			EB56B75E1739AB4C8F244C42D1EBDEA69581110C98B7832321CD06A6B8896504B54A4BEF86B9BE05E0ED8771A9D5727C333B84E08E8F871367EC5823A892D8A4
+			700D1064E4F8F821B07D057B15420D0416A00009288113D0680A3CA4710A360C01043032D20F08F10B99F9C31BABD8820A700644AF6554A31BE568473DFA5190
+			8654A4232569494D7A5294A6B469754CC8A14E63A42735C4349CFA9EC0C684BA2731136D35025B889678A35946E84A0E2A0EBC4C12A3C9F4F020DA1B936F5AF3
+			3C097CE007741885309C918D6C6843ABDAFEC806347C310A3B0C210500DBA606B829A699560638DA73A3EA7ADA4AD445243A7E8C543C6902019F50D5AA58DD2A
+			579DF1D5B05A008EB831AA42E0D2CBC59DE53941559C53193457AC38C8348632D271A4A7BA268D125E8BCD8A8E9E891CB82267B263045189FEF4D6C6ADE650F9
+			7C800690500754FC42197CDD6A36A2210C54D06108822DD170421003201C210942C0410A151221BA95C006C13D42117C1003138400267CF3E90E852A3DB86CCA
+			4695356D6524959BE3EEEE7B94A5EB07E0635ABACDC44439445B16E98825A32227717C5BCDEED226D9B268453A31E9D88628725F9A30E89C451AE376E3FA96B3
+			7013758F42DB44E6AA59CA6AF7398FDAFE890660D0843F9CC217CFC86A5FB3D10C5D8442B72088DF06A0531A234A67A7FD3BDD12F9692865CA059175FD12BCA8
+			ABB64CE53268DFA56E695AF9CB05908D3DEBA32631D9B380C7C4B8970A6C1D296B253F763E809E8234666A10023D8198D5BD7653DF03169000F6DC6E235961B0
+			84BB74CA7A0273C864731765FC5810D84993C8F363AF4D70E7C1B314C49F0790C00FF6508B6EC8834DD2884524D8B0852A3401596C88C42EBAF1B96C7C42091C
+			50A44A2D7D694C675AD39BE674A73DFD6950875AD4463B704DE58BD3CE6EE8B8A4552B5D695A4BB4D06552380A6A6F8DC8604175048AF055DD28E59B3F06E7B9
+			201C800111AAA03036B0410EC96603FE19AA308487516E325A56DC43DCBCB8E64C9BCC2D6528A7623CA620FE262BA3B9F171ED1C011614FB0A64A803B3D99086
+			3484E1D9A68B5BE246436EB8C4C5CC9CDD1D78A9FDC7CDCAA4AE4635E4B4437B5D03AB97A94FBC63939C049A3FED283A30A5EB8951AC604E3596431B48F710AA
+			40AA64D381D968D802116E16A66C9726042660797457F83DB4AD9CE52108814964DC256DC384C0BB04DF4B5688BA5AF1D25658E9B1BE719CEB1D02AAA5053F92
+			EA44D3A472720A6C85D5767D150BD7A9EFD0DB019CD450BB4BBFF8E6B0A51D33ECD437EB73C5C1583576C1B94C26D3B1A4BE7AA8CC41094752F002704D4159EE
+			4E3619A630041740EA8F39178E1DFEA3E41E08A9A6C771476CE289A4C5D00695673A069A617B8B7386CBFD2ECE79225B599D159E629DEE80339F4F6B59F0CAA4
+			38C2B4449B474CE3D85ED698D762620E78971871C55256EAD955EC28E9EA220E20E1CFDA684A3DCE610D63F46217B7B8852F8CA18D7604261CB6A0030CC2326A
+			EC675FFBDBE77EF7BDFF7DF0875FFC3DBBD1E5A907DAAECF2EF12826494D45631231AAD6E746AABBD84B243BB38337BEC3593A5D83D3D2AD13BC0DF027044000
+			0330C00348C0944180042024AF4B307CFB885D8A30098C35078991D389A9CED21D5DFB2E522AADF3B1116E49800448400350C0044C0038C22898E221F64335B4
+			78BFF76AC1569BA5D23B14F752FE3B6EABAFD48ABBC46ABD0913BCA2631047A929FF1A926C8335D5B3A365CAC081CB0DD86100953941053C40410A25251C3A9C
+			BBA5B483A20E38AF73121181039F3A222F1E4C3B57A30D430A42A26B2B373A11ADCBB66B7BC3FC592DDF6897D2C321FB23AFABDB1DD3EBA5084388E8D82100A4
+			A3321C439B5B9C217994A462C2D3B88B46042A0B34ADF8A3BFF4930CBAC38D0FE0890730C0139CC213544182A90B19D43568D2B6CEC8AFAB7B26A73AAE1B798E
+			99F840A97392B6CAB1A1B931002B2F9A001C34F2A3C49A2CB25B8B1AE9121D14BCF7A3AF59F2AFD582B1208CBB9E6A9C56F2C52FB1AE1BBB3A6B5C2AB173B527
+			81A6353435D4819750CA013AFE60056958877A9820776807756C07767007CFB9877488065608AC07389BF1BB477CCC477DDC477EEC477FFC479552BB08C19102
+			FB29C643A710D9BF5A3AC69ECAB7D23A2C002BB065628EE7E8AFC639271EAAC535BC2FF45223EBD10B399B26B030B110B137E880101B712BAE53B1144B0BF780
+			AB06A39D5D132A3F82918B881B9094B2211BB2EB73C11DE92E049310D24BAB56F3B96943444414AF49E918A472B8C1DB96C4891199B4BF8AF329C1FBC3D62B44
+			43929451120DB8AB3A2E9C46C5392582610F30231841F29B921CAD7CA32C2784BF78BAC3D9132AC48BA74BFC0D08443A9BEB21959494C071A9DA8089A2DA1E40
+			2C89F7F346DBA3A360A445FE449CBF843CC3ACA345D31344EA298E3C74095E6B8EB481BFADBCA39A14C281D4C6311C46417944B302B89980089C94B22EA3A76A
+			729B38DC9B08A9BF59541C0999AF5DAB2E534448E4021ACAFB99C434A222C24B987435B9BA2E89904A31E1B6D434B8BB74AB23AA3AD45A9CC5B331F85A469B33
+			C4B0A349CE50A4DF004C68A22940AA9DCA2844C7688F1BD8024660055F508668C02A6CC02AACAA0665E0855548842DB80116B0008C0248FFFC4F000D50011D50
+			022DD050D33FB5D2C3CEF3B7D3DAAFDD3431DDBBB5A632BBDC4B2F6BF4C507F93C626CBCFC139BECD4BF0865D0F273CADA1C3C8EB4CB949C1D20B4508E4445ED
+			2CCDD56ACA6572CACCC3FE4B1D91301C42A3C9EA25DDEC3A642C35CD9BC5A2FBC9FBCBC85662D013B5901CA29470CBCE49C937D4C8C846943A4A810819D9B610
+			218B6EEC3C091DCA106DABD7BB91EBE22F434CB5C00C22CD3452E1009C9FEB31C44AD046EC35551AC43295BCB49B38331B531C6D4EEB4C2A57234E31328DA5EA
+			D31753B1DB93C109A3C9E9A22E1BB44DBB4C3AB882C3D0B44B40CD4A890CAA7DEBBADE5BBCD4DBCD5F6BBBCC930BCA58B5A36A0D5CBAC5FB0B0EC31418F1B98C
+			8F58CA31350E08611CCBD3C131C544CB0B225D4DD4DBECCCB451AF8B0C36039B441CC438AF53B2A13B51D05325541C4AB6DB4AE7101E7A59822E908340B8566C
+			0D843D400325781805FE3350700D57711D57722D577325D715E280C1292D0C2DA2C0114C6755A4FAA32568C41426B995EDAA94D88B2BC9B23C6D432304CD4D2C
+			354E4AD91E4934AB9F4B8B611DBC937017019C2E1F45C52E99B8CF74233BCCC2448D3084C4D0544B08728345B503C2E1C8535AFABF84FC3ABD7CC898BCBC230C
+			55191B4F5F3B49CEA44DF57BAAFAA914BEA1D32F59A5152551BB88D9549D35C5422C8FC88D8ED12FB5D1C32565307C02AA77D238DD40BC0673CAA1B43FA0DC8A
+			87E42EC2FBCCAF7B0B3EC43DFD724E7D93BA6814982E84BFEB6C9C53AB416CABC12231CA9EDA2CB98BCCF91BCD1321D119153C4FB5A3B835D4EDAAA32D449BB7
+			F13CDAF9900A0111FEE854DA942DB5D3F84DE0A4BDCA60569F83D578EAB7A2B52309A4C0A43358C1E3ACF913DC0C55D150F55A2655DC3B0C3BFB0B56AE8529D0
+			9852DCABDBCACA0D0C700006480007F800108001DD550115D8DD14D8130470000C28CA732D5EE33D5EE44D5EE55D5EAFF93C8DADC19E7B89DA3155E97DCAF2C2
+			94D553311C0B2D7053C6DCCB57F9AA5056133AC48D381E33B79A42C4BACCB559FB46D27A225275C41DF4453E64D2B3A34E268CDED4BB3ADD43C9907DA908AD31
+			666CD95FCCAFCB841417036028C5BDED75ABF67357E18C469DC9DF076138835454C6C4B106C6DEB0D1AFE9F253B6A42FACF5B6BD81B9BFDD5E9FECB50C561B9C
+			8ADB91B52FC97BFE5600A441B5F22E140D37BF1DDABD5C35D22538B9205A1A835EB509D9C67CB527DD5AEA6CD794344EF08D43FF353B289DD28273894725DCF5
+			9A2971DBBD5855625B64DE7D64894C01632F1E63322E63333E63344E63355E63366E63377EE3C685E3EE3B20E8910D39BE633CCE633DDE633EEE633FFE63400E
+			6401755C412E64433E64444E64455E64466E64477E6448561A428E644AAE644BBE644CCE644DDE644EEE644F969A49FE64511E65522E65533E65544E65555EE5
+			510B65567E65588E65599E655AAE655BBE654376655CDE655EEE655FFE65600E66611E6690D265623E66644E66655E66666E6667C664637E66699E666AAE666B
+			BE666CCE66F14D8B666DEE666FFE66700E67711E6772AE146E2E67744E67755E67766E6777B6E4737E67799E677AAE677BBE677C0ED078CE677EEE677FFE6780
+			0E6881BE9A7D1E68833E68844E68855E68760E08003B]]>
+		</Data>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="1185"
+		DataField="eierNr"
+		GroupKeepTogether="2"
+		RepeatStyle="1"
+		BackStyle="1"
+		BackColor="8085776"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="eierNr"
+		Left="0"
+		Top="82"
+		Width="1276"
+		Height="305"
+		Text="eierNr"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-weight: bold; font-size: 11.5pt; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field8"
+		DataField="eierNavn"
+		Left="1276"
+		Top="82"
+		Width="6803"
+		Height="305"
+		Text="eierNavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-weight: bold; font-size: 11.5pt; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		Left="495"
+		Top="372"
+		Width="2693"
+		Height="283"
+		Visible="0"
+		Text="Adresse:"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="eierAdresse"
+		Left="1005"
+		Top="450"
+		Width="2145"
+		Height="285"
+		Visible="0"
+		Text="eierAdresse"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="eierAdresse2"
+		Left="2445"
+		Top="405"
+		Width="2685"
+		Height="270"
+		Visible="0"
+		Text="eierAdresse2"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="eierPostSted"
+		Left="4624"
+		Top="427"
+		Width="1842"
+		Height="284"
+		Visible="0"
+		Text="eierPostSted"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="eierPostNr"
+		Left="4215"
+		Top="457"
+		Width="709"
+		Height="284"
+		Visible="0"
+		Text="eierPostNr"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		Left="11450"
+		Top="69"
+		Width="1418"
+		Height="283"
+		Text="Måned:"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field35"
+		Left="13040"
+		Top="472"
+		Width="1418"
+		Height="284"
+		Visible="0"
+		Text="Kontonummer:"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field38"
+		DataField="eierEpost"
+		Left="7675"
+		Top="444"
+		Width="3118"
+		Height="283"
+		Visible="0"
+		Text="eierEpost"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field39"
+		DataField="eierKontoNr"
+		Left="10420"
+		Top="457"
+		Width="2693"
+		Height="284"
+		Visible="0"
+		Text="eierKontoNr"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field70"
+		DataField="UtbetalingsDato"
+		Left="7225"
+		Top="415"
+		Width="283"
+		Height="284"
+		Visible="0"
+		Text="UtbetalingsDato"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="mdAar"
+		Left="12923"
+		Top="70"
+		Width="1701"
+		Height="284"
+		Text="mdAar"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 10pt; vertical-align: top; color: rgb(255,255,255); font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="5240"
+		Top="415"
+		Width="1985"
+		Height="284"
+		Visible="0"
+		Caption="Utbetalingstidspunkt:"
+		ClassName="Normal"
+		Style="color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field85"
+		Left="45"
+		Top="825"
+		Width="1410"
+		Height="285"
+		Text="Leieobjekt"
+		ClassName="Normal"
+		Style="vertical-align: bottom; font-weight: bold; color: rgb(255,255,255); font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field86"
+		Left="2693"
+		Top="825"
+		Width="630"
+		Height="285"
+		Text="Hnr"
+		ClassName="Normal"
+		Style="vertical-align: bottom; font-weight: bold; color: rgb(255,255,255); text-align: center; font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field87"
+		Left="4352"
+		Top="825"
+		Width="1410"
+		Height="285"
+		Text="Leietaker"
+		ClassName="Normal"
+		Style="vertical-align: bottom; font-weight: bold; color: rgb(255,255,255); font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field88"
+		Left="6094"
+		Top="825"
+		Width="585"
+		Height="285"
+		Text="Leie"
+		ClassName="Normal"
+		Style="vertical-align: bottom; font-weight: bold; text-align: center; color: rgb(255,255,255); font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field89"
+		Left="7228"
+		Top="645"
+		Width="1095"
+		Height="450"
+		Text="Andre inntekter"
+		ClassName="Normal"
+		Style="vertical-align: bottom; font-weight: bold; text-align: center; color: rgb(255,255,255); font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field90"
+		Left="8504"
+		Top="630"
+		Width="1140"
+		Height="480"
+		Text="Leietaker innbetalt"
+		ClassName="Normal"
+		Style="vertical-align: bottom; font-weight: bold; text-align: right; color: rgb(255,255,255); font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field92"
+		Left="10346"
+		Top="567"
+		Width="992"
+		Height="567"
+		Text="Forv. honorar"
+		ClassName="Normal"
+		Style="vertical-align: bottom; font-weight: bold; text-align: center; color: rgb(255,255,255); font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field93"
+		Left="12184"
+		Top="567"
+		Width="992"
+		Height="567"
+		Text="Kostn.- trekk"
+		ClassName="Normal"
+		Style="vertical-align: bottom; font-weight: bold; text-align: center; color: rgb(255,255,255); font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field94"
+		Left="13606"
+		Top="709"
+		Width="992"
+		Height="425"
+		Text="Avregnet"
+		ClassName="Normal"
+		Style="vertical-align: bottom; font-weight: bold; text-align: right; color: rgb(255,255,255); font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field95"
+		Left="14740"
+		Top="850"
+		Width="1417"
+		Height="284"
+		Text="Status"
+		ClassName="Normal"
+		Style="vertical-align: bottom; font-weight: bold; color: rgb(255,255,255); font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="360"
+		DataField="Kontrakts_ID"
+		GroupKeepTogether="2"
+		BackStyle="1"
+		BackColor="16051688"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="5811"
+		Top="3260"
+		Width="9354"
+		Height="567"
+		Visible="0"
+		Caption="Kostnader tilhørende boliger uten aktiv leiekontrakt"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 11.5pt; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field18"
+		DataField="kontrakt_fra"
+		Left="0"
+		Top="1276"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="kontrakt_fra"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field19"
+		Left="0"
+		Top="992"
+		Width="2835"
+		Height="284"
+		Visible="0"
+		Text="Kontraktsperiode:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field20"
+		DataField="kontrakt_til"
+		Left="1559"
+		Top="1276"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="kontrakt_til"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		Left="1276"
+		Top="1276"
+		Width="141"
+		Height="283"
+		Visible="0"
+		Text="-"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field40"
+		Left="3685"
+		Top="3402"
+		Width="2409"
+		Height="283"
+		Visible="0"
+		Text="Leietaker:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field42"
+		Left="0"
+		Top="1701"
+		Width="3685"
+		Height="283"
+		Visible="0"
+		Text="Forvalt /Formidlingsavtalenr:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field43"
+		DataField="forvaltningsavtaleId"
+		Left="0"
+		Top="1984"
+		Width="850"
+		Height="284"
+		Visible="0"
+		Text="forvaltningsavtaleId"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field44"
+		DataField="StatusTekst"
+		Left="0"
+		Top="2835"
+		Width="4252"
+		Height="283"
+		Visible="0"
+		Text="StatusTekst"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field45"
+		Left="9638"
+		Top="2835"
+		Width="2409"
+		Height="283"
+		Visible="0"
+		Text="Boligadresse:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field49"
+		Left="3118"
+		Top="1701"
+		Width="2835"
+		Height="283"
+		Visible="0"
+		Text="Innbetalt denne perioden:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field51"
+		Left="11906"
+		Top="1984"
+		Width="2409"
+		Height="284"
+		Visible="0"
+		Text="Depositum:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field52"
+		DataField="depositum"
+		Left="1879"
+		Top="793"
+		Width="2410"
+		Height="284"
+		Visible="0"
+		Text="depositum"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field53"
+		Left="6094"
+		Top="992"
+		Width="3544"
+		Height="284"
+		Visible="0"
+		Text="Kontraktsleie / Husleie i perioden"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field54"
+		DataField="husleie"
+		Left="5811"
+		Top="45"
+		Width="1185"
+		Height="285"
+		Text="leiepris"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; text-align: right; vertical-align: middle; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field55"
+		Left="6094"
+		Top="1701"
+		Width="3260"
+		Height="283"
+		Visible="0"
+		Text="Forvaltningshonorar inkl. MVA"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field59"
+		Left="6094"
+		Top="2835"
+		Width="1843"
+		Height="283"
+		Visible="0"
+		Text="Netto utbetalt:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-weight: bold; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field66"
+		DataField="Kontrakts_ID"
+		Left="3402"
+		Top="2835"
+		Width="1842"
+		Height="283"
+		Visible="0"
+		Text="Kontrakts_ID"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field67"
+		DataField="FormidlingsNr"
+		Left="992"
+		Top="1984"
+		Width="992"
+		Height="284"
+		Visible="0"
+		Text="FormidlingsNr"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="850"
+		Top="1984"
+		Width="142"
+		Height="284"
+		Visible="0"
+		Caption="/"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field71"
+		Left="3118"
+		Top="992"
+		Width="2126"
+		Height="284"
+		Visible="0"
+		Text="Kontraktsstatus:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field72"
+		DataField="kontrakt_status"
+		Left="3118"
+		Top="1276"
+		Width="1843"
+		Height="283"
+		Visible="0"
+		Text="kontrakt_status"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field73"
+		DataField="antallkost"
+		Left="1843"
+		Top="1984"
+		Width="1275"
+		Height="284"
+		Visible="0"
+		Text="antallkost"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field74"
+		Left="0"
+		Top="2409"
+		Width="2268"
+		Height="284"
+		Visible="0"
+		Text="Avregningsmåneder"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field75"
+		DataField="avregneteManeder"
+		Left="2268"
+		Top="2409"
+		Width="7228"
+		Height="284"
+		Visible="0"
+		Text="avregneteManeder"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field111"
+		DataField="leietakerNavn"
+		Left="3543"
+		Top="45"
+		Width="2268"
+		Height="315"
+		Text="leietakerNavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; vertical-align: middle; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field112"
+		DataField="Objekt_adresse"
+		Left="0"
+		Top="45"
+		Width="2693"
+		Height="283"
+		Text="Objekt_adresse"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; vertical-align: middle; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field113"
+		DataField="betalingDenneMd"
+		Left="8362"
+		Top="45"
+		Width="1242"
+		Height="238"
+		Text="InnbetalingDennePerioden"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; text-align: right; vertical-align: middle; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field114"
+		DataField="provisjon"
+		Left="9780"
+		Top="45"
+		Width="1134"
+		Height="283"
+		Text="provisjon"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; text-align: right; vertical-align: middle; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field115"
+		DataField="forvaltningsHonorarProsent"
+		Left="10913"
+		Top="45"
+		Width="851"
+		Height="283"
+		Text="forvaltningsHonorarProsent"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; text-align: left; font-size: 11.5pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field117"
+		DataField="nettoUtbetalt"
+		Left="13323"
+		Top="45"
+		Width="1275"
+		Height="283"
+		Text="nettoUtbetalt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; text-align: right; vertical-align: middle; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field118"
+		DataField="Rom_nummer"
+		Left="2693"
+		Top="45"
+		Width="795"
+		Height="285"
+		Text="Rom_nummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; vertical-align: middle; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field119"
+		DataField="husleie"
+		Left="7660"
+		Top="1261"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="husleie"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field120"
+		DataField="inntekt"
+		Left="7087"
+		Top="45"
+		Width="1215"
+		Height="285"
+		Text="ekstraAndreInntekt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; text-align: right; vertical-align: middle; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field121"
+		DataField="StatusTekst"
+		Left="14740"
+		Top="45"
+		Width="1417"
+		Height="283"
+		Text="status"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; vertical-align: middle; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field122"
+		DataField="kostnad"
+		Left="11906"
+		Top="45"
+		Width="1134"
+		Height="283"
+		Text="EkstraKostnTrekk"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; text-align: right; vertical-align: middle; font-size: 11.5pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+
+Sub OnFormat
+	'rpt.Sections("GroupHeader2").Controls("Field18").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field19").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field20").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field21").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field40").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field41").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field42").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field43").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field44").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field45").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field46").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field67").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field49").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field50").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field51").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field52").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field53").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field54").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field55").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)			
+	'rpt.Sections("GroupHeader2").Controls("Field56").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field57").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field58").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field59").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field64").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field71").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field74").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field75").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	'rpt.Sections("GroupHeader2").Controls("Field76").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	
+	'rpt.Sections("GroupHeader2").Controls("Label9").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	
+	'rpt.Sections("GroupHeader2").Controls("Label11").Visible = (sflong(rpt.fields("Kontrakts_ID").value)=0)
+	
+	rpt.Sections("GroupHeader2").Controls("Field54").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field113").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field117").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	
+	if sflong(rpt.fields("Kontrakts_ID").value)=0 then
+		'rpt.Sections("GroupHeader2").Height=600
+		'rpt.Sections("GroupHeader2").Controls("Shape3").Height=600
+	else	
+		'rpt.Sections("GroupHeader2").Height=3255
+		'rpt.Sections("GroupHeader2").Controls("Shape3").Height=3080
+	end if
+End Sub
+
+
+Function sflong(v)
+    Dim rv
+    On Error Resume Next
+    rv = Clng(v)
+    If Err Then rv = 0
+    sflong = rv
+End Function]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="0"
+		BackStyle="1"
+		BackColor="14737632"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field6"
+		DataField="EkstraKostnad"
+		Left="127"
+		Top="640"
+		Width="5102"
+		Height="283"
+		Visible="0"
+		Text="EkstraKostnad"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="EkstraKostnadPris"
+		Left="5229"
+		Top="640"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="ekstraKostnadPris"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field63"
+		DataField="EkstraKostnadType"
+		Left="6505"
+		Top="640"
+		Width="2976"
+		Height="283"
+		Visible="0"
+		Text="EkstraKostnadType"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+	'rpt.Sections("Detail").Visible =(sflong(rpt.fields("antallkost").value)>0)	
+	
+End Sub
+Function sflong(v)
+		Dim rv
+		On Error Resume Next
+		rv = Clng(v)
+		If Err Then rv = 0
+		sflong = rv
+End Function]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+
+Sub OnFormat
+		
+		'rpt.Sections("GroupFooter2").Visible =(sflong(rpt.fields("antallkost").value)>0)	
+End Sub
+
+Function sflong(v)
+    Dim rv
+    On Error Resume Next
+    rv = Clng(v)
+    If Err Then rv = 0
+    sflong = rv
+End Function
+
+
+Sub OnAfterPrint
+
+End Sub]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="480"
+		NewPage="2"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape4"
+		Left="0"
+		Top="67"
+		Width="16299"
+		Height="425"
+		BackStyle="1"
+		BackColor="14737632"
+		LineColor="14737632"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="570"
+		Top="954"
+		Width="6236"
+		Height="284"
+		Caption="Alle spørsmål vedrørende eieravregning rettes til Bjarte Tronbøl:"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label5"
+		Left="6806"
+		Top="954"
+		Width="2835"
+		Height="284"
+		Caption="e-post: okonomi@leie-bolig.no"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label6"
+		Left="9701"
+		Top="983"
+		Width="2835"
+		Height="283"
+		Caption="tlf: 23 00 61 23"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label7"
+		Left="1545"
+		Top="1221"
+		Width="9638"
+		Height="284"
+		Caption="Vennligst ta kontakt ved endringer av eierdata, navn, tlf. e-post og/eller adresse"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field61"
+		Left="12390"
+		Top="720"
+		Width="1710"
+		Height="285"
+		Visible="0"
+		Text="Netto utbetalt:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-weight: bold; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field62"
+		Left="13323"
+		Top="180"
+		Width="1276"
+		Height="283"
+		Text="totaltNettoUtbetalt"
+		OutputFormat="#,##0.00"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="0"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-weight: bold; font-size: 11.5pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field77"
+		Left="6870"
+		Top="630"
+		Width="840"
+		Height="285"
+		Visible="0"
+		Text="Sum andre inntekter:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field78"
+		DataField="totalhusleie"
+		Left="5528"
+		Top="180"
+		Width="1500"
+		Height="285"
+		Text="totalHusleie"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field79"
+		Left="4260"
+		Top="600"
+		Width="1350"
+		Height="285"
+		Visible="0"
+		Text="Sum husleie:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field80"
+		DataField="totakEkstraAndreInnt"
+		Left="7082"
+		Top="180"
+		Width="1215"
+		Height="285"
+		Text="EkstraAndreInnt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field81"
+		Left="9990"
+		Top="705"
+		Width="1890"
+		Height="285"
+		Visible="0"
+		Text="Sum forv. honorar:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field82"
+		DataField="SumForvHonorar"
+		Left="9780"
+		Top="180"
+		Width="1134"
+		Height="283"
+		Text="provisjon"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field83"
+		Left="567"
+		Top="2551"
+		Width="2976"
+		Height="284"
+		Visible="0"
+		Text="Sum andre trekk/kostnader:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field84"
+		DataField="SumAndreTrekkKostnader"
+		Left="1242"
+		Top="646"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="SumAndreTrekkKostnader"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field99"
+		DataField="totalHusleie"
+		Left="2940"
+		Top="615"
+		Width="1559"
+		Height="283"
+		Text="totalHusleie"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field123"
+		DataField="EkstraKostnTrekk"
+		Left="11622"
+		Top="2551"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="EkstraKostnTrekk"
+		OutputFormat="#,##0.00"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field124"
+		DataField="EkstraAndreInnt"
+		Left="6945"
+		Top="2551"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="EkstraAndreInnt"
+		OutputFormat="#,##0.00"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="90"
+		Top="180"
+		Width="1890"
+		Height="255"
+		Caption="Sum:"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 11.5pt; font-family: &apos;Arial Narrow&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field125"
+		DataField="totalEkstraKostnTrekk"
+		Left="11906"
+		Top="180"
+		Width="1134"
+		Height="283"
+		Text="EkstraKostnTrekk"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="totalHusleieSomUtbetales"
+		DataField="totalHusleieSomUtbetales"
+		Left="3543"
+		Top="142"
+		Width="1843"
+		Height="283"
+		Visible="0"
+		Text="totalHusleieSomUtbetales"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+	dim sumHusleie
+	dim sumAndreInntekter
+	dim sumForvHonorar
+	dim sumAndreTrekk
+	dim sum
+
+	sumhusleie = sfcurr(rpt.Sections("GroupFooter1").Controls("totalHusleieSomUtbetales").Text)
+	sumAndreInntekter = sfcurr(rpt.Sections("GroupFooter1").Controls("Field80").Text)
+	sumForvHonorar = sfcurr(rpt.Sections("GroupFooter1").Controls("Field82").Text)
+	sumAndreTrekk = sfcurr(rpt.Sections("GroupFooter1").Controls("Field125").Text)
+
+
+	sum = sumhusleie + sumAndreInntekter + sumForvHonorar + sumAndreTrekk
+		
+	rpt.Sections("GroupFooter1").Controls("Field62").Text = FormatNumber(sum, 2, True, False, True)	
+End Sub
+
+Function sfcurr(v)
+    Dim rv
+    On Error Resume Next
+    rv = CCur(v)
+    If Err Then rv = 0
+    sfcurr = rv
+End Function]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="285"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label2"
+		Left="0"
+		Top="0"
+		Width="992"
+		Height="283"
+		Caption="Rapportdato:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= Now"
+		Left="992"
+		Top="0"
+		Width="2268"
+		Height="283"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label3"
+		Left="3540"
+		Top="0"
+		Width="1320"
+		Height="285"
+		Caption="Utskriftsansvarlig:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="User_name"
+		Left="4980"
+		Top="0"
+		Width="3090"
+		Height="285"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label8"
+		Left="8342"
+		Top="0"
+		Width="425"
+		Height="283"
+		Caption="Side:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field65"
+		DataField="= Now"
+		Left="8737"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="Side1"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="10205"
+		Top="0"
+		Width="1984"
+		Height="283"
+		Caption="* Beløp inkl. mva."
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 9pt; text-align: left; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

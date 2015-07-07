@@ -1,0 +1,608 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{4AF379A7-896B-4C95-AAD9-73E7C69BE9E7}" GUIDREP="{6E77F103-FEC6-4457-A25F-2E24C0AA946C}" 
+	LICENSE="10000000"
+	PrintWidth="9780"
+	DocumentName="Vektet resterende leietid"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[dim valg, dager, sort 
+sub onDatainitialize
+  	dim sql, omr, dato 
+	'm_data.debugg=true
+	dim order1, order2, order3, order4
+
+'Vekt synkende
+order1 = order1 & "ORDER BY (sum(tl.antall*tl.pris)/(Select sum(tl.pris*tl.antall)from c..tarifflinje tl"
+order1 = order1 & " left join e..t_arealkontrakt ak on ak.tariffnr=tl.tariffnr"
+order1 = order1 & " left join c..abonnement ab on ab.tariff=tl.tariffnr "
+order1 = order1 & " where tl.til_dato>'{FD}'"
+order1 = order1 & " and ak.kontrakt_til>'{FD}' "
+order1 = order1 & " and (case when isNumeric(tl.varenr) =1 then cast(tl.varenr as int) end) in (0101,0102,0103,0104))) desc"
+
+'Vekt stigende
+order2 = order2 & "ORDER BY (sum(tl.antall*tl.pris)/(Select sum(tl.pris*tl.antall)from c..tarifflinje tl"
+order2 = order2 & " left join e..t_arealkontrakt ak on ak.tariffnr=tl.tariffnr"
+order2 = order2 & " left join c..abonnement ab on ab.tariff=tl.tariffnr "
+order2 = order2 & " where tl.til_dato>'{FD}'"
+order2 = order2 & " and ak.kontrakt_til>'{FD}' "
+order2 = order2 & " and (case when isNumeric(tl.varenr) =1 then cast(tl.varenr as int) end) in (0101,0102,0103,0104)))"
+
+'Gjenværende vekt synkende
+order3 = " order by ((sum(tl.antall*tl.pris)/(Select sum(tl.pris*tl.antall)from c..tarifflinje tl "
+order3 = order3 & " left join e..t_arealkontrakt ak on ak.tariffnr=tl.tariffnr "
+order3 = order3 & " left join c..abonnement ab on ab.tariff=tl.tariffnr "
+order3 = order3 & " where tl.til_dato>'{FD}' "
+order3 = order3 & " and ak.kontrakt_til>'{FD}' "
+order3 = order3 & " and (case when isNumeric(tl.varenr) =1 then cast(tl.varenr as int) end) in (0101,0102,0103,0104) "
+order3 = order3 & " ))*datediff(month,'{FD}',ak.kontrakt_til)) desc "
+
+'Gjenværende vekt synkende
+order4 = " order by ((sum(tl.antall*tl.pris)/(Select sum(tl.pris*tl.antall)from c..tarifflinje tl "
+order4 = order4 & " left join e..t_arealkontrakt ak on ak.tariffnr=tl.tariffnr "
+order4 = order4 & " left join c..abonnement ab on ab.tariff=tl.tariffnr "
+order4 = order4 & " where tl.til_dato>'{FD}' "
+order4 = order4 & " and ak.kontrakt_til>'{FD}' "
+order4 = order4 & " and (case when isNumeric(tl.varenr) =1 then cast(tl.varenr as int) end) in (0101,0102,0103,0104) "
+order4 = order4 & " ))*datediff(month,'{FD}',ak.kontrakt_til)) asc "
+
+
+
+	m_data.AddInputMacro "{FD}","Fra dato","getsql(select getdate())","date"
+	m_data.AddInputMacro "{DAGER}","Løpende kontrakter:(antall dager)","90", ""
+	m_data.addwhereparam "{tildato}","Kontrakt til dato løpende kontrakter:","Vis dato ut i fra inntastede dager","1"
+	m_data.addwhereparam "{tildato}","Kontrakt til dato løpende kontrakter:","Vis utløpsdato","2"
+
+	m_data.addsortparam "{sort}","Sortering etter ","Totalsum"," order by sum(tl.antall*tl.pris) desc",""
+	m_data.addsortparam "{sort}","Sortering etter ","Gjenværende måneder"," order by datediff(month,'{FD}',(case when ak.kontrakt_til='31.12.2017' then getdate()+{DAGER} else ak.kontrakt_til END)) desc ",""
+	m_data.addsortparam "{sort}","Sortering etter ","Kontrakt til"," order by kontrakt_til desc",""
+	m_data.addsortparam "{sort}","Sortering etter ","Vekt synkende", "" & order1 ,""
+	m_data.addsortparam "{sort}","Sortering etter ","Vekt stigende", "" & order2 ,""
+	m_data.addsortparam "{sort}","Sortering etter ","Gjenværende vektet synkende", "" & order3 ,""
+	m_data.addsortparam "{sort}","Sortering etter ","Gjenværende vektet stigende", "" & order4 ,""
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	tildato = m_data.GetMacroValue("{tildato}")
+	sort = m_data.GetMacroValue("{sort}")
+
+	sql = sql & " select cn.name, ak.kundenummer, sum(tl.antall*tl.pris) totAar, "
+sql = sql & " (Select sum(tl.pris*tl.antall)from c..tarifflinje tl"
+sql = sql & " left join e..t_arealkontrakt ak on ak.tariffnr=tl.tariffnr"
+sql = sql & " left join c..abonnement ab on ab.tariff=tl.tariffnr "
+sql = sql & " where tl.til_dato>'{FD}'"
+sql = sql & " and ak.kontrakt_til>'{FD}' "
+sql = sql & " and (case when isNumeric(tl.varenr) =1 then cast(tl.varenr as int) end) in (0101,0102,0103,0104)) tot, "
+'Dersom en velger å la kontrakt til vises som utgangspunkt + antall dager:
+if tildato=1 then
+	sql = sql & "(case when ak.kontrakt_til='31.12.2017' then getdate()+{DAGER} else ak.kontrakt_til END) as kontrakt_til,"
+else
+	sql = sql & " ak.kontrakt_til,"
+end if
+sql = sql & " datediff(month,'{FD}',(case when ak.kontrakt_til='31.12.2017' then getdate()+{DAGER} else ak.kontrakt_til END)) mndIgjen,"
+sql = sql & " (sum(tl.antall*tl.pris)/(Select sum(tl.pris*tl.antall)from c..tarifflinje tl"
+sql = sql & " left join e..t_arealkontrakt ak on ak.tariffnr=tl.tariffnr"
+sql = sql & " left join c..abonnement ab on ab.tariff=tl.tariffnr "
+sql = sql & " where tl.til_dato>'{FD}'"
+sql = sql & " and ak.kontrakt_til>'{FD}' "
+sql = sql & " and (case when isNumeric(tl.varenr) =1 then cast(tl.varenr as int) end) in (0101,0102,0103,0104))) vekt,"
+sql = sql & " ((sum(tl.antall*tl.pris)/(Select sum(tl.pris*tl.antall)from c..tarifflinje tl"
+sql = sql & " left join e..t_arealkontrakt ak on ak.tariffnr=tl.tariffnr"
+sql = sql & " left join c..abonnement ab on ab.tariff=tl.tariffnr "
+sql = sql & " where tl.til_dato>'{FD}'"
+sql = sql & " and ak.kontrakt_til>'{FD}' "
+sql = sql & " and (case when isNumeric(tl.varenr) =1 then cast(tl.varenr as int) end) in (0101,0102,0103,0104)"
+sql = sql & " ))*datediff(month,'{FD}',(case when ak.kontrakt_til='31.12.2017' then getdate()+{DAGER} else ak.kontrakt_til END))) vektMedDato,"
+sql = sql & " (case when ak.kontrakt_til='31.12.2017' then '*' else '' END) lopende"
+sql = sql & " from c..tarifflinje tl"
+sql = sql & " left join e..t_arealkontrakt ak on ak.tariffnr=tl.tariffnr"
+sql = sql & " left join c..debitor d on d.kontonr=ak.kundenummer"
+sql = sql & " left join c..c_name cn on cn.id=d.nameid"
+sql = sql & " left join c..abonnement ab on ab.tariff=tl.tariffnr "
+sql = sql & " where tl.til_dato>'{FD}'"
+sql = sql & " and ak.kontrakt_til>'{FD}'"
+sql = sql & " and (case when isNumeric(tl.varenr) =1 then cast(tl.varenr as int) end) in (0101,0102,0103,0104)"
+sql = sql & " Group by ak.kundenummer, cn.name, ak.kontrakt_til"
+'sql = sql & " order by ((sum(tl.antall*tl.pris)/(Select sum(tl.pris*tl.antall)from c..tarifflinje tl"
+'sql = sql & " left join e..t_arealkontrakt ak on ak.tariffnr=tl.tariffnr"
+'sql = sql & " left join c..abonnement ab on ab.tariff=tl.tariffnr "
+'sql = sql & " where tl.til_dato>'{FD}'"
+'sql = sql & " and ak.kontrakt_til>'{FD}' "
+'sql = sql & " and (case when isNumeric(tl.varenr) =1 then cast(tl.varenr as int) end) in (0101,0102,0103,0104)"
+'sql = sql & " ))*datediff(month,'{FD}',(case when ak.kontrakt_til='31.12.2017' then getdate()+{DAGER} else ak.kontrakt_til END))) desc"
+
+     
+ 	m_data.SqlString = sql & " {sort} "
+	m_data.setupfields rpt
+  end sub
+
+Sub OnReportStart
+
+End Sub
+
+Sub OnFetchData(eof)
+	'rpt.Fields("dato").Value = rpt.Fields("dato")
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="1080"
+	RightMargin="1080"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="2130"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		DataField="*y..Bedrift.navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="283"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 14pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="= &quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="7937"
+		Top="0"
+		Width="1701"
+		Height="283"
+		Text="Sidenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= Now"
+		Left="7937"
+		Top="283"
+		Width="1701"
+		Height="284"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="User_name"
+		Left="7087"
+		Top="567"
+		Width="2551"
+		Height="283"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="0"
+		Top="0"
+		Width="5244"
+		Height="567"
+		Caption="Vektet resterende leietid"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 20pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label2"
+		Left="0"
+		Top="1843"
+		Width="1134"
+		Height="283"
+		Caption="Kundenr."
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label3"
+		Left="992"
+		Top="1843"
+		Width="2977"
+		Height="283"
+		Caption="Navn"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="6236"
+		Top="1843"
+		Width="851"
+		Height="283"
+		Caption="Vekt"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; text-align: left; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label5"
+		Left="4110"
+		Top="1843"
+		Width="1276"
+		Height="283"
+		Caption="Totalsum"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; text-align: left; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="0"
+		Y1="2126"
+		X2="9780"
+		Y2="2126"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="7087"
+		Top="1701"
+		Width="1275"
+		Height="425"
+		Caption="Gjenværende mnd"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; text-align: center; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="8362"
+		Top="1701"
+		Width="1276"
+		Height="425"
+		Caption="Gjenværende vektet"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; text-align: center; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label60"
+		Left="5102"
+		Top="1701"
+		Width="992"
+		Height="425"
+		Caption="Kontrakt til"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; text-align: center; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label61"
+		Left="0"
+		Top="992"
+		Width="7795"
+		Height="284"
+		Caption="Totalsum er netto, basert på en full årsleie."
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label62"
+		Left="0"
+		Top="1417"
+		Width="6094"
+		Height="284"
+		Caption="Løpende kontrakter er merket med * og behandles i rapporten som:"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label63"
+		Left="6378"
+		Top="1417"
+		Width="850"
+		Height="284"
+		Caption="dager."
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field33"
+		DataField="{DAGER}"
+		Left="5953"
+		Top="1417"
+		Width="567"
+		Height="284"
+		Text="antall dager"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="345"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field18"
+		DataField="vekt"
+		Left="6236"
+		Top="0"
+		Width="851"
+		Height="283"
+		Text="vekt"
+		OutputFormat="0.00%"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		DataField="mndIgjen"
+		Left="7087"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="måneder igjen"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: center; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="name"
+		Left="992"
+		Top="0"
+		Width="2977"
+		Height="283"
+		Text="Name"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field8"
+		DataField="kundenummer"
+		Left="0"
+		Top="0"
+		Width="992"
+		Height="283"
+		Text="kundenummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field22"
+		DataField="vektMedDato"
+		Left="8362"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Text="Vekting med dato"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: center; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field25"
+		DataField="totAar"
+		Left="4110"
+		Top="0"
+		Width="1276"
+		Height="283"
+		Text="totalt i året"
+		OutputFormat="#,##0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="kontrakt_til"
+		Left="5244"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="vekt"
+		OutputFormat="dd.mm.yy"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field32"
+		DataField="lopende"
+		Left="9496"
+		Top="0"
+		Width="284"
+		Height="283"
+		Text="lopende"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="15"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="465"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line3"
+		X1="0"
+		Y1="0"
+		X2="9780"
+		Y2="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="vekt"
+		Left="6094"
+		Top="0"
+		Width="851"
+		Height="283"
+		Text="vekt"
+		OutputFormat="0.00%"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: center; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="mndIgjen"
+		Left="7087"
+		Top="0"
+		Width="1275"
+		Height="425"
+		Text="Gjennomsnittlig måneder igjen"
+		OutputFormat="#,##0.00"
+		SummaryType="1"
+		SummaryFunc="1"
+		SummaryRunning="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: center; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="vektMedDato"
+		Left="8362"
+		Top="0"
+		Width="1134"
+		Height="425"
+		Text="gjennomsnittlig vekt"
+		OutputFormat="#,##0.00"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: center; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label59"
+		Left="0"
+		Top="0"
+		Width="4535"
+		Height="283"
+		Visible="0"
+		Caption="Rapport laget av: Rune Synnevåg Uni Pluss AS"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="totAar"
+		Left="3969"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="totalt i året"
+		OutputFormat="#,##0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: left; font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

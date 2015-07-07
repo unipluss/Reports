@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{F836C194-A718-4CE1-A1F0-665D6154846E}" GUIDREP="{AB777A05-B374-4836-A113-9AA2A94B083B}" 
+	LICENSE="10000000"
+	PrintWidth="10515"
+	DocumentName="Sluttoppgjør"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[' Se på detail for å sette inn verdier for enkelte av feltene ...
+	dim omr
+	dim sql
+	dim logo
+	dim skalHaLogo
+
+sub onDatainitialize
+
+	'm_data.debugg=true
+	m_data.AddInputMacro "{kontraktsID}","Kontraktsid","",""
+	
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub	
+ 'Kjører sub spørring om logo
+	logoSub
+
+
+sql = "Select distinct S.Dato, S.kundenummer, S.kontraktsid, S.Tekst, S.Belop, getdate() as today, K.Bankgiro, D.SWIFTkode as swift, D.IBANNr as iban, "
+sql = sql + " B.Navn as Bnavn, B.Adresse as Baddress, B.Adresse2 as Baddress2, B.postnr as Bpostnr, B.Poststed as Bpoststed, B.MVAnr as BMVAnr, s.type "
+sql = sql + ", (Select Name from c..c_Name where id=k.NameID) as navn "
+sql = sql + ", (Select sum(F.Totalsum-F.Innbet_Sum-F.Kreditert_Sum) from c..Faktura as F where F.kundenr=S.kundenummer AND F.status<110111) as rest"
+sql = sql + ", isNull((Select top 1 Address from c..c_Address where namelink=k.nameid order by case when mail=-1 then 1 else mail end desc),'') as Address"
+sql = sql + ", isNull((Select top 1 Address2 from c..c_Address where namelink=k.nameid order by case when mail=-1 then 1 else mail end desc),'') as Address2"
+sql = sql + ", isNull((Select top 1 postal_code from c..c_Address where namelink=k.nameid order by case when mail=-1 then 1 else mail end desc),'') as postnr"
+sql = sql + ", isNull((Select top 1 City from c..c_Address where namelink=k.nameid order by case when mail=-1 then 1 else mail end desc),'') as poststed"
+sql = sql + ", isNull((Select top 1 Country from c..c_Address where namelink=k.nameid order by case when mail=-1 then 1 else mail end desc),'') as land"
+
+sql = sql + " from y..BEDRIFT as B, "
+sql = sql + " e..t_sluttoppgjorNy as S "
+sql = sql + " left join e..t_kunde as K on k.kundenummer=s.kundenummer "
+sql = sql + " left join c..DEBITOR as D on d.kontonr=s.kundenummer "
+
+sql = sql + " WHERE S.kontraktsid = {kontraktsID} AND len(s.type) > 0  "
+'sql = sql + " GROUP BY S.dato"
+
+	
+
+
+m_data.sqlstring = sql '+ "{sort}"
+'"object:ef_printContractLib.printContract:printContract;{KF};{KT}"
+	m_data.setupfields rpt
+
+
+end sub
+
+Sub OnReportStart
+End Sub
+
+Sub OnFetchData(eof)
+ setLogo 'Setter logoen dersom den skal ha logo
+'	rpt.fields("Kundenummer").value=rpt.fields("kundenummer").value & ", " & rpt.fields("navn").value
+End Sub
+
+
+sub logoSub()
+	dim fso
+	Set fso = CreateObject("Scripting.FileSystemObject")
+	
+	if m_data.RunSubQuery("Select top 1 rapport_logo_sti, (Case when len(rapport_logo_sti)=0 then 0 else 1 end) as skalHaLogo from e..t_klientParametre","sys")>0 then
+		logo= m_data.subqueryvalue("rapport_logo_sti","sys")
+		skalHaLogo= m_data.subqueryvalue("skalHaLogo","sys")
+	else
+		logo=""
+		skalHaLogo=0
+	end if
+	
+	if not fso.FileExists(logo) then
+		logo=""
+		skalHaLogo=0
+	end if
+end sub
+
+sub setLogo()
+	if skalHaLogo=1 then
+		set rpt.Sections("PageHeader").Controls("Image1").Picture= LoadPicture(logo)
+	end if
+end sub]]></Script>
+<PageSettings	LeftMargin="500"
+	RightMargin="500"
+	TopMargin="500"
+	BottomMargin="500"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="6345"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape1"
+		Left="0"
+		Top="990"
+		Width="6945"
+		Height="3870"
+		LineWeight="3"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field93"
+		DataField="Kundenummer"
+		Left="2423"
+		Top="1186"
+		Width="1701"
+		Height="284"
+		Text="Kundenummer"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label8"
+		Left="162"
+		Top="1171"
+		Width="2268"
+		Height="284"
+		Caption="Kundenr / Customer no.: "
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field94"
+		DataField="Address"
+		Left="165"
+		Top="1740"
+		Width="6375"
+		Height="285"
+		Text="Address"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field95"
+		DataField="Address2"
+		Left="165"
+		Top="2010"
+		Width="6420"
+		Height="285"
+		Text="Address2"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field96"
+		DataField="Navn"
+		Left="165"
+		Top="1455"
+		Width="6390"
+		Height="285"
+		Text="Navn"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field97"
+		DataField="postnr"
+		Left="165"
+		Top="2295"
+		Width="870"
+		Height="285"
+		Text="Postnr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field98"
+		DataField="poststed"
+		Left="1022"
+		Top="2295"
+		Width="5244"
+		Height="284"
+		Text="poststed"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field99"
+		DataField="land"
+		Left="165"
+		Top="2580"
+		Width="6075"
+		Height="270"
+		Text="land"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field100"
+		DataField="Bankgiro"
+		Left="3103"
+		Top="4185"
+		Width="3685"
+		Height="283"
+		Text="bankkontonummer"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field101"
+		DataField="Baddress"
+		Left="12"
+		Top="300"
+		Width="3585"
+		Height="285"
+		Text="Address"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field102"
+		DataField="Baddress2"
+		Left="3600"
+		Top="300"
+		Width="3330"
+		Height="285"
+		Text="Address2"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field103"
+		DataField="Bnavn"
+		Left="12"
+		Top="15"
+		Width="6915"
+		Height="270"
+		Text="Bnavn"
+		ClassName="Normal"
+		Style="font-size: 11.5pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field104"
+		DataField="Bpostnr"
+		Left="12"
+		Top="580"
+		Width="1340"
+		Height="284"
+		Text="Postnr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field105"
+		DataField="Bpoststed"
+		Left="1350"
+		Top="585"
+		Width="3480"
+		Height="285"
+		Text="poststed"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="143"
+		Top="4515"
+		Width="585"
+		Height="285"
+		Caption="Swift:"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label14"
+		Left="2610"
+		Top="4520"
+		Width="567"
+		Height="284"
+		Caption="Iban:"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit87"
+		Left="135"
+		Top="4905"
+		Width="9930"
+		Height="570"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[23010000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C695C66305C6673323020
+			4D65726B3A205377696674206F67204962616E20676A656C646572206B756E20666F7220706572736F6E6572206D6564206574207574656E6C616E64736B206B
+			6F6E746F6E756D6D65722E205C7061720D0A4E6F746963653A20537769667420616E64204962616E206F6E6C79206170706C69657320666F7220706572736F6E
+			732077697468206120666F726569676E206163636F756E746E756D6265725C69305C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field107"
+		DataField="swift"
+		Left="852"
+		Top="4520"
+		Width="1700"
+		Height="284"
+		Text="Swift"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field108"
+		DataField="iban"
+		Left="3285"
+		Top="4515"
+		Width="3375"
+		Height="285"
+		Text="Iban"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label15"
+		Left="150"
+		Top="4200"
+		Width="2985"
+		Height="285"
+		Caption="Bankkontonr / Bankaccount no."
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="Image1"
+		Left="7654"
+		Top="283"
+		Width="2126"
+		Height="1418"
+		SizeMode="1"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label2"
+		Left="7677"
+		Top="1843"
+		Width="932"
+		Height="283"
+		Caption="Dato / Date :"
+		ClassName="Normal"
+		Style="font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field90"
+		DataField="today"
+		Left="8669"
+		Top="1843"
+		Width="1074"
+		Height="283"
+		Text="dato"
+		OutputFormat="d-mmm-yyyy"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label17"
+		Left="7087"
+		Top="2551"
+		Width="2834"
+		Height="284"
+		Visible="0"
+		Caption="Endret Oystein V. 18.03.13 "
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label18"
+		Left="30"
+		Top="5889"
+		Width="10488"
+		Height="425"
+		Caption="SLUTTOPPGJØR / FINAL SETTLEMENT"
+		ClassName="Normal"
+		Style="text-align: center; font-size: 14pt; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="330"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="283"
+		Top="0"
+		Width="1418"
+		Height="283"
+		Caption="Dato / Date"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label5"
+		Left="1770"
+		Top="0"
+		Width="2745"
+		Height="255"
+		Caption="Beskrivelse / Description"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label6"
+		Left="8744"
+		Top="0"
+		Width="1559"
+		Height="283"
+		Caption="Beløp / Amount"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line4"
+		X1="285"
+		Y1="283"
+		X2="10275"
+		Y2="283"
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="285"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field88"
+		DataField="Dato"
+		Left="283"
+		Top="0"
+		Width="1418"
+		Height="283"
+		Text="Dato"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field89"
+		DataField="Tekst"
+		Left="1770"
+		Top="0"
+		Width="6900"
+		Height="285"
+		Text="Tekst"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field91"
+		DataField="Belop"
+		Left="8744"
+		Top="0"
+		Width="1559"
+		Height="283"
+		Text="Belop"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="1350"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="285"
+		Y1="45"
+		X2="10275"
+		Y2="45"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label7"
+		Left="3870"
+		Top="135"
+		Width="4695"
+		Height="240"
+		Caption="Gjenværende depositum/ Remaining deposit"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field92"
+		DataField="Belop"
+		Left="8744"
+		Top="142"
+		Width="1559"
+		Height="283"
+		Text="sum"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="8787"
+		Y1="1134"
+		X2="10205"
+		Y2="1134"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line3"
+		X1="8787"
+		Y1="1179"
+		X2="10205"
+		Y2="1179"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="2323"
+		Top="634"
+		Width="6237"
+		Height="567"
+		Caption="Rest ubetalte faktura etter at depositum er trukket fra / Remaining unpaid invoices after deposit has been withdrawn: "
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field109"
+		DataField="rest"
+		Left="8772"
+		Top="835"
+		Width="1418"
+		Height="284"
+		Text="rest"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="60"
+	>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{4D4B2EC8-D43D-4C51-B480-6A3EE9C72EB4}" GUIDREP="{1759D56C-627E-41C3-B03B-D74B8AEAF9D1}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="15600"
+	DocumentName="Varesalg"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[Option Explicit
+Sub OnDataInitialize
+	' m_data.Debugg=true
+	dim sql, y
+
+
+	m_data.AddInputMacro "{E}","Eiernummer",""
+	m_data.AddInputMacro "{PMF}","Periode fra","getsql(select month(getdate()))"
+	m_data.AddInputMacro "{PMT}","Periode til","getsql(select month(getdate()))"
+	m_data.AddInputMacro "{PY}","År","getsql(select year(getdate()))"
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+
+    sql = " select far.fakturert, far.utbetalt, isnull(far.utbetalt,0) - (isnull(far.fakturert,0) + isnull(far.kreditert,0)) diff, far.kreditert, far.honorar, far.kontraktsid, far.eierid, far.leierid, far.permf, far.permt, far.pery, "
+	sqladd sql, " nl.name leietakernavn, ne.name eiernavn, byg.navn byggnavn, bo.rom_nummer "
+	sqladd sql, "  , case when far.permf=far.permt then convert(varchar,far.permf) else convert(varchar,far.permf) + '-' + convert(varchar,far.permt) end per "
+	SqlAdd sql, " from (select (select sum(vl.LSum) "
+	SqlAdd sql, " from c..VARELNFAKT vl join c..faktura f on f.Fakturanr=vl.Fakturanr "
+	SqlAdd sql, " where vl.dim5 = mor.kontraktsid "
+	SqlAdd sql, " and f.fakturanr in (select SupplierInvNo from y..trans where periode between mor.permf and mor.permt and omstype =0 and SupplierInvNo>0 and kontonr=mor.leierid) ) fakturert, "
+
+	SqlAdd sql, " (Select sum(lu.utbetalt) from e..t_leieformidling_eierUtbetalingLog lu "
+	SqlAdd sql, " where lu.kundenrEier=mor.eierid and month(lu.dato) between mor.permf and mor.permt and year(lu.dato)=mor.pery and lu.kontraktsid=mor.kontraktsid ) utbetalt, "
+
+	SqlAdd sql, " (Select (select  sum(tsum) from c..PostAvmerking where post1 in (Select postpost from c..FAKTURA where kundenr=mor.leierid ) "
+	SqlAdd sql, " and  post2 in ( select isnull(postpost,0) from c..FAKTURA where month(fakturadato) between mor.permf and mor.permt and year(fakturadato)=mor.pery)) "
+	SqlAdd sql, " from c..FAKTURA f join c..VARELNFAKT vl on vl.Fakturanr=f.fakturanr "
+	SqlAdd sql, " where month(f.fakturadato) between mor.permf and mor.permt and year(f.fakturadato)=mor.pery and vl.dim5=mor.kontraktsid group by vl.dim5 ) kreditert, "
+
+	SqlAdd sql, " (Select sum(ll.price) from e..t_leieformidling_fakturaLog ll "
+	SqlAdd sql, " where ll.kontraktsid=mor.kontraktsid and ll.year=mor.pery and ll.Month between mor.permf and mor.permt ) honorar "
+
+	SqlAdd sql, " , mor.kontraktsid, mor.eierid, mor.leierid, mor.permf, mor.permt, mor.pery "
+
+	'--morspørringen:
+	
+	SqlAdd sql, " from (select lr.ContractId kontraktsid, lr.OwnerId eierid, lr.TenantId leierid, {PMF} permf, {PMT} permt, {PY} pery "
+	SqlAdd sql, " from e..t_leieformidling_registrering lr where lr.OwnerId={E}) mor ) far "
+	sqladd sql, " left join e..t_kunde kl on kl.Kundenummer=far.leierid "
+	sqladd sql, " left join c..c_Name nl on nl.ID=kl.NameID "
+	sqladd sql, " left join e..t_kunde ke on ke.Kundenummer=far.eierid "
+	sqladd sql, " left join c..c_Name ne on ne.ID=ke.NameID "
+	sqladd sql, " left join e..t_kontraktsdata kd on kd.Kontrakts_ID = far.kontraktsid "
+	sqladd sql, " left join e..t_boligobjekt bo on bo.Objekt_id=kd.Objekt "
+	sqladd sql, " left join e..t_bygg byg on byg.ID = bo.Bygg_id "
+	sqladd sql, " where ( far.utbetalt>0 or far.fakturert>0 or far.kreditert>0 or far.honorar>0 ) "
+	sqladd sql, " order by byg.navn, bo.rom_nummer "
+
+	m_data.SqlString = sql
+	m_data.SetupFields rpt
+End Sub
+
+Sub SqlAdd(ByRef sql, code)
+    sql = sql & Replace(Replace(code, "\n", vbCrLf), "\t", vbTab) & vbCrLf
+End Sub
+
+Sub OnReportStart
+
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="800"
+	RightMargin="360"
+	TopMargin="720"
+	BottomMargin="360"
+	Orientation="2"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1305"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="0"
+		Top="0"
+		Width="3285"
+		Height="420"
+		Caption="Eierrapport periode"
+		ClassName="Normal"
+		Style="font-size: 18pt; color: rgb(0,0,0); background-color: rgb(255,255,255); font-family: &apos;Arial&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="=&quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="13743"
+		Top="283"
+		Width="1701"
+		Height="284"
+		Text="Sidenr"
+		SummaryType="4"
+		SummaryFunc="11"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Arial&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="=now"
+		Left="12751"
+		Top="0"
+		Width="2693"
+		Height="283"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8.5pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="eiernavn"
+		Left="0"
+		Top="510"
+		Width="5070"
+		Height="420"
+		Text="Eier"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Verdana&apos;; font-size: 11.5pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="per"
+		Left="3270"
+		Top="0"
+		Width="990"
+		Height="435"
+		Text="Per."
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: center; font-family: &apos;Arial&apos;; font-size: 18pt; vertical-align: top; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="pery"
+		Left="4395"
+		Top="0"
+		Width="1095"
+		Height="435"
+		Text="Per."
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 18pt; vertical-align: top; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="330"
+		RepeatStyle="1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="7650"
+		Top="0"
+		Width="1425"
+		Height="285"
+		Caption="Fakturert"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; text-align: right; font-family: &apos;Arial&apos;; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="15390"
+		Y1="315"
+		X2="0"
+		Y2="315"
+		LineColor="12632256"
+		LineWeight="3"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label18"
+		Left="11889"
+		Top="0"
+		Width="1418"
+		Height="283"
+		Caption="Utbetalt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; text-align: right; font-family: &apos;Arial&apos;; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label19"
+		Left="9090"
+		Top="0"
+		Width="1425"
+		Height="285"
+		Caption="Kreditert"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; text-align: right; font-family: &apos;Arial&apos;; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label20"
+		Left="10515"
+		Top="0"
+		Width="1410"
+		Height="285"
+		Caption="Honorar"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; text-align: right; font-family: &apos;Arial&apos;; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label22"
+		Left="0"
+		Top="0"
+		Width="2025"
+		Height="285"
+		Caption="Leietaker"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; text-align: left; font-family: &apos;Arial&apos;; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label23"
+		Left="3480"
+		Top="0"
+		Width="2745"
+		Height="285"
+		Caption="Bygg"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; text-align: left; font-family: &apos;Arial&apos;; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label24"
+		Left="6780"
+		Top="0"
+		Width="840"
+		Height="285"
+		Caption="Rom"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; text-align: left; font-family: &apos;Arial&apos;; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label25"
+		Left="14130"
+		Top="0"
+		Width="1230"
+		Height="285"
+		Caption="Diff"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; text-align: right; font-family: &apos;Arial&apos;; vertical-align: middle; "
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="300"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field15"
+		DataField="fakturert"
+		Left="7650"
+		Top="0"
+		Width="1425"
+		Height="285"
+		Text="Fakturert"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Arial&apos;; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field22"
+		DataField="kreditert"
+		Left="9090"
+		Top="0"
+		Width="1425"
+		Height="285"
+		Text="Kreditert"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Arial&apos;; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field23"
+		DataField="utbetalt"
+		Left="11889"
+		Top="0"
+		Width="1418"
+		Height="283"
+		Text="Utbetalt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Arial&apos;; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		DataField="honorar"
+		Left="10515"
+		Top="0"
+		Width="1410"
+		Height="285"
+		Text="Honorar"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Arial&apos;; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="leietakernavn"
+		Left="0"
+		Top="0"
+		Width="3375"
+		Height="285"
+		Text="Leietaker"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field32"
+		DataField="byggnavn"
+		Left="3480"
+		Top="0"
+		Width="3180"
+		Height="285"
+		Text="Bygg"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field33"
+		DataField="rom_nummer"
+		Left="6780"
+		Top="0"
+		Width="855"
+		Height="285"
+		Text="Rom"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		DataField="diff"
+		Left="14085"
+		Top="0"
+		Width="1305"
+		Height="285"
+		Text="diff"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Arial&apos;; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="0"
+		KeepTogether="-1"
+	>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="375"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="fakturert"
+		Left="7657"
+		Top="90"
+		Width="1417"
+		Height="283"
+		Text="Fakturert"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		SummaryGroup="Detail"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Arial&apos;; font-weight: bold; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field25"
+		DataField="utbetalt"
+		Left="11889"
+		Top="90"
+		Width="1418"
+		Height="283"
+		Text="Utbetalt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		SummaryGroup="Detail"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Arial&apos;; font-weight: bold; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="kreditert"
+		Left="9090"
+		Top="90"
+		Width="1425"
+		Height="285"
+		Text="Kreditert"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		SummaryGroup="Detail"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Arial&apos;; font-weight: bold; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="honorar"
+		Left="10515"
+		Top="90"
+		Width="1410"
+		Height="285"
+		Text="Honorar"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		SummaryGroup="Detail"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Arial&apos;; font-weight: bold; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="15375"
+		Y1="30"
+		X2="0"
+		Y2="30"
+		LineColor="12632256"
+		LineWeight="3"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field35"
+		DataField="diff"
+		Left="14085"
+		Top="90"
+		Width="1305"
+		Height="285"
+		Text="Diff"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		SummaryGroup="Detail"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Arial&apos;; font-weight: bold; font-size: 9pt; vertical-align: middle; "
+		>
+		</Control>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

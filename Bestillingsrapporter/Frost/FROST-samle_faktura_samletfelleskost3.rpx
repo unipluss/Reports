@@ -1,0 +1,4847 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{72A52889-4C8D-4DA6-BAE0-4F6FEB0281BD}" GUIDREP="{B78B8316-653C-4379-82D1-ECF93BC08639}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10215"
+	DocumentName="Faktura"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[Option Explicit
+dim logo, skalHaLogo
+dim fakturanr, bankgiro, postgiro, BankPostGiro, hoymvasats, lavmvasats, factbankgiro,IBAN,SWIFT
+dim bednavn, bedadr1, bedadr2, bedpostnr, bedpoststed, OcrAvtale, MVAnr, Landkode, Url, MailAdr
+dim factnavn, factadr1, factadr2, factpostnr, factpoststed, factgiro, factkidtype, factoringnr, factfritxt
+dim klib, Sfelt, tot, innrykk, init, Antlinje, Antlinje2, VKurs, ViseMvafelt, ViseUtenAvg,personmvasats
+dim felleskostnadtekst, merkedFelleskostnad, dimFelleskost, dimKontrakt, dimAreal, avrund, foretaksreg
+
+ViseMvafelt = false 'Sett til true hvis mvafelt skal vise på blanketten
+ViseUtenAvg = false 'Sett til true hvis avgiftsfrie linjer skal vises med 0%
+
+Sub OnDataInitialize
+	Dim sql
+	'm_data.Debugg = True
+	m_data.Trace "/// report start /// : " & now
+
+'	Create a groupcounter
+	Antlinje = 140
+	Antlinje2 = 250 
+	'Antlinje = 14 
+	'Antlinje2 = 35 
+	m_data.AddGroupCounter "fakturanr",Clng(Antlinje)
+
+	'Input dialog 
+	m_data.AddInputMacro "{BHR}","Jobb nr.","getsql(select max(behandlingsregel) as it from c..faktura)"
+	'm_data.AddInputMacro "{BHR2}","",""
+	m_data.AddInputMacro "{felleskostnadTekst}","Felleskostnad tekst:","Felleskostnad", ""
+	'm_data.AddInputMacro "{FE}","Velg felleskostnader som skal samles","1",,7,"Select distinct dimrecordid as varenr, navn from e..t_arealvaredim av/**/left join y..Dimensjon dim on dim.dimtall=av.dimrecordid/**/where navn is not null and dim.dimtype=(select dimFelleskostnad from e..t_klientParametre) order by navn "
+	m_data.AddInputMacro "{FE}","Velg felleskostnader som skal spesifiseres ","1",,7,"Select DimTall,navn from y..Dimensjon where dimtype=(select top 1 dimFelleskostnad from e..t_klientParametre) order by navn "
+	m_data.addwhereparam "{avrund}","Desimalplasser kvm","0","0"
+	m_data.addwhereparam "{avrund}","Desimalplasser kvm","1","1"
+	m_data.addwhereparam "{avrund}","Desimalplasser kvm","2","2"
+	m_data.addwhereparam "{avrund}","Desimalplasser kvm","Nærmeste halve","100"
+	if not m_data.ShowInputDialog("Oppgi fakturaserie") then exit sub
+	felleskostnadtekst = m_data.GetMacroValue("{felleskostnadTekst}")
+	merkedFelleskostnad = len(m_data.GetMacroValue("{FE}"))
+	avrund = m_data.GetMacroValue("{avrund}")
+	logoSub
+	
+	if isnumeric(felleskostnadTekst) or len(felleskostnadtekst)=0 Then 
+		felleskostnadtekst = "Felleskostnader"
+	end if
+	
+	'Henter neringsdimensjonene
+	if m_data.RunSubQuery("Select ('dim'+convert(varchar(2),dimFelleskostnad)) as felleskost, ('dim'+convert(varchar(2),dimEtasjeArealId)) as etasjeareal, ('dim'+convert(varchar(2),dimKontrakt)) as kontrakt from e..t_klientParametre","sys")>0 then
+		dimFelleskost = m_data.subqueryvalue("felleskost","sys")
+		dimKontrakt = m_data.subqueryvalue("kontrakt","sys")
+		dimAreal = m_data.subqueryvalue("etasjeareal","sys")
+	end if
+	
+	foretaksreg = "Organisasjonsnr."
+	if m_data.RunSubQuery("select case when count(*)>0 then 'Foretaksregisteret' else 'Organisasjonsnr.' end foretaksreg from y..bedrift where abs(isnull(Foretaksregister,0)) = 1","sys")>0 then
+		foretaksreg = m_data.subqueryvalue("foretaksreg","sys")
+	end if
+	
+	'if merkedFelleskostnad	= 0 then
+	'	m_data.setmacrovalue("{FE}") = 0
+	'end if
+	
+	'Create query string
+ sql = ""
+	m_data.sqladd sql, "SELECT  F.Kundenr, F.e2bStatus, F.Kundenavn, F.AvtaleGiroStatus, F.Fakturanr, F.Fakturadato"
+	m_data.sqladd sql, ", F.Forfallsdato, F.Leveringsdato, F.Vaar_Ref, F.Levering, F.Type, F.Adresse"
+	m_data.sqladd sql, ", F.Adresse2, F.Postnr, F.Poststed, F.Land, F.Selgernr1, F.Valutakode"
+	m_data.sqladd sql, ", F.Valutasum, F.Nettosum, vl."& dimKontrakt &" as kontrakts_id, vl.id"
+	m_data.sqladd sql, ", isNull((select top 1 varetekst from c..varelnfakt where fakturanr = f.fakturanr and vl."& dimKontrakt &"="& dimKontrakt &" and varenr='***' and len(varetekst)>0),' ') as periode"
+	m_data.sqladd sql, " 	  , (CASE WHEN isNumeric(vl.varenr)=1 and cast(vl.varenr as int) in "
+	m_data.sqladd sql, " 	  ((Select vareavgiftspliktig from e..t_kvadratmetertype where not isNull(vareavgiftspliktig,0)=0 "
+	m_data.sqladd sql, " 	  union "
+	m_data.sqladd sql, " 	  Select vareavgiftsfri from e..t_kvadratmetertype where not isNull(vareavgiftsfri,0)=0)) then convert(varchar(8),vl.id+'100') "
+	m_data.sqladd sql, " when vl.varenr in (Select varenr from c..VARER WHERE CHARINDEX('Parkering', varenavn1) > 0) then '3'"
+	if merkedFelleskostnad	= 0 then
+		m_data.sqladd sql, " 	when vl." & dimFelleskost &" in (0" 
+	else
+		m_data.sqladd sql, " 	when vl." & dimFelleskost &" in ({FE}" 
+	end if
+	'm_data.sqladd sql, " 			union "
+	m_data.sqladd sql, " 			 ) then convert(varchar(8),vl.id+'100')"
+	m_data.sqladd sql, " 	  when vl.varenr='***' then convert(varchar(8),'1') else convert(varchar(2),0)+'-'+convert(varchar(8),VL.Momsprosent) end) felleskostnad"
+	m_data.sqladd sql, ", (select sum(netto) from c..varelnfakt where fakturanr = f.fakturanr and momskode in (6,7)) as persongrunnlag"
+	m_data.sqladd sql, ", (select top 1 momsprosent from c..varelnfakt where fakturanr = f.fakturanr and momskode in (6,7)) as MvaProsentPersongrunnlag"
+	m_data.sqladd sql, ", (select top 1 momsprosent from c..varelnfakt where fakturanr = f.fakturanr and momskode in (0,1)) as MvaProsentHøy"
+	m_data.sqladd sql, ", (select top 1 momsprosent from c..varelnfakt where fakturanr = f.fakturanr and momskode in (4,5)) as MvaProsentLav"
+	m_data.sqladd sql, " , (case when len(F.Deres_Ref)=0 then (Select name from c..c_Name where id=(Select top 1 namelink from c..c_Contacts where FK_id=F.kundenr order by standard)) else F.Deres_Ref end) as Deres_Ref"
+	m_data.sqladd sql, " , F.Rekvisisjon, F.LevBetingelse, F.BetBetingelse, F.Transportmaate"
+	if avrund = 100 then
+		m_data.sqladd sql, " ,isNull((Select cast(cast(round(2.*sum(antall+tillegg),0)/2 as decimal(15,1)) as varchar(20)) as antall from e..t_arealres where kontrakts_id=vl." & dimKontrakt &" and etasjearealid=vl." & dimAreal &"),1) as kvm"
+	else
+		m_data.sqladd sql, " ,isNull((Select cast(cast(round(sum(antall+tillegg),"&avrund&") as decimal(15,"&avrund&")) as varchar(20)) as antall from e..t_arealres where kontrakts_id=vl." & dimKontrakt &" and etasjearealid=vl." & dimAreal &"),1) as kvm"
+	end if
+	'm_data.sqladd sql, " ,isNull((Select sum(antall+tillegg) as antall from e..t_arealres where kontrakts_id=vl." & dimKontrakt &" and etasjearealid=vl." & dimAreal &"),1) as kvm"
+	m_data.sqladd sql, ", F.Transport, F.Kommentarer, F.Momsprosent as FMoms, F.MomsLav, F.MomsHoy, F.Totalsum"
+	m_data.sqladd sql, ", F.GrlLav, F.GrlHoy, F.Mvagrunnlag, F.Moms, F.Factoring, F.Fritekst, F.Koblet_til_faktnr"
+	m_data.sqladd sql, ", F.eFakttura, F.Innbet_Sum, F.Kreditert_Sum, F.Bilagsnr_Regnskap, V.Komponentid"
+	m_data.sqladd sql, ", V.Komp_visningstype as VKompvis, V.Enhet, VL.Varenr, vl.dim5, VL.Varetekst, VL.Komp_visningstype"
+	m_data.sqladd sql, ", VL.Komp_Lagertype, VL.Momsprosent, VL.Valutaprice, VL.Pris, VL.Netto, VL.Rabatt, VL.Antall"
+	m_data.sqladd sql, ", VL.ValutaLSum, VL.Komp_level, VL.Momsprosent, VL.Momskode"
+	m_data.sqladd sql, ", (Select Navn from c..Selger as S where S.Nr = F.Selgernr1) as SNavn"
+	m_data.sqladd sql, ", (Select Count(VL2.Fakturanr) from c..Varelnfakt as VL2 where ((VL2.Fakturanr = F.Fakturanr) and (not IsNull(VL2.komp_visningstype,0) = 102))) as AntLinjer"
+	m_data.sqladd sql, ", D.Gironr, D.Kjedenr, NA2.Name as KjedeNavn, A2.Address as KjedeAddress"
+	m_data.sqladd sql, ", A2.Address2 as KjedeAddress2, A2.Postal_code as KjedePostnr, A2.City as KjedePoststed"
+	m_data.sqladd sql, ", A2.Country as KjedeLand, D2.Gironr as KjedeGiro"
+ 	m_data.sqladd sql, ", (Select TOP 1 ISNULL(LOWER(Country_code), 'no') from c..Debitor AS D5 LEFT JOIN c..c_Address AS A5 on D5.NameID = A5.NameLink where d5.kontonr = f.kundenr and (mail=1 or mail=-1)) as CC"
+
+	m_data.sqladd sql, "FROM c..FAKTURA as F"
+	m_data.sqladd sql, "INNER JOIN c..VARELNFAKT as VL on F.fakturanr = VL.fakturanr"
+	m_data.sqladd sql, "LEFT JOIN c..VARER as V on VL.Varenr = V.Varenr"
+	m_data.sqladd sql, "LEFT JOIN c..Debitor as D on F.Kundenr = D.Kontonr"
+	m_data.sqladd sql, "LEFT JOIN c..DEBITOR as D2 on D.Kjedenr = D2.Kontonr"
+	m_data.sqladd sql, "LEFT JOIN c..c_Name as NA2 on D2.NameID = NA2.ID"
+	m_data.sqladd sql, "LEFT JOIN c..c_Address as A2 on (D2.NameID = A2.NameLink AND (A2.mail <> 0 or A2.namelink is null))"
+
+	'm_data.sqladd sql, "WHERE ((F.fakturanr Between {fra} and {til})"
+	m_data.sqladd sql, "WHERE ((F.Behandlingsregel = {BHR})"
+	m_data.sqladd sql, "AND (not IsNull(VL.komp_visningstype,0)=102))"
+	m_data.sqladd sql, "AND NOT vl.varenr='***'"
+
+	m_data.sqladd sql, "ORDER BY F.fakturanr, vl."& dimKontrakt &",felleskostnad desc,VL.varenr desc"
+
+	m_data.SqlString = sql
+	m_data.SetupFields rpt
+
+	set klib = createobject("kidlib.kid")
+
+End Sub
+
+Sub OnFetchData(eof)
+	setLogo
+	'// Watermark for e2b
+	If m_data.SFCurr(m_data.GetValue("e2bStatus")) > 0 Then
+		m_data.SetWatermark rpt, ""
+	Else
+		rpt.Watermark = Nothing
+	End If
+	
+	if left(m_data.GetValue("felleskostnad"),1)="0" and m_data.GetValue("momsprosent")=0 then
+		rpt.Fields("tekstlinje").Value=felleskostnadtekst & " - avgiftsfri"
+	elseif left(m_data.GetValue("felleskostnad"),1)="0" and m_data.GetValue("momsprosent")=25 then
+		rpt.Fields("tekstlinje").Value=felleskostnadtekst & " - avgiftspliktig"
+	elseif m_data.GetValue("felleskostnad")="3" then
+		rpt.Fields("tekstlinje").Value="Parkering"
+	else
+		rpt.Fields("tekstlinje").Value=m_data.GetValue("Varetekst")
+	end if
+	
+	rpt.Fields("orgforetaksreg").Value = foretaksreg
+	
+	if m_data.GetValue("kontrakts_id")="0" then
+		'rpt.Fields("kontraktnrString").Value=""
+		rpt.Sections("GroupHeader4").Controls("Label31").Visible = false
+		rpt.Sections("GroupHeader4").Controls("Field196").Visible = false
+			
+	else
+		'rpt.Fields("kontraktnrString").Value=rpt.Fields("kontrakts_id")
+			rpt.Sections("GroupHeader4").Controls("Field196").Visible = true
+			rpt.Sections("GroupHeader4").Controls("Label31").Visible = true
+	end if
+
+	if not init then
+		init = true
+		bednavn = m_data.GetValue("*y..Bedrift.Navn")
+		bedadr1 = m_data.GetValue("*y..Bedrift.Adresse")
+		bedadr2 = m_data.GetValue("*y..Bedrift.Adresse2")
+		bedpostnr = m_data.GetValue("*y..Bedrift.Postnr")
+		bedpoststed = m_data.GetValue("*y..Bedrift.Poststed")
+		OcrAvtale = m_data.GetValue("*y..Bedrift.OCRKundeID")
+		bankgiro = m_data.GetValue("*y..Bedrift.Bankgiro")
+		postgiro = m_data.GetValue("*y..Bedrift.Postgiro")
+		factnavn = m_data.GetValue("*y..System_faktura.Fact_Navn")
+		factadr1 = m_data.GetValue("*y..System_faktura.Fact_Adresse1")
+		factadr2 = m_data.GetValue("*y..System_faktura.Fact_Adresse2")
+		factpostnr = m_data.GetValue("*y..System_faktura.Fact_Postnr")
+		factpoststed = m_data.GetValue("*y..System_faktura.Fact_Poststed")
+		factgiro = m_data.GetValue("*y..System_faktura.Fact_Giro")
+		factkidtype = m_data.GetValue("*y..System_faktura.Fact_KidType")
+		factoringnr = m_data.GetValue("*y..System_faktura.Fact_Nr")
+		factfritxt = m_data.GetValue("*y..System_faktura.Fact_Fritekst")
+		'hoymvasats = rpt.Fields("MvaProsentHøy").Value 'm_data.GetValue("*y..System.UtgMvaPSats")
+		'lavmvasats = rpt.Fields("MvaProsentLav").Value 'm_data.GetValue("*y..System.UtgMvaPSats2")
+		personmvasats = rpt.Fields("MvaProsentPersongrunnlag").Value 'm_data.GetValue("*y..System.UtgMvaPSats3")
+		MVAnr = m_data.GetValue("*y..Bedrift.MVAnr")
+		Landkode = m_data.GetValue("*y..Bedrift.Landkode")
+		Url = m_data.GetValue("*y..Bedrift.Url")
+		MailAdr = m_data.GetValue("*y..Bedrift.MailAdr")
+		IBAN = m_data.GetValue("*y..Bedrift.IBANnr")
+		SWIFT = m_data.GetValue("*y..Bedrift.SWIFTkode")
+	end if
+ 
+	rpt.Fields("OrgNrTxt").Value = MVAnr
+ 	if Len(Trim(Landkode)) > 0 Then 
+		rpt.Fields("OrgNrTxt").Value = Landkode & " " & MVAnr
+	end if
+
+	if Len(Trim(postgiro)) > 0 Then 
+		rpt.Fields("Postgirotxt").Value = "Postgiro"
+		rpt.Fields("Postvalue").Value = postgiro
+	else
+		rpt.Fields("Postgirotxt").Value = ""
+	end if
+
+	if Len(Trim(bankgiro)) > 0 Then 
+		rpt.Fields("Bankgirotxt").Value = "Bankgiro"
+		rpt.Fields("Bankgirotext").Value = bankgiro
+		BankPostGiro = bankgiro 
+	else 
+		rpt.Fields("Bankgirotxt").Value = ""
+		BankPostGiro = postgiro
+	end if
+
+	if Len(Trim(IBAN)) > 0 then
+		rpt.Fields("IBANtxt").Value = "IBAN"
+		rpt.Fields("IBANvalue").Value = IBAN
+	else
+		rpt.Fields("IBANtxt").Value = ""
+	end if
+
+	if Len(Trim(SWIFT)) > 0 then
+		rpt.Fields("SWIFTtxt").Value = "SWIFT"
+		rpt.Fields("SWIFTvalue").Value = SWIFT
+	else
+		rpt.Fields("SWIFTtxt").Value = ""
+	end if
+
+	'Create total
+	tot = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("Totalsum").value)))) - (m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("Kreditert_sum").value))))) - m_data.sfcurr(rpt.fields("Innbet_sum").value)
+	rpt.Fields("tot").value = (tot)
+	rpt.fields("tot2").value = m_data.DelBelop(rpt.Fields("tot"))
+
+	'Lag kontrollsiffer
+	rpt.fields("ksiff").value = m_data.sfcurr(klib.Modulus10(m_data.sfcurr(rpt.Fields("tot")),""))
+
+	'Add kid-field
+	if m_data.sfcurr(OcrAvtale) > 0 Then 
+		if m_data.sfcurr(rpt.Fields("Factoring")) <> 0 Then
+			if m_data.Sfcurr(rpt.Fields("Kjedenr")) > 0 then
+				Select case m_data.sfcurr(factkidtype)
+					case "160101"		rpt.Fields("KID").value = klib.Lagkidnr_Elcon( cstr(factoringnr),cstr(rpt.Fields("Kjedenr")),cstr(rpt.Fields("fakturanr")))
+					case "160102"		rpt.Fields("KID").value = klib.Lag_kidnrKfinans( clng(rpt.Fields("fakturanr")),clng(rpt.Fields("Kjedenr")),clng(factoringnr))
+					case "160103"		rpt.Fields("KID").value = klib.LagKidnr_DNB( cstr(Factoringnr),cstr(rpt.Fields("Kjedenr")),cstr(rpt.Fields("fakturanr")))
+					case "160104"		rpt.Fields("KID").value = klib.LagKidnr_FactoNor( cstr(Factoringnr),cstr(rpt.Fields("Kjedenr")),cstr(rpt.Fields("fakturanr")))
+					case "160107"		rpt.Fields("KID").value = klib.Lagkidnr_Elcon( cstr(factoringnr),cstr(rpt.Fields("Kjedenr")),cstr(rpt.Fields("fakturanr")))
+					case else			rpt.Fields("KID").value = klib.Lag_kidnr( clng(rpt.Fields("fakturanr")),clng(rpt.Fields("Kjedenr")))
+				end select
+			else
+				Select case m_data.sfcurr(factkidtype)
+					case "160101"		rpt.Fields("KID").value = klib.Lagkidnr_Elcon( cstr(factoringnr),cstr(rpt.Fields("kundenr")),cstr(rpt.Fields("fakturanr")))
+					case "160102"		rpt.Fields("KID").value = klib.Lag_kidnrKfinans( clng(rpt.Fields("fakturanr")),clng(rpt.Fields("kundenr")),clng(factoringnr))
+					case "160103"		rpt.Fields("KID").value = klib.LagKidnr_DNB( cstr(Factoringnr),cstr(rpt.Fields("kundenr")),cstr(rpt.Fields("fakturanr")))
+					case "160104"		rpt.Fields("KID").value = klib.LagKidnr_FactoNor( cstr(Factoringnr),cstr(rpt.Fields("kundenr")),cstr(rpt.Fields("fakturanr")))
+					case "160107"		rpt.Fields("KID").value = klib.Lagkidnr_Elcon( cstr(factoringnr),cstr(rpt.Fields("kundenr")),cstr(rpt.Fields("fakturanr")))
+					case else			rpt.Fields("KID").value = klib.Lag_kidnr( clng(rpt.Fields("fakturanr")),clng(rpt.Fields("kundenr")))
+				end select
+			end if
+		else
+			rpt.Fields("KID").value = klib.Lag_kidnr( clng(rpt.Fields("fakturanr")),clng(rpt.Fields("kundenr")))
+		end if
+	end if
+
+	'Setter "KampText" til enten kampanjetekster eller factoring fritekst hvis factoring faktura
+	If m_data.sfcurr(rpt.Fields("Factoring")) = 0 Then
+		rpt.Fields("KampText").Value = m_data.GetprinttextTOF(170101,m_data.sfcurr(rpt.Fields("Fakturanr")))
+	else
+		rpt.Fields("KampText").Value = factfritxt
+	End if
+
+	if Len(Trim(rpt.Fields("Fritekst"))) > 1 Then 
+		rpt.Fields("FritekstFelt").Value = rpt.Fields("Fritekst")
+	end if
+
+	rpt.Fields("Rabfelt").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Rabatt")))' / 100)
+	if ViseMvafelt then rpt.Fields("Mvafelt").value = m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Momsprosent"))))) / 100) else rpt.Fields("Mvafelt").value = ""
+
+	if ViseUtenAvg then
+		Select case m_data.Sfcurr(rpt.Fields("Momskode"))
+			case "2"	rpt.Fields("Mvafelt").value = "Avg.fri"
+			case "3"	rpt.Fields("Mvafelt").value = "Utenf.omr"
+			case "8"	rpt.Fields("Mvafelt").value = "Ingen mva"
+		end select
+	end if
+
+	rpt.Fields("Antallfelt").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Antall")))
+
+	'"Reset" what fields to show and not as default 
+	rpt.Fields("Bedrifttxt").Value = ""
+	rpt.Sections("Detail").Controls("Field9").Visible = True
+	rpt.Sections("Detail").Controls("Field10").Visible = True
+	rpt.Sections("Detail").Controls("Field99").Visible = True
+	rpt.Sections("Detail").Controls("Field98").Visible = True
+	rpt.Sections("Detail").Controls("Field100").Visible = True
+	rpt.Sections("Detail").Controls("Field115").Visible = True
+	rpt.Sections("Detail").Controls("Field104").Visible = False
+	rpt.Sections("Detail").Controls("Field117").Visible = False
+
+	if rpt.Fields("Varenr") = "***" Then
+		rpt.Sections("Detail").Controls("Field9").Visible = False
+		rpt.Sections("Detail").Controls("Field10").Visible = False
+		rpt.Sections("Detail").Controls("Field117").Visible = False
+		rpt.Sections("Detail").Controls("Field104").Visible = True
+	End if
+
+	if rpt.Fields("Varenr") = "" Then
+		rpt.Sections("Detail").Controls("Field115").Visible = False
+	End if
+
+	innrykk = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Komp_level"))))) * 5
+	rpt.Fields("KompVare").value = String(innrykk, " ") & rpt.Fields("Varenr") & " - " & rpt.Fields("Varetekst")
+
+	'Visningstype hvis komponentvare er vis detaljert og komponentene gir prisen
+	if m_data.sfcurr(rpt.Fields("komp_visningstype")) = 100 Then
+		rpt.Sections("Detail").Controls("Field117").Visible = True
+		rpt.Sections("Detail").Controls("Field9").Visible = False
+		rpt.Sections("Detail").Controls("Field10").Visible = False
+	End if
+
+	'Visningstype hvis komponentvare er vis enkel
+	if m_data.sfcurr(rpt.Fields("komp_visningstype")) = 101 Then 
+		rpt.Sections("Detail").Controls("Field117").Visible = True
+		rpt.Sections("Detail").Controls("Field9").Visible = False
+		rpt.Sections("Detail").Controls("Field10").Visible = False
+		rpt.Sections("Detail").Controls("Field99").Visible = False
+		rpt.Sections("Detail").Controls("Field98").Visible = False
+		rpt.Sections("Detail").Controls("Field100").Visible = False
+		rpt.Sections("Detail").Controls("Field115").Visible = False
+	End if
+
+	'Visningstype hvis komponent hovedvare gir pris
+	if m_data.sfcurr(rpt.Fields("komp_visningstype")) = 100 AND m_data.sfcurr(rpt.Fields("Komp_lagertype")) = 101 Then 
+		rpt.Sections("Detail").Controls("Field117").Visible = True
+		rpt.Sections("Detail").Controls("Field9").Visible = False
+		rpt.Sections("Detail").Controls("Field10").Visible = False
+		rpt.Sections("Detail").Controls("Field99").Visible = False
+		rpt.Sections("Detail").Controls("Field98").Visible = False
+		rpt.Sections("Detail").Controls("Field100").Visible = False
+		rpt.Sections("Detail").Controls("Field115").Visible = False
+	End if
+
+	'ta vekk rab,mva,pris og sum felt fra hovedvare hvis det er komponentene som prissetter og visningstype er detaljert
+	if m_data.sfcurr(rpt.Fields("komponentid")) = -1 AND m_data.sfcurr(rpt.Fields("VKompvis")) = 0 AND m_data.sfcurr(rpt.Fields("Komp_lagertype")) = 200 Then
+		rpt.Sections("Detail").Controls("Field99").Visible = False
+		rpt.Sections("Detail").Controls("Field98").Visible = False
+		rpt.Sections("Detail").Controls("Field100").Visible = False
+		rpt.Sections("Detail").Controls("Field115").Visible = False
+	end if
+
+	If m_data.sfcurr(rpt.Fields("Factoring")) = 0 Then
+		if m_data.sfcurr(rpt.Fields("Totalsum").value) >= 0 Then 
+			rpt.Fields("TilKonto").Value = m_data.bbsknr(BankPostGiro)
+			rpt.Fields("FraKonto").Value = m_data.bbsknr(rpt.Fields("Gironr"))
+			'Set recipient
+			rpt.Fields("MottakerNavn").Value = bednavn
+			rpt.Fields("MottakerAdresse").Value = bedadr1
+			rpt.Fields("MottakerAdresse2").Value = bedadr2
+			rpt.Fields("MottakerPostnr").Value = bedpostnr 
+			rpt.Fields("MottakerPoststed").Value = bedpoststed
+			rpt.Fields("MottakerLand").Value = ""
+			'Set remitter
+			rpt.Fields("AvsenderNavn").Value = rpt.Fields("Kundenavn")
+			rpt.Fields("AvsenderAdresse").Value = rpt.Fields("Adresse")
+			rpt.Fields("AvsenderAdresse2").Value = rpt.Fields("Adresse2")
+			rpt.Fields("AvsenderPostnr").Value = rpt.Fields("Postnr")
+			rpt.Fields("AvsenderPoststed").Value = rpt.Fields("Poststed")
+			rpt.Fields("AvsenderLand").Value = rpt.Fields("Land")
+		else
+			'rpt.Sections("GroupFooter1").Controls("Field22").Visible = False
+			rpt.Fields("KID").Value = ""
+			rpt.Fields("KredTxt").Value = "Ref. fakturanr: " & rpt.Fields("Koblet_til_faktnr")
+			rpt.Fields("TilKonto").Value = m_data.bbsknr(rpt.Fields("Gironr"))
+			rpt.Fields("FraKonto").Value = m_data.bbsknr(BankPostGiro)
+			'Set recipient
+			rpt.Fields("MottakerNavn").Value = rpt.Fields("Kundenavn")
+			rpt.Fields("MottakerAdresse").Value = rpt.Fields("Adresse")
+			rpt.Fields("MottakerAdresse2").Value = rpt.Fields("Adresse2")
+			rpt.Fields("MottakerPostnr").Value = rpt.Fields("Postnr")
+			rpt.Fields("MottakerPoststed").Value = rpt.Fields("Poststed")
+			rpt.Fields("MottakerLand").Value = rpt.Fields("Land")
+			'Set remitter
+			rpt.Fields("AvsenderNavn").Value = bednavn
+			rpt.Fields("AvsenderAdresse").Value = bedadr1
+			rpt.Fields("AvsenderAdresse2").Value = bedadr2
+			rpt.Fields("AvsenderPostnr").Value = bedpostnr
+			rpt.Fields("AvsenderPoststed").Value = bedpoststed
+			rpt.Fields("AvsenderLand").Value = ""
+		End if
+ 
+	Else
+		if m_data.sfcurr(rpt.Fields("Totalsum").value) >= 0 Then 
+			rpt.Fields("TilKonto").Value = m_data.bbsknr(factgiro)
+			rpt.Fields("FraKonto").Value = m_data.bbsknr(rpt.Fields("Gironr"))
+			rpt.Fields("Bankgirotext").Value = factgiro
+			rpt.Fields("Bedrifttxt").Value = bednavn
+			'Set recipient
+			rpt.Fields("MottakerNavn").Value = factnavn
+			rpt.Fields("MottakerAdresse").Value = factadr1
+			rpt.Fields("MottakerAdresse2").Value = factadr2
+			rpt.Fields("MottakerPostnr").Value = factpostnr
+			rpt.Fields("MottakerPoststed").Value = factpoststed
+			rpt.Fields("MottakerLand").Value = ""
+			'Set remitter
+			rpt.Fields("AvsenderNavn").Value = rpt.Fields("Kundenavn")
+			rpt.Fields("AvsenderAdresse").Value = rpt.Fields("Adresse")
+			rpt.Fields("AvsenderAdresse2").Value = rpt.Fields("Adresse2")
+			rpt.Fields("AvsenderPostnr").Value = rpt.Fields("Postnr")
+			rpt.Fields("AvsenderPoststed").Value = rpt.Fields("Poststed")
+			rpt.Fields("AvsenderLand").Value = rpt.Fields("Land")
+		else
+			'rpt.Sections("GroupFooter1").Controls("Field22").Visible = False
+			rpt.Fields("KID").Value = ""
+			rpt.Fields("KredTxt").Value = "Ref. fakturanr: " & rpt.Fields("Koblet_til_faktnr")
+			rpt.Fields("TilKonto").Value = m_data.bbsknr(rpt.Fields("Gironr"))
+			rpt.Fields("FraKonto").Value = m_data.bbsknr(factgiro)
+			rpt.Fields("Bankgirotext").Value = factgiro
+			rpt.Fields("Bedrifttxt").Value = bednavn
+			'Set recipient
+			rpt.Fields("MottakerNavn").Value = rpt.Fields("Kundenavn")
+			rpt.Fields("MottakerAdresse").Value = rpt.Fields("Adresse")
+			rpt.Fields("MottakerAdresse2").Value = rpt.Fields("Adresse2")
+			rpt.Fields("MottakerPostnr").Value = rpt.Fields("Postnr")
+			rpt.Fields("MottakerPoststed").Value = rpt.Fields("Poststed")
+			rpt.Fields("MottakerLand").Value = rpt.Fields("Land")
+			'Set remitter
+			rpt.Fields("AvsenderNavn").Value = factnavn
+			rpt.Fields("AvsenderAdresse").Value = factadr1
+			rpt.Fields("AvsenderAdresse2").Value = factadr2
+			rpt.Fields("AvsenderPostnr").Value = factpostnr
+			rpt.Fields("AvsenderPoststed").Value = factpoststed
+			rpt.Fields("AvsenderLand").Value = ""
+		End if
+	End if
+ 
+ ' Valutafaktura og kontantfaktura
+	if rpt.Fields("ValutaKode") <= "0" Then rpt.Fields("ValutaKode").Value = ""
+	if Len(Trim(rpt.Fields("ValutaKode"))) > 0 Then
+		if m_data.sfcurr(rpt.Fields("Valutasum")) <> 0 THEN VKurs = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("TotalSum"))))) / m_data.sfcurr(rpt.Fields("Valutasum")) ELSE VKurs = 1
+		m_data.AddGroupCounter "fakturanr",Clng(Antlinje2)
+		rpt.Fields("Sidetall").Value = "Page " & rpt.Fields("_groupcounter") & " of " & AntSider2(rpt.Fields("AntLinjer"))
+ 
+		If m_data.sfcurr(rpt.Fields("Factoring")) = 0 Then
+			rpt.Fields("InnbetKred").Value = m_data.gjemnull(((m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Innbet_sum")))))) + (m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Kreditert_sum"))))))) / m_data.sfcurr(VKurs))
+			if m_data.sfcurr(rpt.Fields("InnbetKred")) <> 0 Then rpt.Fields("InnbetKredTxt").Value = "- Credit/payment"
+			if m_data.sfcurr(rpt.Fields("Totalsum").value) >= 0 Then
+				rpt.Fields("FaktTxt").Value = "INVOICE"
+			else
+				rpt.Fields("FaktTxt").Value = "CREDIT MEMO"
+				rpt.Fields("KredTxt").Value = "Ref. invoice: " & rpt.Fields("Koblet_til_faktnr")
+			End if
+		Else
+			tot = m_data.sfcurr(rpt.fields("Totalsum").value)
+			rpt.Fields("tot").value = (tot)
+			rpt.fields("tot2").value = m_data.DelBelop(rpt.Fields("tot"))
+			rpt.Fields("InnbetKredTxt").Value = ""
+			rpt.Fields("InnbetKred").Value = ""
+			if m_data.sfcurr(rpt.Fields("Totalsum").value) >= 0 Then
+				rpt.Fields("FaktTxt").Value = "INVOICE"
+			else
+				rpt.Fields("FaktTxt").Value = "CREDIT MEMO"
+				rpt.Fields("KredTxt").Value = "Ref. invoice: " & rpt.Fields("Koblet_til_faktnr")
+			End if
+		End if
+ 
+		rpt.Fields("Prisfelt").value = m_data.gjemnull2(rpt.Fields("ValutaPrice"))
+		Sfelt = m_data.gjemnull2(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Netto")))) / m_data.sfcurr(VKurs)) 'm_data.sfcurr((m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall"))))) * m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Prisfelt"))))) * ((100 - m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt"))))))/100)
+		rpt.Fields("Sumfelt").value = m_data.gjemnull2(Sfelt)
+		rpt.Fields("NettoSumFelt").Value = m_data.gjemnull2(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Nettosum")))) / m_data.sfcurr(VKurs))
+		rpt.Fields("TotalSumFelt").Value = m_data.gjemnull2(rpt.Fields("ValutaSum"))
+ 
+		if Len(Trim(rpt.Fields("Leveringsdato"))) > 0 Then rpt.Fields("LevdatoTxt").Value = "Date of delivery"
+		if Len(Trim(Url)) > 0 Then rpt.Fields("WebTxt").Value = "Web:"
+		if Len(Trim(MailAdr)) > 0 Then rpt.Fields("EpostTxt").Value = "E-mail:"
+		if Len(Trim(rpt.Fields("Levering"))) > 1 Then 
+			rpt.Fields("LevTxt").Value = "Deliver to:"
+			rpt.Fields("LeveringFelt").Value = rpt.Fields("Levering")
+		end if
+ 
+		if Len(Trim(rpt.Fields("Rekvisisjon"))) > 0 Then rpt.Fields("RekvTxt").Value = "Requisition"
+		if Len(Trim(rpt.Fields("SNavn"))) > 0 Then rpt.Fields("Selgertxt").Value = "Seller"
+		if Len(Trim(rpt.Fields("Transportmaate"))) > 0 Then rpt.Fields("Transportmaatetxt").Value = "Transport"
+		if Len(Trim(rpt.Fields("Transport"))) > 0 Then 
+			rpt.Fields("TransportorTxt").Value = "Transport agency"
+			rpt.Fields("TransportorFelt").Value = rpt.Fields("Transport")
+		end if
+ 
+		if Len(Trim(rpt.Fields("Levbetingelse"))) > 0 Then 
+			rpt.Fields("LevBetingelseTxt").Value = "Delivery terms"
+			rpt.Fields("LevBetingelseFelt").Value = rpt.Fields("Levbetingelse")
+		end if
+		if Len(Trim(rpt.Fields("Betbetingelse"))) > 0 Then 
+			rpt.Fields("BetBetingelseTxt").Value = "Payment terms"
+			rpt.Fields("BetBetingelseFelt").Value = rpt.Fields("Betbetingelse")
+		end if
+ 
+ If m_data.sfcurr(rpt.Fields("MomsHoy")) <> 0 Then 
+ 'rpt.Sections("GroupFooter1").Controls("Shape2").Visible = true
+ 'rpt.Sections("GroupFooter1").Controls("NokHoyText").Visible = true
+ 'rpt.Sections("GroupFooter1").Controls("NokHoySum").Visible = true
+ 
+ If m_data.sfcurr(rpt.Fields("MvaProsentHøy").Value) <> 0 Then
+ rpt.Fields("HoyMva").Value = "+ " & rpt.Fields("MvaProsentHøy").Value & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlHoy"))))) / m_data.sfcurr(VKurs))
+ rpt.Fields("NokHoyText").Value = "+ " & rpt.Fields("MvaProsentHøy").Value & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlHoy")))
+ Else
+ rpt.Fields("HoyMva").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats") & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlHoy"))))) / m_data.sfcurr(VKurs))
+ rpt.Fields("NokHoyText").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats") & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlHoy")))
+ End If
+ End If 
+ 
+ If m_data.sfcurr(rpt.Fields("MomsLav")) <> 0 Then 
+ 'rpt.Sections("GroupFooter1").Controls("Shape2").Visible = true
+ 'rpt.Sections("GroupFooter1").Controls("NokMellomText").Visible = true
+ 'rpt.Sections("GroupFooter1").Controls("NokMellomSum").Visible = true
+ 
+ If m_data.sfcurr(rpt.Fields("MvaProsentLav").Value) <> 0 Then
+ rpt.Fields("LavMva").Value = "+ " & rpt.Fields("MvaProsentLav").Value & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlLav"))))) / m_data.sfcurr(VKurs))
+ rpt.Fields("NokMellomText").Value = "+ " & rpt.Fields("MvaProsentLav").Value & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlLav")))
+ Else
+ rpt.Fields("LavMva").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats2") & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlLav"))))) / m_data.sfcurr(VKurs))
+ rpt.Fields("NokMellomText").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats2") & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlLav")))
+ End If 
+ End If
+ 
+ if m_data.sfcurr(rpt.Fields("personmva")) <> 0 Then 
+ 'rpt.Sections("GroupFooter1").Controls("Shape2").Visible = true
+ 'rpt.Sections("GroupFooter1").Controls("NokLavText").Visible = true
+ 'rpt.Sections("GroupFooter1").Controls("NokLavSum").Visible = true
+ 
+ rpt.Fields("personmvatekst").Value = "+ " & rpt.Fields("MvaProsentPersongrunnlag").Value & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull((m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("persongrunnlag"))))) / m_data.sfcurr(VKurs)))
+ rpt.Fields("NokLavText").Value = "+ " & rpt.Fields("MvaProsentPersongrunnlag").Value & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("persongrunnlag")))
+ else 
+ rpt.Fields("NokLavText").value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats3") & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("persongrunnlag")))
+ end if 
+ 
+ '// Rekner ut mva
+		rpt.Fields("NokLavSum").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("personmva")))
+		rpt.Fields("NokMellomSum").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("MomsLav")))
+		rpt.Fields("NokHoySum").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("MomsHoy")))
+		rpt.Fields("MomsLavfelt").value = m_data.gjemnull2(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("MomsLav"))))) / m_data.sfcurr(VKurs))
+		rpt.Fields("MomsHoyfelt").value = m_data.gjemnull2(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("MomsHoy"))))) / m_data.sfcurr(VKurs))
+ rpt.Fields("personmva").value = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("personmva").value)))) / m_data.sfcurr(VKurs)
+ 
+		if m_data.sfcurr(rpt.Fields("MomsHoy")) = 0 Then
+			if m_data.sfcurr(rpt.Fields("MomsLav")) = 0 Then
+				if m_data.sfcurr(rpt.Fields("Moms")) <> 0 Then
+					rpt.Fields("HoyMva").Value = "+ " & m_data.sfcurr(rpt.Fields("FMoms")) & "% VAT of " & rpt.Fields("ValutaKode") & " " &m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Mvagrunnlag"))))) / m_data.sfcurr(VKurs))
+					rpt.Fields("MomsHoyfelt").Value = m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Moms"))))) / m_data.sfcurr(VKurs))
+				end if
+			end if
+		End if
+ 
+	else
+		m_data.AddGroupCounter "fakturanr",Clng(Antlinje)
+		rpt.Fields("Sidetall").Value = "Side " & rpt.Fields("_groupcounter") & " av " & AntSider(rpt.Fields("AntLinjer"))
+ 
+		If m_data.sfcurr(rpt.Fields("Factoring")) = 0 Then
+			rpt.Fields("InnbetKred").Value = m_data.gjemnull((m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Innbet_sum")))))) + (m_data.sfcurr(rpt.Fields("Kreditert_sum"))))
+			if m_data.sfcurr(rpt.Fields("InnbetKred")) <> 0 Then rpt.Fields("InnbetKredTxt").Value = "- Kreditert/Innbetalt"
+			if m_data.sfcurr(rpt.Fields("Totalsum").value) >= 0 Then
+				If m_data.sfcurr(rpt.Fields("Type")) = 1001 OR m_data.sfcurr(rpt.Fields("Type")) = 1002 Then
+					rpt.Fields("FaktTxt").Value = "KONTANTNOTA"
+					rpt.Fields("InnbetKredTxt").Value = ""
+					rpt.Fields("InnbetKred").Value = ""
+					m_data.AddGroupCounter "fakturanr",Clng(Antlinje2)
+					rpt.Fields("Sidetall").Value = "Side " & rpt.Fields("_groupcounter") & " av " & AntSider2(rpt.Fields("AntLinjer"))
+				else
+					rpt.Fields("FaktTxt").Value = "FAKTURA"
+'					m_data.AddGroupCounter "fakturanr",Clng(Antlinje)
+'					rpt.Fields("Sidetall").Value = "Side " & rpt.Fields("_groupcounter") & " av " & AntSider(rpt.Fields("AntLinjer"))
+				End if
+			else
+				rpt.Fields("FaktTxt").Value = "KREDITNOTA"
+				rpt.Fields("KredTxt").Value = "Ref. fakturanr: " & rpt.Fields("Koblet_til_faktnr")
+			End if
+		Else
+			tot = m_data.sfcurr(rpt.fields("Totalsum").value)
+			rpt.Fields("tot").value = (tot)
+			rpt.fields("tot2").value = m_data.DelBelop(rpt.Fields("tot"))
+			rpt.fields("ksiff").value = m_data.sfcurr(klib.Modulus10(m_data.sfcurr(rpt.Fields("tot")),""))
+			rpt.Fields("InnbetKredTxt").Value = ""
+			rpt.Fields("InnbetKred").Value = ""
+			if m_data.sfcurr(rpt.Fields("Totalsum").value) >= 0 Then
+				rpt.Fields("FaktTxt").Value = "FAKTURA"
+			else
+				rpt.Fields("FaktTxt").Value = "KREDITNOTA"
+				rpt.Fields("KredTxt").Value = "Ref. fakturanr: " & rpt.Fields("Koblet_til_faktnr")
+			End if
+		End if
+ 
+		rpt.Fields("Prisfelt").value = m_data.gjemnull2(m_data.sfdbl(rpt.Fields("Pris")))
+ 'Sfelt = m_data.Sfcurr(rpt.Fields("Netto")) 'm_data.sfcurr((m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall"))))) * m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Prisfelt")))))) * ((100 - m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt"))))))/100)
+		Sfelt = m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall"))))) * m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Pris"))))))) * ((100 - m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt")))))))/100)
+		rpt.Fields("Sumfelt").value = m_data.gjemnull(Sfelt)
+		rpt.Fields("NettoSumFelt").Value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Nettosum")))
+		rpt.Fields("TotalSumFelt").Value = m_data.gjemnull(rpt.Fields("TotalSum"))
+ 
+		if Len(Trim(rpt.Fields("Leveringsdato"))) > 0 Then rpt.Fields("LevdatoTxt").Value = "Leveringsdato"
+		if Len(Trim(rpt.Fields("Levering"))) > 1 Then 
+			rpt.Fields("LevTxt").Value = "Leverings adresse:"
+			rpt.Fields("LeveringFelt").Value = rpt.Fields("Levering")
+		end if
+ 
+		if Len(Trim(Url)) > 0 Then rpt.Fields("WebTxt").Value = "Web:"
+		if Len(Trim(MailAdr)) > 0 Then rpt.Fields("EpostTxt").Value = "E-post:"
+ 
+		if Len(Trim(rpt.Fields("Rekvisisjon"))) > 0 Then rpt.Fields("RekvTxt").Value = "Rekvisisjon"
+		if Len(Trim(rpt.Fields("SNavn"))) > 0 Then rpt.Fields("Selgertxt").Value = "Selger"
+		if Len(Trim(rpt.Fields("Transportmaate"))) > 0 Then rpt.Fields("Transportmaatetxt").Value = "Leveringsm" & Chr(229) & "te"
+		if Len(Trim(rpt.Fields("Transport"))) > 0 Then 
+			rpt.Fields("TransportorTxt").Value = "Transport" & Chr(248) & "r"
+			rpt.Fields("TransportorFelt").Value = rpt.Fields("Transport")
+		end if
+		if Len(Trim(rpt.Fields("Levbetingelse"))) > 0 Then 
+			rpt.Fields("LevBetingelseTxt").Value = "Lev.betingelse"
+			rpt.Fields("LevBetingelseFelt").Value = rpt.Fields("Levbetingelse")
+		end if
+		if Len(Trim(rpt.Fields("Betbetingelse"))) > 0 Then 
+			rpt.Fields("BetBetingelseTxt").Value = "Bet.betingelse"
+			rpt.Fields("BetBetingelseFelt").Value = rpt.Fields("Betbetingelse")
+		end if
+ 
+ 'rpt.Sections("GroupFooter1").Controls("Shape2").Visible = false
+ 'rpt.Sections("GroupFooter1").Controls("NokLavText").Visible = false
+ 'rpt.Sections("GroupFooter1").Controls("NokMellomText").Visible = false
+ 'rpt.Sections("GroupFooter1").Controls("NokHoyText").Visible = false
+ 'rpt.Sections("GroupFooter1").Controls("NokLavSum").Visible = false
+ 'rpt.Sections("GroupFooter1").Controls("NokMellomSum").Visible = false
+ 'rpt.Sections("GroupFooter1").Controls("NokHoySum").Visible = false
+ 
+		If m_data.sfcurr(rpt.Fields("MomsHoy")) <> 0 Then 
+ If m_data.sfcurr(rpt.Fields("MvaProsentHøy").Value) <> 0 Then
+ rpt.Fields("HoyMva").Value = "+ " & rpt.Fields("MvaProsentHøy").Value & "% m.v.a. av kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlHoy")))
+ Else
+ rpt.Fields("HoyMva").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats") & "% m.v.a. av kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlHoy")))
+ End If
+ End If
+ 
+		if m_data.sfcurr(rpt.Fields("MomsLav")) <> 0 Then 
+ If m_data.sfcurr(rpt.Fields("MvaProsentLav").Value) <> 0 Then 
+ rpt.Fields("LavMva").Value = "+ " & rpt.Fields("MvaProsentLav").Value & "% m.v.a. av kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlLav")))
+		 Else
+ rpt.Fields("LavMva").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats2") & "% m.v.a. av kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlLav")))
+ End If
+ End IF
+ 
+		'if not rpt.Fields("momsprosent").value = rpt.Fields("MvaProsentPersongrunnlag").Value then
+ 
+		if m_data.sfcurr(rpt.Fields("personmva")) <> 0 Then 
+ rpt.Fields("personmvatekst").Value = "+ " & rpt.Fields("MvaProsentPersongrunnlag").Value & "% m.v.a. av kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("persongrunnlag")))
+		else 
+ rpt.Fields("personmva").value = ""
+ 'rpt.Fields("personmva").value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats3") & "% m.v.a. av kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("persongrunnlag")))
+ end if 
+		
+		'End If
+ 
+		rpt.Fields("MomsLavfelt").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("MomsLav")))
+		rpt.Fields("MomsHoyfelt").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("MomsHoy")))
+ 
+		if m_data.sfcurr(rpt.Fields("MomsHoy")) = 0 Then
+			if m_data.sfcurr(rpt.Fields("MomsLav")) = 0 Then
+				if m_data.sfcurr(rpt.Fields("Moms")) <> 0 Then
+					rpt.Fields("HoyMva").Value = "+ " & m_data.sfcurr(rpt.Fields("FMoms")) & "% m.v.a. av kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("Mvagrunnlag")))
+					rpt.Fields("MomsHoyfelt").Value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Moms")))
+				end if
+			end if
+		End if
+	end if
+
+	if m_data.Sfcurr(rpt.Fields("Kjedenr")) > 0 then
+		rpt.Fields("Bedrifttxt").value = rpt.Fields("Kundenavn")
+		rpt.Fields("AvsenderNavn").value = rpt.Fields("KjedeNavn")
+		rpt.Fields("AvsenderAdresse").value = rpt.Fields("KjedeAddress")
+		rpt.Fields("AvsenderAdresse2").value = rpt.Fields("KjedeAddress2")
+		rpt.Fields("AvsenderPostnr").value = rpt.Fields("KjedePostnr")
+		rpt.Fields("AvsenderPoststed").value = rpt.Fields("KjedePoststed")
+		rpt.Fields("AvsenderLand").value = rpt.Fields("KjedeLand")
+
+		rpt.Fields("LevTxt").value = "Leveringsadresse:"
+		rpt.Fields("LeveringFelt").value = rpt.Fields("Kundenavn") & Chr(13) & rpt.Fields("Adresse") & Chr(13) & rpt.Fields("Adresse2") & Chr(13) & rpt.Fields("Postnr") & " " & rpt.Fields("Poststed") & Chr(13) & rpt.Fields("Land")
+		rpt.Fields("Kundenavn").value = rpt.Fields("KjedeNavn")
+		rpt.Fields("Adresse").value = rpt.Fields("KjedeAddress")
+		rpt.Fields("Adresse2").value = rpt.Fields("KjedeAddress2")
+		rpt.Fields("Postnr").value = rpt.Fields("KjedePostnr")
+		rpt.Fields("Poststed").value = rpt.Fields("KjedePoststed")
+		rpt.Fields("Land").value = rpt.Fields("KjedeLand")
+		rpt.Fields("FraKonto").value = rpt.Fields("KjedeGiro")
+	end if
+End Sub
+
+Function sfcurr(v)
+ Dim rv
+ On Error Resume Next
+ rv = CCur(v)
+ If Err Then rv = 0
+ m_data.sfcurr = rv
+End Function
+
+function sfint(v)
+	on error resume next
+	m_data.sfint = clng(v)
+end function
+
+function DelBelop(bel)
+	dim tmp, i
+	tmp = formatnumber(m_data.sfcurr(bel),2,,,0)
+	i = len(tmp)
+	DelBelop = left(tmp,i-3) & " " & right(tmp,2)
+end function
+
+function bbsknr(kto)
+	on error resume next
+	m_data.bbsknr = left(kto,4) & " " & mid(kto,5,2) & " " & right(kto,5)
+end function
+
+function gjemnull(Tall)
+	dim tmptall
+	tmptall = Tall
+	if tmptall <> 0 then
+		m_data.gjemnull = tmptall
+	else
+		m_data.gjemnull = " "
+	end if
+end function
+
+function gjemnull2(Tall)
+	dim tmptall
+	tmptall = Tall
+	if tmptall <> 0 then
+		m_data.gjemnull2 = tmptall
+	else
+		m_data.gjemnull2 = " "
+	end if
+end function
+
+function AntSider(v)
+	on error resume next
+	Dim tmp
+	tmp = 0
+	tmp = v mod Clng(Antlinje)
+	if tmp > 0 then tmp = 1
+	AntSider = Fix(v/Clng(Antlinje)) + tmp
+end function
+
+function AntSider2(v)
+	on error resume next
+	Dim tmp
+	tmp = 0
+	tmp = v mod Clng(Antlinje2)
+	if tmp > 0 then tmp = 1
+	AntSider2 = Fix(v/Clng(Antlinje2)) + tmp
+end function
+
+Function sfdbl(v)
+	Dim temp
+	On Error Resume Next
+	temp = CCur(v)
+	If Err Then temp = 0
+	If temp <> 0 Then temp = CDbl(v)
+	m_data.sfdbl = temp
+End Function
+
+Sub SqlAdd(ByRef sql, code)
+ sql = sql & Replace(Replace(code, "\n", vbCrLf), "\t", vbTab) & vbCrLf
+End Sub
+
+sub logoSub()
+	dim fso
+	Set fso = CreateObject("Scripting.FileSystemObject")
+	
+	if m_data.RunSubQuery("Select top 1 rapport_logo_sti, (Case when len(rapport_logo_sti)=0 then 0 else 1 end) as skalHaLogo from e..t_klientParametre","sys")>0 then
+		logo= m_data.subqueryvalue("rapport_logo_sti","sys")
+		skalHaLogo= m_data.subqueryvalue("skalHaLogo","sys")
+	else
+		logo=""
+		skalHaLogo=0
+	end if
+	
+	if not fso.FileExists(logo)  then
+		logo=""
+		skalHaLogo=0
+	end if
+end sub
+
+sub setLogo()
+	if skalHaLogo=1 then
+		set rpt.Sections("GroupHeader1").Controls("Image1").Picture= LoadPicture(logo)
+	end if
+end sub
+
+Sub OnReportStart
+
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="720"
+	RightMargin="720"
+	TopMargin="720"
+	BottomMargin="720"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: top; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="0"
+		BackColor="12640511"
+		CanShrink="1"
+	>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="5100"
+		DataField="Fakturanr"
+		RepeatStyle="4"
+		NewPage="1"
+		KeepTogether="-1"
+		CanGrow="0"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape1"
+		Left="0"
+		Top="3330"
+		Width="10215"
+		Height="960"
+		BackStyle="1"
+		BackColor="16051688"
+		LineStyle="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape3"
+		Left="0"
+		Top="2910"
+		Width="10200"
+		Height="435"
+		BackStyle="1"
+		BackColor="15326413"
+		LineStyle="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field108"
+		DataField="AvtaleGiroStatus"
+		Left="7654"
+		Top="9043"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="AvtaleGiroStatus"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field57"
+		DataField="Rekvisisjon"
+		Left="5244"
+		Top="8760"
+		Width="2268"
+		Height="283"
+		Visible="0"
+		Text="Rekvisisjon"
+		ClassName="Normal"
+		Style="font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field60"
+		DataField="Selgernr"
+		Left="5244"
+		Top="9043"
+		Width="2268"
+		Height="284"
+		Visible="0"
+		Text="Selgernr"
+		ClassName="Normal"
+		Style="font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field61"
+		DataField="SNavn"
+		Left="5244"
+		Top="9327"
+		Width="2268"
+		Height="283"
+		Visible="0"
+		Text="SNavn"
+		ClassName="Normal"
+		Style="font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field84"
+		DataField="Gironr"
+		Left="7654"
+		Top="9327"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="D.Gironr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field177"
+		DataField="EpostTxt"
+		Left="8875"
+		Top="6795"
+		Width="700"
+		Height="200"
+		Visible="0"
+		Text="EpostTxt"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="6378"
+		Top="4698"
+		Width="992"
+		Height="142"
+		Visible="0"
+		Caption="Pris"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; text-align: right; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="*y..Bedrift.Navn"
+		Left="6165"
+		Top="330"
+		Width="3690"
+		Height="285"
+		Text="*y..Bedrift.Navn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="60"
+		Top="3375"
+		Width="1545"
+		Height="195"
+		Caption="Fakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		DataField="Fakturanr"
+		Left="8445"
+		Top="2985"
+		Width="1680"
+		Height="285"
+		Text="Fakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 11.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field8"
+		DataField="Fakturadato"
+		Left="1605"
+		Top="3375"
+		Width="1995"
+		Height="195"
+		Text="Fakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="Kundenr"
+		Left="1245"
+		Top="945"
+		Width="1410"
+		Height="225"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="Kundenavn"
+		Left="60"
+		Top="1170"
+		Width="3300"
+		Height="225"
+		Text="Kundenavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="Adresse"
+		Left="60"
+		Top="1395"
+		Width="3300"
+		Height="210"
+		Text="Adresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field15"
+		DataField="Adresse2"
+		Left="60"
+		Top="1590"
+		Width="3300"
+		Height="210"
+		Text="Adresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field16"
+		DataField="Postnr"
+		Left="75"
+		Top="1830"
+		Width="735"
+		Height="210"
+		Text="Postnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field17"
+		DataField="Poststed"
+		Left="795"
+		Top="1800"
+		Width="2565"
+		Height="210"
+		Text="Poststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field18"
+		DataField="Land"
+		Left="75"
+		Top="2070"
+		Width="3300"
+		Height="225"
+		Text="Land"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field35"
+		DataField="*y..Bedrift.Adresse"
+		Left="6180"
+		Top="630"
+		Width="3510"
+		Height="195"
+		Text="*y..Bedrift.Adresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field36"
+		DataField="*y..Bedrift.Adresse2"
+		Left="6180"
+		Top="825"
+		Width="3450"
+		Height="195"
+		Text="*y..Bedrift.Adresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field37"
+		DataField="*y..Bedrift.Postnr"
+		Left="6180"
+		Top="1025"
+		Width="675"
+		Height="200"
+		Text="*y..Bedrift.Postnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field38"
+		DataField="*y..Bedrift.Poststed"
+		Left="7125"
+		Top="1020"
+		Width="2715"
+		Height="210"
+		Text="*y..Bedrift.Poststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="0"
+		Top="4650"
+		Width="1982"
+		Height="220"
+		Visible="0"
+		Caption="Varenr."
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="1997"
+		Top="4650"
+		Width="3665"
+		Height="220"
+		Visible="0"
+		Caption="Varetekst"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="7087"
+		Top="4557"
+		Width="1133"
+		Height="283"
+		Visible="0"
+		Caption="Antall"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; text-align: right; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="8305"
+		Top="4650"
+		Width="620"
+		Height="220"
+		Visible="0"
+		Caption="Rab %."
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; text-align: center; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label14"
+		Left="8950"
+		Top="4650"
+		Width="1180"
+		Height="220"
+		Visible="0"
+		Caption="Sum"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; text-align: right; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="0"
+		Y1="5069"
+		X2="10205"
+		Y2="5069"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="60"
+		Top="3570"
+		Width="1545"
+		Height="210"
+		Caption="Forfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field47"
+		DataField="Forfallsdato"
+		Left="1605"
+		Top="3570"
+		Width="1995"
+		Height="210"
+		Text="Forfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field48"
+		DataField="OrgNrTxt"
+		Left="8070"
+		Top="1260"
+		Width="2070"
+		Height="225"
+		Text="OrgNrTxt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="white-space: nowrap; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label17"
+		Left="3118"
+		Top="6236"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Caption="Organisasjonsnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field49"
+		DataField="bankgirotext"
+		Left="8070"
+		Top="1470"
+		Width="2070"
+		Height="225"
+		Text="bankgirotext"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field50"
+		DataField="Postgirotxt"
+		Left="3375"
+		Top="7755"
+		Width="1560"
+		Height="225"
+		Visible="0"
+		Text="Postgirotxt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field51"
+		DataField="postvalue"
+		Left="4935"
+		Top="7755"
+		Width="2070"
+		Height="225"
+		Visible="0"
+		Text="postvalue"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label19"
+		Left="6215"
+		Top="3375"
+		Width="1800"
+		Height="195"
+		Caption="Vår referanse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field53"
+		DataField="Vaar_Ref"
+		Left="8055"
+		Top="3375"
+		Width="2040"
+		Height="195"
+		Text="Vaar_Ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field54"
+		DataField="Deres_Ref"
+		Left="1655"
+		Top="2299"
+		Width="1830"
+		Height="200"
+		Text="Deres_Ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label20"
+		Left="75"
+		Top="2295"
+		Width="1575"
+		Height="210"
+		Caption="Deres referanse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field55"
+		DataField="RekvTxt"
+		Left="235"
+		Top="8184"
+		Width="1300"
+		Height="200"
+		Visible="0"
+		Text="RekvTxt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field56"
+		DataField="Rekvisisjon"
+		Left="1535"
+		Top="8184"
+		Width="1830"
+		Height="200"
+		Visible="0"
+		Text="Rekvisisjon"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field58"
+		DataField="Selgertxt"
+		Left="285"
+		Top="8490"
+		Width="1545"
+		Height="195"
+		Visible="0"
+		Text="Selgertxt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field59"
+		DataField="SNavn"
+		Left="1830"
+		Top="8490"
+		Width="1995"
+		Height="195"
+		Visible="0"
+		Text="SNavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label21"
+		Left="5235"
+		Top="2275"
+		Width="750"
+		Height="200"
+		Visible="0"
+		Caption="Telefon:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field62"
+		DataField="*y..Bedrift.Telefon"
+		Left="6525"
+		Top="2115"
+		Width="2565"
+		Height="195"
+		Text="Telefon"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label22"
+		Left="7675"
+		Top="6595"
+		Width="800"
+		Height="200"
+		Visible="0"
+		Caption="Faks:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field63"
+		DataField="*y..Bedrift.TeleFax"
+		Left="8475"
+		Top="6595"
+		Width="1000"
+		Height="200"
+		Visible="0"
+		Text="TeleFax"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field64"
+		DataField="LevTxt"
+		Left="4500"
+		Top="6930"
+		Width="3150"
+		Height="285"
+		Visible="0"
+		Text="LevTxt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field66"
+		DataField="FaktTxt"
+		Left="6195"
+		Top="3000"
+		Width="2235"
+		Height="285"
+		Text="FaktTxt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 11.5pt; text-align: left; font-family: &apos;Verdana&apos;; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field72"
+		DataField="LeveringFelt"
+		Left="4500"
+		Top="7200"
+		Width="3120"
+		Height="990"
+		Visible="0"
+		Text="LeveringFelt"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field73"
+		DataField="Kommentarer"
+		Left="0"
+		Top="4695"
+		Width="9780"
+		Height="285"
+		Text="Kommentarer"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field112"
+		DataField="Sidetall"
+		Left="8109"
+		Top="7584"
+		Width="1984"
+		Height="283"
+		Visible="0"
+		Text="Sidetall"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label28"
+		Left="4819"
+		Top="4557"
+		Width="850"
+		Height="283"
+		Visible="0"
+		Caption="Mva"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-style: italic; text-align: center; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field128"
+		DataField="Bankgirotxt"
+		Left="6180"
+		Top="1470"
+		Width="1920"
+		Height="225"
+		Text="Bankgirotxt"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field131"
+		DataField="Transportmaatetxt"
+		Left="280"
+		Top="8689"
+		Width="1500"
+		Height="200"
+		Visible="0"
+		Text="Transportmaatetxt"
+		ClassName="Normal"
+		Style="font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field132"
+		DataField="Transportmaate"
+		Left="1830"
+		Top="8689"
+		Width="2000"
+		Height="200"
+		Visible="0"
+		Text="Transportmaate"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field136"
+		DataField="Leveringsdato"
+		Left="1605"
+		Top="3780"
+		Width="1995"
+		Height="195"
+		Text="Leveringsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field137"
+		DataField="LevdatoTxt"
+		Left="60"
+		Top="3780"
+		Width="1545"
+		Height="195"
+		Text="LevdatoTxt"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field144"
+		DataField="KredTxt"
+		Left="4110"
+		Top="3075"
+		Width="1980"
+		Height="225"
+		Text="KredTxt"
+		ClassName="Normal"
+		Style="font-weight: bold; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label29"
+		Left="6215"
+		Top="3570"
+		Width="1800"
+		Height="210"
+		Caption="Bilagsnr i regnsk."
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field149"
+		DataField="Bilagsnr_Regnskap"
+		Left="8055"
+		Top="3570"
+		Width="2025"
+		Height="210"
+		Text="Bilagsnr_Regnskap"
+		Multiline="0"
+		ClassName="Normal"
+		Style="white-space: nowrap; font-family: &apos;Verdana&apos;; font-size: 8.5pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field152"
+		DataField="TransportorFelt"
+		Left="1830"
+		Top="8889"
+		Width="2000"
+		Height="200"
+		Visible="0"
+		Text="TransportorFelt"
+		ClassName="Normal"
+		Style="white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field153"
+		DataField="TransportorTxt"
+		Left="280"
+		Top="8889"
+		Width="1500"
+		Height="200"
+		Visible="0"
+		Text="TransportorTxt"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field154"
+		DataField="LevBetingelseFelt"
+		Left="2030"
+		Top="6949"
+		Width="1700"
+		Height="200"
+		Visible="0"
+		Text="LevBetingelseFelt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field155"
+		DataField="BetBetingelseFelt"
+		Left="2030"
+		Top="7134"
+		Width="1700"
+		Height="200"
+		Visible="0"
+		Text="BetBetingelseFelt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field156"
+		DataField="LevBetingelseTxt"
+		Left="640"
+		Top="6949"
+		Width="1250"
+		Height="200"
+		Visible="0"
+		Text="LevBetingelseTxt"
+		Multiline="0"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field157"
+		DataField="BetBetingelseTxt"
+		Left="640"
+		Top="7134"
+		Width="1250"
+		Height="200"
+		Visible="0"
+		Text="BetBetingelseTxt"
+		Multiline="0"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field172"
+		DataField="*y..Bedrift.MvaNr"
+		Left="30"
+		Top="7867"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="*y..Bedrift.MvaNr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field173"
+		DataField="*y..Bedrift.Landkode"
+		Left="1306"
+		Top="7867"
+		Width="1133"
+		Height="283"
+		Visible="0"
+		Text="*y..Bedrift.Landkode"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field174"
+		DataField="*y..Bedrift.Url"
+		Left="6510"
+		Top="2385"
+		Width="3060"
+		Height="195"
+		Text="Url"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field175"
+		DataField="*y..Bedrift.Mailadr"
+		Left="6510"
+		Top="2640"
+		Width="3075"
+		Height="195"
+		Text="Mailadr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field176"
+		DataField="WebTxt"
+		Left="5295"
+		Top="2430"
+		Width="500"
+		Height="200"
+		Visible="0"
+		Text="WebTxt"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field179"
+		DataField="IBANtxt"
+		Left="6180"
+		Top="1650"
+		Width="1920"
+		Height="225"
+		Text="IBANtxt"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field180"
+		DataField="IBANvalue"
+		Left="8070"
+		Top="1650"
+		Width="2055"
+		Height="225"
+		Text="IBANvalue"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field181"
+		DataField="SWIFTtxt"
+		Left="6180"
+		Top="1860"
+		Width="1920"
+		Height="225"
+		Text="SWIFTtxt"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field182"
+		DataField="SWIFTvalue"
+		Left="8070"
+		Top="1860"
+		Width="2040"
+		Height="225"
+		Text="SWIFTvalue"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field197"
+		DataField="{FE}"
+		Left="455"
+		Top="7300"
+		Width="6095"
+		Height="284"
+		Visible="0"
+		Text="{FE}"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label33"
+		Left="0"
+		Top="4400"
+		Width="10063"
+		Height="283"
+		Caption="Antall i forbindelse med husleie er kvm inkludert andel i fellesareal"
+		ClassName="Normal"
+		Style="font-style: italic; font-family: &apos;Verdana&apos;; font-size: 7pt; color: rgb(128,128,128); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="Image1"
+		Left="45"
+		Top="0"
+		Width="1560"
+		Height="780"
+		SizeMode="2"
+		PictureAlignment="0"
+		>
+		<Data><![CDATA[010000006C740000FE130000474946383961B2010F01A520000000000F0F0F1F1F1F2F2F2F3F3F3FC52D3A4F4F4FC839465F5F5FCC47526F6F6FD0545ED3616B
+			7F7F7FD76E778F8F8FDB7B83DE88909F9F9FE2969CAFAFAFE6A3A8E9B0B5BFBFBFEDBDC1CFCFCFF0CACEF4D7DADFDFDFF8E5E6EFEFEFFBF2F3FFFFFFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF21FE114372656174656420776974682047494D50002C00000000B2010F010006FE409070482C1A
+			8FC8A472C96C1E1985A8744A5D30AED8ACC5C9ED7ABFE0B0784C2E9BCFE8B47ACD0641A9F0787CD2AEDBEFF8BC7ECFEFF7DF7281737E8485868788898A7E8082
+			8E51748B929394959697768D8F8291989E9FA0A1A2889A9B729DA3631F160B09151FA9B1B2B38BA5A670A8B44E1B100754101ABAC2C3C469B6B753B9C54616C7
+			510916B0CBD3D4D54409C89CD6431D11BE9B07101BDBE4E5B1D9DAD6CDE8510BD1E6F0F194ECA7D4DDDFF45107111DF2FEFF7EF2E15AB64E601C065B002A5CB8
+			C660B2611D26607318685F3F8618337EA108491706071C4D31C0A0B1A449242195818A3831E4AD04132E9E9C993165AA8F2E053A2049B327FE409B2B25E6A4E8
+			4A9ACFA3E48062D20061E8506048A352534AE94385964E871695CA5517D5454CB38A9D126E5CD7B3A2BE1EB28A75ACDB02EE8CA29D3B8FA34A3F61DFEAA5124E
+			26DDBF88D4F259D576AFE12808012B2E24380F2F7C872393E5B7B8729EC675562D90CC39D048CBA0D9605EF3B8B3E94030FD865E1D66F419CDA7633BDAC9BAF6
+			46BB76EEC9DEED68ABEDDF4A42265C5390B7714750812B271232581ADDC7A33FF2BDFC777334C5A56B7754B6BAEDEB64A06F1FBF29AEF7D0E0C3607046BE7D9C
+			EEE717A7EFC2D2BDFD6C89E3FF9DDF04E7FDFFD958A41F5AFC25511F8008A293DF80511568847F0946884E6A0C1EE5A0101F0825E186F4FED056E14C0EE6C5E1
+			88F4C024D7870CCDC716892C1A941C8A0B8127628B34E6431D8CF28484C15535F648913838E6E8E390C7991764524426C91B7C474EA5E493BB2DD82431505629
+			9B80530A63E596B14999652A5C86691A855F8E22E6999D7958A62718A0E9A66426AE59158F6FD619D98B721AD2412F76F609E72B79FAB19E9F84760664A077AC
+			58E8A29C1989E8737C322A29674C3E3AC6A093666A9A3B9682A1A8A6A0768665A74BEC0959A8A872E625A943609AEAABA71D1013AB207C0AEBADA7A919A8A9B8
+			F6BA1B9965BAEAEBB0B2E189A3ADC4261BDB8D0CF2AAECB3C619EB9DB0D056BB9BA3C0216BEDB6571E5A9BB3DC865BE47096512BEEB9FE4B520698B6E8B6CBDB
+			AA5181EBEEBCD1C9AA5A4FE6D2ABEF71BA9AC4EEBE001B072C46A5056C3079D2CA93DDC10C6FC72C391916D6F0C4DA25BC0C2F14677C1F34270EB3B0C6208F57
+			E92C11876CF27FD88A82F1C92CFF37EA271FB72C737BF02E52F2CC3803F872222BE7EC3382FD1212F3CF44BB37B01E3717AD74820E388747CF4B479DE0C3D8B1
+			27F5D5EE591C46D258771D21C76440EDF5D8118EECC4D064A70D60CA4870ADF6DB12EE4C84D870D7BDE1AA4DD9AD378BA35ABDF7DFF7D1E637E084B797C0E085
+			27AE1DE28A37FEAEE390BBC778E494473679E598BF7579E69C3BB579E7A073746AE8A4976EFAE9A8A7AEFAEAACB7EEFAEBB0C72EFBFEECB4D76EFBEDB8E7DEE2
+			E159F4EEFBEFC0072FFCF0C4176FFCF1C827AFFCF2CC37EFFCF3C94330C1F4D4576FFDF5D867AFFDF6DC734FEBF7E0872FFEF8E4976FFEF9E8A7AFFEFAECB7EF
+			FEFBF0C72FFFFCF4D76FFFFDF8E7AFFFFEFC2F73C10512688000114080021AF080084C60021520400A5CC0038BC8C0051E30400516300000C860060570400434
+			F0021C884F062C48C2129AF084265480122480C216BA10850DCC801F382001051000831ACCA10E77C8C31EF230000468C005FA9081071860003E4CA212734800
+			043C60886060E10BA748C52A12A00E1758A216B7C8451E5E31090DE8A218C7E8C320CAD00E14408000C8C8462506000150AC431AFE71D846369AB10B61ACA31E
+			F798412CF2F18F49FC2212F208C842EE50000A08611A3CD080351AF28F0388231A1849C747761191675C02212DC9C91DFAB1938014E4113609CA422240916568
+			40254BD9460340D00C9464E5180720014DCAB2949FBC651B45690452EA528F017800193280C45FD65100991443061C694C2E0AA096836CE62373294D2EF2B208
+			BEAC26195D190609AC529B5C0C4032BF200170769100AFC4A639F948CD75965109D974E716071045798E519CDDB4A716E9D94B7DB2B19DFED4E0358910CF80FA
+			50855DC8A241B71880747241A10BED6103FA19D12D02D4A0031D42412BAA43492E8103DFE4E80E339A040F8454A4A814C24645FEDAC73640B4A22405C14A598A
+			002E1880A54B84A6131080D31D4E94A03DF5E1459328C0A21AF5A8484DAA5297AAD35106D587294DC24B9FAAC3863A81037F2480011AF0C4FF79F5AB016C8001
+			6EA8477E6A94AA9E74A9182D3153962274090480A4154F4AC69F3241016D0C80012430CE2E7080020A60A6181DDA568E0E55A89528AC06BBFAD5C63AF6B18FA5
+			A001047B492664408F0678405FBDE0810B0416980E4D0265B74880A69AE1027115A324151BD1C3F690ADAABD036AC9B85922F0948DA75C830446DB45612EE1B2
+			628C641D580B00497200B2C84DEE03BA18C9E43AB7B1AEE5216CBBE8D1362C578C6F45025D931880EA4E12AF6C140013AECBFE450484760D37E5A2774F7B4E50
+			4C7589D355AF1E52CB45B31EE1BDFB3CAF6EDB58DB21DC769E79C0AF0FD75B0601F730A68B30F06B131BDB3C90978BFA55E9180510E1356460BB07856B174D5B
+			871746150D0A1EA97BD7CA60EAEA21C43C24307DB9D85F369473964BE0AD0F5B5C0D143371C45D8CEF1609AC061BEB90C343C0B04FFD40DC0C56180424F6878F
+			338860452CB9A594202E8FD3408131DAD50862B4AA1F8AD9450A28418C1F2EC7939B9C88270340C75A9C321AD2DBC52B13C1CCD9E5839901E0E6228811C8E418
+			338EB988E625AAD90C2F16639D8560661ADB81CDA4FD7217BBABE4F67EC2CC7D56E29FC7C00144F7369AE13C8499C59B84FE15935602472E869E1F9DE44948B9
+			0D45B47483299AE843C818B148F8EF1809C0C0A52A958005ACF5FFC2AC69477B02D225AEAF154BF8EA4583B1CD88002F17790D822AEB53AB0DE06BAFADB9E72D
+			DAFADAD856EA9F8BBCD0414B988BBE358499795CEC75D2DACB7D18F5AF2BEA6D75A27587CCF6B4A411E181551FC1D91C7DE3A4D94B6D5247B4DD407D770E6BDA
+			69132342C8399CB2AC392A0074CBD6D79898F32F017E56816B90D920907712F7DDE12E3361E11C45E7C3FBBDEE7F3781DBFEA4B8C6079C88954BB409DEEC2932
+			EDA0EE88B3FBE416070085352C5F44B89C87E15E8207401ED100609C0C35BF84C47549F16FBF1B9F3CDF7122B89CE62EFE78E001E596A77D7B0C71A5DF9C0928
+			97279E8BF0F31D72BC0DF6E64211CBBECEA68721E99658FA2DDD1E767332BA096C4F38BDD3FE850C0490005477A796B94E729B9B1CEC68E5A613F2BE58448CDB
+			C2FF0B6B51C74AC2AC9331E820EE7ADCBF6ECBA01AE0EC8CCFA0DBED40DCA38BFB0214680002025F5F36C0BD1266CEB6EC65BFEDA762B20BCAD62299EDC07A25
+			8EC203BB1DA3EB350FFB524BE2D46A9060037A5F46D33B5D8B013804562B1B0BE4A7E1F594007694F99E060E10BD873B47BCC70B41DCDD53E2C14B7478E60BEF
+			F51C075BEAB245389D71DE4582FBC1A482A645E8479F50E267DFF88B607D7610686ED40473E67C6B5064EA6704C795FE5CA9176D7E806F4BC47F0FE57F93A07D
+			A6C67D6C6079006068C0658175F0815D746485157DE9C645632706D8778100A8080268078C9782434046F697071EC08139B475ACB6449887074B767606088209
+			D68289F0821DA7456E177A03A7071EC07C4AD483EE067D869606DFC74308D87FECB779EEB77D0687078C67004D907B5DA47875C0014EA844A1C65A0120836820
+			824AC46984D76A25C767EF577579C07864E6868BC68662107334C80412B8450A106A657061E5357C59587C5B98815D78078CA7834880833C24000F70854C007C
+			67B844A627716BD80657277F19B48067B082928081C7A7816B107A4E807EE11544022401A8A7540ED458A967437BFE548352D54694688948D05935A4841BA456
+			89F87F8B788A8D0883747889A0986F8428047B34000A008B7DD5595E155636440092D8437C0806A43884C51880A8A806AAE804046871A2980499585170B806DD
+			E86444880846D806E3E804AA465514C88A3D058415388C2CF88D2E188E69308F4DD08416878BCA8856711687BA576D5A14691BA707F5B8605C409008090681C8
+			52E6F77642E88EFE58840089068A358544E001115974E7488E413500CD3806ED5866EF7808F1C8068AA58F0FB08CE06400BC6804146093D5645E3EB8912ED991
+			F0F89167309361104B11F57967E00162E84FC1746240E9782F69083199803D779458E74F02D00039798959E94FFEB90595FC588A53497E4469067AC87285A800
+			E9084A40A45978C00146C4938694592BB97E7288091C307B0264090DF85C5E75978508980FB448A9878DAC0444D128926B705C0D708D74296C0AF04486408D84
+			C998FD73621750410524890724404F849984F09784E95C829999A8999AAAB99AACD99AAEF99AB0199BB2399BB4599BB6799BB8999BBAB99BBCD99BBEF99BC019
+			9CC2399CC4490B9FA33BA0739CC8C939CAB99C98333ACE199DD2399DD4599DD6799DD8999DDAB99DDCD99DDEF99DE0199EE2399EE4599E55B219E61939CD999E
+			58B39EEC2935EEF99E4B139FF259340CA03D0E003DFAB99FFCD99FFEF99F001AA0023AA0045AA0021A01C599FEA00ABAA00CDAA00EFAA0101AA1123AA1145AA1
+			167AA1189AA11ABAA11CDAA11EFAA120AA3EFF43417C99540ED4953E517765590421E6057237461CA7844607063F47814896984D2401288A0419C09696A457A0
+			360662048578B4A263A0A24289042D8A85B214A3C1759A1947545ED04C04A08F453042B21400364A045906A5430052462A06489A8C4EB0A4FBD8A45D008C0060
+			904C50A3532A4D3E994FBFA492606065625085B0D606636A514C2A9165AA4B4E3A46445A703E64A3DA048930274DE1D705F7E4A5D317A661B0A70DD9A7D245A9
+			A014A8309AA652CAA8DA949096A54D60F8A662C4A64C5092497407920A5F96AA432E0AA89A4A4683D7A69BFECA05E6C48B6A5A4867C746BCB874A8AA4BAD7AAA
+			ABCA49980A638B37AB4E604E9E9A048F5A4DA14AAB7FF8AAC2477ABE1AAC1AF4AB68CA05B7AA41A46A046ECAA9DAB48EE3B54EA29AA97FFA4FD2EA435B59A2B6
+			66AD7E1A8444A5AE4B6589D9AA417CD8ADCE0A4E7739AF80C471BBC405D99843BDFA4E8560A6E59AA77DA0AF196468F67AAC0FF905BE68AA1AB46F9687001460
+			89456479837A0475F467E508A960B05119A990957AA6EDCA073F9777B17A040BDB04F336061D6B76F7EA43771706782A7ADE4A46885A04C58661017B60E2E67B
+			D40A657E50A3F8B843392B042BCB042D3B06359BB176F68465506E14A8444DF9639D57A8403B5C81F4B3FEC04AB2233BB4525AB31994AC486BAC2CDBB0639096
+			39C47F05580645AB41539B44F887AE4A30B7E0576F5DABA75B3BB0595BB025BB076E4A914A347649BB044B2BA466AB68028B744A14B742B55283BA52B5D4B732
+			294B5B4AB0EE5A4A211BA5852A0460EA46B555B88ADB4356FAB49DCBB01966068D7BB395BAB3FAF5B93E7BA3066B95AC74B994CB042F3A964860AF36B6A84420
+			BA4970B862B0BAA8FB72AA9BB8A35BA917A9438356B35074BB6A90AAA71BB46746BD59F5050BFBB637C6ADC89BBC305B06C47BB6D34B06E12BBE12F97329BBAC
+			3CD4ACD09B06D26BBCD4CBAE9DB4B92B0BB163CBBDE36BBE2976BCF9EBBDCC7B06E5ABB45D1B62B808FEB1A8D4BE2069B95F80B9B82B4BF46BB6829B440B08BC
+			4820BC6110C0FEBBB600DCBD159CB7358B4A21965D085C940A2CBF69E5B59CF4C0FD6B88A0FBBB1CDCC16A49BE2F6CBAF02BC3FD9BC1D5FAA54A647FE8EB5023
+			6C06EFCB43B69BB7990B4A2A5CC343B0BC469B4E14ACB1688BB8370CC3483CBC334CC35F2B53F316626EF6C3A9C45DC38640DBF8665CCCA24AF4C50744B6843A
+			C5CFE743CDDAC458F6C4541CC54E2CC7E32AC4AC7BC24260B75E0402C506AEB20B00801CC880DCB3821CC89B8B97851CC8265CC88600BCF63B7F9C9BC8806CA8
+			921CC8A5CBA5953CC9312BC9CD9AB699ACC99B9CC846F0B2825CB3A2F8C9D5ABB5997CC8A388CA8BFE2CC88DFCC9ED16C199EC656E6CC5897CC942A0C481CCB6
+			9FECC71689CA8E5BC947F0AF863CC7C47CAE95CCCAFC96C9AFACC88540C12CFCC9E274CB989CC9BA1CC995ECB4D78CCD6550B3C32CC9F785CA9FEC5DAEACCC92
+			CCCC0576CE28CCC8D12CCB4B40CA853C006748C9DE2C064347CEFB46CE74DA87E41CCEA2ACB2E42CC9A4CACE7ABBCA5CEBCCF1FBCE99DC74553BD0826CCFDB5C
+			9AD538400827B1E44C89A2D959620B00DCDCCDE27C046A8BCABC66D0959BC94064C667BCD0ED2CC82A8D40D02AC94908D10D5DC7347DD3E49CAF38BDD303CDAF
+			9F9C041D1DD1C1FBD3E8CCD3379D910CBC04B98BD3319DC86E7783460DCAA11CD5460DCC49A0BDFE547DD336EDCE47A0C7A89CB2201DD0AA9CD5108DD426DDC0
+			644DD34D5DC8A337CD3B2DD169BDD368CC80711DD59DACBF62ED54109D82671DBD754DCE664DD42DFDD7B08CADF08C92460DD7843DD0B6BAD8379DAB82DDD596
+			67D53318D927EDD8891CD80A3DD88EBDD642CD050FFDCF5B8DD9923CD7224DDA80FD057D4D04F22CC853B6DA098CDA2ECDD27E2BDBA98C7787CD056DE9D4A36D
+			DB0070B42BE4DB89ECBBC51BD24A90894D06DB242CDC9A9DCC9CBDD89EDDCB9CC5938A2DDC715A4FC20DC803D095CA4D68A86C68DDDDC5CC4DDB456CDBD12DD5
+			6AF7D6BD4DDA555A88080BD15AEAA57F6CDC4AE072DB1AD65C7DD0BEDDDCF45DDEB27DDE90EC2105AD2DD3EBFDD739BAA322EDA38B0DA4F2ED8C968D04EA1BC8
+			608DCCFDCD044100003B]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field201"
+		Left="9285"
+		Top="30"
+		Width="285"
+		Height="285"
+		Text="Sidetall"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field202"
+		Left="9825"
+		Top="30"
+		Width="360"
+		Height="285"
+		Text="Sidetall"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="0"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: left; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label34"
+		Left="9525"
+		Top="30"
+		Width="315"
+		Height="285"
+		Caption="av"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; ddo-char-set: 0; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label35"
+		Left="8895"
+		Top="30"
+		Width="480"
+		Height="285"
+		Caption="Side"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; ddo-char-set: 0; text-align: left; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label36"
+		Left="15"
+		Top="3015"
+		Width="3270"
+		Height="300"
+		Caption="Fakturainformasjon"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 11.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field203"
+		DataField="TotalSumFelt"
+		Left="8055"
+		Top="3795"
+		Width="2040"
+		Height="195"
+		Text="TotalSumFelt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label37"
+		Left="6215"
+		Top="3795"
+		Width="1800"
+		Height="210"
+		Caption="Sum å betale:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field204"
+		DataField="bankgirotext"
+		Left="8055"
+		Top="4020"
+		Width="2070"
+		Height="225"
+		Text="bankgirotext"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field205"
+		DataField="Bankgirotxt"
+		Left="6215"
+		Top="4020"
+		Width="1815"
+		Height="225"
+		Text="Bankgirotxt"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field206"
+		DataField="KID"
+		Left="1620"
+		Top="3975"
+		Width="3600"
+		Height="283"
+		Text="KID"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; text-align: left; white-space: nowrap; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label38"
+		Left="75"
+		Top="4020"
+		Width="1545"
+		Height="195"
+		Caption="KID"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label39"
+		Left="60"
+		Top="930"
+		Width="1140"
+		Height="210"
+		Caption="Kundenr:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="Image2"
+		Left="6195"
+		Top="2100"
+		Width="283"
+		Height="284"
+		PictureAlignment="0"
+		>
+		<Data><![CDATA[010000006C740000BC030000424DBC030000000000003600000028000000140000000F000000010018000000000086030000C30E0000C30E0000000000000000
+			0000FFFFFFFFFFFFFFFFFFFFFFFFF4F4F46A67675B58585B58585B58585B58585B58585B58586A6767F4F4F4FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFE0E0E05B58589D9B9B9391919896969896969391919D9B9B5B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFFE0E0E05B58586F6C6C6B68686D6A6A6D6A6A6B68686F6C6C5B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFE0E0E05B5858918F8F8785858C8A8A8C8A8A878585918F8F5B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE0E0
+			E05B5858A2A0A09593939B99999B9999959393A2A0A05B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE0E0E05B5858
+			5B58585B58585B58585B58585B58585B58585B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE0E0E05B5858AEACACC1
+			C0C0C1C0C0C1C0C0C1C0C0AEACAC5B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7F7F7CDCCCCFFFFFFE0E0E05B5858EAEAEA807E7E7977
+			777977778A8888EAEAEA5B5858E0E0E0FFFFFFCDCCCCF7F7F7FFFFFFFFFFFFFFFFFFFFFFFFA3A1A1C1C0C0ECECECE0E0E05B5858EAEAEA5B58585B58585B5858
+			676464EAEAEA5B5858E0E0E0ECECECC1C0C0A3A1A1FFFFFFFFFFFFFFFFFFFFFFFF7B7878EBEBEB7E7B7BE0E0E05B5858EAEAEA9D9B9B9D9B9B969494A8A6A6EA
+			EAEA5B5858E0E0E07E7B7BEBEBEB7B7878FFFFFFFFFFFFFFFFFFFFFFFF827F7FD3D2D2A4A3A3E0E0E05B5858EAEAEAFCFCFC868484918F8FFFFFFFEAEAEA5B58
+			58E0E0E0A4A3A3D3D2D2827F7FFFFFFFFFFFFFFFFFFFFFFFFF7B7878EEEEEE828080E0E0E05B5858EAEAEAF5F5F55E5B5B636161FEFEFEEAEAEA5B5858E0E0E0
+			828080EEEEEE7B7878FFFFFFFFFFFFFFFFFFFFFFFFB7B6B6ACABABFFFFFFE0E0E05B5858E9E9E9FFFFFFDCDCDCE1E1E1FFFFFFE9E9E95B5858E0E0E0FFFFFFAC
+			ABABB7B6B6FFFFFFFFFFFFFFFFFFFFFFFFFEFEFEE7E7E7FFFFFFE0E0E05B58587573738481818481818481818481817573735B5858E0E0E0FFFFFFE7E7E7FEFE
+			FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4F4F46A67675B58585B58585B58585B58585B58585B58586A6767F4F4F4FFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFF0000]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="Image3"
+		Left="6195"
+		Top="2355"
+		Width="283"
+		Height="283"
+		PictureAlignment="0"
+		>
+		<Data><![CDATA[010000006C740000BC030000424DBC030000000000003600000028000000140000000F000000010018000000000086030000C30E0000C30E0000000000000000
+			0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBBDBCBC858383737070777474737070858383BDBCBCFBFBFBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFE7E6E6787575A2A1A1E0E0E0FFFFFFFAFAFAFFFFFFE0E0E0A2A1A1787575E7E6E6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFE7E6E6F2F2F2DDDCDCA5A3A3BBBABA8F8D8DC7C6C68E8C8CBBBABAA5A3A3DDDCDCF2F2F2E7E6E6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFB78
+			7575DFDEDE8583836C6969C1C0C05B5858C7C6C65B5858BFBEBE6C6A6A858383DEDEDE787575FBFBFBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBDBCBCA3A1A1E7E6
+			E6B7B6B6D2D1D1CDCDCDB7B6B6E5E5E5B7B6B6CDCDCDD3D2D2B7B6B6E7E6E6A2A1A1BDBCBCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF858383E3E3E36461615B5858
+			C8C7C75D5A5A5B5858C7C6C65B58585D5A5AC8C7C75B5858646161E3E2E2858383FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF737070DBDADA5B58585B5858CDCDCD5B
+			58585B5858C7C6C65B58585B5858CDCDCD5B58585B5858DBDADA737070FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF777474EAEAEABDBCBCBDBCBCE9E9E9BDBCBCBDBC
+			BCE5E5E5BDBCBCBDBCBCE9E9E9BDBCBCBDBCBCEAEAEA777474FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF737070DFDFDF5B58585B5858CDCDCD5B58585B5858C7C6C6
+			5B58585B5858CECDCD5B58585B5858DFDFDF737070FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF858383E5E5E57B78786F6C6CCDCDCD7270706F6C6CCDCDCD6F6C6C72
+			7070CECDCD6F6C6C7B7878E5E4E4858383FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBDBCBCA2A1A1E1E1E1989696BDBCBCBBBABA989696DBDADA989696BBBABABBBA
+			BA989696E1E1E1A2A1A1BDBCBCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFB787575E1E0E09B9999656262CAC9C95B5858C7C6C65B5858CCCBCB6562629B9999
+			E1E0E0787575FBFBFBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE7E6E6F2F2F2E1E0E0C1BFBFB9B8B8A8A7A7CCCBCBA8A6A6B9B8B8C1BFBFE1E0E0F2F2F2E7
+			E6E6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE7E6E6787575A2A1A1E7E7E7FFFFFFFFFFFFFFFFFFE7E7E7A2A1A1787575E7E6E6FFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBBEBDBD858383737070777474737070858383BEBDBDFBFBFBFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFF0000]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="Image4"
+		Left="6195"
+		Top="2610"
+		Width="300"
+		Height="210"
+		PictureAlignment="0"
+		>
+		<Data><![CDATA[010000006C740000BC030000424DBC030000000000003600000028000000140000000F000000010018000000000086030000C30E0000C30E0000000000000000
+			0000FFFFFFD7D6D66764645B58585B58585B58585B58585B58585B58585B58585B58585B58585B58585B58585B5858676464D7D6D6FFFFFFFFFFFFFFFFFFFFFF
+			FF726F6FCDCCCC6461615B58585B58585B58585B58585B58585B58585B58585B58585B58585B5858646161CDCCCC726F6FFFFFFFFFFFFFFFFFFFFFFFFF5B5858
+			777575CECDCD615E5E5B58585B58585B58585B58585B58585B58585B58585B5858615E5ECECDCD7775755B5858FFFFFFFFFFFFFFFFFFFFFFFF5B58585B585879
+			7777CBCACA615E5E5B58585B58585B58585B58585B58585B5858615E5ECBCACA7977775B58585B5858FFFFFFFFFFFFFFFFFFFFFFFF5B58585B58585B58587C7A
+			7A7775755B5858878585D8D8D8D8D8D88785855B58587775757C7A7A5B58585B58585B5858FFFFFFFFFFFFFFFFFFFFFFFF5B58585B58585B58585B5858615E5E
+			B9B8B8FEFEFEFFFFFFFFFFFFFEFEFEB9B8B8615E5E5B58585B58585B58585B5858FFFFFFFFFFFFFFFFFFFFFFFF5B58585B58585B58587C7A7AE5E5E5FFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFE5E5E57C7A7A5B58585B58585B5858FFFFFFFFFFFFFFFFFFFFFFFF5B58585D5A5AACABABFCFCFCFFFFFFA5A3A37977777977
+			777C7979F4F4F4FFFFFFFFFFFFFCFCFCACABAB5D5A5A5B5858FFFFFFFFFFFFFFFFFFFFFFFF716E6EDADADACDCCCCFFFFFFFFFFFFF5F5F5EAEAEAEAEAEAEAEAEA
+			EAEAEAF5F5F5FFFFFFFFFFFFCDCCCCDBDADA716E6EFFFFFFFFFFFFFFFFFFFFFFFFE1E1E1827F7F797676FFFFFFFFFFFFB0AEAE8E8C8C8E8C8C8E8C8C8E8C8CB0
+			AEAEFFFFFFFFFFFF797676827F7FE1E1E1FFFFFFFFFFFFFFFFFFFFFFFFDBDADA6764645F5C5CCCCBCBE0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0
+			E0CCCBCB5F5C5C676464DBDADAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0EFEF8B88885B58585B58585B58585B58585B58585B58585B58585B58585B58585B5858
+			8B8888F0EFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC1C0C06461615B58585B58585B58585B58585B58585B5858646161C1C0C0FFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFECEBEB8785855B58585B58585B58585B5858878585ECEBEBFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEBBBABA656262656262BBBABAFEFEFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFF0000]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="orgforetaksreg"
+		DataField="orgforetaksreg"
+		Left="6180"
+		Top="1260"
+		Width="1919"
+		Height="225"
+		Text="orgforetaksreg"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[Option Explicit
+Dim Valutakurs
+Sub OnFormat
+	if m_data.Sfcurr(rpt.Fields("AvtaleGiroStatus")) <> 0 Then
+		if m_data.Sfcurr(rpt.Fields("eFakttura")) <> 0 then
+			rpt.Sections("GroupFooter1").Controls("Label27").Caption = "BELASTES VIA AVTALEGIRO / eFaktura"
+		else
+			rpt.Sections("GroupFooter1").Controls("Label27").Caption = "BELASTES VIA AVTALEGIRO"
+		end if
+	else
+		if m_data.Sfcurr(rpt.Fields("eFakttura")) <> 0 then
+			rpt.Sections("GroupFooter1").Controls("Label27").Caption = "Sendt som eFaktura"
+		else
+			rpt.Sections("GroupFooter1").Controls("Label27").Caption = ""
+		end if
+	end if
+	
+	' Valutafaktura og kontantfaktura
+	if rpt.Fields("ValutaKode") <= "0" Then rpt.Fields("ValutaKode").Value = ""
+	if Len(Trim(rpt.Fields("ValutaKode"))) > 0 Then
+
+ '// mva visning
+ rpt.Sections("GroupFooter1").Controls("Shape2").Visible = true
+ rpt.Sections("GroupFooter1").Controls("NokLavText").Visible = true
+ rpt.Sections("GroupFooter1").Controls("NokMellomText").Visible = true
+ rpt.Sections("GroupFooter1").Controls("NokHoyText").Visible = true
+ rpt.Sections("GroupFooter1").Controls("NokLavSum").Visible = true
+ rpt.Sections("GroupFooter1").Controls("NokMellomSum").Visible = true
+ rpt.Sections("GroupFooter1").Controls("NokHoySum").Visible = true
+'		m_data.AddGroupCounter "fakturanr",28
+
+		rpt.Sections("GroupHeader1").Controls("Label9").Caption = "Item #"
+		rpt.Sections("GroupHeader1").Controls("Label10").Caption = "Description"
+		rpt.Sections("GroupHeader1").Controls("Label11").Caption = "Quantity"
+		rpt.Sections("GroupHeader1").Controls("Label12").Caption = "%"
+		rpt.Sections("GroupHeader1").Controls("Label13").Caption = "Price"
+		rpt.Sections("GroupHeader1").Controls("Label14").Caption = "Total"
+		rpt.Sections("GroupHeader1").Controls("Label28").Caption = ""
+		rpt.Sections("GroupHeader1").Controls("Label17").Caption = "Org.no"
+		rpt.Sections("GroupHeader1").Controls("Label4").Caption = "Date"
+		rpt.Sections("GroupHeader1").Controls("Label16").Caption = "Term of payment"
+		rpt.Sections("GroupHeader1").Controls("Label21").Caption = "Telephone:"
+		rpt.Sections("GroupHeader1").Controls("Label22").Caption = "Facsimile:"
+		rpt.Sections("GroupHeader1").Controls("Label19").Caption = "Our reference"
+		rpt.Sections("GroupHeader1").Controls("Label20").Caption = "Your reference"
+		rpt.Sections("GroupHeader1").Controls("Label29").Caption = "Acc. ref."
+
+		if m_data.sfcurr(rpt.Fields("Valutasum")) <> 0 THEN Valutakurs = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("TotalSum"))))) / m_data.sfcurr(rpt.Fields("Valutasum")) ELSE Valutakurs = 1
+
+		rpt.Sections("GroupFooter1").Controls("Label3").Caption = "Sub Total"
+		rpt.Sections("GroupFooter1").Controls("Label7").Caption = "Total " & rpt.Fields("ValutaKode")
+		rpt.Sections("GroupFooter1").Controls("Label30").Caption = "Rate of exchange is " & m_data.gjemnull(Valutakurs) & " NOK for 1 " & rpt.Fields("ValutaKode")
+
+'		rpt.Sections("GroupFooter1").Controls("Field4").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field21").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field22").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field23").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field24").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field25").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field26").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field27").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field28").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field29").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field34").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field39").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field40").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field41").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field42").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field43").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field44").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field67").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field68").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field69").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field70").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field71").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field82").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field83").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field85").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field86").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Field138").Visible = False
+
+'		rpt.Sections("GroupFooter1").Controls("Label3").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Label8").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Label25").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Label26").Visible = False
+		rpt.Sections("GroupFooter1").Controls("Label27").Visible = False
+
+		rpt.Sections("GroupFooter1").CanShrink = True
+		rpt.Sections("GroupFooter1").KeepTogether = False
+		rpt.Sections("GroupFooter1").PrintAtBottom = False
+
+	else
+ '// mva visning
+ rpt.Sections("GroupFooter1").Controls("Shape2").Visible = false
+ rpt.Sections("GroupFooter1").Controls("NokLavText").Visible = false
+ rpt.Sections("GroupFooter1").Controls("NokMellomText").Visible = false
+ rpt.Sections("GroupFooter1").Controls("NokHoyText").Visible = false
+ rpt.Sections("GroupFooter1").Controls("NokLavSum").Visible = false
+ rpt.Sections("GroupFooter1").Controls("NokMellomSum").Visible = false
+ rpt.Sections("GroupFooter1").Controls("NokHoySum").Visible = false
+ 
+		if m_data.sfcurr(rpt.Fields("Type")) = 1001 OR m_data.sfcurr(rpt.Fields("Type")) = 1002 Then
+'			m_data.AddGroupCounter "fakturanr",28
+			SumText("Totalsum")
+
+'			rpt.Sections("GroupFooter1").Controls("Field4").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field21").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field22").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field23").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field24").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field25").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field26").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field27").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field28").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field29").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field34").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field39").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field40").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field41").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field42").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field43").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field44").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field67").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field68").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field69").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field70").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field71").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field82").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field83").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field85").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field86").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field138").Visible = False
+
+'			rpt.Sections("GroupFooter1").Controls("Label3").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Label8").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Label25").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Label26").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Label27").Visible = False
+
+			rpt.Sections("GroupFooter1").CanShrink = True
+			rpt.Sections("GroupFooter1").KeepTogether = False
+			rpt.Sections("GroupFooter1").PrintAtBottom = False
+		else
+			rpt.Sections("GroupHeader1").Controls("Label9").Caption = "Varenr."
+			rpt.Sections("GroupHeader1").Controls("Label10").Caption = "Varetekst"
+			rpt.Sections("GroupHeader1").Controls("Label11").Caption = "Antall"
+			rpt.Sections("GroupHeader1").Controls("Label12").Caption = "%"
+			rpt.Sections("GroupHeader1").Controls("Label13").Caption = "Pris"
+			rpt.Sections("GroupHeader1").Controls("Label14").Caption = "Sum"
+			rpt.Sections("GroupHeader1").Controls("Label28").Caption = "Mva"
+			rpt.Sections("GroupHeader1").Controls("Label17").Caption = "Organisasjonsnr"
+			rpt.Sections("GroupHeader1").Controls("Label4").Caption = "Fakturadato"
+			rpt.Sections("GroupHeader1").Controls("Label16").Caption = "Forfallsdato"
+			rpt.Sections("GroupHeader1").Controls("Label21").Caption = "Telefon:"
+			rpt.Sections("GroupHeader1").Controls("Label22").Caption = "Telefaks:"
+			rpt.Sections("GroupHeader1").Controls("Label19").Caption = "V" & Chr(229) &"r referanse"
+			rpt.Sections("GroupHeader1").Controls("Label20").Caption = "Deres referanse"
+			rpt.Sections("GroupHeader1").Controls("Label29").Caption = "Bilagsnr i regnsk."
+
+			rpt.Sections("GroupFooter1").Controls("Label3").Caption = "Sum eks.mva"
+
+			if m_data.sfcurr(rpt.Fields("Totalsum").value) >= 0 Then
+				SumText("Sum å betale")
+			else
+				SumText("Sum tilgode")
+			end if
+
+			rpt.Sections("GroupFooter1").Controls("Label30").Caption = ""
+
+'			rpt.Sections("GroupFooter1").Controls("Field4").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field21").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field22").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field23").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field24").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field25").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field26").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field27").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field28").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field29").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field34").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field39").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field40").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field41").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field42").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field43").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field44").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field67").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field68").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field69").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field70").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field71").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field82").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field83").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field85").Visible = False
+			rpt.Sections("GroupFooter1").Controls("Field86").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Field138").Visible = True
+
+'			rpt.Sections("GroupFooter1").Controls("Label3").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Label8").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Label25").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Label26").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Label27").Visible = True
+
+			rpt.Sections("GroupFooter1").CanShrink = False
+			rpt.Sections("GroupFooter1").KeepTogether = True
+			rpt.Sections("GroupFooter1").PrintAtBottom = True
+		end if
+	end if
+	
+	
+End Sub
+
+Function SumText(Text)
+ dim Contry
+ Contry = Trim(rpt.Fields("CC").Value)
+ 
+ if Contry = "no" OR Contry = "" then
+ rpt.Sections("GroupFooter1").Controls("Label7").Caption = Text
+ else
+ rpt.Sections("GroupFooter1").Controls("Label7").Caption = Text & " NOK"
+ end if
+End Function
+
+Function sfcurr(v)
+ Dim rv
+ On Error Resume Next
+ rv = CCur(v)
+ If Err Then rv = 0
+ m_data.sfcurr = rv
+End Function
+
+function gjemnull(Tall)
+	dim tmptall
+	tmptall = formatnumber(m_data.sfcurr(Tall),2)
+	if tmptall <> 0 then
+		m_data.gjemnull = tmptall
+	else
+		m_data.gjemnull = " "
+	end if
+end function
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="0"
+		DataField="Fakturanr"
+		CanShrink="1"
+	>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader3"
+		Height="435"
+		DataField="periode"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak1"
+		Left="0"
+		Top="0"
+		Width="360"
+		Height="60"
+		Visible="0"
+		Enabled="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field114"
+		DataField="_groupcounter"
+		Left="8079"
+		Top="142"
+		Width="1984"
+		Height="283"
+		Visible="0"
+		Text="_groupcounter"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field195"
+		DataField="periode"
+		Left="142"
+		Top="142"
+		Width="7086"
+		Height="283"
+		Text="tekslinje"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line3"
+		X1="135"
+		Y1="420"
+		X2="10065"
+		Y2="420"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label32"
+		Left="6803"
+		Top="142"
+		Width="1417"
+		Height="283"
+		Caption="Antall"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; text-align: right; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader4"
+		Height="285"
+		DataField="kontrakts_id"
+		CanGrow="0"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label31"
+		Left="142"
+		Top="0"
+		Width="2126"
+		Height="283"
+		Caption="Kontraktnr."
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field196"
+		DataField="kontrakts_id"
+		Left="1559"
+		Top="0"
+		Width="1417"
+		Height="283"
+		Text="kontrakts_id"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader5"
+		Height="0"
+		DataField="felleskostnad"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field192"
+		DataField="felleskostnad"
+		Left="0"
+		Top="0"
+		Width="708"
+		Height="283"
+		Visible="0"
+		Text="felleskostnad"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader6"
+		Height="0"
+		DataField="Momsprosent"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field200"
+		DataField="Momsprosent"
+		Left="0"
+		Top="0"
+		Width="1275"
+		Height="141"
+		Visible="0"
+		Text="VL.Momsprosent"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Visible="0"
+		Height="0"
+		KeepTogether="-1"
+		CanGrow="0"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field104"
+		DataField="Varetekst"
+		Left="0"
+		Top="0"
+		Width="10095"
+		Height="220"
+		Visible="0"
+		Text="Varetekst"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field117"
+		DataField="KompVare"
+		Left="0"
+		Top="0"
+		Width="5640"
+		Height="225"
+		Visible="0"
+		Text="KompVare"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-style: italic; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="Varenr"
+		Left="0"
+		Top="0"
+		Width="1982"
+		Height="220"
+		Text="Varenr"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		DataField="Varetekst"
+		Left="1997"
+		Top="0"
+		Width="3665"
+		Height="220"
+		Text="Varetekst"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field115"
+		DataField="mvafelt"
+		Left="8070"
+		Top="0"
+		Width="880"
+		Height="220"
+		Text="mvafelt"
+		OutputFormat="0.00%"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; text-align: center; vertical-align: middle; white-space: nowrap; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field98"
+		DataField="Prisfelt"
+		Left="7230"
+		Top="0"
+		Width="1050"
+		Height="220"
+		Text="Prisfelt"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; text-align: right; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field19"
+		DataField="Enhet"
+		Left="6670"
+		Top="0"
+		Width="567"
+		Height="220"
+		Text="Enhet"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: left; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field100"
+		DataField="rabfelt"
+		Left="8305"
+		Top="0"
+		Width="620"
+		Height="220"
+		Text="rab"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; text-align: center; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field99"
+		DataField="Sumfelt"
+		Left="8950"
+		Top="0"
+		Width="1180"
+		Height="220"
+		Text="Sumfelt"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field11"
+		DataField="Antall"
+		Left="2976"
+		Top="1701"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="Antall"
+		OutputFormat="0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-size: 8pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; background-color: rgb(192,192,192); vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field12"
+		DataField="Pris"
+		Left="2976"
+		Top="850"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="Pris"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-size: 8pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; background-color: rgb(192,192,192); vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="Netto"
+		Left="2970"
+		Top="1140"
+		Width="1605"
+		Height="270"
+		Visible="0"
+		Text="Netto"
+		OutputFormat="0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-size: 8pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; background-color: rgb(192,192,192); vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field20"
+		DataField="Rab"
+		Left="2976"
+		Top="1417"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="Rab"
+		OutputFormat="0%"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: left; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; background-color: rgb(192,192,192); vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field87"
+		DataField="Totalsum"
+		Left="0"
+		Top="1701"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="Totalsum"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field88"
+		DataField="Innbet_sum"
+		Left="1559"
+		Top="850"
+		Width="1417"
+		Height="284"
+		Visible="0"
+		Text="Innbet_sum"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field89"
+		DataField="Kreditert_Sum"
+		Left="1559"
+		Top="1134"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="Kreditert_Sum"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field96"
+		DataField="GrlHoy"
+		Left="0"
+		Top="1134"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="GrlHoy"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field97"
+		DataField="GrlLav"
+		Left="0"
+		Top="850"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="GrlLav"
+		OutputFormat="#.##"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field101"
+		DataField="Antallfelt"
+		Left="5670"
+		Top="0"
+		Width="992"
+		Height="220"
+		Text="Antallfelt"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="MomsLav"
+		Left="1559"
+		Top="1417"
+		Width="1417"
+		Height="284"
+		Visible="0"
+		Text="MomsLav"
+		OutputFormat="0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; color: rgb(0,0,0); font-family: &apos;Times New Roman&apos;; background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="MomsHoy"
+		Left="1559"
+		Top="1701"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="MomsHoy"
+		OutputFormat="0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; color: rgb(0,0,0); font-family: &apos;Times New Roman&apos;; font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field107"
+		DataField="InnbetaltKreditert"
+		Left="0"
+		Top="1417"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="InnbetaltKreditert"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field110"
+		DataField="Factoring"
+		Left="4535"
+		Top="850"
+		Width="1418"
+		Height="284"
+		Visible="0"
+		Text="Factoring"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field113"
+		DataField="AntLinjer"
+		Left="4535"
+		Top="1134"
+		Width="1418"
+		Height="283"
+		Visible="0"
+		Text="AntLinjer"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field118"
+		DataField="komp_visningstype"
+		Left="4535"
+		Top="1701"
+		Width="1418"
+		Height="283"
+		Visible="0"
+		Text="komp_visningstype"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field123"
+		DataField="Komponentid"
+		Left="4535"
+		Top="1417"
+		Width="1418"
+		Height="284"
+		Visible="0"
+		Text="Komponentid"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field124"
+		DataField="VKompvis"
+		Left="5953"
+		Top="850"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="VKompvis"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field125"
+		DataField="Komp_level"
+		Left="5953"
+		Top="1134"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="Komp_level"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field126"
+		DataField="Komp_lagertype"
+		Left="5953"
+		Top="1417"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="Komp_lagertype"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field129"
+		DataField="Rabatt"
+		Left="5953"
+		Top="1701"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="Rabatt"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field130"
+		DataField="Momsprosent"
+		Left="5953"
+		Top="2551"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="Momsprosent"
+		BackStyle="1"
+		CanShrink="-1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field133"
+		DataField="Moms"
+		Left="4535"
+		Top="2551"
+		Width="1418"
+		Height="284"
+		Visible="0"
+		Text="Moms"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field134"
+		DataField="Mvagrunnlag"
+		Left="2976"
+		Top="2551"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="Mvagrunnlag"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field135"
+		DataField="FMoms"
+		Left="1559"
+		Top="2551"
+		Width="1417"
+		Height="284"
+		Visible="0"
+		Text="FMoms"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field139"
+		DataField="Vaar_Ref"
+		Left="0"
+		Top="1984"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="Vaar_Ref"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field140"
+		DataField="Bilagsnr_Regnskap"
+		Left="1559"
+		Top="1984"
+		Width="1417"
+		Height="284"
+		Visible="0"
+		Text="Bilagsnr_Regnskap"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field141"
+		DataField="Levering"
+		Left="2976"
+		Top="1984"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="Levering"
+		OutputFormat="0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-size: 8pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; background-color: rgb(192,192,192); vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field142"
+		DataField="Fritekst"
+		Left="4535"
+		Top="1984"
+		Width="1418"
+		Height="284"
+		Visible="0"
+		Text="Fritekst"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-size: 8pt; background-color: rgb(192,192,192); vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field143"
+		DataField="Koblet_til_faktnr"
+		Left="5953"
+		Top="1984"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="Koblet_til_faktnr"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field145"
+		DataField="Type"
+		Left="0"
+		Top="2551"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="Type"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field146"
+		DataField="ValutaPrice"
+		Left="0"
+		Top="2268"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="ValutaPrice"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field147"
+		DataField="ValutaKode"
+		Left="1559"
+		Top="2268"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="ValutaKode"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field148"
+		DataField="ValutaLSum"
+		Left="2976"
+		Top="2268"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="ValutaLSum"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field150"
+		DataField="ValutaSum"
+		Left="4535"
+		Top="2268"
+		Width="1418"
+		Height="283"
+		Visible="0"
+		Text="ValutaSum"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field151"
+		DataField="Nettosum"
+		Left="5953"
+		Top="2268"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="Nettosum"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field158"
+		DataField="Betbetingelse"
+		Left="0"
+		Top="2835"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="Betbetingelse"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field159"
+		DataField="Levbetingelse"
+		Left="1559"
+		Top="2835"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="Levbetingelse"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field160"
+		DataField="Transport"
+		Left="2976"
+		Top="2835"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="Transport"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field161"
+		DataField="Kjedenr"
+		Left="4535"
+		Top="2835"
+		Width="1418"
+		Height="283"
+		Visible="0"
+		Text="Kjedenr"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field162"
+		DataField="KjedeNavn"
+		Left="7512"
+		Top="850"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="KjedeNavn"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field163"
+		DataField="KjedeAddress"
+		Left="7512"
+		Top="1134"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="KjedeAddress"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field164"
+		DataField="KjedeAddress2"
+		Left="7512"
+		Top="1417"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="KjedeAddress2"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field165"
+		DataField="KjedePostnr"
+		Left="7512"
+		Top="1701"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="KjedePostnr"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field166"
+		DataField="KjedePoststed"
+		Left="7512"
+		Top="1984"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="KjedePoststed"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field167"
+		DataField="KjedeLand"
+		Left="7512"
+		Top="2268"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="KjedeLand"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field168"
+		DataField="KjedeGiro"
+		Left="7512"
+		Top="2551"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="KjedeGiro"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field169"
+		DataField="KjedeLand"
+		Left="7512"
+		Top="2835"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="KjedeLand"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field170"
+		DataField="Factoring"
+		Left="5953"
+		Top="2835"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="Factoring"
+		BackStyle="1"
+		CanShrink="-1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); font-size: 8pt; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field171"
+		DataField="eFakttura"
+		Left="9071"
+		Top="850"
+		Width="992"
+		Height="284"
+		Visible="0"
+		Text="eFakttura"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field178"
+		DataField="Momskode"
+		Left="9071"
+		Top="1134"
+		Width="992"
+		Height="283"
+		Visible="0"
+		Text="Momskode"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field185"
+		DataField="persongrunnlag"
+		Left="6047"
+		Top="3118"
+		Width="1512"
+		Height="284"
+		Visible="0"
+		Text="persongrunnlag"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field186"
+		DataField="MvaProsentPersongrunnlag"
+		Left="3024"
+		Top="3118"
+		Width="3023"
+		Height="284"
+		Visible="0"
+		Text="MvaProsentPersongrunnlag"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field187"
+		DataField="MvaProsentHøy"
+		Left="0"
+		Top="3118"
+		Width="1512"
+		Height="284"
+		Visible="0"
+		Text="MvaProsentHøy"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field188"
+		DataField="MvaProsentLav"
+		Left="1512"
+		Top="3118"
+		Width="1512"
+		Height="284"
+		Visible="0"
+		Text="MvaProsentLav"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field189"
+		DataField="AvtaleGiroStatus"
+		Left="7559"
+		Top="3118"
+		Width="1512"
+		Height="284"
+		Visible="0"
+		Text="AvtaleGiroStatus"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field190"
+		DataField="CC"
+		Left="9071"
+		Top="1417"
+		Width="992"
+		Height="284"
+		Visible="0"
+		Text="Country_code"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="white-space: nowrap; color: rgb(0,0,0); background-color: rgb(192,192,192); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field191"
+		DataField="felleskostnad"
+		Left="4961"
+		Top="0"
+		Width="708"
+		Height="283"
+		Text="felleskostnad"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter6"
+		Height="315"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field194"
+		DataField="tekstlinje"
+		Left="567"
+		Top="0"
+		Width="6094"
+		Height="283"
+		Text="tekslinje"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field193"
+		DataField="Sumfelt"
+		Left="8385"
+		Top="0"
+		Width="1710"
+		Height="285"
+		Text="Sumfelt"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader5"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field198"
+		DataField="kvm"
+		Left="6803"
+		Top="0"
+		Width="1417"
+		Height="283"
+		Text="kvm"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field199"
+		DataField="momsprosent"
+		Left="283"
+		Top="0"
+		Width="1418"
+		Height="283"
+		Visible="0"
+		Text="kvm"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter5"
+		Height="0"
+	>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter4"
+		Height="0"
+		KeepTogether="-1"
+	>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter3"
+		Visible="0"
+		Height="0"
+		CanShrink="1"
+	>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="2325"
+		CanGrow="0"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field111"
+		DataField="FritekstFelt"
+		Left="0"
+		Top="45"
+		Width="5244"
+		Height="850"
+		Text="FritekstFelt"
+		CanShrink="-1"
+		ClassName="Normal"
+		Style="font-weight: bold; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="187"
+		Y1="0"
+		X2="10108"
+		Y2="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape4"
+		Left="5535"
+		Top="1605"
+		Width="4530"
+		Height="645"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field207"
+		DataField="NettosumFelt"
+		Left="8646"
+		Top="45"
+		Width="1454"
+		Height="220"
+		Text="NettosumFelt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; font-family: &apos;Verdana&apos;; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label40"
+		Left="5528"
+		Top="45"
+		Width="3118"
+		Height="220"
+		Caption="Sum eks.mva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field208"
+		DataField="TotalSumFelt"
+		Left="8646"
+		Top="925"
+		Width="1454"
+		Height="220"
+		Text="TotalSumFelt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; font-weight: bold; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label41"
+		Left="5528"
+		Top="925"
+		Width="3118"
+		Height="220"
+		Caption="Sum å betale"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-weight: bold; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field209"
+		DataField="FraKonto"
+		Left="6378"
+		Top="1888"
+		Width="2268"
+		Height="283"
+		Text="FraKonto"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 10pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field210"
+		DataField="LavMva"
+		Left="5535"
+		Top="495"
+		Width="3105"
+		Height="225"
+		Text="LavMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field211"
+		DataField="HoyMva"
+		Left="5528"
+		Top="717"
+		Width="3118"
+		Height="220"
+		Text="HoyMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field212"
+		DataField="MomsLavFelt"
+		Left="8646"
+		Top="493"
+		Width="1454"
+		Height="220"
+		Text="MomsLavFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field213"
+		DataField="MomsHoyFelt"
+		Left="8646"
+		Top="717"
+		Width="1454"
+		Height="220"
+		Text="MomsHoyFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field214"
+		DataField="InnbetKredTxt"
+		Left="5528"
+		Top="1134"
+		Width="3118"
+		Height="220"
+		Text="InnbetKredTxt"
+		ClassName="Normal"
+		Style="font-weight: bold; color: rgb(255,0,0); font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field215"
+		DataField="InnbetKred"
+		Left="8646"
+		Top="1134"
+		Width="1454"
+		Height="220"
+		Text="InnbetKred"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; color: rgb(255,0,0); white-space: nowrap; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label42"
+		Left="425"
+		Top="1321"
+		Width="9638"
+		Height="283"
+		ClassName="Normal"
+		Style="text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field216"
+		DataField="personmvatekst"
+		Left="5528"
+		Top="268"
+		Width="3118"
+		Height="220"
+		Text="LavMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field217"
+		DataField="personmva"
+		Left="8646"
+		Top="268"
+		Width="1454"
+		Height="220"
+		Text="MomsLavFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field218"
+		DataField="NokLavText"
+		Left="5528"
+		Top="1596"
+		Width="3118"
+		Height="220"
+		Visible="0"
+		Text="Field218"
+		ClassName="Normal"
+		Style="font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field219"
+		DataField="NokMellomText"
+		Left="5528"
+		Top="1800"
+		Width="3105"
+		Height="225"
+		Visible="0"
+		Text="Field219"
+		ClassName="Normal"
+		Style="font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field220"
+		DataField="NokHoyText"
+		Left="5528"
+		Top="2028"
+		Width="3118"
+		Height="220"
+		Visible="0"
+		Text="Field220"
+		ClassName="Normal"
+		Style="font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field221"
+		DataField="NokLavSum"
+		Left="8646"
+		Top="1596"
+		Width="1417"
+		Height="220"
+		Text="Field221"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field222"
+		DataField="NokMellomSum"
+		Left="8646"
+		Top="1804"
+		Width="1417"
+		Height="220"
+		Text="Field222"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field223"
+		DataField="NokHoySum"
+		Left="8646"
+		Top="2028"
+		Width="1417"
+		Height="220"
+		Text="Field223"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Visible="0"
+		PrintAtBottom="1"
+		Height="7305"
+		KeepTogether="-1"
+		CanGrow="0"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape2"
+		Left="5535"
+		Top="1560"
+		Width="4530"
+		Height="645"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="NettosumFelt"
+		Left="8646"
+		Top="0"
+		Width="1454"
+		Height="220"
+		Text="NettosumFelt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; font-family: &apos;Verdana&apos;; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label3"
+		Left="5528"
+		Top="0"
+		Width="3118"
+		Height="220"
+		Caption="Sum eks.mva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="tot2"
+		Left="3910"
+		Top="6355"
+		Width="1635"
+		Height="285"
+		Visible="0"
+		Text="Totalsum"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;AdvOCR-B&apos;; ddo-char-set: 2; font-size: 13pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field22"
+		DataField="KID"
+		Left="0"
+		Top="6355"
+		Width="3600"
+		Height="283"
+		Visible="0"
+		Text="KID"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; ddo-char-set: 2; font-size: 13pt; text-align: right; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field23"
+		DataField="Kundenr"
+		Left="1600"
+		Top="2918"
+		Width="2200"
+		Height="220"
+		Visible="0"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; text-align: left; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		DataField="Avsendernavn"
+		Left="0"
+		Top="4177"
+		Width="3827"
+		Height="220"
+		Visible="0"
+		Text="Avsendernavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-weight: bold; font-family: &apos;Verdana&apos;; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field25"
+		DataField="AvsenderAdresse"
+		Left="0"
+		Top="4400"
+		Width="3827"
+		Height="220"
+		Visible="0"
+		Text="AvsenderAdresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="AvsenderAdresse2"
+		Left="0"
+		Top="4624"
+		Width="3827"
+		Height="220"
+		Visible="0"
+		Text="AvsenderAdresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="AvsenderPostnr"
+		Left="0"
+		Top="4845"
+		Width="870"
+		Height="225"
+		Visible="0"
+		Text="AvsenderPostnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="AvsenderPoststed"
+		Left="855"
+		Top="4845"
+		Width="2940"
+		Height="225"
+		Visible="0"
+		Text="AvsenderPoststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; white-space: nowrap; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="AvsenderLand"
+		Left="0"
+		Top="5071"
+		Width="3827"
+		Height="220"
+		Visible="0"
+		Text="AvsenderLand"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field32"
+		DataField="TotalSumFelt"
+		Left="8646"
+		Top="880"
+		Width="1454"
+		Height="220"
+		Text="TotalSumFelt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; font-weight: bold; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label7"
+		Left="5528"
+		Top="880"
+		Width="3118"
+		Height="220"
+		Caption="Sum å betale"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-weight: bold; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		DataField="ksiff"
+		Left="6000"
+		Top="6355"
+		Width="425"
+		Height="284"
+		Visible="0"
+		Text="kontrollsiffer"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; ddo-char-set: 2; font-size: 13pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field39"
+		DataField="MottakerNavn"
+		Left="5750"
+		Top="4177"
+		Width="4252"
+		Height="220"
+		Visible="0"
+		Text="MottakerNavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field40"
+		DataField="MottakerAdresse"
+		Left="5750"
+		Top="4400"
+		Width="4252"
+		Height="220"
+		Visible="0"
+		Text="MottakerAdresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field41"
+		DataField="MottakerAdresse2"
+		Left="5750"
+		Top="4624"
+		Width="4252"
+		Height="220"
+		Visible="0"
+		Text="MottakerAdresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field42"
+		DataField="MottakerPostnr"
+		Left="5750"
+		Top="4845"
+		Width="870"
+		Height="225"
+		Visible="0"
+		Text="MottakerPostnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field43"
+		DataField="MottakerPoststed"
+		Left="6630"
+		Top="4845"
+		Width="3345"
+		Height="225"
+		Visible="0"
+		Text="MottakerPoststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label8"
+		Left="0"
+		Top="2918"
+		Width="1600"
+		Height="220"
+		Visible="0"
+		Caption="Kundenummer"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field44"
+		DataField="TilKonto"
+		Left="6700"
+		Top="6355"
+		Width="3401"
+		Height="284"
+		Visible="0"
+		Text="TilKonto"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; ddo-char-set: 2; font-size: 13pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field67"
+		DataField="Fakturanr"
+		Left="1600"
+		Top="3156"
+		Width="2200"
+		Height="220"
+		Visible="0"
+		Text="Fakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label25"
+		Left="0"
+		Top="3380"
+		Width="1600"
+		Height="220"
+		Visible="0"
+		Caption="Referanse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label26"
+		Left="15"
+		Top="3603"
+		Width="1600"
+		Height="220"
+		Visible="0"
+		Caption="Dato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field68"
+		DataField="Vaar_Ref"
+		Left="1600"
+		Top="3380"
+		Width="2200"
+		Height="220"
+		Visible="0"
+		Text="Vaar_Ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field69"
+		DataField="Fakturadato"
+		Left="1600"
+		Top="3603"
+		Width="2200"
+		Height="220"
+		Visible="0"
+		Text="Fakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field70"
+		DataField="Forfallsdato"
+		Left="8631"
+		Top="2431"
+		Width="1417"
+		Height="284"
+		Visible="0"
+		Text="Forfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: center; font-size: 12pt; font-weight: bold; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field71"
+		DataField="Tot"
+		Left="3402"
+		Top="1843"
+		Width="1984"
+		Height="283"
+		Text="Totalsum"
+		OutputFormat="0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field82"
+		DataField="FraKonto"
+		Left="6378"
+		Top="1843"
+		Width="2268"
+		Height="283"
+		Text="FraKonto"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 10pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field83"
+		DataField="TilKonto"
+		Left="0"
+		Top="1843"
+		Width="2409"
+		Height="283"
+		Text="TilKonto"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field85"
+		DataField="MottakerLand"
+		Left="5750"
+		Top="5071"
+		Width="4252"
+		Height="220"
+		Visible="0"
+		Text="MottakerLand"
+		ClassName="Normal"
+		Style="white-space: nowrap; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field86"
+		DataField="FaktTxt"
+		Left="0"
+		Top="3156"
+		Width="1600"
+		Height="220"
+		Visible="0"
+		Text="FaktTxt"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field90"
+		DataField="LavMva"
+		Left="5535"
+		Top="450"
+		Width="3105"
+		Height="225"
+		Text="LavMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field91"
+		DataField="HoyMva"
+		Left="5528"
+		Top="672"
+		Width="3118"
+		Height="220"
+		Text="HoyMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field102"
+		DataField="MomsLavFelt"
+		Left="8646"
+		Top="448"
+		Width="1454"
+		Height="220"
+		Text="MomsLavFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field103"
+		DataField="MomsHoyFelt"
+		Left="8646"
+		Top="672"
+		Width="1454"
+		Height="220"
+		Text="MomsHoyFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field105"
+		DataField="InnbetKredTxt"
+		Left="5528"
+		Top="1089"
+		Width="3118"
+		Height="220"
+		Text="InnbetKredTxt"
+		ClassName="Normal"
+		Style="font-weight: bold; color: rgb(255,0,0); font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field106"
+		DataField="InnbetKred"
+		Left="8646"
+		Top="1089"
+		Width="1454"
+		Height="220"
+		Text="InnbetKred"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; color: rgb(255,0,0); white-space: nowrap; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label27"
+		Left="0"
+		Top="5625"
+		Width="9975"
+		Height="705"
+		Visible="0"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 34pt; text-align: center; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field127"
+		DataField="KampText"
+		Left="0"
+		Top="100"
+		Width="5386"
+		Height="1134"
+		Text="KampText"
+		CanGrow="0"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field138"
+		DataField="Bedrifttxt"
+		Left="0"
+		Top="2700"
+		Width="3800"
+		Height="225"
+		Visible="0"
+		Text="Bedrifttxt"
+		ClassName="Normal"
+		Style="white-space: nowrap; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label30"
+		Left="425"
+		Top="1276"
+		Width="9638"
+		Height="283"
+		ClassName="Normal"
+		Style="text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field183"
+		DataField="personmvatekst"
+		Left="5528"
+		Top="223"
+		Width="3118"
+		Height="220"
+		Text="LavMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field184"
+		DataField="personmva"
+		Left="8646"
+		Top="223"
+		Width="1454"
+		Height="220"
+		Text="MomsLavFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="NokLavText"
+		DataField="NokLavText"
+		Left="5528"
+		Top="1551"
+		Width="3118"
+		Height="220"
+		Visible="0"
+		Text="NokLavText"
+		ClassName="Normal"
+		Style="font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="NokMellomText"
+		DataField="NokMellomText"
+		Left="5528"
+		Top="1755"
+		Width="3105"
+		Height="225"
+		Visible="0"
+		Text="NokMellomText"
+		ClassName="Normal"
+		Style="font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="NokHoyText"
+		DataField="NokHoyText"
+		Left="5528"
+		Top="1983"
+		Width="3118"
+		Height="220"
+		Visible="0"
+		Text="NokHoyText"
+		ClassName="Normal"
+		Style="font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="NokLavSum"
+		DataField="NokLavSum"
+		Left="8646"
+		Top="1551"
+		Width="1417"
+		Height="220"
+		Text="NokLavSum"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="NokMellomSum"
+		DataField="NokMellomSum"
+		Left="8646"
+		Top="1759"
+		Width="1417"
+		Height="220"
+		Text="NokMellomSum"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="NokHoySum"
+		DataField="NokHoySum"
+		Left="8646"
+		Top="1983"
+		Width="1417"
+		Height="220"
+		Text="NokHoySum"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 6pt; vertical-align: middle; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Visible="0"
+		Height="0"
+		CanShrink="1"
+	>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

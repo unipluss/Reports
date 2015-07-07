@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{438108E6-D4D7-4829-B242-B81FC3F1439F}" GUIDREP="{B1B7A7FE-F76A-4185-A3D4-80175F70E799}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10650"
+	DocumentName="KPI utregning"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[
+'dim utleid
+Sub OnDataInitialize
+	'm_data.Debugg=true
+	dim sql
+
+	'm_data.AddInputMacro "{kontrakter}","Vis kontrakt nr:","", ""
+
+	'if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	
+	
+	sql = sql & " select k.kundenummer, k.kontrakts_id, k.kontrakt_fra, k.kontrakt_til, k.justerings_dato_kpi, "
+	sql = sql & " abs(k.justeringsintervall) intervall, k.faktorkpi, k.justeringsdato, j.justeringsdato just_foretatt, n.name kundenavn "
+	sql = sql & " from e..t_kpi_justering j join e..t_arealkontrakt k on j.kontrakts_id = k.kontrakts_id join e..t_kunde ku on ku.kundenummer=k.kundenummer "
+	sql = sql & " join c..c_name n on n.id=ku.nameid "
+	sql = sql & " order by k.kundenummer, j.kontrakts_id, j.justeringsdato "
+
+	
+	m_data.SqlString = sql
+	m_data.SetupFields rpt
+End Sub
+
+
+Sub OnReportStart
+
+End Sub
+
+Sub OnFetchData(eof)
+
+	'rpt.fields("nypris").value=rpt.fields("pris2")*rpt.fields("antall")
+	'rpt.fields("gammelpris").value=rpt.fields("pris")*rpt.fields("antall")
+	'IF utleid = 2 THEN
+	'	rpt.fields("tekst").value = "Antall kvm er netto kvm"
+	'else
+	'	rpt.fields("tekst").value = "Antall kvm er brutto (inkl fellesareal)"
+	'end if
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="800"
+	RightMargin="360"
+	TopMargin="720"
+	BottomMargin="360"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1260"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="*y..Bedrift.Navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="283"
+		Text="*y..Bedrift.Navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="*y..Bedrift.Arstall"
+		Left="7937"
+		Top="0"
+		Width="2693"
+		Height="283"
+		Text="*y..Bedrift.Arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="=&quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="7937"
+		Top="283"
+		Width="2693"
+		Height="284"
+		Text="Sidenr"
+		SummaryType="4"
+		SummaryFunc="11"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; text-align: right; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="=now()"
+		Left="7937"
+		Top="567"
+		Width="2693"
+		Height="283"
+		Text="Dato"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; text-align: right; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="User_name"
+		Left="7937"
+		Top="850"
+		Width="2693"
+		Height="284"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-size: 8pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label30"
+		Left="0"
+		Top="0"
+		Width="4394"
+		Height="425"
+		Caption="KPI-justeringer"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 16pt; font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="345"
+		DataField="kontrakts_id"
+		GroupKeepTogether="2"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field59"
+		DataField="kundenummer"
+		Left="22"
+		Top="37"
+		Width="992"
+		Height="283"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field60"
+		DataField="kontrakts_id"
+		Left="6642"
+		Top="37"
+		Width="1418"
+		Height="283"
+		Text="kontraktsid"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 10pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field63"
+		DataField="kundenavn"
+		Left="1005"
+		Top="30"
+		Width="3750"
+		Height="285"
+		Text="kundenavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label51"
+		Left="4785"
+		Top="37"
+		Width="1842"
+		Height="283"
+		Caption="Kontraktsnummer"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label50"
+		Left="8490"
+		Top="30"
+		Width="1842"
+		Height="283"
+		Caption="Justering foretatt"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="0"
+		DataField="just_foretatt"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="285"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field62"
+		DataField="just_foretatt"
+		Left="8622"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Text="justeringsdato"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 10pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="0"
+	>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="60"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="0"
+		Y1="45"
+		X2="10605"
+		Y2="45"
+		LineColor="12632256"
+		LineWeight="3"
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="1140"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label36"
+		Left="12472"
+		Top="0"
+		Width="1843"
+		Height="283"
+		Caption="Totalt kvm utleid:"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; vertical-align: middle; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field50"
+		DataField="antall"
+		Left="14315"
+		Top="0"
+		Width="992"
+		Height="283"
+		Text="antall"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; font-weight: bold; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label44"
+		Left="0"
+		Top="567"
+		Width="5811"
+		Height="283"
+		Visible="0"
+		Caption="Rapporten er laget av: Erik F Uni Pluss AS"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

@@ -1,0 +1,2154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{4E5AB03F-1999-4D34-A10A-A74876A9ACEE}" GUIDREP="{A7FE4F01-40D8-4471-9FAD-E020E1899B6A}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10350"
+	DocumentName="Faktura"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[Option Explicit
+dim fakturanr, bankgiro, postgiro, BankPostGiro, hoymvasats, lavmvasats, factbankgiro,IBAN,SWIFT
+dim bednavn, bedadr1, bedadr2, bedpostnr, bedpoststed, OcrAvtale, MVAnr, Landkode, Url, MailAdr
+dim factnavn, factadr1, factadr2, factpostnr, factpoststed, factgiro, factkidtype, factoringnr, factfritxt
+dim klib, Sfelt, tot, innrykk, init, Antlinje, Antlinje2, VKurs, ViseMvafelt, ViseUtenAvg,personmvasats
+
+ViseMvafelt = false 'Sett til true hvis mvafelt skal vise på blanketten
+ViseUtenAvg = false 'Sett til true hvis avgiftsfrie linjer skal vises med 0%
+
+Sub OnDataInitialize
+	Dim sql
+	'm_data.Debugg = True
+	m_data.Trace "/// report start /// : " & now
+
+'	Create a groupcounter
+	Antlinje = 14 
+	Antlinje2 = 35 
+	m_data.AddGroupCounter "fakturanr",Clng(Antlinje)
+	m_data.fieldchooser = true
+
+	'Input dialog 
+	m_data.AddInputMacro "{fra}","Fra fakturanr.","getsql(select max(fakturanr) as it from c..faktura)"
+	m_data.AddInputMacro "{til}","Til fakturanr.","getsql(select max(fakturanr) as it from c..faktura)"
+	if not m_data.ShowInputDialog("Oppgi fakturaserie") then exit sub
+	
+	'Create query string
+ 	sql="object:urap_blankettdataLib.faktura:{fra}|{til}"
+
+	m_data.SqlString = sql
+	m_data.SetupFields rpt
+
+End Sub
+
+
+
+Sub OnReportStart
+	dim dettop
+	dettop = 0
+
+	m_data.GetControl("fldFritekstlinje").top = dettop 
+	m_data.GetControl("fldKomplinje").top = dettop 
+	m_data.GetControl("fldPrisInkMva").top = dettop 
+	m_data.GetControl("fldPrisExMva").top = dettop 
+	m_data.GetControl("fldSumInkMva").top = dettop 
+	m_data.GetControl("fldSumExMva").top = dettop 
+	m_data.GetControl("fldMvaPsnt").top = dettop 
+	m_data.GetControl("fldMvakr").top = dettop
+
+	dim lbltop
+	lbltop =  m_data.GetControl("lblvarenr").top
+	m_data.GetControl("lblprisinkmva").top = lbltop
+	m_data.GetControl("lblSumLinjeInkmva").top = lbltop
+
+End Sub
+
+Sub OnFetchData(eof)
+'// Watermark for e2b or ap
+	If m_data.SFCurr(m_data.GetValue("e2bStatus")) > 0 Then
+		m_data.SetWatermark rpt, "e2bWatermark"
+	Elseif m_data.SFCurr(m_data.GetValue("APStatus")) > 0 Then
+		m_data.SetWatermark rpt, "APWatermark"
+	Else
+		rpt.Watermark = Nothing
+	End If
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="720"
+	RightMargin="720"
+	TopMargin="450"
+	BottomMargin="720"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: top; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="PageHeader" Name="PageHeader"
+		Visible="0"
+		Height="0"
+		BackColor="12640511"
+		CanShrink="1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="4950"
+		DataField="Fakturanr"
+		RepeatStyle="4"
+		NewPage="1"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftnavn"
+		DataField="*y..bedrift.navn"
+		Left="5528"
+		Top="0"
+		Width="4252"
+		Height="283"
+		Text="*y..bedrift.navn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-weight: bold; font-size: 11.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftadresse"
+		DataField="*y..bedrift.adresse"
+		Left="6345"
+		Top="285"
+		Width="3180"
+		Height="285"
+		Text="*y..bedrift.adresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftadresse2"
+		DataField="*y..bedrift.adresse2"
+		Left="6345"
+		Top="540"
+		Width="3810"
+		Height="210"
+		Text="*y..bedrift.adresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftpostnr"
+		DataField="*y..bedrift.postnr"
+		Left="6345"
+		Top="755"
+		Width="810"
+		Height="220"
+		Text="postnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftpoststed"
+		DataField="*y..bedrift.poststed"
+		Left="7170"
+		Top="750"
+		Width="3000"
+		Height="225"
+		Text="poststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblmvanr"
+		DataField="lblmvanr"
+		Left="6345"
+		Top="1050"
+		Width="1725"
+		Height="225"
+		Text="lblmvanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvanr"
+		DataField="fldmvanr"
+		Left="8085"
+		Top="1050"
+		Width="2100"
+		Height="210"
+		Text="fldmvanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblBankgiro"
+		DataField="lblbankgiro"
+		Left="6345"
+		Top="1260"
+		Width="1725"
+		Height="225"
+		Text="lblbankgiro"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBankgiro"
+		DataField="bankgirotext"
+		Left="8085"
+		Top="1260"
+		Width="2100"
+		Height="225"
+		Text="bankgirotext"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblIban"
+		DataField="lbliban"
+		Left="6345"
+		Top="1485"
+		Width="1725"
+		Height="210"
+		Text="lbliban"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldIban"
+		DataField="ibanvalue"
+		Left="8085"
+		Top="1485"
+		Width="2100"
+		Height="225"
+		Text="fldiban"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblswift"
+		DataField="lblswift"
+		Left="6345"
+		Top="1710"
+		Width="1725"
+		Height="225"
+		Text="swifttxt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldswift"
+		DataField="fldswift"
+		Left="8085"
+		Top="1710"
+		Width="2100"
+		Height="210"
+		Text="fldswift"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="imgPhone"
+		Left="6345"
+		Top="2430"
+		Width="300"
+		Height="225"
+		>
+		<Data><![CDATA[010000006C740000BC030000424DBC030000000000003600000028000000140000000F000000010018000000000086030000C30E0000C30E0000000000000000
+			0000FFFFFFFFFFFFFFFFFFFFFFFFF4F4F46A67675B58585B58585B58585B58585B58585B58586A6767F4F4F4FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFE0E0E05B58589D9B9B9391919896969896969391919D9B9B5B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFFE0E0E05B58586F6C6C6B68686D6A6A6D6A6A6B68686F6C6C5B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFE0E0E05B5858918F8F8785858C8A8A8C8A8A878585918F8F5B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE0E0
+			E05B5858A2A0A09593939B99999B9999959393A2A0A05B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE0E0E05B5858
+			5B58585B58585B58585B58585B58585B58585B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE0E0E05B5858AEACACC1
+			C0C0C1C0C0C1C0C0C1C0C0AEACAC5B5858E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7F7F7CDCCCCFFFFFFE0E0E05B5858EAEAEA807E7E7977
+			777977778A8888EAEAEA5B5858E0E0E0FFFFFFCDCCCCF7F7F7FFFFFFFFFFFFFFFFFFFFFFFFA3A1A1C1C0C0ECECECE0E0E05B5858EAEAEA5B58585B58585B5858
+			676464EAEAEA5B5858E0E0E0ECECECC1C0C0A3A1A1FFFFFFFFFFFFFFFFFFFFFFFF7B7878EBEBEB7E7B7BE0E0E05B5858EAEAEA9D9B9B9D9B9B969494A8A6A6EA
+			EAEA5B5858E0E0E07E7B7BEBEBEB7B7878FFFFFFFFFFFFFFFFFFFFFFFF827F7FD3D2D2A4A3A3E0E0E05B5858EAEAEAFCFCFC868484918F8FFFFFFFEAEAEA5B58
+			58E0E0E0A4A3A3D3D2D2827F7FFFFFFFFFFFFFFFFFFFFFFFFF7B7878EEEEEE828080E0E0E05B5858EAEAEAF5F5F55E5B5B636161FEFEFEEAEAEA5B5858E0E0E0
+			828080EEEEEE7B7878FFFFFFFFFFFFFFFFFFFFFFFFB7B6B6ACABABFFFFFFE0E0E05B5858E9E9E9FFFFFFDCDCDCE1E1E1FFFFFFE9E9E95B5858E0E0E0FFFFFFAC
+			ABABB7B6B6FFFFFFFFFFFFFFFFFFFFFFFFFEFEFEE7E7E7FFFFFFE0E0E05B58587573738481818481818481818481817573735B5858E0E0E0FFFFFFE7E7E7FEFE
+			FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4F4F46A67675B58585B58585B58585B58585B58585B58586A6767F4F4F4FFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFF0000]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="imgEmail"
+		Left="6345"
+		Top="2715"
+		Width="300"
+		Height="225"
+		>
+		<Data><![CDATA[010000006C740000BC030000424DBC030000000000003600000028000000140000000F000000010018000000000086030000C30E0000C30E0000000000000000
+			0000FFFFFFD7D6D66764645B58585B58585B58585B58585B58585B58585B58585B58585B58585B58585B58585B5858676464D7D6D6FFFFFFFFFFFFFFFFFFFFFF
+			FF726F6FCDCCCC6461615B58585B58585B58585B58585B58585B58585B58585B58585B58585B5858646161CDCCCC726F6FFFFFFFFFFFFFFFFFFFFFFFFF5B5858
+			777575CECDCD615E5E5B58585B58585B58585B58585B58585B58585B58585B5858615E5ECECDCD7775755B5858FFFFFFFFFFFFFFFFFFFFFFFF5B58585B585879
+			7777CBCACA615E5E5B58585B58585B58585B58585B58585B5858615E5ECBCACA7977775B58585B5858FFFFFFFFFFFFFFFFFFFFFFFF5B58585B58585B58587C7A
+			7A7775755B5858878585D8D8D8D8D8D88785855B58587775757C7A7A5B58585B58585B5858FFFFFFFFFFFFFFFFFFFFFFFF5B58585B58585B58585B5858615E5E
+			B9B8B8FEFEFEFFFFFFFFFFFFFEFEFEB9B8B8615E5E5B58585B58585B58585B5858FFFFFFFFFFFFFFFFFFFFFFFF5B58585B58585B58587C7A7AE5E5E5FFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFE5E5E57C7A7A5B58585B58585B5858FFFFFFFFFFFFFFFFFFFFFFFF5B58585D5A5AACABABFCFCFCFFFFFFA5A3A37977777977
+			777C7979F4F4F4FFFFFFFFFFFFFCFCFCACABAB5D5A5A5B5858FFFFFFFFFFFFFFFFFFFFFFFF716E6EDADADACDCCCCFFFFFFFFFFFFF5F5F5EAEAEAEAEAEAEAEAEA
+			EAEAEAF5F5F5FFFFFFFFFFFFCDCCCCDBDADA716E6EFFFFFFFFFFFFFFFFFFFFFFFFE1E1E1827F7F797676FFFFFFFFFFFFB0AEAE8E8C8C8E8C8C8E8C8C8E8C8CB0
+			AEAEFFFFFFFFFFFF797676827F7FE1E1E1FFFFFFFFFFFFFFFFFFFFFFFFDBDADA6764645F5C5CCCCBCBE0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0
+			E0CCCBCB5F5C5C676464DBDADAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0EFEF8B88885B58585B58585B58585B58585B58585B58585B58585B58585B58585B5858
+			8B8888F0EFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC1C0C06461615B58585B58585B58585B58585B58585B5858646161C1C0C0FFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFECEBEB8785855B58585B58585B58585B5858878585ECEBEBFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEBBBABA656262656262BBBABAFEFEFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFF0000]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="imgUrl"
+		Left="6345"
+		Top="3000"
+		Width="300"
+		Height="225"
+		>
+		<Data><![CDATA[010000006C740000BC030000424DBC030000000000003600000028000000140000000F000000010018000000000086030000C30E0000C30E0000000000000000
+			0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBBDBCBC858383737070777474737070858383BDBCBCFBFBFBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFE7E6E6787575A2A1A1E0E0E0FFFFFFFAFAFAFFFFFFE0E0E0A2A1A1787575E7E6E6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFE7E6E6F2F2F2DDDCDCA5A3A3BBBABA8F8D8DC7C6C68E8C8CBBBABAA5A3A3DDDCDCF2F2F2E7E6E6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFB78
+			7575DFDEDE8583836C6969C1C0C05B5858C7C6C65B5858BFBEBE6C6A6A858383DEDEDE787575FBFBFBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBDBCBCA3A1A1E7E6
+			E6B7B6B6D2D1D1CDCDCDB7B6B6E5E5E5B7B6B6CDCDCDD3D2D2B7B6B6E7E6E6A2A1A1BDBCBCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF858383E3E3E36461615B5858
+			C8C7C75D5A5A5B5858C7C6C65B58585D5A5AC8C7C75B5858646161E3E2E2858383FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF737070DBDADA5B58585B5858CDCDCD5B
+			58585B5858C7C6C65B58585B5858CDCDCD5B58585B5858DBDADA737070FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF777474EAEAEABDBCBCBDBCBCE9E9E9BDBCBCBDBC
+			BCE5E5E5BDBCBCBDBCBCE9E9E9BDBCBCBDBCBCEAEAEA777474FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF737070DFDFDF5B58585B5858CDCDCD5B58585B5858C7C6C6
+			5B58585B5858CECDCD5B58585B5858DFDFDF737070FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF858383E5E5E57B78786F6C6CCDCDCD7270706F6C6CCDCDCD6F6C6C72
+			7070CECDCD6F6C6C7B7878E5E4E4858383FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBDBCBCA2A1A1E1E1E1989696BDBCBCBBBABA989696DBDADA989696BBBABABBBA
+			BA989696E1E1E1A2A1A1BDBCBCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFB787575E1E0E09B9999656262CAC9C95B5858C7C6C65B5858CCCBCB6562629B9999
+			E1E0E0787575FBFBFBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE7E6E6F2F2F2E1E0E0C1BFBFB9B8B8A8A7A7CCCBCBA8A6A6B9B8B8C1BFBFE1E0E0F2F2F2E7
+			E6E6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE7E6E6787575A2A1A1E7E7E7FFFFFFFFFFFFFFFFFFE7E7E7A2A1A1787575E7E6E6FFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFBFBBEBDBD858383737070777474737070858383BEBDBDFBFBFBFFFFFFFFFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFF0000]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedrifttelefon"
+		DataField="*y..bedrift.telefon"
+		Left="6720"
+		Top="2430"
+		Width="3390"
+		Height="225"
+		Text="*y..bedrift.telefon"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftemail"
+		DataField="*y..bedrift.mailadr"
+		Left="6720"
+		Top="2715"
+		Width="3390"
+		Height="225"
+		Text="*y..bedrift.mailadr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedrifturl"
+		DataField="*y..bedrift.url"
+		Left="6720"
+		Top="3000"
+		Width="3390"
+		Height="225"
+		Text="*y..bedrift.url"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblKundenrTop"
+		DataField="lblKundenr"
+		Left="0"
+		Top="1725"
+		Width="1140"
+		Height="225"
+		Text="lblKundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundenrTop"
+		DataField="fldKundenr"
+		Left="1155"
+		Top="1725"
+		Width="2145"
+		Height="225"
+		Text="fldKundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundenavnTop"
+		DataField="fldKundenavn"
+		Left="0"
+		Top="1935"
+		Width="3300"
+		Height="225"
+		Text="fldKundenavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; font-weight: bold; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldkundeadresseTop"
+		DataField="fldkundeadresse"
+		Left="0"
+		Top="2160"
+		Width="3300"
+		Height="210"
+		Text="fldKundeadresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundeadresse2"
+		DataField="fldkundeadresse2"
+		Left="0"
+		Top="2340"
+		Width="3300"
+		Height="210"
+		Text="fldKundeadresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundepostnr"
+		DataField="fldkundepostnr"
+		Left="0"
+		Top="2565"
+		Width="915"
+		Height="210"
+		Text="fldKundepostnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundepoststed"
+		DataField="fldkundepoststed"
+		Left="960"
+		Top="2565"
+		Width="2340"
+		Height="210"
+		Text="fldkundepoststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundeland"
+		DataField="fldkundeland"
+		Left="0"
+		Top="2775"
+		Width="3300"
+		Height="210"
+		Text="fldKundeland"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblDeresRef"
+		DataField="lblDeres_ref"
+		Left="0"
+		Top="2976"
+		Width="850"
+		Height="210"
+		Visible="0"
+		Text="lblDeres_ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldDeresRef"
+		DataField="deres_ref"
+		Left="992"
+		Top="2976"
+		Width="5244"
+		Height="210"
+		Visible="0"
+		Text="deres_ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape3"
+		Left="0"
+		Top="3345"
+		Width="10305"
+		Height="1005"
+		BackStyle="1"
+		BackColor="16117480"
+		LineStyle="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblFakturadato"
+		DataField="lblFakturadato"
+		Left="6378"
+		Top="3402"
+		Width="1701"
+		Height="210"
+		Text="lblfakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldfakturadato"
+		DataField="fakturadato"
+		Left="8079"
+		Top="3402"
+		Width="2126"
+		Height="210"
+		Text="fakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblforfallsdato"
+		DataField="lblForfallsdato"
+		Left="6378"
+		Top="3750"
+		Width="1701"
+		Height="210"
+		Text="lblforfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldLeveringsdato"
+		DataField="leveringsdato"
+		Left="8079"
+		Top="4110"
+		Width="2126"
+		Height="210"
+		Text="leveringsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblLeveringsdato"
+		DataField="lblLeveringsdato"
+		Left="6378"
+		Top="4110"
+		Width="1701"
+		Height="210"
+		Text="lblleveringsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldForfallsdato"
+		DataField="forfallsdato"
+		Left="8079"
+		Top="3750"
+		Width="2126"
+		Height="210"
+		Text="forfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblFakturanr"
+		DataField="lblfakturanr"
+		Left="0"
+		Top="3402"
+		Width="2126"
+		Height="283"
+		Text="lblfakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 11.5pt; font-weight: bold; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldFakturanr"
+		DataField="fakturanr"
+		Left="2126"
+		Top="3402"
+		Width="1559"
+		Height="283"
+		Text="fakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblvaar_ref"
+		DataField="lblVar_ref"
+		Left="0"
+		Top="4110"
+		Width="1300"
+		Height="210"
+		Text="lblvar_ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBilagsnr"
+		DataField="bilagsnr_regnskap"
+		Left="2126"
+		Top="3685"
+		Width="1559"
+		Height="284"
+		Text="fldBilagsnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; text-align: right; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblbilagsnr"
+		DataField="lblBilagsnr"
+		Left="0"
+		Top="3685"
+		Width="2126"
+		Height="284"
+		Text="lblBilagsnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldVaar_ref"
+		DataField="vaar_ref"
+		Left="1417"
+		Top="4110"
+		Width="4677"
+		Height="210"
+		Text="referanse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; text-align: left; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblVarenr"
+		DataField="lblVarenr"
+		Left="0"
+		Top="4695"
+		Width="1982"
+		Height="250"
+		Tag="Varenr"
+		Text="lblVarenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-weight: bold; font-size: 11.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblVaretekst"
+		DataField="lblVaretekst"
+		Left="1997"
+		Top="4695"
+		Width="3665"
+		Height="250"
+		Tag="Varetekst"
+		Text="lblVaretekst"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-weight: bold; font-size: 11.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblAntall"
+		DataField="lblAntall"
+		Left="5670"
+		Top="4695"
+		Width="992"
+		Height="250"
+		Tag="antall"
+		Text="lblAntall"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-weight: bold; font-size: 11.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblPrisExMva"
+		DataField="lblPrisexmva"
+		Left="7230"
+		Top="4695"
+		Width="1050"
+		Height="250"
+		Tag="prisexmva"
+		Text="lblPrisexmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-weight: bold; font-size: 11.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblRabatt"
+		DataField="lblRabatt"
+		Left="8070"
+		Top="4695"
+		Width="880"
+		Height="250"
+		Tag="rabatt"
+		Text="lbl%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: center; font-family: &apos;Verdana&apos;; font-weight: bold; font-size: 11.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblMva"
+		DataField="lblMvalinje"
+		Left="8646"
+		Top="4590"
+		Width="708"
+		Height="250"
+		Visible="0"
+		Text="lblMvalinje"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumLinje"
+		DataField="lblSumLinjeexmva"
+		Left="8950"
+		Top="4695"
+		Width="1180"
+		Height="250"
+		Tag="sum"
+		Text="lblSumLinjeexmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-weight: bold; font-size: 11.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSideCount"
+		Left="9585"
+		Top="285"
+		Width="285"
+		Height="285"
+		Text="1"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSdeCountTot"
+		Left="9930"
+		Top="285"
+		Width="285"
+		Height="285"
+		Text="1"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="0"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lblSideSlash"
+		Left="9795"
+		Top="285"
+		Width="135"
+		Height="285"
+		Caption="/"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldLevering"
+		DataField="leveringfelt"
+		Left="3450"
+		Top="1965"
+		Width="2786"
+		Height="1011"
+		Text="fldlevering"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lbllevering"
+		DataField="lbllevering"
+		Left="3450"
+		Top="1755"
+		Width="1725"
+		Height="210"
+		Text="lbllevering"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblPrisInkMva"
+		DataField="lblPrisinkmva"
+		Left="7230"
+		Top="4995"
+		Width="1050"
+		Height="250"
+		Visible="0"
+		Tag="prisinkmva"
+		Text="lblPrisinkmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-weight: bold; font-size: 11.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumLinjeInkmva"
+		DataField="lblSumLinjeinkmva"
+		Left="8955"
+		Top="4980"
+		Width="1180"
+		Height="250"
+		Visible="0"
+		Tag="suminkmva"
+		Text="lblSumLinjeInkMva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-weight: bold; font-size: 11.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKommentar"
+		DataField="kommentarer"
+		Left="0"
+		Top="4400"
+		Width="10290"
+		Height="255"
+		Text="fldKommentar"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-style: italic; font-weight: bold; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="imgLogo"
+		Left="0"
+		Top="90"
+		Width="5415"
+		Height="1110"
+		PictureAlignment="0"
+		>
+		<Data><![CDATA[010000006C740000560D000047494638396191003D00E7F5004A8D2D4B8E2E4C8F2F4D90304E91315590314F923256913250933357923355923A589334599435
+			57943C5A953659953D5A963E5B973F5C98405D99416398415E9A42649942659A43679B44659B4A689C45669D4B679E4C689F4D69A04E6AA14F6BA25071A1506C
+			A35172A2516DA45273A35271A35874A45372A45973A55A74A65B75A75C76A85D77A95E78AA5F7AAB607BAC617FAB6780AC6881AD6982AE6A83AF6B84B16C85B2
+			6D78BE1F86B36E84B37479BF2087B46F85B4757AC02288B57086B5768CB4767BC22380C02E8DB57788B7788EB67883C22581C22F8FB77983C33190B87A84C432
+			91B97B85C53392BA7C90BA8286C63493BB7D91BB8387C73594BC7E92BC8498BB8593BD8599BC868DC7409ABD878EC8419BBE888FC9429CBF8990CA439DC08A90
+			CB4C9FC18B97CB4D91CD4DA0C38C97CC55A4C2939EC493A1C48DA5C3949FC594A2C58EA6C495A0C6959AD058A7C6969BD1599AD160A9C797AAC898A1D162ABC9
+			99ACCA9AA1D36AAACBA1ADCB9BA2D46BABCCA2AECC9CACCDA3B3CCA3B4CDA4AAD675B5CEA5ABD776B6CFA7ACD877B7D0A8B8D1A9ABDA7FB9D2AAB3D980BAD4AB
+			B8D5B2BBD5ACB5DC82C0D4B3BAD6B3C1D5B4BBD7B4B5DE8AC2D7B5B6DF8CBCDE8CC3D8B6BDDF8DC4D9B7BEE08EBCE094C5DAB8BDE195C6DBB9C7DCBAC4E196C8
+			DDBCC6DDC2C7DEC3C4E39FCDDDC3C6E4A0CEDEC4C8E0C4C7E5A1CFDFC5D0E0C6CCE5A8D1E1C7D2E2C8CEE7AAD3E4C9D4E5CAD2E5D1CEEAB3D9E4D2D3E6D2D6E6
+			CCD5E9B4DAE5D3D4E7D3D3EBBBD5E8D4DBE7D4DCE8D5D6EDBDDDE9D6DDECBEDEEAD7DBEEC6DEEEBFE0EBD8E1ECD9DFEDE1DEF0C8E2EDDBE3EEDCE6EDE2E0EFE2
+			DDF2D0E3F1D0E7EEE3E4F0DDE4F2D1E8EFE4E9F0E5E6F3D3E4F4DAEBF1E6E5F5DBECF3E7ECF5DCEDF4E9EDF6DDEEF5EAECF7E5ECF6F1EFF6EBEDF7F2F0F7ECF3
+			F7E6EEF8F3F1F8EDF4F7F3F5F9E8F6F8F4F0FAF4F4FAEFF7F9F6F8FAF7F5FCF0F9FBF8FCFBF2F6FDF2FAFCF9FDFCF3FBFDFAFCFFFBFEFFFCFFFFFFFFFFFFFFFF
+			FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF21FE114372656174656420776974682047494D50002C0000000091003D000008FE00E9091C48B0
+			A0C18308132A5CC8B0A1C38710234A9C48B1A2C58B13DBBDC2632589C78F204326B9336EA038428252AA5CC9B2A5CB94892CC1DAD6709C26374F44EAFCD8448D
+			246B0DA5391AB364E7CE2974409544E8CA0380A750A34A953A86A0A71D38B26ADDCAB5ABD7AD3BF8744BD82E4E81A968D3020820255C426B4B02A89D0BF54121
+			83ED021DA03B37C098A5EE2EF9F84AB870572DC30E4AB321972FDF15C00E0233E1D8310FA003190DA8AC3640976F02D35DC26AB8346127D40C3E11C099AF8B76
+			05AD81684D77C0977502ADA9A09D96C018D8F4E05D354DBC2B1F79047D6DE6DDF92EC131CCE73E102610D483E85303ACC12D5070F1EF38B4FEA41E0804BBDA0B
+			C80572FB603E6D1C817D1AB7873AC65B684A83C19B1E426B20BC05F34D35403203BD22418052B1101C74083E45C017E784960969FA15B6C3290349D360540290
+			329024006E080004F4B463C5797AF862CD8A2CB6E8228BDAA427101384F960072DD774A36337D9FC62C811857132902F730970852DE39CA3E439E3F8F205016A
+			0980C9408A18A096047B1C93E492E3B052036B6AD1B3CE126965F00C46337E2546300A6D43487E5D6532902D6905C002750919F30298524949A5955309500466
+			087DD2419863A655159AF4D0D89517CE3094CE235FC929109D6881E00B43C5A080969F025589560C8426C4CA05698949265A6B30DA6857FE3B6CE2903B627865
+			293D984A15401F0E35F2E994A102CAE1320DC1A3867C5189D9445A2D28E3ECB3D046BB8C35E3C85890A35B39C1A643ADD83A275A0794AA503B0D040A2C3DA24A
+			65C34306A255E289691520EFBCF4D69B000635FC216E9A5C7151CD43CEC0A9D5ADB9462502443C98FBE754813CC4CD6C532DD8200128E46210B65A81419343D4
+			0C11E7B753DD00111B0A073BD5B90CB5E369C4F414C2678018104810C65969FC50C71F5F8A560F10C55132BAC242A5C943F0AC2CD5A5A83618C016C0F1BB95CD
+			1C7BCC15C13BF7FC73BA510DED50D1EE969885881EC8EC74C61B3784F3D4204BC5F3433EF7792ED642136D74B20295F3C28602B03273FE57509B2DF556544FB5
+			B6436D73F876D04F695DECDC5011240F1D1D30B05C7B8AECCD9517D9DC2C705681AB0B911A57230E00CA0BB57342D70459D3091E636CE1FAEBB0C74E415A7858
+			BE1515C83C848BB73A4FE5014435843E55ED0E59C31ECB09C9A3FCF2CC334F435A75D8AE950FAA3C9407EFB8A255009E0C719380F052ADF0D02810A06E11C453
+			453F10CD59C9614E43BB549AB65458589B10C9E04BF54943EAAC8A7C45A3508BFAC6B69545884321EFA0C5DFD0D6BBA9406010EA50C83A1871A0FC454502A468
+			DA41B8410728756D1DE408A1084748C2111AE30F181020419CF0951DC8A115DB70073C66080F777403178260DFC0E6279506100113FEC9F8C608BF910C4D24A1
+			7CBF5A185A2CD0055448231C431406226830B988B5430D11C8A216B7C8C52D3EC08369E1D540BC50181F0CC109684C2313864021AF8482875349C003BAF880EF
+			45A9134AFCD4022040C7B3A82501121311002441103B54C8303E68051C0334805EE4B1411F08951F1B04814D0D8413872C8CB616391F0844C86422AA82408471
+			A80DD9C02D0369C60233B91532A48393EDE90241E0162002E84D200C425003F04890740882955EC1102CB1F3804F82B2413540253DD40104309A27016E808741
+			A87106604E8F10D62A58802440C8598ACE3C1F784541CE7187A461A7038AD02041A8418855EA270A9E782541B4D99E1368429DB4FEC4CE006C308B83C8C31A83
+			80410490C5170280E00EFB2A883BA8410931B8D3424E98C329BA61BFECCD670239D044390E924FDA0860034F8845045D45528B6833006153874A57CAD2968E54
+			217013C0655C4A539572A7A43835A95452E04892C28D07D2C8A950873ACFA874A0A73E15560FB441D4A60A35571238134E4515801C48D3A95825299D027002EE
+			95B44A554D6856C73A113A91E01643AD520E824AD6B69AF401C520AA22927053B7DA3522DC90EA50ADF1D2BBFAF5AF800DAC60074BD8C21AF6B0884DAC6217CB
+			D8C63AF6B1595D0728FEE00A6B4442118AA8C53346B10E6B68E21CB2500423C4498F58609614EB90440481A109694002B3C508FE072310213361106A14029147
+			2CE8F10D45D0961EA348863A20F18C5C0C6D158A88C4993421CD58AC4220E8880C3DA481D95144C8189855C43A7A011A6BEC4F20E790046872D38840C4021EF2
+			7085221C610D70484211D6E546278C290D3CF922AEED608435A4C108457C6229A0F880116E108B1E44E00388C0040CACB10A112C030B1360C106FE60A20DC8A0
+			0DE3E8C017D4710713BC220709400128B0D00117D40E1E4DD8C2403A500B7A488207F2C842075E800778C4E0104F588135D2000279F0A0032820C2382EB08776
+			404164F46084114AF20909BC00036350072226E0021970E30B375887291424106560C092D6E001054680814EB4230820F000FE0F64C18114788011B24001B170
+			E90281FC4105C0E0C60358018A06B8A0036B8BC40448315215ECC1C52CB086293AA08C27BC801E711080349A70835B00E5020448C3183CD08E750C008F351881
+			2F90D38B0E040028CC088015BED1801570A3069A9A610B4070005BD0630C1B80870DC6B00A135863010938841166400F79700002B6D6C40AD4F18A0900631022
+			86063CA4108017300205034946047AAA890B48031E6318413B6EB007487C40131348C517AC108B0F184320CB00C100C4E90700A420160558452708B08E574460
+			4ADF5003077E001443BB58C7866286A3E9D10901D8A20912688123E87101158080039CF6341E9F918309CBA30E2D98C018FEE4A1090190E00613F88030929103
+			0E04021E2D688007B871EB5CDB40022588C33A20D0820D6C80D88C78C00A44A96C752CA303B118040352408769BB400515F89D40B4DD5345B820828AB8C0B82D
+			F08137D862021D50C12ADAFDEE969160054968871F20208312E47BDF9DDD40ED9EA1093F4C409C0697850502A1831384E30923E8040D3AF08D26B84011AF80C7
+			05C6408A0964FCD3A595840D50008E0F580002EE5EC306AA40004C788015AE90C40D5800F32D70E009EAC0B5AE93E08B084920109328C00CC021827B35401A9A
+			F0C027B63082650CC2038050AD14AC208C166020DBDB16882B3A100749B80008E3FE422FD6E18B09282219BAB5802264FE118E1744E00218B0851F3CE00B1BBC
+			9D009D18430422B38A0B2480063437783B9A700005E0F6090138800A9E317F011CA006DA700169400FBDB0029D06797170000930088AB002B9200D2B10083690
+			03AE9004F2C00292800608C00083007387D00B0E8008AA67036D3010128008F4C00A39100910600CCBD0024BA0090160001A000AF4300833182EC3470FC28064
+			F4407502010F7EB00007D002D0306E832010D56731A5150005C001AC7002AFB00C37400778E001494203FA4600066001E7A20ED2901EED901EFFC41DF0A00E4D
+			738668282657F549EB901EE14073331484F2D00EE8851B63480F712810796887F0001B7638106F2810EA508741F886302A3510F2B052C171557D5557CB640D62
+			282375655386586CE8051CF2F086EB308890F589A0188AA2388AA4588A821510003B]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldRefFaktnr"
+		Left="3827"
+		Top="3402"
+		Width="2409"
+		Height="283"
+		Text="Ref Faktnr"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 9pt; font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[Option Explicit
+
+Dim Valutakurs,lblOrgTxt 
+
+Sub OnFormat
+	
+	if m_data.sfcurr( m_data.getvalue("valutasum")) <> 0 then
+		rpt.Sections("GroupFooter1").visible = false	
+	else
+		rpt.Sections("GroupFooter1").visible = true	
+	end if
+
+'sak 245 Foretaksregistrert - pba
+	if m_data.sfcurr( m_data.getvalue("valutasum")) <> 0 then
+		lblOrgTxt = m_data.GetCheckField("DefValValuta","Org.No")
+	else
+		lblOrgTxt = m_data.GetCheckField("DefaultVal","Organisasjonsnr.")
+	end if
+	if trim(lblOrgTxt) <> "" then rpt.Sections("GroupHeader1").Controls("lblmvanr").text = lblOrgTxt
+	
+'sak 438 "ref faktnr kreditnota - pba
+	if m_data.sfcurr(m_data.getvalue("Koblet_til_faktnr")) <> 0 then 
+		rpt.Sections("GroupHeader1").Controls("fldRefFaktnr").text = "(Ref fakturanr: " & m_data.getvalue("Koblet_til_faktnr") & ")"
+	else
+		rpt.Sections("GroupHeader1").Controls("fldRefFaktnr").text = ""
+	end if
+End Sub
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="0"
+		DataField="Fakturanr"
+		CanShrink="1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+	
+	if m_data.sfcurr( m_data.getvalue("valutasum")) <> 0 then
+		m_data.GetControl("lblnoklav").visible = true
+		m_data.GetControl("lblnokmellom").visible = true
+		m_data.GetControl("lblnokhoy").visible = true
+		m_data.GetControl("fldnoklav").visible = true
+		m_data.GetControl("fldnokmellom").visible = true
+		m_data.GetControl("fldnokhoy").visible = true
+	else
+		m_data.GetControl("lblnoklav").visible = false
+		m_data.GetControl("lblnokmellom").visible = false
+		m_data.GetControl("lblnokhoy").visible = false
+		m_data.GetControl("fldnoklav").visible = false
+		m_data.GetControl("fldnokmellom").visible = false
+		m_data.GetControl("fldnokhoy").visible = false
+
+	end if
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader3"
+		Height="0"
+		DataField="_groupcounter"
+	>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak1"
+		Left="0"
+		Top="0"
+		Width="360"
+		Height="60"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldGroupCounter"
+		DataField="_groupcounter"
+		Left="142"
+		Top="142"
+		Width="2551"
+		Height="283"
+		Visible="0"
+		Text="_groupcounter"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="1125"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="fldFritekstlinje"
+		DataField="fritekstlinje"
+		Left="0"
+		Top="535"
+		Width="10063"
+		Height="220"
+		Text="Varetekst"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-weight: bold; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKompLinje"
+		DataField="KompVare"
+		Left="30"
+		Top="267"
+		Width="5669"
+		Height="220"
+		Text="KompVare"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-style: italic; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldVarenr"
+		DataField="Varenr"
+		Left="15"
+		Top="0"
+		Width="1984"
+		Height="220"
+		Tag="Varenr"
+		Text="Varenr"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldVaretekst"
+		DataField="Varetekst"
+		Left="1997"
+		Top="0"
+		Width="3665"
+		Height="220"
+		Tag="Varetekst"
+		Text="Varetekst"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvalinje"
+		DataField="mvafelt"
+		Left="8070"
+		Top="0"
+		Width="880"
+		Height="220"
+		Text="mvafelt"
+		OutputFormat="0.00%"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; text-align: center; vertical-align: middle; white-space: nowrap; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldPrisExMva"
+		DataField="PrisExMva"
+		Left="7230"
+		Top="0"
+		Width="1050"
+		Height="220"
+		Tag="prisexmva"
+		Text="PrisExMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldEnhet"
+		DataField="Enhet"
+		Left="6670"
+		Top="0"
+		Width="567"
+		Height="220"
+		Text="Enhet"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; text-align: left; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldRabatt"
+		DataField="rabfelt"
+		Left="8305"
+		Top="0"
+		Width="620"
+		Height="220"
+		Tag="rabatt"
+		Text="rab"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: center; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumExMva"
+		DataField="SumExMva"
+		Left="8950"
+		Top="0"
+		Width="1180"
+		Height="220"
+		Tag="sum"
+		Text="SumExMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAntall"
+		DataField="Antallfelt"
+		Left="5670"
+		Top="0"
+		Width="992"
+		Height="220"
+		Tag="antall"
+		Text="Antallfelt"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldPrisInkMva"
+		DataField="PrisInkMva"
+		Left="7230"
+		Top="735"
+		Width="1050"
+		Height="220"
+		Visible="0"
+		Tag="prisinkmva"
+		Text="PrisInkMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumInkMva"
+		DataField="SumInkMva"
+		Left="8950"
+		Top="735"
+		Width="1180"
+		Height="220"
+		Visible="0"
+		Tag="suminkmva"
+		Text="SumInkMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvaPsnt"
+		DataField="mvaprosent"
+		Left="7228"
+		Top="1134"
+		Width="992"
+		Height="220"
+		Visible="0"
+		Text="Mva%"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvaKr"
+		DataField="mvabelop"
+		Left="7228"
+		Top="1417"
+		Width="992"
+		Height="220"
+		Visible="0"
+		Text="MvaKr"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+	
+
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter3"
+		Height="0"
+	>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="2655"
+		CanGrow="0"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="fldFritekst"
+		DataField="FritekstFelt"
+		Left="0"
+		Top="283"
+		Width="5244"
+		Height="709"
+		Text="FritekstFelt"
+		CanShrink="-1"
+		ClassName="Normal"
+		Style="font-weight: bold; font-style: italic; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumNetto"
+		DataField="NettosumFelt"
+		Left="8670"
+		Top="300"
+		Width="1455"
+		Height="225"
+		Text="NettosumFelt"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; font-family: &apos;Verdana&apos;; white-space: nowrap; background-color: rgb(232,238,245); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldTotalsum"
+		DataField="TotalSumFelt"
+		Left="8670"
+		Top="1185"
+		Width="1455"
+		Height="225"
+		Text="TotalSumFelt"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; font-weight: bold; white-space: nowrap; background-color: rgb(205,219,232); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumMellomMva"
+		DataField="LavMva"
+		Left="5565"
+		Top="750"
+		Width="3105"
+		Height="225"
+		Text="LavMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumHoyMva"
+		DataField="HoyMva"
+		Left="5565"
+		Top="975"
+		Width="3120"
+		Height="225"
+		Text="HoyMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumMellomMva"
+		DataField="MomsLavFelt"
+		Left="8670"
+		Top="750"
+		Width="1455"
+		Height="225"
+		Text="MomsLavFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumHoyMva"
+		DataField="MomsHoyFelt"
+		Left="8670"
+		Top="975"
+		Width="1455"
+		Height="225"
+		Text="MomsHoyFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblInnbetsum"
+		DataField="InnbetKredTxt"
+		Left="5565"
+		Top="1395"
+		Width="3120"
+		Height="225"
+		Text="InnbetKredTxt"
+		ClassName="Normal"
+		Style="font-weight: bold; color: rgb(255,0,0); font-family: &apos;Verdana&apos;; font-size: 8.5pt; background-color: rgb(205,219,232); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldInnbetsum"
+		DataField="InnbetKred"
+		Left="8670"
+		Top="1395"
+		Width="1455"
+		Height="225"
+		Text="InnbetKred"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; color: rgb(255,0,0); white-space: nowrap; font-family: &apos;Verdana&apos;; font-size: 8.5pt; background-color: rgb(205,219,232); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKamptext"
+		DataField="KampText"
+		Left="0"
+		Top="1050"
+		Width="5250"
+		Height="555"
+		Text="KampText"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumLavMva"
+		DataField="personmvatekst"
+		Left="5565"
+		Top="525"
+		Width="3120"
+		Height="225"
+		Text="LavMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumLavMva"
+		DataField="personmva"
+		Left="8670"
+		Top="525"
+		Width="1455"
+		Height="225"
+		Text="MomsLavFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblTotalsum"
+		DataField="lbltotalsum"
+		Left="5565"
+		Top="1185"
+		Width="3120"
+		Height="225"
+		Text="lbltotalsum"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; font-weight: bold; white-space: nowrap; background-color: rgb(205,219,232); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumNetto"
+		DataField="lblSumNetto"
+		Left="5565"
+		Top="300"
+		Width="3120"
+		Height="225"
+		Text="lblSumNetto"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-size: 8.5pt; font-family: &apos;Verdana&apos;; white-space: nowrap; background-color: rgb(232,238,245); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblNokLav"
+		DataField="NokLavText"
+		Left="5565"
+		Top="1935"
+		Width="3105"
+		Height="225"
+		Text="lblNokLav"
+		ClassName="Normal"
+		Style="font-size: 6pt; vertical-align: middle; font-family: &apos;Microsoft Sans Serif&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblNokMellom"
+		DataField="NokMellomText"
+		Left="5565"
+		Top="2145"
+		Width="3105"
+		Height="225"
+		Text="lblNokMellom"
+		ClassName="Normal"
+		Style="font-size: 6pt; vertical-align: middle; font-family: &apos;Microsoft Sans Serif&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblNokHoy"
+		DataField="NokHoyText"
+		Left="5565"
+		Top="2370"
+		Width="3105"
+		Height="225"
+		Text="lblNokHoy"
+		ClassName="Normal"
+		Style="font-size: 6pt; vertical-align: middle; font-family: &apos;Microsoft Sans Serif&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldNokLav"
+		DataField="NokLavSum"
+		Left="8670"
+		Top="1935"
+		Width="1425"
+		Height="225"
+		Text="fldNokLav"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 6pt; vertical-align: middle; font-family: &apos;Microsoft Sans Serif&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldNokMellom"
+		DataField="NokMellomSum"
+		Left="8670"
+		Top="2145"
+		Width="1425"
+		Height="225"
+		Text="fldNokMellom"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 6pt; vertical-align: middle; font-family: &apos;Microsoft Sans Serif&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldNokHoy"
+		DataField="NokHoySum"
+		Left="8670"
+		Top="2370"
+		Width="1425"
+		Height="225"
+		Text="fldNokHoy"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 6pt; vertical-align: middle; font-family: &apos;Microsoft Sans Serif&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldbetalsum"
+		DataField="tot"
+		Left="8685"
+		Top="1635"
+		Width="1455"
+		Height="225"
+		Text="fldbetalsum"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; font-weight: bold; white-space: nowrap; background-color: rgb(205,219,232); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblbetalsum"
+		DataField="lblbetalsum"
+		Left="5580"
+		Top="1635"
+		Width="3120"
+		Height="225"
+		Text="lblBetalsum"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; font-weight: bold; white-space: nowrap; background-color: rgb(205,219,232); "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		PrintAtBottom="1"
+		Height="5925"
+		KeepTogether="-1"
+		CanGrow="0"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="fldTot"
+		DataField="Tot"
+		Left="3405"
+		Top="450"
+		Width="1980"
+		Height="285"
+		Text="Totalsum"
+		OutputFormat="0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 10pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldFrakonto"
+		DataField="FraKonto"
+		Left="6375"
+		Top="450"
+		Width="2265"
+		Height="285"
+		Text="FraKonto"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 10pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldTilKonto"
+		DataField="TilKonto"
+		Left="0"
+		Top="450"
+		Width="2415"
+		Height="285"
+		Text="TilKonto"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 10pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldTot2"
+		DataField="tot2"
+		Left="3915"
+		Top="4965"
+		Width="1635"
+		Height="285"
+		Text="Totalsum"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Courier&apos;; ddo-char-set: 0; font-size: 12pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKID"
+		DataField="KID"
+		Left="0"
+		Top="4965"
+		Width="3600"
+		Height="285"
+		Text="KID"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Courier&apos;; ddo-char-set: 0; font-size: 12pt; text-align: right; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundenr2"
+		DataField="Kundenr"
+		Left="1605"
+		Top="1530"
+		Width="2190"
+		Height="210"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; text-align: left; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsendernavn"
+		DataField="Avsendernavn"
+		Left="0"
+		Top="2775"
+		Width="3825"
+		Height="225"
+		Text="Avsendernavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-weight: bold; font-family: &apos;Verdana&apos;; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsenderAdresse"
+		DataField="AvsenderAdresse"
+		Left="0"
+		Top="3000"
+		Width="3825"
+		Height="225"
+		Text="AvsenderAdresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsenderadresse2"
+		DataField="AvsenderAdresse2"
+		Left="0"
+		Top="3225"
+		Width="3825"
+		Height="225"
+		Text="AvsenderAdresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsenderpostnr"
+		DataField="AvsenderPostnr"
+		Left="0"
+		Top="3450"
+		Width="870"
+		Height="225"
+		Text="AvsenderPostnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsenderpoststed"
+		DataField="AvsenderPoststed"
+		Left="855"
+		Top="3450"
+		Width="2940"
+		Height="225"
+		Text="AvsenderPoststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsenderland"
+		DataField="AvsenderLand"
+		Left="0"
+		Top="3675"
+		Width="3825"
+		Height="225"
+		Text="AvsenderLand"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKsiff"
+		DataField="ksiff"
+		Left="6000"
+		Top="4965"
+		Width="420"
+		Height="285"
+		Text="kontrollsiffer"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Courier&apos;; ddo-char-set: 0; font-size: 12pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakernavn"
+		DataField="MottakerNavn"
+		Left="5745"
+		Top="2775"
+		Width="4260"
+		Height="225"
+		Text="MottakerNavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 0; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakeradresse"
+		DataField="MottakerAdresse"
+		Left="5745"
+		Top="3000"
+		Width="4260"
+		Height="225"
+		Text="MottakerAdresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakeradresse2"
+		DataField="MottakerAdresse2"
+		Left="5745"
+		Top="3225"
+		Width="4260"
+		Height="225"
+		Text="MottakerAdresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakerpostnr"
+		DataField="MottakerPostnr"
+		Left="5745"
+		Top="3450"
+		Width="870"
+		Height="225"
+		Text="MottakerPostnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakerpoststed"
+		DataField="MottakerPoststed"
+		Left="6630"
+		Top="3450"
+		Width="3345"
+		Height="225"
+		Text="MottakerPoststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldTilKontoOCR"
+		DataField="TilKonto"
+		Left="6705"
+		Top="4965"
+		Width="3390"
+		Height="285"
+		Text="TilKonto"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Courier&apos;; ddo-char-set: 0; font-size: 12pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldFakturanr2"
+		DataField="Fakturanr"
+		Left="1605"
+		Top="1755"
+		Width="2190"
+		Height="225"
+		Text="Fakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldvar_ref2"
+		DataField="Vaar_Ref"
+		Left="1605"
+		Top="1980"
+		Width="2190"
+		Height="225"
+		Text="Vaar_Ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldFakturadato2"
+		DataField="Fakturadato"
+		Left="1605"
+		Top="2205"
+		Width="2190"
+		Height="225"
+		Text="Fakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldForfallsdato2"
+		DataField="Forfallsdato"
+		Left="8625"
+		Top="1035"
+		Width="1425"
+		Height="285"
+		Text="Forfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: center; font-size: 12pt; font-weight: bold; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakerland"
+		DataField="MottakerLand"
+		Left="5745"
+		Top="3675"
+		Width="4260"
+		Height="225"
+		Text="MottakerLand"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblFakturanr2"
+		DataField="FaktTxt"
+		Left="0"
+		Top="1755"
+		Width="1605"
+		Height="225"
+		Text="FaktTxt"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedrifttxt"
+		DataField="Bedrifttxt"
+		Left="0"
+		Top="1305"
+		Width="3795"
+		Height="225"
+		Text="Bedrifttxt"
+		ClassName="Normal"
+		Style="white-space: nowrap; font-family: &apos;Verdana&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblKundenr2"
+		DataField="lblkundenr"
+		Left="15"
+		Top="1530"
+		Width="1605"
+		Height="210"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; text-align: left; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblvar_ref2"
+		DataField="lblvar_ref"
+		Left="15"
+		Top="1980"
+		Width="1605"
+		Height="225"
+		Text="Vaar_Ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblfakturadato2"
+		DataField="lblfakturadato"
+		Left="15"
+		Top="2205"
+		Width="1605"
+		Height="225"
+		Text="Fakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvtalegiroVarsel"
+		DataField="fldAvtalegiroVarsel"
+		Left="142"
+		Top="4230"
+		Width="9975"
+		Height="705"
+		Text="fldAvtalegiroVarsel"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-weight: bold; font-size: 34pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Visible="0"
+		Height="0"
+		CanShrink="1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

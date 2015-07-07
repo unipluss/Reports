@@ -1,0 +1,3189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{645A5A69-26B9-41C5-8284-4A6DDE169547}" GUIDREP="{CD8DAAFB-E9EC-4F1C-A1CD-B36672FB5AB4}" 
+	LICENSE="10000000"
+	PrintWidth="10845"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[' Se på detail for å sette inn verdier for enkelte av feltene ...
+sub onDatainitialize
+	dim omr
+	'm_data.debugg=true
+	m_data.AddInputMacro "{KF}","KontraktFra","",""
+	m_data.AddInputMacro "{KT}","KontraktTil","",""
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	m_data.sqlstring = "object:ef_printContractLib.printContract:printContract;{KF};{KT}"
+	m_data.setupfields rpt
+
+
+end sub
+
+Sub OnReportStart
+End Sub
+
+Sub OnFetchData(eof)
+	dim Avtalt_pris
+	dim Medlem
+	Dim MedlemFaktor
+	Dim nypris,pris
+
+	
+	pris	 = rpt.fields("pris").Value
+ 	Avtalt_pris = rpt.fields("Avtalt_pris").Value
+	Medlem = rpt.fields("Medlem").Value
+	svarfrist = rpt.fields("svarfrist").Value
+	MedlemFaktor=sfcurr(rpt.fields("MedlemFaktor").Value)
+	
+'	rpt.fields("Kundenummer").value=rpt.fields("kundenummer").value & ", " & rpt.fields("navn").value
+	if sfcurr(Avtalt_pris)=0 and sfcurr(Medlem)=0 then		
+		nypris=sfcurr(pris)*sfcurr(MedlemFaktor)				
+	end if
+	
+	if sfcurr(Avtalt_pris)=0 and abs(Medlem)=1 then
+		nypris=pris
+	end if	
+	
+	if Avtalt_pris>0 then
+		nypris=Avtalt_pris
+	end if
+	
+	
+	rpt.Fields("pris").Value=nypris
+	
+	'if rpt.Fields("omrade")="Fabrikkvegen" then
+	'	rpt.sections("GroupHeader1").visible = False
+	'else
+	'	rpt.sections("Detail").visible = False
+	'end if
+	rpt.sections("GroupHeader1").visible = False
+	rpt.sections("Detail").visible = False
+	if rpt.Fields("mvaHusleie") then
+		rpt.sections("GroupHeader1").visible = True
+	else
+		rpt.sections("Detail").visible = True
+	end if
+
+End Sub
+
+Function sfcurr(v)
+    Dim rv
+    On Error Resume Next
+    rv = CCur(v)
+    If Err Then rv = 0
+    sfcurr = rv
+End Function]]></Script>
+<PageSettings	LeftMargin="500"
+	RightMargin="500"
+	TopMargin="500"
+	BottomMargin="500"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="60090"
+	>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit16"
+		Left="120"
+		Top="120"
+		Width="10620"
+		Height="1380"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[22010000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C66726F6D616E5C66707271325C6663686172736574302054696D6573204E657720526F6D616E
+			3B7D7D0D0A5C766965776B696E64345C7563315C706172645C736C2D3237305C736C6D756C74305C667332385C7061720D0A5C706172645C71635C625C66315C
+			6673333220486F74656C6C617674616C65205C7061720D0A536F72626F6E6E65204C65696C696768657473686F74656C6C5C6C696E655C706172645C736C2D32
+			37305C736C6D756C74305C7163205B21627967675D5C62305C66305C667332385C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field37"
+		DataField="pris"
+		Left="9690"
+		Top="7680"
+		Width="990"
+		Height="255"
+		Visible="0"
+		Text="pris"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; text-align: right; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field6"
+		DataField="kundenummer"
+		Left="9345"
+		Top="7035"
+		Width="1410"
+		Height="210"
+		Visible="0"
+		Text="kundenummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field25"
+		DataField="lagetdato"
+		Left="9213"
+		Top="39811"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="lagetdato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="svarfrist"
+		Left="9354"
+		Top="40519"
+		Width="1134"
+		Height="284"
+		Visible="0"
+		Text="svarfrist"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(224,224,224); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="oppgang"
+		Left="9600"
+		Top="7335"
+		Width="1125"
+		Height="210"
+		Visible="0"
+		Text="oppgang"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field32"
+		DataField="objekt_adresse"
+		Left="9213"
+		Top="40945"
+		Width="1559"
+		Height="141"
+		Visible="0"
+		Text="objekt_adresse"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field33"
+		DataField="objekt_postnummer"
+		Left="9071"
+		Top="37260"
+		Width="1701"
+		Height="283"
+		Visible="0"
+		Text="objekt_postnummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		DataField="objekt_poststed"
+		Left="9236"
+		Top="41603"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="objekt_poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field35"
+		DataField="etasje_navn"
+		Left="9459"
+		Top="8349"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="etasje_navn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field36"
+		DataField="byggnavn"
+		Left="9525"
+		Top="8010"
+		Width="1260"
+		Height="255"
+		Visible="0"
+		Text="byggnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit8"
+		Left="345"
+		Top="2505"
+		Width="8085"
+		Height="1980"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[D9010000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			726F6D616E5C66707271325C6663686172736574302054696D6573204E657720526F6D616E3B7D7B5C66315C666E696C5C66636861727365743020417269616C
+			3B7D7D0D0A5C766965776B696E64345C7563315C706172645C625C66305C6673323420312E202020417674616C656E7320696E6E686F6C645C7061720D0A5C62
+			3020312E3120417674616C656E206F6D666174746572206B6A5C2766387020617620686F74656C6C746A656E6573746572206F67206B6F72746964736C656965
+			206176206C65696C696768657465722069206C65696C696768657473686F74656C6C2E205C66315C667331345C7061720D0A5C7061720D0A5C625C66305C6673
+			323420322E202020417674616C656E73206F6D66616E675C7061720D0A5C623020417674616C656E206B616E2062656E7974746573206176206B756E64656E2C
+			2064617474657273656C736B6170206F6720666F727265746E696E67736B6F6E74616B746572206176206B756E64656E2E5C7061720D0A5C7061720D0A5C7061
+			720D0A5C66315C667331345C7061720D0A5C7061720D0A5C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		DataField="kontrakt_til"
+		Left="9638"
+		Top="41228"
+		Width="1134"
+		Height="284"
+		Visible="0"
+		Text="kontrakt_til"
+		ClassName="Normal"
+		Style="font-family: &apos;Trebuchet MS&apos;; ddo-char-set: 1; font-size: 8pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field47"
+		DataField="kontrakt_fra"
+		Left="9638"
+		Top="38819"
+		Width="1134"
+		Height="283"
+		Visible="0"
+		Text="kontrakt_fra"
+		ClassName="Normal"
+		Style="font-family: &apos;Trebuchet MS&apos;; ddo-char-set: 1; font-size: 8pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit9"
+		Left="270"
+		Top="4590"
+		Width="10140"
+		Height="570"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[F0000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			726F6D616E5C66707271325C6663686172736574302054696D6573204E657720526F6D616E3B7D7B5C66315C6673776973735C66707271325C66636861727365
+			743020417269616C3B7D7D0D0A7B5C636F6C6F7274626C203B5C726564305C677265656E305C626C7565303B7D0D0A5C766965776B696E64345C7563315C7061
+			72645C66305C6673323420322E315C7061720D0A4B756E64655C6366315C6C616E67313033335C66315C667331385C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field48"
+		DataField="address1"
+		Left="9213"
+		Top="38394"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="address1"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field49"
+		DataField="address2"
+		Left="9213"
+		Top="38110"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="address2"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field50"
+		DataField="postal_code"
+		Left="9071"
+		Top="39386"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="postal_code"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field51"
+		DataField="city"
+		Left="9213"
+		Top="40236"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="city"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field52"
+		DataField="navn"
+		Left="9213"
+		Top="37685"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="navn"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field53"
+		DataField="country"
+		Left="9213"
+		Top="39102"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="country"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape17"
+		Left="360"
+		Top="5265"
+		Width="3255"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak1"
+		Left="0"
+		Top="13874"
+		Width="425"
+		Height="0"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field63"
+		DataField="Giro"
+		Left="157"
+		Top="54692"
+		Width="2976"
+		Height="283"
+		Text="Giro"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; font-size: 12pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field64"
+		Left="142"
+		Top="54419"
+		Width="2126"
+		Height="283"
+		Text="Innbetalt til konto"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field65"
+		Left="4110"
+		Top="54419"
+		Width="709"
+		Height="283"
+		Text="Beløp"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; font-size: 11pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field66"
+		DataField="Sluttsum"
+		Left="4125"
+		Top="54692"
+		Width="1559"
+		Height="283"
+		Text="Sluttsum"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; ddo-char-set: 1; font-size: 12pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field67"
+		DataField="Kundenummer"
+		Left="1858"
+		Top="55542"
+		Width="2126"
+		Height="283"
+		Text="Kundenummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field68"
+		DataField="Navn"
+		Left="157"
+		Top="57384"
+		Width="3827"
+		Height="284"
+		Text="Navn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field84"
+		DataField="Postal_code"
+		Left="157"
+		Top="58235"
+		Width="850"
+		Height="283"
+		Text="Postnr"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field85"
+		DataField="City"
+		Left="1007"
+		Top="58235"
+		Width="1984"
+		Height="283"
+		Text="Poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field86"
+		Left="157"
+		Top="59227"
+		Width="3827"
+		Height="283"
+		Text="Kundeidentifikasjon (KID)"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field87"
+		Left="4125"
+		Top="59227"
+		Width="1843"
+		Height="283"
+		Text="Kroner"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field88"
+		DataField="Sluttsum"
+		Left="4409"
+		Top="59794"
+		Width="2126"
+		Height="283"
+		Text="Sluttsum"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; font-size: 12pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field89"
+		Left="7102"
+		Top="59227"
+		Width="2409"
+		Height="283"
+		Text="Til konto"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field90"
+		DataField="address1"
+		Left="157"
+		Top="57668"
+		Width="3827"
+		Height="283"
+		Text="address1"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit47"
+		Left="157"
+		Top="55825"
+		Width="3827"
+		Height="284"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[BB000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C66733230205265666572616E7365202020202020202020202020202053696B6B65726865745C66315C7061720D0A7D
+			0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit48"
+		Left="157"
+		Top="55542"
+		Width="1701"
+		Height="283"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[A6000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C66733230204B756E64656E756D6D65725C66315C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field96"
+		DataField="address2"
+		Left="157"
+		Top="57951"
+		Width="3827"
+		Height="284"
+		Text="address2"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit49"
+		Left="270"
+		Top="47040"
+		Width="9360"
+		Height="4530"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[C9020000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C66733230202020202020202020202020204B756E64656E756D6D65723A205B216B756E64656E756D6D65725D5C7061
+			720D0A2020202020202020202020205B216E61766E5D5C7061720D0A2020202020202020202020205B2161647265737365315D5C7061720D0A20202020202020
+			20202020205B2161647265737365325D5C7061720D0A2020202020202020202020205B21706F73746E725D205B21706F7374737465645D5C7061720D0A202020
+			2020202020202020205B216C616E645D5C7061720D0A5C66315C7061720D0A5C7061720D0A5C7061720D0A5C7061720D0A5C706172645C71635C66305C667332
+			382053696B6B657268657420667261206B756E646520666F7220736B61646520705C276535206C65696420726F6D2F617265616C6520692068656E686F6C6420
+			74696C20617674616C656E5C7061720D0A5C66315C667332305C7061720D0A5C625C695C66305C6673323420426F6C69673A5C7061720D0A5C62305C69305C70
+			61720D0A5C7061726420202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020
+			4F6D725C27653564653A20202020202020205B216F6D726164655D5C7061720D0A20202020202020202020202020202020202020202020202020202020202020
+			2020202020202020202020202020202020202020202020426F6C6967747970653A2020202020205B21626F6C6967747970655D5C66315C667332305C7061720D
+			0A5C7061720D0A5C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field99"
+		DataField="Giro"
+		Left="7385"
+		Top="59794"
+		Width="2551"
+		Height="283"
+		Text="Giro"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; font-size: 12pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit51"
+		Left="5543"
+		Top="55258"
+		Width="1133"
+		Height="284"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[A9000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C625C66733238204749524F5C62305C66315C667332305C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field101"
+		DataField="Kidnr"
+		Left="298"
+		Top="59794"
+		Width="3686"
+		Height="283"
+		Text="kidnummer"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; font-size: 12pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field102"
+		Left="6520"
+		Top="54419"
+		Width="2834"
+		Height="283"
+		Text="Betalerens kontonummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; font-size: 11pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field103"
+		Left="157"
+		Top="53983"
+		Width="1275"
+		Height="283"
+		Text="Kvittering"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; font-size: 12pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="15"
+		Y1="55110"
+		X2="10740"
+		Y2="55110"
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit52"
+		Left="5820"
+		Top="57240"
+		Width="3555"
+		Height="1425"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[C7000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C6673323220536F72626F6E6E655C7061720D0A5C6673323020416472657373655C7061720D0A353030302042657267
+			656E5C66315C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label51"
+		Left="5669"
+		Top="56970"
+		Width="1134"
+		Height="283"
+		Caption="Betalt til"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label52"
+		Left="5669"
+		Top="55836"
+		Width="2551"
+		Height="284"
+		Caption="Underskrift ved girering"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label53"
+		Left="142"
+		Top="57112"
+		Width="1134"
+		Height="283"
+		Caption="Betalt av"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak4"
+		Left="0"
+		Top="44535"
+		Width="360"
+		Height="60"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit56"
+		Left="5745"
+		Top="45000"
+		Width="4200"
+		Height="945"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[DB000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C66733230204F7267616E697361736A6F6E736E722E20202020204E4F3939373432373034314D56415C7061720D0A42
+			616E6B6769726F20202020202020205C6631202020202020205C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field106"
+		DataField="Medlem"
+		Left="9731"
+		Top="6043"
+		Width="992"
+		Height="425"
+		Visible="0"
+		Text="Medlem"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field107"
+		DataField="Avtalt_pris"
+		Left="10001"
+		Top="6493"
+		Width="709"
+		Height="425"
+		Visible="0"
+		Text="Avtalt_pris"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field108"
+		DataField="MedlemFaktor"
+		Left="9255"
+		Top="2848"
+		Width="1559"
+		Height="425"
+		Visible="0"
+		Text="MedlemFaktor"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field109"
+		DataField="AntallPostdagerAkseptFrist"
+		Left="9345"
+		Top="1950"
+		Width="1290"
+		Height="285"
+		Visible="0"
+		Text="AntallPostdagerAkseptFrist"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field163"
+		DataField="mvaHusleie"
+		Left="9705"
+		Top="2265"
+		Width="885"
+		Height="300"
+		Visible="0"
+		Text="mvaHusleie"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="omrade"
+		Left="9030"
+		Top="2565"
+		Width="1725"
+		Height="195"
+		Visible="0"
+		Text="omrade"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape80"
+		Left="3615"
+		Top="5265"
+		Width="3090"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape81"
+		Left="6705"
+		Top="5265"
+		Width="1350"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape82"
+		Left="8055"
+		Top="5265"
+		Width="2130"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape83"
+		Left="360"
+		Top="5550"
+		Width="3255"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape84"
+		Left="3615"
+		Top="5550"
+		Width="3090"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape85"
+		Left="6705"
+		Top="5550"
+		Width="1350"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape86"
+		Left="8055"
+		Top="5550"
+		Width="2130"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label81"
+		Left="570"
+		Top="5295"
+		Width="2070"
+		Height="285"
+		Tag="2976"
+		Caption="Navn"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field169"
+		DataField="Navn"
+		Left="540"
+		Top="5580"
+		Width="1680"
+		Height="330"
+		Text="navn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit99"
+		Left="330"
+		Top="7125"
+		Width="9915"
+		Height="6300"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[D3040000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			726F6D616E5C66707271325C6663686172736574302054696D6573204E657720526F6D616E3B7D7B5C66315C6673776973735C66707271325C66636861727365
+			743020417269616C3B7D7D0D0A7B5C636F6C6F7274626C203B5C726564305C677265656E305C626C7565303B7D0D0A5C766965776B696E64345C7563315C7061
+			72645C625C66305C6673323420332E20202050726973657220323031325C7061720D0A5C623020332E312050726973657220736F6D206E65766E74206E656465
+			6E666F7220676A656C64657220765C2765357265206C6F6B61736A6F6E65722069205B21627967675D2E5C7061720D0A5C625C7061720D0A342E202020426573
+			74696C6C696E6765722F617662657374696C6C696E672F626574616C696E672E5C7061720D0A5C706172645C66692D323132365C6C69323132365C62305C7061
+			720D0A5C756C5C7461622052657365727661736A6F6E20617620726F6D3A5C7061720D0A5C756C6E6F6E655C7061720D0A5C7461625C6C616E6732303537202A
+			5C74616220546C663A5C7461625C7461625C7461625C7461622035332036392037302030305C7061720D0A5C746162202A5C746162204661783A5C7461625C74
+			61625C7461625C7461622035332036392037302037315C7061720D0A5C746162202A5C74616220426F6F6B696E6720652D706F73743A5C74616220706F737440
+			736F72626F6E6E652E6E6F5C7061720D0A5C6C616E67313033335C625C7061720D0A5C6C616E67313034345C623020342E3220417662657374696C6C696E6720
+			6D5C27653520765C2765367265206D6F747461747420696E6E656E206B6C2E2031362E303020616E6B6F6D7374646167656E2E5C7061720D0A5C7061720D0A34
+			2E33204F7070686F6C64657420736B616C20676A5C276638726573206F7070207665642061767265697365206D6564206B7265646974746B6F72742C206B6F6E
+			74616E7420656C6C65722076656420656E5C7061720D0A20202020202066616B74757261617674616C652E2046616B74757261617674616C6520736B616C2061
+			7674616C657320646972656B7465206D656420686F74656C6C657420705C27653520666F72685C2765356E642E5C7061720D0A5C7061720D0A342E342044656E
+			6E65206669726D61617674616C656E206D5C2765352068656E76697365732074696C207665642072657365727661736A6F6E20666F72205C27653520665C2765
+			35207072697320736F6D206E65766E74206920617674616C656E2E5C7061720D0A5C7061720D0A5C6220352E2020204E6F2073686F775C7061720D0A5C623020
+			352E3120446572736F6D20617662657374696C6C696E67736672697374656E20696B6B65206F766572686F6C6465732076696C207265676E696E6720666F7220
+			665C27663872737465206F7665726E617474696E6720626C695C7061720D0A20202020202066616B747572657274206B756E646520646572736F6D20686F7465
+			6C6C657420696B6B6520665C27653572206C65696420757420726F6D6D65742F686F74656C6C65696C6967686574656E2E5C7061720D0A5C706172645C636631
+			5C6C616E67313033335C66315C667331385C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit100"
+		Left="285"
+		Top="14235"
+		Width="9915"
+		Height="12810"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[CA070000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			726F6D616E5C66707271325C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A7B5C636F6C6F7274626C203B5C726564305C67726565
+			6E305C626C75653235353B5C7265643131325C677265656E3133395C626C756535373B7D0D0A5C766965776B696E64345C7563315C706172645C66692D323132
+			365C6C69323132365C625C66305C6673323420362E2020204B6F6E74616B74706572736F6E65725C7061720D0A2020202020205C6230204B6F6E74616B747065
+			72736F6E20686F7320686F74656C6C65745C7461625C746162204B6F6E74616B74706572736F6E20686F73206B756E64653A5C7061720D0A2020202020205C70
+			61720D0A2020202020204E61766E3A204672656472696B204D696368616C73656E5C7461625C7461625C746162204E61766E3A205B216E61766E5D5C7061720D
+			0A20202020205C6C616E673130333120546C663A20202020202020393236203431203934385C7461625C7461625C7461625C74616220546C66203A205B216B75
+			6E6465746C665D5C7061720D0A202020202020452D706F73743A205C6366315C756C204672656472696B40736F72626F6E6E652E6E6F5C6366305C756C6E6F6E
+			6520205C7461625C74616220452D706F73743A205B216B756E646565706F73745D5C7061720D0A5C6C616E67313034345C7061720D0A5C6220372E2020205072
+			6973656E6472696E6765725C7061720D0A5C623020372E3120536F72626F6E6E652076696C206B756E6E6520726567756C6572652070726973656E6520736F6D
+			20665C2766386C67652061762067656E6572656C6C20707269735C2766386B6E696E675C7061720D0A2028206B6F6E73756D70726973696E64656B73656E2920
+			656C6C657220656E6472696E6765722069207265676C656E6520666F72206F6666656E746C6967655C7061720D0A736B617474657220656C6C65722061766769
+			6674657220705C27653520686F74656C6C746A656E6573746572206D762E5C7061720D0A5C7061720D0A5C6220392E2020204B6F6E7472616B7473706572696F
+			64656E5C7061720D0A5C623020392E31204B6F6E7472616B74656E20676A656C646572206672612064616773206461746F206F6720757420323031322E5C7061
+			720D0A4E42215C7061720D0A20202020202020205C62204B6F6E7472616B74656E20747265722069206B7261667420735C27653520736E6172742064656E2065
+			72207369676E657274206F672072657475726E6572742074696C205C7061720D0A2020202020202020536F72626F6E6E652E5C7061720D0A2020202020202020
+			656E74656E20705C2765352066617820656C6C6572207065722065706F7374205C7061720D0A5C7061720D0A5C706172645C66692D323132365C6C6932313236
+			5C7269352031302E202020466F726365204D616A657572655C7061720D0A5C6230202020202020202053747265696B2C206C6F636B206F75742C206272616E6E
+			2C20696B6B65206C65766572616E73657220656C6C657220616E647265206F6D7374656E6469676865746572207574656E666F72205C7061720D0A2020202020
+			202020686F74656C6C657473206B6F6E74726F6C6C2067697220686F74656C6C657420726574742074696C205C27653520616E756C6C65726520726573657276
+			61736A6F6E6572205C7061720D0A20202020202020207574656E2076617273656C20656C6C6572206572737461746E696E6773706C696B7420666F7220686F74
+			656C6C65742E5C7061720D0A5C6C696E655C7061720D0A5C706172645C6366325C625C66733430205B21627967675D202D2056692074696C6279723A205C7061
+			720D0A5C7061720D0A5C6366305C667332345C746162202A205C7461625C623020476F642061746D6F73665C27653672652069207472616469736A6F6E737269
+			6B65206F672074726976656C696765206F6D676976656C7365722E5C7061720D0A5C625C746162202A5C7461625C62302045742073657276696365696E6E7374
+			696C7420706572736F6E616C6520736F6D2062727972207365672E5C7061720D0A5C625C746162202A5C7461625C62302053656E7472616C20706C6173736572
+			696E67206920686A65727465742061762053616E6476696B656E5C7061720D0A5C625C746162202A5C7461625C62302032322076656C7574737479727465206C
+			65696C69676865746572206F672074726976656C69676520726F6D206920667269736B65206F672064656C696B617465206661726765722E205C7061720D0A5C
+			746162202A5C746162204765742074762061626F6E6E656D656E74206F6720696E7465726E65747420657220696E6B6C7564657274206920726F6D7072697365
+			6E2E205C7061720D0A5C625C746162202A5C7461625C6230204E796F7070757373656465206C65696C696768657465725C7061720D0A5C746162202A20205C74
+			61622046726F6B6F737462756666657420705C2765352074696C6B6E797474657420686F74656C6C2053616E6476696B656E20686F74656C6C202853616E6476
+			696B73766569656E20393429202D206D6F742074696C6C656767205C7061720D0A5C625C7061720D0A5C7061720D0A5C62305C7061720D0A5C625C7461625C74
+			61625C7061720D0A5C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit101"
+		Left="283"
+		Top="29906"
+		Width="9922"
+		Height="5811"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[0F030000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			726F6D616E5C66707271325C6663686172736574302054696D6573204E657720526F6D616E3B7D7B5C66315C666E696C5C6663686172736574302054696D6573
+			204E657720526F6D616E3B7D7D0D0A7B5C636F6C6F7274626C203B5C7265643131325C677265656E3133395C626C756535373B7D0D0A5C766965776B696E6434
+			5C7563315C706172645C625C66305C667332382047796C646967206672612064616773206461746F206F6720757420323031323A5C7061720D0A5C667332345C
+			7061720D0A5C667332305C7461625C7461625C7461625C7461625C7461625C7061720D0A5C66733234203220526F6D7320686F74656C6C6C65696C6967686574
+			3A5C746162206B72203235305C74616220706572206E6174745C74616220205C7061720D0A3320526F6D7320686F74656C6C6C65696C69676865743A5C746162
+			206B722034353020706572206E6174745C7061720D0A5C7061720D0A50726973656E6520676A656C64657220686F74656C6C65696C69676865742070722E2064
+			5C276638676E2C20696E6B6C7564657274206D657276657264696176676966742E5C7061720D0A5C6366315C667334305C7061720D0A5C6366305C667332345C
+			7461625C7461625C7461625C7461625C7061720D0A4C65696C6967686574736E756D6D65723A205C756C205B21726F6D5D5C756C6E6F6E655C7061720D0A5C70
+			61720D0A44657420657220666F722064656E6E65206C65696C6967686574656E20617674616C7420656E2066617374206D5C2765356E6564737072697320705C
+			276535205C756C205B21707269735D5C756C6E6F6E6520206B7220696E6B6C206D76612E205C7461625C7061720D0A5C706172645C66692D323132365C6C6932
+			3132365C7269355C62305C7061720D0A5C7061720D0A5C7061720D0A5C7061720D0A4461746F3A205B216C616765746461746F5D5C7061720D0A5C7061720D0A
+			5C706172645C66315C667332305C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field170"
+		DataField="kundetlf"
+		Left="8625"
+		Top="6465"
+		Width="1260"
+		Height="420"
+		Visible="0"
+		Text="kundetlf"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field171"
+		DataField="kundeepost"
+		Left="6855"
+		Top="6510"
+		Width="1605"
+		Height="420"
+		Visible="0"
+		Text="kundeepost"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field174"
+		DataField="*y..Bedrift.Navn"
+		Left="210"
+		Top="44655"
+		Width="4875"
+		Height="435"
+		Text="bedriftnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 14.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field175"
+		DataField="objekt_poststed"
+		Left="9240"
+		Top="42435"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="objekt_poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field176"
+		DataField="objekt_poststed"
+		Left="9240"
+		Top="42855"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="objekt_poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field177"
+		DataField="objekt_poststed"
+		Left="9240"
+		Top="43275"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="objekt_poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field178"
+		DataField="*y..Bedrift.Adresse"
+		Left="195"
+		Top="45090"
+		Width="2580"
+		Height="285"
+		Visible="0"
+		Text="adresse"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field179"
+		DataField="*y..Bedrift.Postnr"
+		Left="210"
+		Top="45375"
+		Width="660"
+		Height="285"
+		Visible="0"
+		Text="postnr"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field180"
+		DataField="*y..Bedrift.Poststed"
+		Left="900"
+		Top="45375"
+		Width="2160"
+		Height="285"
+		Visible="0"
+		Text="poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field182"
+		DataField="*y..Bedrift.Telefon"
+		Left="1125"
+		Top="45660"
+		Width="2370"
+		Height="285"
+		Visible="0"
+		Text="telefon"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label85"
+		Left="210"
+		Top="45660"
+		Width="885"
+		Height="285"
+		Caption="Telefon"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field62"
+		DataField="Giro"
+		Left="7512"
+		Top="45222"
+		Width="2834"
+		Height="284"
+		Text="Giro"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label82"
+		Left="3810"
+		Top="5310"
+		Width="1455"
+		Height="285"
+		Tag="2976"
+		Caption="Type leilighet"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field165"
+		DataField="boligtype"
+		Left="3810"
+		Top="5580"
+		Width="2385"
+		Height="330"
+		Text="boligtype"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; text-align: left; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field166"
+		DataField="rom_nummer"
+		Left="6750"
+		Top="5580"
+		Width="1245"
+		Height="255"
+		Text="rom_nummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label83"
+		Left="6765"
+		Top="5295"
+		Width="1230"
+		Height="285"
+		Tag="2976"
+		Caption="Leilighetsnr"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label84"
+		Left="8115"
+		Top="5280"
+		Width="1965"
+		Height="285"
+		Tag="2976"
+		Caption="Innflytningsdato"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field168"
+		DataField="Kontrakt_fra"
+		Left="8175"
+		Top="5580"
+		Width="1680"
+		Height="330"
+		Text="kontrakt fra"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit116"
+		Left="283"
+		Top="36142"
+		Width="3969"
+		Height="5102"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[62010000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			726F6D616E5C66707271325C6663686172736574302054696D6573204E657720526F6D616E3B7D7B5C66315C666E696C5C6663686172736574302054696D6573
+			204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C66692D323132365C6C69323132365C7269355C66305C66733234204D65
+			642076656E6E6C69672068696C73656E5C7061720D0A5C706172645C6220466F7220536F72626F6E6E655C7061720D0A5C7061720D0A5C7061720D0A5C706172
+			0D0A5C6230205F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5C7461625C7061720D0A4672656472696B204D696368616C73656E5C70
+			61720D0A53616C6773206F67206D61726B656473736A65665C66315C667332305C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit117"
+		Left="4677"
+		Top="36142"
+		Width="3969"
+		Height="5102"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[28010000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			726F6D616E5C66707271325C6663686172736574302054696D6573204E657720526F6D616E3B7D7B5C66315C666E696C5C6663686172736574302054696D6573
+			204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C66692D323132365C6C69323132365C7269355C66305C667332345C7061
+			720D0A5C706172645C6220466F72204B756E64655C7061720D0A5C7061720D0A5C7061720D0A5C7061720D0A5C6230205F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F
+			5F5F5F5F5F5F5F5F5F5F5F5F5F5C7461625C7061720D0A5B216E61766E5D5C66315C667332305C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+<Script>
+<![CDATA[Sub OnFormat
+'1
+	dim kontraktfra  ' fra kontrakt_fra
+	dim kontrakttil  ' fra kontrakt_til
+	dim utleiernavn  ' skrives inn for hver enkelt
+	dim returadresse ' skrives inn for hver enkelt
+	dim navn 		' navn
+	dim omrade		' omrade
+	dim boligtype	' boligtype
+	dim svarfrist	' svarfrist
+	dim mvaHusleie 
+	dim kundeepost
+	dim kundetlf 
+'10
+	dim kundenummer	' kundenummer
+	dim adresse1	' address1
+	dim adresse2	' address2
+	dim postnr		' postal_code
+	dim poststed	' city
+	dim land		' country
+	dim oppgang		' oppgang
+	dim rom		' rom_nummer
+	dim objekt_adresse ' objekt_adresse
+'20
+	dim objekt_postnr  ' objekt_postnummer
+	dim objekt_poststed ' objekt_poststed
+	dim etasje		' etasjenavn
+	dim bygg		' byggnavn
+	dim pris		' pris
+	dim lagetdato 	' lagetdato
+	dim webside	'  skrives inn for hver enkelt, dette er hjemmesiden til utleier
+	dim benevning ' dette er forkortelsen for utleierens navn/ eller annen benevning av utleier. f.eks SiB, utleier, OAS, osv.
+	dim reglement ' beskivelse av de dokumenter etc. med regelement som leietaker skal vedta bindende.
+	dim signatur ' beskrivelse person som skriver under, eks: Direktør for Studentboligene, Studentsamskipnaden i Bergen
+ 	'Kode for SiB prismakro:
+     dim Avtalt_pris
+	 dim Medlem
+	 Dim MedlemFaktor
+     Dim nypris
+	'Kode for postdager
+     Dim AntallPostdagerAkseptFrist, nysvarfrist
+	 
+	kontraktfra = rpt.Fields("kontrakt_fra").Value
+
+
+'******************************************************
+'	Under her kommer de felt som tilpasses for hver enkelt.
+'******************************************************
+	utleiernavn = "{navn på utleier}"
+	returadresse = "{returadresse}"
+	webside="{webside}"
+	benevning="{benevning}"
+	reglement="{reglement}"
+	signatur="{signatur}"
+'******************************************************
+
+	kontrakttil = rpt.Fields("kontrakt_til").Value
+
+	lagetdato = rpt.fields("lagetDato").value
+	navn = rpt.fields("Navn").value
+	omrade = rpt.fields("omrade").Value
+	mvaHusleie = rpt.fields("mvaHusleie").Value
+	kundeepost = rpt.fields("kundeepost").Value
+	kundetlf = rpt.fields("kundetlf").Value
+	boligtype = rpt.fields("boligtype").Value
+	svarfrist = rpt.fields("svarfrist").Value
+	kundenummer	 = rpt.fields("kundenummer").Value
+	adresse1 = rpt.fields("Address1").Value
+	adresse2 = rpt.fields("Address2").Value
+	postnr = rpt.fields("postal_code").Value
+	poststed = rpt.fields("city").Value
+	land = rpt.fields("country").Value
+	oppgang = rpt.fields("oppgang").Value
+	rom = rpt.fields("rom_nummer").Value
+	objekt_adresse  = rpt.fields("objekt_adresse").Value
+	objekt_postnr   = rpt.fields("objekt_postnummer").Value
+	objekt_poststed  = rpt.fields("objekt_poststed").Value
+	etasje = rpt.fields("etasje_navn").Value
+	bygg	 = rpt.fields("byggnavn").Value    
+    pris	 = rpt.fields("pris").Value
+	'Kode for SiB prismakro:
+    Avtalt_pris = rpt.fields("Avtalt_pris").Value
+	Medlem = rpt.fields("Medlem").Value
+	MedlemFaktor=sfcurr(rpt.fields("MedlemFaktor").Value)
+	AntallPostdagerAkseptFrist=rpt.fields("AntallPostdagerAkseptFrist").Value
+
+	if sfcurr(Avtalt_pris)=0 and sfcurr(Medlem)=0 then		
+		nypris=sfcurr(pris)*sfcurr(MedlemFaktor)				
+	end if
+	
+	if sfcurr(Avtalt_pris)=0 and abs(Medlem)=1 then
+		nypris=pris
+	end if	
+		
+	if Avtalt_pris>0 then
+		nypris=Avtalt_pris
+	end if
+	
+		
+	'Kode for postdager
+    if AntallPostdagerAkseptFrist > 0  then
+ 	nysvarfrist = dateadd("d", -AntallPostdagerAkseptFrist, svarfrist)
+    else
+    nysvarfrist = svarfrist
+	end if
+	
+	
+	
+
+	dim a 
+	set a = rpt.Sections("GroupHeader1").Controls
+	' dim b as IRichEdit
+	dim p
+	dim i 
+	on error resume next
+	for i = 0 to ( a.Count - 1 )
+		set b = a.item(i)
+		p = instr(1,b.name, "Rich", 1 )
+		if not isnull(p) then
+			if p > 0 then
+				call b.replacefield("lagetdato",lagetdato)
+				call b.replacefield("kontraktfra", kontraktfra )
+				call b.replacefield("kontrakttil", kontrakttil )
+				call b.replacefield("utleiernavn", utleiernavn )
+				call b.replacefield("returadresse",returadresse )
+				call b.replacefield("navn",navn)
+				call b.replacefield("omrade",omrade)
+				call b.replacefield("mvaHusleie",mvaHusleie)
+				call b.replacefield("kundetlf",kundetlf)
+				call b.replacefield("kundeepost",kundeepost)
+				call b.replacefield("boligtype",boligtype)
+				call b.replacefield("svarfrist",nysvarfrist) 'endret pga postdager
+				call b.replacefield("kundenummer",kundenummer)
+				call b.replacefield("adresse1",adresse1)
+				call b.replacefield("adresse2",adresse2)
+				call b.replacefield("postnr",postnr)
+				call b.replacefield("poststed",poststed)
+				call b.replacefield("land",land)
+				call b.replacefield("oppgang",oppgang)
+				call b.replacefield("rom",rom)
+				call b.replacefield("objekt_adresse",objekt_adresse)
+				call b.replacefield("objekt_postnr",objekt_postnr)
+				call b.replacefield("objekt_poststed",objekt_poststed)
+				call b.replacefield("etasje",etasje)
+				call b.replacefield("bygg",bygg)			
+			    call b.replacefield("webside",webside )
+				call b.replacefield("benevning",benevning )
+				call b.replacefield("reglement",reglement )
+				call b.replacefield("signatur",signatur )
+				call b.replacefield("MedlemFaktor",MedlemFaktor )
+				'kode for SiB medlemspris:
+			    call b.replacefield("Medlem",Medlem)	
+				call b.replacefield("pris",nypris)	
+
+
+			end if
+		end if	
+	next 
+End Sub
+
+
+Function sfcurr(v)
+    Dim rv
+    On Error Resume Next
+    rv = CCur(v)
+    If Err Then rv = 0
+    sfcurr = rv
+End Function
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="91545"
+		NewPage="2"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field231"
+		DataField="objekt_poststed"
+		Left="9240"
+		Top="43275"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="objekt_poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field230"
+		DataField="objekt_poststed"
+		Left="9240"
+		Top="42855"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="objekt_poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field229"
+		DataField="objekt_poststed"
+		Left="9240"
+		Top="42435"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="objekt_poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field227"
+		DataField="kundeepost"
+		Left="9071"
+		Top="8787"
+		Width="1559"
+		Height="426"
+		Visible="0"
+		Text="kundeepost"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field226"
+		DataField="kundetlf"
+		Left="8362"
+		Top="6094"
+		Width="1276"
+		Height="426"
+		Visible="0"
+		Text="kundetlf"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak5"
+		Left="0"
+		Top="13874"
+		Width="425"
+		Height="0"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak6"
+		Left="15"
+		Top="75942"
+		Width="425"
+		Height="0"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak7"
+		Left="0"
+		Top="60338"
+		Width="425"
+		Height="0"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak8"
+		Left="0"
+		Top="44535"
+		Width="360"
+		Height="60"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit102"
+		Left="150"
+		Top="1125"
+		Width="10620"
+		Height="780"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[DD000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			726F6D616E5C66707271325C6663686172736574302054696D6573204E657720526F6D616E3B7D7B5C66315C666E696C5C66636861727365743020417269616C
+			3B7D7D0D0A5C766965776B696E64345C7563315C706172645C736C2D3237305C736C6D756C74305C71635C756C5C625C66305C667333325C7061720D0A4C6569
+			656B6F6E7472616B745C756C6E6F6E655C62305C66315C667332385C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field183"
+		DataField="pris"
+		Left="9690"
+		Top="7680"
+		Width="990"
+		Height="255"
+		Visible="0"
+		Text="pris"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; text-align: right; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field184"
+		DataField="kundenummer"
+		Left="9345"
+		Top="7035"
+		Width="1410"
+		Height="210"
+		Visible="0"
+		Text="kundenummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field185"
+		DataField="lagetdato"
+		Left="9213"
+		Top="39811"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="lagetdato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field186"
+		DataField="svarfrist"
+		Left="9354"
+		Top="40519"
+		Width="1134"
+		Height="284"
+		Visible="0"
+		Text="svarfrist"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(224,224,224); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field187"
+		DataField="oppgang"
+		Left="9600"
+		Top="7335"
+		Width="1125"
+		Height="210"
+		Visible="0"
+		Text="oppgang"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field188"
+		DataField="objekt_adresse"
+		Left="9213"
+		Top="40945"
+		Width="1559"
+		Height="141"
+		Visible="0"
+		Text="objekt_adresse"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field189"
+		DataField="objekt_postnummer"
+		Left="9071"
+		Top="37260"
+		Width="1701"
+		Height="283"
+		Visible="0"
+		Text="objekt_postnummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field190"
+		DataField="objekt_poststed"
+		Left="9236"
+		Top="41603"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="objekt_poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field191"
+		DataField="etasje_navn"
+		Left="9459"
+		Top="8349"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="etasje_navn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field192"
+		DataField="byggnavn"
+		Left="9525"
+		Top="8010"
+		Width="1260"
+		Height="255"
+		Visible="0"
+		Text="byggnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field193"
+		DataField="kontrakt_til"
+		Left="9638"
+		Top="41228"
+		Width="1134"
+		Height="284"
+		Visible="0"
+		Text="kontrakt_til"
+		ClassName="Normal"
+		Style="font-family: &apos;Trebuchet MS&apos;; ddo-char-set: 1; font-size: 8pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field194"
+		DataField="kontrakt_fra"
+		Left="9638"
+		Top="38819"
+		Width="1134"
+		Height="283"
+		Visible="0"
+		Text="kontrakt_fra"
+		ClassName="Normal"
+		Style="font-family: &apos;Trebuchet MS&apos;; ddo-char-set: 1; font-size: 8pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field195"
+		DataField="address1"
+		Left="9213"
+		Top="38394"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="address1"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field196"
+		DataField="address2"
+		Left="9213"
+		Top="38110"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="address2"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field197"
+		DataField="postal_code"
+		Left="9071"
+		Top="39386"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="postal_code"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field198"
+		DataField="city"
+		Left="9213"
+		Top="40236"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="city"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field199"
+		DataField="navn"
+		Left="9213"
+		Top="37685"
+		Width="1559"
+		Height="283"
+		Visible="0"
+		Text="navn"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field200"
+		DataField="country"
+		Left="9213"
+		Top="39102"
+		Width="1559"
+		Height="284"
+		Visible="0"
+		Text="country"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape87"
+		Left="360"
+		Top="5265"
+		Width="3255"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak9"
+		Left="0"
+		Top="13874"
+		Width="425"
+		Height="0"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field201"
+		DataField="Giro"
+		Left="157"
+		Top="86102"
+		Width="2976"
+		Height="283"
+		Text="Giro"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; font-size: 12pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field202"
+		Left="142"
+		Top="85829"
+		Width="2126"
+		Height="283"
+		Text="Innbetalt til konto"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field203"
+		Left="4110"
+		Top="85829"
+		Width="709"
+		Height="283"
+		Text="Beløp"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; font-size: 11pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field204"
+		DataField="Sluttsum"
+		Left="4125"
+		Top="86102"
+		Width="1559"
+		Height="283"
+		Text="Sluttsum"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; ddo-char-set: 1; font-size: 12pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field205"
+		DataField="Kundenummer"
+		Left="1858"
+		Top="86952"
+		Width="2126"
+		Height="283"
+		Text="Kundenummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field206"
+		DataField="Navn"
+		Left="157"
+		Top="88794"
+		Width="3827"
+		Height="284"
+		Text="Navn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field207"
+		DataField="Postal_code"
+		Left="157"
+		Top="89645"
+		Width="850"
+		Height="283"
+		Text="Postnr"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field208"
+		DataField="City"
+		Left="1007"
+		Top="89645"
+		Width="1984"
+		Height="283"
+		Text="Poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field209"
+		Left="157"
+		Top="90637"
+		Width="3827"
+		Height="283"
+		Text="Kundeidentifikasjon (KID)"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field210"
+		Left="4125"
+		Top="90637"
+		Width="1843"
+		Height="283"
+		Text="Kroner"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field211"
+		DataField="Sluttsum"
+		Left="4409"
+		Top="91204"
+		Width="2126"
+		Height="283"
+		Text="Sluttsum"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; font-size: 12pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field212"
+		Left="7102"
+		Top="90637"
+		Width="2409"
+		Height="283"
+		Text="Til konto"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field213"
+		DataField="address1"
+		Left="157"
+		Top="89078"
+		Width="3827"
+		Height="283"
+		Text="address1"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit105"
+		Left="157"
+		Top="87235"
+		Width="3827"
+		Height="284"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[BB000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C66733230205265666572616E7365202020202020202020202020202053696B6B65726865745C66315C7061720D0A7D
+			0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit106"
+		Left="157"
+		Top="86952"
+		Width="1701"
+		Height="283"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[A6000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C66733230204B756E64656E756D6D65725C66315C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field214"
+		DataField="address2"
+		Left="157"
+		Top="89361"
+		Width="3827"
+		Height="284"
+		Text="address2"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 11pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit107"
+		Left="270"
+		Top="78450"
+		Width="9360"
+		Height="4530"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[C9020000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C66733230202020202020202020202020204B756E64656E756D6D65723A205B216B756E64656E756D6D65725D5C7061
+			720D0A2020202020202020202020205B216E61766E5D5C7061720D0A2020202020202020202020205B2161647265737365315D5C7061720D0A20202020202020
+			20202020205B2161647265737365325D5C7061720D0A2020202020202020202020205B21706F73746E725D205B21706F7374737465645D5C7061720D0A202020
+			2020202020202020205B216C616E645D5C7061720D0A5C66315C7061720D0A5C7061720D0A5C7061720D0A5C7061720D0A5C706172645C71635C66305C667332
+			382053696B6B657268657420667261206B756E646520666F7220736B61646520705C276535206C65696420726F6D2F617265616C6520692068656E686F6C6420
+			74696C20617674616C656E5C7061720D0A5C66315C667332305C7061720D0A5C625C695C66305C6673323420426F6C69673A5C7061720D0A5C62305C69305C70
+			61720D0A5C7061726420202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020
+			4F6D725C27653564653A20202020202020205B216F6D726164655D5C7061720D0A20202020202020202020202020202020202020202020202020202020202020
+			2020202020202020202020202020202020202020202020426F6C6967747970653A2020202020205B21626F6C6967747970655D5C66315C667332305C7061720D
+			0A5C7061720D0A5C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field215"
+		DataField="Giro"
+		Left="7385"
+		Top="91204"
+		Width="2551"
+		Height="283"
+		Text="Giro"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; font-size: 12pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit108"
+		Left="5543"
+		Top="86668"
+		Width="1133"
+		Height="284"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[A9000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C625C66733238204749524F5C62305C66315C667332305C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field216"
+		DataField="Kidnr"
+		Left="298"
+		Top="91204"
+		Width="3686"
+		Height="283"
+		Text="kidnummer"
+		ClassName="Normal"
+		Style="font-family: &apos;AdvOCR-B&apos;; font-size: 12pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field217"
+		Left="6520"
+		Top="85829"
+		Width="2834"
+		Height="283"
+		Text="Betalerens kontonummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; font-size: 11pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field218"
+		Left="157"
+		Top="85393"
+		Width="1275"
+		Height="283"
+		Text="Kvittering"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; font-size: 12pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="15"
+		Y1="86520"
+		X2="10740"
+		Y2="86520"
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit109"
+		Left="5820"
+		Top="88650"
+		Width="3555"
+		Height="1425"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[C7000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C6673323220536F72626F6E6E655C7061720D0A5C6673323020416472657373655C7061720D0A353030302042657267
+			656E5C66315C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label86"
+		Left="5669"
+		Top="88380"
+		Width="1134"
+		Height="283"
+		Caption="Betalt til"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label87"
+		Left="5669"
+		Top="87246"
+		Width="2551"
+		Height="284"
+		Caption="Underskrift ved girering"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label88"
+		Left="142"
+		Top="88522"
+		Width="1134"
+		Height="283"
+		Caption="Betalt av"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak10"
+		Left="0"
+		Top="44535"
+		Width="360"
+		Height="60"
+		Visible="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit110"
+		Left="5745"
+		Top="76410"
+		Width="4200"
+		Height="945"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[DB000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C66733230204F7267616E697361736A6F6E736E722E20202020204E4F3939373432373034314D56415C7061720D0A42
+			616E6B6769726F20202020202020205C6631202020202020205C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field219"
+		DataField="Medlem"
+		Left="9731"
+		Top="6043"
+		Width="992"
+		Height="425"
+		Visible="0"
+		Text="Medlem"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field220"
+		DataField="Avtalt_pris"
+		Left="10001"
+		Top="6493"
+		Width="709"
+		Height="425"
+		Visible="0"
+		Text="Avtalt_pris"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field221"
+		DataField="MedlemFaktor"
+		Left="9255"
+		Top="2848"
+		Width="1559"
+		Height="425"
+		Visible="0"
+		Text="MedlemFaktor"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field222"
+		DataField="AntallPostdagerAkseptFrist"
+		Left="9345"
+		Top="1950"
+		Width="1290"
+		Height="285"
+		Visible="0"
+		Text="AntallPostdagerAkseptFrist"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field223"
+		DataField="mvaHusleie"
+		Left="9705"
+		Top="2265"
+		Width="885"
+		Height="300"
+		Visible="0"
+		Text="mvaHusleie"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field224"
+		DataField="omrade"
+		Left="9030"
+		Top="2565"
+		Width="1725"
+		Height="195"
+		Visible="0"
+		Text="omrade"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape88"
+		Left="3615"
+		Top="5265"
+		Width="3090"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape89"
+		Left="6705"
+		Top="5265"
+		Width="1350"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape90"
+		Left="8055"
+		Top="5265"
+		Width="2130"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape91"
+		Left="360"
+		Top="5550"
+		Width="3255"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape92"
+		Left="3615"
+		Top="5550"
+		Width="3090"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape93"
+		Left="6705"
+		Top="5550"
+		Width="1350"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape94"
+		Left="8055"
+		Top="5550"
+		Width="2130"
+		Height="285"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label89"
+		Left="570"
+		Top="5295"
+		Width="2070"
+		Height="285"
+		Tag="2976"
+		Caption="Navn"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field225"
+		DataField="Navn"
+		Left="540"
+		Top="5595"
+		Width="1680"
+		Height="330"
+		Text="navn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit111"
+		Left="285"
+		Top="6240"
+		Width="10200"
+		Height="7230"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[E4060000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			73776973735C66707271325C66636861727365743020417269616C3B7D7B5C66315C66726F6D616E5C66707271325C6663686172736574302054696D6573204E
+			657720526F6D616E3B7D7D0D0A7B5C636F6C6F7274626C203B5C726564305C677265656E305C626C7565303B5C7265643234345C677265656E305C626C756530
+			3B7D0D0A7B5C7374796C6573686565747B204E6F726D616C3B7D7B5C73312068656164696E6720313B7D7B5C73322068656164696E6720323B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C66305C66733138204B6F6E74616B74696E666F20666F7265736174743A205C7061720D0A5C7061720D0A6572206465
+			7420692064616720696E6E675C276535747420665C2766386C67656E6465206B6F6E7472616B74206F6D206C65696520617620726F6D2069205C69206C65696C
+			69676865745C6930202069205C69205B21627967675D2C205B216F626A656B745F706F73746E725D205B216F626A656B745F706F7374737465645D5C6930202E
+			5C6C696E655C6C696E655C695C7061720D0A5C625C66733232204C65696574616B6572206C6569657220726F6D206E723A205B21726F6D5D202069205B216279
+			67675D2C205B216F626A656B745F706F73746E725D205B216F626A656B745F706F7374737465645D2E5C69305C7061720D0A5C62305C667331385C7061720D0A
+			5C7061720D0A5C7061720D0A5C706172645C71635C625C276137315C7061720D0A5C706172645C716A5C62305C7061720D0A5C706172645C6B6565706E5C7332
+			5C71635C62204C454945464F52484F4C4445545C7061720D0A5C706172645C71635C7061720D0A5C706172645C716A5C6230204C656965666F72686F6C646574
+			206F6D66617474657220726F6D2069206C65696C69676865742069205C69205B21627967675D2E5C69302020426F6C6967656E20657220696E73706973657274
+			206176206C65696572656E206F67207374696C6C65732074696C20646973706F7369736A6F6E20736F6D2064656E20666F72656C69676765722E20526F6D6D65
+			74206B616E20646973706F6E6572657320617620696E6E74696C203120706572736F6E2E204C656965722068617220665C276535747420676F64206B6A656E6E
+			736B61702074696C206C65696C6967686574656E732073745C2766387272656C73652C207374616E646172642C20706C616E6C5C276638736E696E67206F6720
+			657474657269736F6C6572696E6720766564206772756E64696720696E7370656B736A6F6E2E5C7061720D0A5C7061720D0A5C7061720D0A5C625C7061720D0A
+			5C706172645C71635C276137325C7061720D0A5C706172645C716A5C62305C7061720D0A5C706172645C6B6565706E5C73325C71635C62204C454945464F5248
+			4F4C444554532056415249474845545C7061720D0A5C706172645C716A5C6366315C62305C7061720D0A5C7061720D0A5C706172645C6E6F77696463746C7061
+			725C636630204C656965666F72686F6C646574206C5C27663870657220667261205C62205B216B6F6E7472616B746672615D5C6230202068766F72667261206F
+			67735C276535206C6569656E206C5C2766387065722E204C656965666F72686F6C64657473207661726967686574206572207469647362657374656D74206F67
+			20766172657220667261205C62205B216B6F6E7472616B746672615D5C6230202074696C205C62205B216B6F6E7472616B7474696C5D5C623020204C6569656B
+			6F6E7472616B74656E206B616E20696B6B652073696573206F70702069206C656965746964656E2C207265662E6875736C6569656C6F76656E73205C27613720
+			392D322E20426567676520706172746572206B616E20646F675C63663220205C636630207369206F707020617674616C656E2064656E2030312E30382E206876
+			657274205C27653572206920617674616C65706572696F64656E2E2056696C6B5C27653572657420666F722064657474652065722061742075746C6569657220
+			665C2765357220736B726966746C6967206D656C64696E67206F6D20646574746520736E6172657374206F672073656E6573742064656E205B21737661726672
+			6973745D2E204F7070736967656C73657220736B616C20765C27653672652075746C6569657220692068656E64652073656E657374207369737465207669726B
+			65646167206920656E206B616C656E6465726D5C2765356E65642E20452D706F737420657220756E6465722064656E6E6520617674616C6520676F646B6A656E
+			7420736F6D20736B726966746C6967206D656C64696E672E5C625C66315C667332345C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit112"
+		Left="283"
+		Top="15103"
+		Width="10205"
+		Height="12898"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[9A0C0000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			73776973735C66707271325C66636861727365743020417269616C3B7D7B5C66315C66726F6D616E5C66707271325C6663686172736574302054696D6573204E
+			657720526F6D616E3B7D7D0D0A7B5C636F6C6F7274626C203B5C726564305C677265656E305C626C7565303B7D0D0A7B5C7374796C6573686565747B204E6F72
+			6D616C3B7D7B5C73312068656164696E6720313B7D7B5C73322068656164696E6720323B7D7D0D0A5C766965776B696E64345C7563315C706172645C71635C62
+			5C66305C667331385C276137335C7061720D0A5C7061720D0A5C706172645C6B6565706E5C73325C7163204C454945424554414C494E475C7061720D0A5C7061
+			72645C716A5C62305C7061720D0A5C636631204C65696573756D6D656E20657220705C276535206B72205B21707269735D2C2D207072206D6E642E204C656965
+			6E20696E6B6C75646572657220696E7465726E657474206F6720536F72626F6E6E65206D65646C656D736B617065742E204C656965722064656B6B6572207365
+			6C76207374725C2766386D206F67206F70707661726D696E67206176206C65696C6967686574656E2E205C7061720D0A5C7061720D0A4C6569656E2062657461
+			6C657320666F72736B75646473766973206F6720756F7070666F72647265742064656E20312E20692068766572206D5C2765356E6564206D6564206769726F20
+			74696C3A205C7061720D0A5C6366305C6920466F72656E696E6773676174656E2031204153205C6366315C6930204B6F6E746F3A203337303520323120343433
+			3730206D6564206C65696572656E73205C756C206E61766E5C756C6E6F6E65202C205C756C2061647265737365206F67206876696C6B656E206D5C2765356E65
+			64206C6569656E20676A656C6465722E205C756C6E6F6E65204C6569657220736B616C20626574616C6520696E6E2065742062656C5C2766387020736F6D2074
+			696C737661726572205C756C20656E206D5C2765356E656473206C6569655C756C6E6F6E65202C2074696C2073696B6B657268657420666F7220736B796C6469
+			67206C6569652C20736B6164657220705C27653520626F6C6967656E2C207574676966746572207665642066726176696B696E67206F6720666F7220616E6472
+			65206B72617620736F6D2072656973657220736567206176206C656965617674616C656E2E2044656E6E6520617674616C656E20657220696B6B652062696E64
+			656E646520666F722075746C6569657220665C2766387220617674616C7420666F72736B756464736C65696520666F72656C69676765722E205C6366305C695C
+			7061720D0A5C6366315C69305C7061720D0A5C7061720D0A465C27663872737465206C6569655C2766386B6E696E672066696E6E657220737465642030312E30
+			312E32303133206F6720687665722030312E3031206876657274205C276535722076696465726520692068656E686F6C642074696C205374617469737469736B
+			2053656E7472616C6279725C27653573206B6F6E73756D70726973696E64656B73206920666F7265675C276535656E6465203132206D5C2765356E6564657273
+			20706572696F64652062617365727420705C276535207469647370756E6B74206672612031352E313020692073746172742074696C2031352E31302E206E6573
+			7465205C276535722E5C7061720D0A5C7061720D0A56656420666F7273696E6B657420626574616C696E67206176206465742062656C5C2766387020736F6D20
+			696C65676765732065747465722064656E6E65206B6F6E7472616B742C20737661726573206D6F726172656E74206574746572206D6F726172656E74656C6F76
+			656E73207361747365722C206D656E206D696E696D756D2032202520666F72206876657220705C276535626567796E7420656C6C65722064656C206176206B61
+			6C656E6465726D5C2765356E65642C2073616D74207075727265676562797220705C2765356C7964656E6465206B72203135302C2D2E5C7061720D0A5C706172
+			0D0A5C706172645C71635C625C276137345C7061720D0A5C7061720D0A4652454D4C4549455C7061720D0A5C706172645C716A5C62305C7061720D0A4672656D
+			6C656965206F67206F76657264726167656C7365206176206B6F6E7472616B74656E20657220696B6B652074696C6C617474206D6564206D696E647265207574
+			6C6569657220686172206769747420736B726966746C69672073616D74796B6B652074696C2064657474652E5C7061720D0A5C7061720D0A5C7061720D0A5C70
+			6172645C71635C625C276137355C7061720D0A5C7061720D0A55544C454945525320504C494B5445525C7061720D0A5C7061720D0A5C706172645C716A5C6230
+			2055746C6569657220736B616C20735C27663872676520666F72206174206279676E696E67656E2065722069206F7264656E746C6967207374616E642E205574
+			6C65696572656E20736B616C20666F72737661726C6967207665646C696B65686F6C64652075746C656964206C65696C696768657420656C6C657220726F6D20
+			6D65642064657274696C2074696C685C27663872656E6465206C65646E696E676572206F6720696E6E7265746E696E67657220666F722061766C5C2766387020
+			6F6720666F7273796E696E67206D65642076616E6E206F6720656C656B747269736B207374725C2766386D2074696C206C616D706570756E6B746572206F6720
+			7374696B6B2D6B6F6E74616B7465722E5C7061720D0A5C7061720D0A5C7061720D0A5C706172645C71635C625C276137365C7061720D0A5C7061720D0A4C4549
+			4552454E53205645444C494B45484F4C4453504C494B545C7061720D0A5C706172645C716A5C62305C7061720D0A4C65696572656E20736B616C20705C276535
+			206567656E2062656B6F7374696E67207665646C696B65686F6C646520696E6E67616E6773645C2766387265722074696C206C65696C6967686574656E20656C
+			6C657220726F6D6D65742C206C5C2765357365722C206E5C2766386B6C65722C2076696E64756572206D65642072616D6D6572206F67206B61726D65722C2076
+			616E6E6B72616E65722C2073657276616E7465722C2076616E6E6B6C6F73657474736B5C2765356C6572206D656420736574652C206C6F6B6B206F6720736973
+			7465726E652C207661726D7476616E6E736265686F6C646572652C20656C656B747269736B65206B6F6D66797265722C206C616D70656B75706C65722C20656C
+			656B747269736B65206B6F6E74616B7465722C20627279746572652C2073696B72696E676572206F6720725C276638796B766172736C65722C2073616D742066
+			6F72657461206F70707374616B696E672061762061766C5C2766387073725C276638722074696C206567656E2076616E6E6C5C276535732E204C696B65735C27
+			653520705C2765356C696767657220646574206C65696572656E205C276535207665646C696B65686F6C6465206C6564696E676572206F6720696E6E7265746E
+			696E67657220736F6D2068616E2068617220616E6272616B74206F67207574726564657420757467696674656E6520766564206F766E73666569696E672E5C70
+			61720D0A5665646C696B65686F6C6473706C696B74656E206F6D666174746572206F67735C27653520666F726E79656C73652061762074617065742C206D616C
+			696E67206F6720616E6E656E206F7070757373696E67206F6720697374616E6473657474656C736520696E6E76656E64696E672E20416C742061726265696420
+			736F6D206C65696572656E20706C696B746572205C276535207574665C276638726520736B616C206C6569657220666F72657461207574656E20756772756E6E
+			6574206F7070686F6C64206F6720705C27653520656E206D5C276535746520736F6D20657220685C2765356E647665726B736D657373696720666F7273766172
+			6C69672E5C7061720D0A5C7061720D0A4F707066796C6C6572206C65696572656E20696B6B6520646973736520666F72706C696B74656C7365722C2065722075
+			746C65696572656E20626572657474696765742074696C205C276535207574665C2766387265207665646C696B65686F6C6473617262656964656E6520666F72
+			206C65696572656E73207265676E696E672C20656C6C65722068657665206B6F6E7472616B74656E2E2044657420766973657320666F72205C27663876726967
+			2074696C20616E64726520706C696B746572206265736B72657665742069205C2761372037206F67205C2761372038206E6564656E666F722E5C7061720D0A5C
+			7061720D0A5C706172645C6366305C625C66315C667332345C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit113"
+		Left="283"
+		Top="30622"
+		Width="10205"
+		Height="14457"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[1C0B0000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			73776973735C66707271325C66636861727365743020417269616C3B7D7B5C66315C66726F6D616E5C66707271325C6663686172736574302054696D6573204E
+			657720526F6D616E3B7D7D0D0A7B5C636F6C6F7274626C203B5C726564305C677265656E305C626C7565303B7D0D0A5C766965776B696E64345C7563315C7061
+			72645C71635C6366315C625C66305C667331385C276137375C7061720D0A5C7061720D0A4C45494552454E5320424548414E444C494E47204156204C45494420
+			4C45494C494748455420454C4C455220524F4D5C7061720D0A5C706172645C716A5C62305C7061720D0A4C65696572656E20736B616C20626568616E646C6520
+			64656E206C65696465206C65696C6967686574656E20656C6C657220726F6D20735C2765352076656C20736F6D206569656E646F6D6D656E20666F72205C2766
+			3876726967206D65642074696C625C276638726C696720616B74736F6D6865742E2048616E20706C696B746572205C27653520657273746174746520616C6C20
+			736B61646520736F6D20736B796C6465732068616D2073656C762C2068616E73206875737374616E642C206672656D6C65696574616765726520656C6C657220
+			616E64726520706572736F6E657220736F6D2068616E20686172206769747420616467616E672074696C206C6569656C65696C6967686574656E20656C6C6572
+			207574656E20736B6A656C6C6967206772756E6E2074696C206569656E646F6D6D656E20666F72205C276638767269672E204C65696572656E20737661726572
+			206F67735C27653520666F7220736B61646572207665642066727973696E6720736F6D20736B796C646573206C656965722073656C7620656C6C6572206E6F65
+			6E20736F6D206C6569657220657220616E737661726C696720666F722E204572737461746E696E6773706C696B74656E206F6D666174746572206F67735C2765
+			352075746769667420736F6D206D5C27653574746520665C2766386C67652061762075747279646E696E672061762075745C276638792E5C7061720D0A5C7061
+			720D0A44657420657220725C276638796B65666F7262756420705C2765352068656C65206569656E646F6D6D656E2E20446572736F6D206C65696574616B6572
+			2062727974657220646574746520666F7262756465742076696C206C65696574616B6572656E20626C692066616B74757265727420657420676562797220705C
+			2765356C7964656E6465206B7220353030207065722068656E64656C73652E20476A656E746174746520627275646420705C2765352064656E6E652062657374
+			656D6D656C73656E20616E73657320736F6D20766573656E746C6967206D69736C6967686F6C64206176206C65696574616B65727320666F72706C696B74656C
+			73657220284A66205C276137203134292E205C7061720D0A5C7061720D0A4C65696574616B65722068617220696B6B652074696C67616E672074696C205C2765
+			352068656E6765206F70702062696C6465722C2072616D6D65722C20706C616B617465722C206F737620705C276535206C65696C6967686574656E7320766567
+			6765722C20645C27663872657220656C6C657220616E64726520666173746520696E6E7265746E696E6765722E205C7061720D0A5C7061720D0A5C7061720D0A
+			5C7061720D0A5C706172645C71635C625C276137385C7061720D0A5C7061720D0A4C45494552454E53204D454C4445504C494B545C7061720D0A5C706172645C
+			716A5C62305C7061720D0A4C65696572656E20706C696B74657220737472616B73205C276535206D656C64652074696C2075746C65696572656E20656E687665
+			7220736B61646520736F6D206D5C276535207574626564726573207574656E206F7070686F6C642E20416E64726520736B61646572206F67206D616E676C6572
+			206D5C276535206C65696572206D656C6465207574656E20756E5C27663864696720666F7273696E6B656C73652E204C6172206C6569657220765C2765367265
+			205C27653520676920706C696B746967206D656C64696E672C207461706572206C656965722073697474206D756C696765206572737461746E696E67736B7261
+			76206F6720657220616E737661726C696720666F7220616C6C20736B61646520736F6D206B6F6D6D657220617620666F7273696E6B656C73656E2E5C7061720D
+			0A5C7061720D0A49206672656D6C656965666F72686F6C6420706C696B746572206672656D6C6569657461676572205C276535206D656C646520736B61646520
+			656C6C6572206D616E67656C20625C27653564652074696C206672656D6C65696572656E206F672068757365696572656E2E5C7061720D0A5C7061720D0A5C70
+			61720D0A5C7061720D0A5C706172645C71635C625C276137395C7061720D0A5C7061720D0A4F564552484F4C44454C5345204156204F5244454E535245474C45
+			525C7061720D0A5C706172645C716A5C62305C7061720D0A4C65696572656E20706C696B746572206F6720665C2766386C6765206875736F7264656E73726567
+			6C657220487573656965726E6573204C616E6473666F7262756E64206861722066617374736174742074696C2073696B72696E6720617620676F64206875736F
+			7264656E206F6720666F72737661726C696720626568616E646C696E67206176206569656E646F6D6D656E2E204C65696572656E206572206F67735C27653520
+			616E737661726C696720666F7220617420736C696B65206F7264656E737265676C657220626C6972206F766572686F6C6474206176206C65696572656E732068
+			75737374616E64206F6720616E6472652069205C2761372037206E65766E746520706572736F6E65722E5C7061720D0A5C7061720D0A56656420696E6E206F67
+			207574666C797474696E67206D5C276535206C6569657220696B6B6520706C617373657265206B6172746F6E67657220656C6C657220616E64726520676A656E
+			7374616E64657220692066656C6C6573617265616C2E2044657420657220696B6B652074696C6C6174205C27653520706C6173736572652073796B6C6572206F
+			6720616E64726520676A656E7374616E646572206920747261707065726F6D206461206465747465206B616E20666F7268696E6472652073696B6B657220725C
+			2766386D6D696E6720766564206272616E6E2E20427275646420705C276535206F7264656E737265676C657220626C69722062657472616B74657420736F6D20
+			766573656E746C6967206D69736C6967686F6C64206176206C6569656B6F6E7472616B74656E2E5C7061720D0A5C7061720D0A5C7061720D0A5C7061720D0A5C
+			706172645C71635C625C27613731305C7061720D0A5C7061720D0A464F52414E4452494E4745522049204C454944204C45494C494748455420454C4C45522052
+			4F4D5C7061720D0A5C706172645C716A5C62305C7061720D0A4C65696572656E206D5C27653520696B6B65207574656E2075746C65696572656E7320736B7269
+			6674656C6967652073616D74796B6B6520666F7265746120666F72616E6472696E6765722069206C656964206C65696C696768657420656C6C657220726F6D2C
+			20735C27653520736F6D20616E6272696E67656C736520617620666173742067756C7662656C6567672C20666A65726E656C736520656C6C657220666C797474
+			696E6720656C6C6572206F6D62797474696E67206176206F766E65722C206B6F6D66797265722C20645C27663872657220656C6C6572206C69676E656E64652E
+			205C7061720D0A5C706172645C6366305C625C66315C667332345C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field228"
+		DataField="*y..Bedrift.Navn"
+		Left="210"
+		Top="76065"
+		Width="4875"
+		Height="435"
+		Text="bedriftnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 14.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field232"
+		DataField="*y..Bedrift.Adresse"
+		Left="195"
+		Top="76500"
+		Width="2580"
+		Height="285"
+		Visible="0"
+		Text="adresse"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field233"
+		DataField="*y..Bedrift.Postnr"
+		Left="210"
+		Top="76785"
+		Width="660"
+		Height="285"
+		Visible="0"
+		Text="postnr"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field234"
+		DataField="*y..Bedrift.Poststed"
+		Left="900"
+		Top="76785"
+		Width="2160"
+		Height="285"
+		Visible="0"
+		Text="poststed"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field235"
+		DataField="*y..Bedrift.Telefon"
+		Left="1125"
+		Top="77070"
+		Width="2370"
+		Height="285"
+		Visible="0"
+		Text="telefon"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label90"
+		Left="210"
+		Top="77070"
+		Width="885"
+		Height="285"
+		Caption="Telefon"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field236"
+		DataField="Giro"
+		Left="7512"
+		Top="76632"
+		Width="2834"
+		Height="284"
+		Text="Giro"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label91"
+		Left="3810"
+		Top="5310"
+		Width="1455"
+		Height="285"
+		Tag="2976"
+		Caption="Type leilighet"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field237"
+		DataField="boligtype"
+		Left="3810"
+		Top="5595"
+		Width="2385"
+		Height="330"
+		Text="boligtype"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; text-align: left; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field238"
+		DataField="rom_nummer"
+		Left="6735"
+		Top="5595"
+		Width="1275"
+		Height="255"
+		Text="rom_nummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label92"
+		Left="6735"
+		Top="5295"
+		Width="1260"
+		Height="285"
+		Tag="2976"
+		Caption="Leilighetsnr"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label93"
+		Left="8115"
+		Top="5280"
+		Width="1965"
+		Height="285"
+		Tag="2976"
+		Caption="Innflytningsdato"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field239"
+		DataField="Kontrakt_fra"
+		Left="8175"
+		Top="5595"
+		Width="1680"
+		Height="330"
+		Text="kontrakt fra"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit114"
+		Left="285"
+		Top="45750"
+		Width="10200"
+		Height="13500"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[BB0A0000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			73776973735C66707271325C66636861727365743020417269616C3B7D7D0D0A7B5C636F6C6F7274626C203B5C726564305C677265656E305C626C7565303B7D
+			0D0A5C766965776B696E64345C7563315C706172645C716A5C6366315C66305C667331382055746C65696572656E20657220626572657474696765742074696C
+			205C27653520666F7265746120617262656964657220736F6D206D5C27653574746520765C2765367265206E5C2766386476656E6469672074696C206569656E
+			646F6D6D656E7320666F72737661726C696765207665646C696B65686F6C64206F6720666F726E79656C73652C206F672074696C205C27653520666F72657461
+			206574687665727420666F72616E6472696E677361726265696420735C2765352076656C206920736F6D207574656E666F72206465206C65696465206C65696C
+			6967686574656E20656C6C657220726F6D6D656E6520692064656E207574737472656B696E672075746C65696572656E2066696E6E6572206465747465206E5C
+			2766386476656E6469672E5C7061720D0A5C7061720D0A4465742073616D6D6520676A656C64657220617262656964206F6720756C656D70657220736F6D2066
+			6F725C2765357273616B6573206D656420676174656F7070617262656964656C736520656C6C657220705C2765356C65676720667261206F6666656E746C6967
+			65206D796E646967686574657220656C6C6572206672612075746C65696572657320666F7273696B72696E677373656C736B61702E5C7061720D0A5C7061720D
+			0A4C65696572656E7320706C696B746572205C2765352066696E6E6520736567206920736C696B20617262656964207574656E206572737461746E696E672065
+			6C6C6572206176736C61672069206C6569656E2C206D6564206D696E64726520616E6E657420665C2766386C676572206176204875736C6569656C6F76656E73
+			207566726176696B656C696765207265676C65722074696C20656E68766572207469642E5C7061720D0A5C7061720D0A446572736F6D2075746C656965722061
+			6E73657220646574206E5C2766386476656E646967205C27653520666F72657461206F6D62796767696E672069206569656E646F6D6D656E2C206D5C27653520
+			6C65696572656E2066696E6E652073656720692064657474652E5C7061720D0A5C706172645C625C7061720D0A5C706172645C71635C7061720D0A5C27613720
+			31315C7061720D0A5C7061720D0A55544C45494552454E5320414447414E472054494C204C45494C494748455420454C4C455220524F4D5C7061720D0A5C7061
+			72645C716A5C62305C7061720D0A4C65696572656E2068617220706C696B742074696C20657474657220617674616C65205C27653520666F726576697365206C
+			65696C696768657420656C6C657220726F6D206920616C6C65206461676572206D656C6C6F6D206B6C2E30382E30302D2032302E303020666F72206574746572
+			73796E2C20726570617261736A6F6E2C207665646C696B65686F6C642C2074616B736572696E672C20666F72657669736E696E67206D2E762E5C7061720D0A5C
+			7061720D0A55746C65696572656E2068617220726574742074696C205C2765352062616E652073656720616467616E672074696C2064652075746C6569646520
+			6C65696C6967686574657220656C6C657220726F6D6D656E65206920616C6C652074696C66656C6C65722068766F7220646574746520616E736573206E5C2766
+			386476656E64696720666F72205C27653520666F7265627967676520656C6C65722062656772656E736520736B61646520705C276535206569656E646F6D6D65
+			6E20736F6D20662E20656B73206272616E6E206F672076616E6E736B616465722E5C7061720D0A5C7061720D0A5C7061720D0A5C706172645C71635C625C2761
+			3731325C7061720D0A5C7061720D0A464F52414E4452494E4745522049204C454945464F52484F4C4445545C7061720D0A5C706172645C716A5C62305C706172
+			0D0A4C656965617674616C656E2066616C6C657220626F727420646572736F6D2075746C656964206C65696C696768657420656C6C657220726F6D20626C6972
+			205C27663864656C616774206176206272616E6E20656C6C657220616E6E656E2068656E64656C6967206265676976656E68657420656C6C6572206465742066
+			6F72656C696767657220705C2765356C656767206920667261206F6666656E746C696765206D796E64696768657465722C206C696B6567796C646967206F6D20
+			646574746520736B6A657220665C2766387220656C6C6572206574746572206174206C65696572656E20686172206F76657274617474206C65696C6967686574
+			656E20656C6C657220726F6D6D65742E5C7061720D0A5C706172645C625C7061720D0A5C7061720D0A5C7061720D0A5C706172645C71635C27613731335C7061
+			720D0A5C7061720D0A465241464C595454494E475C7061720D0A5C7061720D0A5C706172645C716A5C6230204C65696572656E20736B616C2076656420667261
+			666C797474696E672074696C62616B656C6576657265206465206C65696465206C65696C6967686574657220656C6C657220726F6D20727964646967676A6F72
+			74206F672072656E676A6F72742C206D65642068656C652076696E6475737275746572206F6720676C61737366656C7465722C206F6720666F725C2766387672
+			696720692073616D6D65207374616E6420736F6D20766564206F766572746167656C73652C20626F72747365747420667261206E6F726D616C7420736C697420
+			6F6720656C64652E5C7061720D0A5C7061720D0A4876697320696B6B6520616E6E657420657220736B726966746C696720617674616C742C206D5C276535206C
+			65696572656E20696B6B6520666A65726E65206661737420696E76656E7461722C206C6564696E6765722C206F67206C696B6E65646520736F6D206C65696572
+			206861722073617474206F70702C206D6564206D696E647265206C6569657220736574746572206C65696C6967686574656E20656C6C657220726F6D6D657420
+			692073616D6D65207374616E6420736F6D206461206C65696572206F766572746F6B2064656E2E5C7061720D0A5C7061720D0A55746C65696572656E20686172
+			20726574742074696C20736C696B7420696E76656E746172207574656E2076656465726C61672E204C696B65735C276535206861722075746C65696572207265
+			74742074696C206C5C27653573657220736F6D206C65696572656E20686172207361747420696E6E206F67206C61747420765C27653672652074696C62616B65
+			2C206F6720616C6C65206E5C2766386B6C65722074696C206C5C27653573656E652E5C7061720D0A5C7061720D0A4D616E676C657220736F6D206C6569657265
+			6E20696B6B65206861722075746265647265742C206B616E2075746C65696572656E207574626564726520705C276535206C65696572656E73206B6F73746E61
+			642E5C7061720D0A5C7061720D0A466F7264656C736B6F727420736F6D2068617220626C6974742075746C657665727420736B616C206F67735C276535206C65
+			76657265732074696C62616B652074696C2075746C6569657220766564207574666C797474696E672E5C7061720D0A5C706172645C71635C625C7061720D0A7D
+			0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit115"
+		Left="285"
+		Top="60960"
+		Width="10200"
+		Height="13440"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[0D0A0000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			73776973735C66707271325C66636861727365743020417269616C3B7D7B5C66315C6673776973735C66707271325C666368617273657430205461686F6D613B
+			7D7D0D0A7B5C636F6C6F7274626C203B5C726564305C677265656E305C626C7565303B5C72656433315C677265656E33315C626C756533313B7D0D0A5C766965
+			776B696E64345C7563315C706172645C71635C6366315C625C66305C667331385C27613731345C7061720D0A5C7061720D0A4C45494552454E5320415654414C
+			4542525544445C62305C7061720D0A5C706172645C716A5C7061720D0A426C6972206C6569656E20656C6C657220617674616C74652074696C6C656767797465
+			6C73657220696B6B6520626574616C7420696E6E656E20313420646167657220657474657220617420736B726966746C696720705C2765356B72617620657474
+			65722066756E6E6574207374656420705C27653520656C6C657220657474657220666F7266616C6C736461672E205C756C205476616E677366756C6C62797264
+			656C7365736C6F76656E2028747666626C2E29205C276137342D31385C756C6E6F6E6520206B616E206C65696572656E206B6173746573207574207574656E20
+			735C2766386B736D5C2765356C206574746572207476626C2E205C27613731332D322C20332E206C65646420706B7420612E203120705C276535206B72617665
+			7420736B616C206465742073745C27653520617420756E6E6C6174656C7365206176205C27653520626574616C65206C6569656E20696E6E656E203134206461
+			67657220657474657220705C2765356B7261766574206572206D6F74746174742C206769722075746C6569657220726574742074696C205C276535206B726576
+			65206C65696572656E2075746B61737465742E204C65696572656E206B616E20696B6B65207365747465206672656D206D6F746B72617620705C276535207574
+			6C65696572656E206D6564206D696E647265206D6F746B72617665742065722065726B6A656E742061762068616D20656C6C65722072657474736C6967206176
+			676A6F72742076656420646F6D20656C6C657220666F726C696B2E5C7061720D0A5C7061720D0A466C797474657220696B6B65206C65696572206E5C27653572
+			206C656965746964656E206572207574652C206B616E2068616E206C696B656C65646573206B6173746573207574207574656E20735C2766386B736D5C276535
+			6C20657474657220747666626C2E205C27613731332D322C20332E6C65646420706B742E62202D207469647362656772656E736574206C6569652C206576742E
+			205C2761372031332D322C2033206C65646420706B742E63202D2076616E6C6967206C656965666F72686F6C642E20476A5C27663872206C65696572656E2065
+			6C6C657273206E6F6520766573656E746C696720627275646420705C276535206C656965617674616C656E2C206B616E2075746C656965726520686576652061
+			7674616C656E2C206F67206C65696572656E20706C696B746572206461205C27653520666C79747465207574206176206C656965617265616C65742E2055746B
+			617374656C73656E206B616E206461206C696B656C65646573206265676A5C27653672657320657474657220747666626C2E205C27613731332D322E20332E20
+			6C65646420706B742E20642E5C7061720D0A5C7061720D0A456E206C656965626F657220736F6D20666C79747465722065747465722075746B617374696E6720
+			656C6C6572206B726176206672612075746C6569657220705C276535206772756E6E206176206D69736C6967686F6C64656C73652C20706C696B746572205C27
+			653520626574616C65206C65696520666F722064656E2074696420736F6D2065722069676A656E206176206C656965746964656E206D65642066726164726167
+			2061762064657420736F6D2075746C65696572656E20665C2765357220696E6E20766564206E792075746C6569652E5C7061720D0A5C7061720D0A4C65696572
+			656E206D5C276535206F67735C27653520626574616C652064656E206B6F73746E6164656E20736F6D2075746B617374696E672C20735C2766386B736D5C2765
+			356C2C206F6720727964646967676A5C27663872696E6720656E2075746B617374656C736520692074696C66656C6C6520665C276638726572206D6564207365
+			672E5C7061720D0A5C625C7061720D0A5C706172645C7061720D0A5C706172645C71635C27613731355C7061720D0A5C706172645C716A5C62305C7061720D0A
+			466F72686F6C6420736F6D20696B6B6520726567756C657265732069206E5C276535765C27653672656E6465206B6F6E7472616B742C20665C27653572206875
+			736C6569656C6F76656E73207265676C657220616E76656E6465732E205C7061720D0A5C7061720D0A4E5C276535765C27653672656E6465206B6F6E7472616B
+			74206572207574737465647420692032202D20746F202D206C696B656C7964656E6520656B73656D706C617265722C2068766F72617620687665722061762070
+			617274656E65206265686F6C64657220687665727420736974742E5C7061720D0A5C7061720D0A5C7061720D0A5C7061720D0A4C657374206F6720676A656E6E
+			6F6D675C27653574743A5C7061720D0A5C7061720D0A5C706172645C66692D3336305C6C693732305C716A202D5C74616220464151205C7461625C746162202D
+			204A61205F5F5F5F5F5F5F5F5C7061720D0A2D5C746162204F7264656E737265676C65725C746162202D204A61205F5F5F5F5F5F5F5F5C7061720D0A2D5C7461
+			6220476562797265725C7461625C746162202D204A61205F5F5F5F5F5F5F5F5C7061720D0A5C706172645C716A5C7061720D0A5C7061720D0A5C7061720D0A5C
+			706172645C6366305C7461625C6C616E6731303234205B216C616765746461746F5D5C6C616E673130343420202D2042657267656E5C6C616E67313032345C70
+			61720D0A5C706172645C716A5C6366315C6C616E67313034345C7061720D0A5C7061720D0A5C7061720D0A5C706172645C71635C625C7061720D0A5C7061720D
+			0A5C7061720D0A5C70617264205F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F2020202020202020202020202020202020202020202020202020202020202020202020
+			2020202020202020202020202020202020202020205C7461625C746162205F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5C7061720D0A4D61726B6564736A65
+			665C7461625C7461625C7461625C7461625C7461625C7461625C746162204C65696574616B65725C7061720D0A4672656472696B204D696368616C73656E5C74
+			61625C7461625C7461625C7461625C7461625C7461625C6366325C6C616E67313033335C62305C66315C66733236205B216E61766E5D5C6366315C6C616E6731
+			3034345C66305C667331385C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field240"
+		DataField="*y..Bedrift.Navn"
+		Left="405"
+		Top="2970"
+		Width="1710"
+		Height="255"
+		Text="bedriftnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 9pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label94"
+		Left="405"
+		Top="2655"
+		Width="1815"
+		Height="225"
+		Caption="Huseier:"
+		ClassName="Normal"
+		Style="font-size: 9pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field241"
+		DataField="*y..Bedrift.Adresse"
+		Left="405"
+		Top="3225"
+		Width="1710"
+		Height="255"
+		Text="bedriftnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 9pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field242"
+		DataField="*y..Bedrift.Postnr"
+		Left="405"
+		Top="3480"
+		Width="540"
+		Height="255"
+		Text="bedriftnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 9pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field243"
+		DataField="*y..Bedrift.Poststed"
+		Left="930"
+		Top="3480"
+		Width="1710"
+		Height="255"
+		Text="bedriftnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 9pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field244"
+		DataField="*y..Bedrift.Telefon"
+		Left="1170"
+		Top="3975"
+		Width="1710"
+		Height="255"
+		Text="bedriftnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 9pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field245"
+		DataField="*y..Bedrift.Mailadr"
+		Left="1170"
+		Top="4215"
+		Width="1710"
+		Height="255"
+		Text="bedriftnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 9pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label95"
+		Left="420"
+		Top="3975"
+		Width="585"
+		Height="225"
+		Caption="Tlf:"
+		ClassName="Normal"
+		Style="font-size: 9pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label96"
+		Left="435"
+		Top="4230"
+		Width="705"
+		Height="225"
+		Caption="E-post:"
+		ClassName="Normal"
+		Style="font-size: 9pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[Sub OnFormat
+'1
+	dim kontraktfra  ' fra kontrakt_fra
+	dim kontrakttil  ' fra kontrakt_til
+	dim utleiernavn  ' skrives inn for hver enkelt
+	dim returadresse ' skrives inn for hver enkelt
+	dim navn 		' navn
+	dim omrade		' omrade
+	dim boligtype	' boligtype
+	dim svarfrist	' svarfrist
+	dim mvaHusleie
+	dim kundeepost
+	dim kundetlf 
+'10
+	dim kundenummer	' kundenummer
+	dim adresse1	' address1
+	dim adresse2	' address2
+	dim postnr		' postal_code
+	dim poststed	' city
+	dim land		' country
+	dim oppgang		' oppgang
+	dim rom		' rom_nummer
+	dim objekt_adresse ' objekt_adresse
+'20
+	dim objekt_postnr  ' objekt_postnummer
+	dim objekt_poststed ' objekt_poststed
+	dim etasje		' etasjenavn
+	dim bygg		' byggnavn
+	dim pris		' pris
+	dim lagetdato 	' lagetdato
+	dim webside	'  skrives inn for hver enkelt, dette er hjemmesiden til utleier
+	dim benevning ' dette er forkortelsen for utleierens navn/ eller annen benevning av utleier. f.eks SiB, utleier, OAS, osv.
+	dim reglement ' beskivelse av de dokumenter etc. med regelement som leietaker skal vedta bindende.
+	dim signatur ' beskrivelse person som skriver under, eks: Direktør for Studentboligene, Studentsamskipnaden i Bergen
+ 	'Kode for SiB prismakro:
+     dim Avtalt_pris
+	 dim Medlem
+	 Dim MedlemFaktor
+     Dim nypris
+	'Kode for postdager
+     Dim AntallPostdagerAkseptFrist, nysvarfrist
+	 
+	kontraktfra = rpt.Fields("kontrakt_fra").Value
+
+
+'******************************************************
+'	Under her kommer de felt som tilpasses for hver enkelt.
+'******************************************************
+	utleiernavn = "{navn på utleier}"
+	returadresse = "{returadresse}"
+	webside="{webside}"
+	benevning="{benevning}"
+	reglement="{reglement}"
+	signatur="{signatur}"
+'******************************************************
+
+	kontrakttil = rpt.Fields("kontrakt_til").Value
+
+	lagetdato = rpt.fields("lagetDato").value
+	navn = rpt.fields("Navn").value
+	omrade = rpt.fields("omrade").Value
+	mvaHusleie = rpt.fields("mvaHusleie").Value
+	kundeepost = rpt.fields("kundeepost").Value
+	kundetlf = rpt.fields("kundetlf").Value
+	boligtype = rpt.fields("boligtype").Value
+	svarfrist = rpt.fields("svarfrist").Value
+	kundenummer	 = rpt.fields("kundenummer").Value
+	adresse1 = rpt.fields("Address1").Value
+	adresse2 = rpt.fields("Address2").Value
+	postnr = rpt.fields("postal_code").Value
+	poststed = rpt.fields("city").Value
+	land = rpt.fields("country").Value
+	oppgang = rpt.fields("oppgang").Value
+	rom = rpt.fields("rom_nummer").Value
+	objekt_adresse  = rpt.fields("objekt_adresse").Value
+	objekt_postnr   = rpt.fields("objekt_postnummer").Value
+	objekt_poststed  = rpt.fields("objekt_poststed").Value
+	etasje = rpt.fields("etasje_navn").Value
+	bygg	 = rpt.fields("byggnavn").Value    
+    pris	 = rpt.fields("pris").Value
+	'Kode for SiB prismakro:
+    Avtalt_pris = rpt.fields("Avtalt_pris").Value
+	Medlem = rpt.fields("Medlem").Value
+	MedlemFaktor=sfcurr(rpt.fields("MedlemFaktor").Value)
+	AntallPostdagerAkseptFrist=rpt.fields("AntallPostdagerAkseptFrist").Value
+
+	if sfcurr(Avtalt_pris)=0 and sfcurr(Medlem)=0 then		
+		nypris=sfcurr(pris)*sfcurr(MedlemFaktor)				
+	end if
+	
+	if sfcurr(Avtalt_pris)=0 and abs(Medlem)=1 then
+		nypris=pris
+	end if	
+		
+	if Avtalt_pris>0 then
+		nypris=Avtalt_pris
+	end if
+	
+		
+	'Kode for postdager
+    if AntallPostdagerAkseptFrist > 0  then
+ 	nysvarfrist = dateadd("d", -AntallPostdagerAkseptFrist, svarfrist)
+    else
+    nysvarfrist = svarfrist
+	end if
+	
+	
+	
+
+	dim a 
+	set a = rpt.Sections("Detail").Controls
+	' dim b as IRichEdit
+	dim p
+	dim i 
+	on error resume next
+	for i = 0 to ( a.Count - 1 )
+		set b = a.item(i)
+		p = instr(1,b.name, "Rich", 1 )
+		if not isnull(p) then
+			if p > 0 then
+				call b.replacefield("lagetdato",lagetdato)
+				call b.replacefield("kontraktfra", kontraktfra )
+				call b.replacefield("kontrakttil", kontrakttil )
+				call b.replacefield("utleiernavn", utleiernavn )
+				call b.replacefield("returadresse",returadresse )
+				call b.replacefield("navn",navn)
+				call b.replacefield("omrade",omrade)
+				call b.replacefield("mvaHusleie",mvaHusleie)
+				call b.replacefield("kundetlf",kundetlf)
+				call b.replacefield("kundeepost",kundeepost)
+				call b.replacefield("boligtype",boligtype)
+				call b.replacefield("svarfrist",nysvarfrist) 'endret pga postdager
+				call b.replacefield("kundenummer",kundenummer)
+				call b.replacefield("adresse1",adresse1)
+				call b.replacefield("adresse2",adresse2)
+				call b.replacefield("postnr",postnr)
+				call b.replacefield("poststed",poststed)
+				call b.replacefield("land",land)
+				call b.replacefield("oppgang",oppgang)
+				call b.replacefield("rom",rom)
+				call b.replacefield("objekt_adresse",objekt_adresse)
+				call b.replacefield("objekt_postnr",objekt_postnr)
+				call b.replacefield("objekt_poststed",objekt_poststed)
+				call b.replacefield("etasje",etasje)
+				call b.replacefield("bygg",bygg)			
+			    call b.replacefield("webside",webside )
+				call b.replacefield("benevning",benevning )
+				call b.replacefield("reglement",reglement )
+				call b.replacefield("signatur",signatur )
+				call b.replacefield("MedlemFaktor",MedlemFaktor )
+				'kode for SiB medlemspris:
+			    call b.replacefield("Medlem",Medlem)	
+				call b.replacefield("pris",nypris)	
+
+
+			end if
+		end if	
+	next 
+End Sub
+
+
+Function sfcurr(v)
+    Dim rv
+    On Error Resume Next
+    rv = CCur(v)
+    If Err Then rv = 0
+    sfcurr = rv
+End Function
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="0"
+	>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

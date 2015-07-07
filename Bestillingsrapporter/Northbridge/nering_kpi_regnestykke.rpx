@@ -1,0 +1,981 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{7F5EB706-60B8-4B9C-87F3-9F44BBB17E22}" GUIDREP="{CD392147-DB93-44DC-9707-EC36FD83379F}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10650"
+	DocumentName="KPI utregning"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[dim utleid
+Sub OnDataInitialize
+	'm_data.Debugg=true
+	dim sql
+
+	'm_data.AddInputMacro "{FK}","Fra kunde","getsql(select min(Kontonr) from c..DEBITOR)", "search;s_kraftkunde"
+	'm_data.AddInputMacro "{TK}","Til kunde","getsql(select max(Kontonr) from c..DEBITOR)", "search;s_kraftkunde"
+	'm_data.AddInputMacro "{OM}","Velg bygg ","0",,7,"Select ID, navn  from e..t_bygg union select '0','Alle' order by navn"
+	'm_data.AddInputMacro "{status}","Velg status ","0",,7,"select ST.status_id, ST.Status from (e..t_arealkontrakt as AR INNER JOIN e..t_status as ST on AR.statusid=ST.Status_id) GROUP BY ST.Status, st.status_id union select '0','Alle' order by st.status_id"
+	'm_data.addwhereparam "{utleid}","Visning utleid kvm","Vis utleid kvm inkl fellesareal","1"
+	'm_data.addwhereparam "{utleid}","Visning utleid kvm","Vis netto utleid kvm","2"	
+
+
+'	m_data.addsortparam "{sort}","Sortering etter ","Kundenavn"," order by name, ak.kontrakts_id",""
+'	m_data.addsortparam "{sort}","Sortering etter ","Område"," order by bo.Omrade, name, ak.kontrakts_id",""
+'	m_data.addsortparam "{sort}","Sortering etter ","Bygg"," order by by1.navn,name, ak.kontrakts_id",""
+'	m_data.addsortparam "{sort}","Sortering etter ","Areal type"," order by kt.navn,name, ak.kontrakts_id",""
+'	m_data.addsortparam "{sort}","Sortering etter ","Areal antall"," order by arl.antall DESC,name, ak.kontrakts_id",""
+'	m_data.addsortparam "{sort}","Sortering etter ","Etasje"," order by ea.etasjeID,name, ak.kontrakts_id",""
+'	m_data.addsortparam "{sort}","Sortering etter ","Status"," order by status,name, ak.kontrakts_id",""
+''	m_data.addsortparam "{sort}","Sortering etter ","Kontrakt fra"," order by ak.kontrakt_fra,name, ak.kontrakts_id",""
+'	m_data.addsortparam "{sort}","Sortering etter ","Kontrakt til"," order by ak.kontrakt_til,name, ak.kontrakts_id",""
+'	m_data.addsortparam "{sort}","Sortering etter ","Justeringsdato"," order by ak.justeringsdato,name, ak.kontrakts_id",""
+'	m_data.addsortparam "{sort}","Sortering etter ","Startdato KPI"," order by ak.startdatokpi,name, ak.kontrakts_id",""
+'	m_data.addsortparam "{sort}","Sortering etter ","Oppsigelsesdato"," order by case when ak.oppsigelsesdato IS NULL THEN '12/31/2999' END,name, ak.kontrakts_id",""
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	
+		sql = sql & " select ak.kontrakts_id,  tl.id as id, d.kontonr, cn.name, ak.statusid, ak.justeringsdato, ak.faktorkpi, ak.startdatokpi, tl.varenr, tl.fra_dato, tl.til_dato, tl.pris as pris, tl.tariffnr, tl2.pris as pris2, tl2.varenr, tl2.antall antall2, tl.antall antall, tl.tekst as tekst, tl2.tekst,"
+sql = sql & " (select kv.verdi as test from utool..t_kpi_verdier kv "
+sql = sql & " where kv.offisiell_id collate Latin1_General_CI_AS= ak.kpiid  collate Latin1_General_CI_AS and  Month(DateAdd(month,-3, "
+sql = sql & " ak.justeringsdato))=kv.maaned  and kv.aar=Year(DateAdd(month,-3, ak.justeringsdato))) as registert_kpi"
+sql = sql & " ,(select kv.verdi as test from utool..t_kpi_verdier kv "
+sql = sql & " where kv.offisiell_id collate Latin1_General_CI_AS = ak.kpiid  collate Latin1_General_CI_AS and  Month(DateAdd(month,-3, "
+sql = sql & " ak.justeringsdato))=kv.maaned  and kv.aar=Year(DateAdd(month,-15, ak.justeringsdato))) as tidligere_kpi"
+sql = sql & " ,(select kv.verdi as test from utool..t_kpi_verdier kv "
+sql = sql & " where kv.offisiell_id collate Latin1_General_CI_AS = ak.kpiid  collate Latin1_General_CI_AS and  Month(ak.startdatokpi)=kv.maaned  and "
+sql = sql & " kv.aar=Year(ak.startdatokpi)) as start_kpi, ak.justeringsdato-365 as justeringsdato_1, (DateAdd(month,-15, ak.justeringsdato+14)) as nykpi, DateAdd(month,-27, ak.justeringsdato+14) as stardatokpi_1"
+sql = sql & " from e..t_arealkontrakt ak"
+sql = sql & " left join c..tarifflinje tl on ak.tariffnr=tl.tariffnr"
+sql = sql & " left join c..debitor d on ak.kundenummer=d.kontonr"
+sql = sql & " left join c..c_name cn on cn.id=d.nameid"
+sql = sql & " inner join c..tarifflinje tl2 on tl2.tariffnr=ak.tariffnr"
+sql = sql & " where tl.varenr<>'***'"
+sql = sql & " and tl.varenr=tl2.varenr"
+sql = sql & " and tl2.pris>tl.pris"
+sql = sql & " and tl2.tekst=tl.tekst"
+sql = sql & " and tl2.fra_dato=DateAdd(Year,-1,ak.justeringsdato)"
+sql = sql & " and tl.til_dato=DateAdd(Day,-366,ak.justeringsdato)" 
+sql = sql & " and isNumeric(tl.varenr)=1 and cast(tl.varenr as int) in "
+sql = sql & " ((Select vareavgiftspliktig from e..t_kvadratmetertype where not isNull(vareavgiftspliktig,0)=0 "
+sql = sql & " union "
+sql = sql & " Select vareavgiftsfri from e..t_kvadratmetertype where not isNull(vareavgiftsfri,0)=0))"
+sql = sql & " and ak.statusid=1011 "
+sql = sql & " order by ak.kundenummer, ak.kontrakts_id"
+	
+	'Sjekke om "alle" er valgt. I så fall så dropper vi den siste "and"
+	'if typpe<>"0" then
+	'	sql=sql & " and by1.ID in({OM})"
+	'end if
+'
+'	if status<>"0" then
+'		sql=sql & " and ak.statusid in({status})"
+''	end if
+'
+'
+'	sql = sql & " Group By ea.etasjeID, et.Etasje_navn,D.Kontonr, bo.Omrade, kt.navn, N.ID, N.name,  ak.kontrakt_fra,ak.kontrakt_til, ak.justeringsdato,"
+''	sql = sql & "  ak.startdatokpi, arl.antall, ak.kontrakts_id,  kt.vareavgiftspliktig, kt.vareavgiftsfri, arl.antall, ea.nettokvm, ak.akseptdato, "
+'	sql = sql & " ak.justeringsdato, ak.justeringsintervall, ak.oppsigelsesdato, st.status, by1.navn"
+'	
+	m_data.SqlString = sql '& " {sort}" 
+	m_data.SetupFields rpt
+End Sub
+
+
+Sub OnReportStart
+
+End Sub
+
+Sub OnFetchData(eof)
+
+	rpt.fields("nypris").value=rpt.fields("pris2")*rpt.fields("antall")
+	rpt.fields("gammelpris").value=rpt.fields("pris")*rpt.fields("antall")
+	'IF utleid = 2 THEN
+	'	rpt.fields("tekst").value = "Antall kvm er netto kvm"
+	'else
+	'	rpt.fields("tekst").value = "Antall kvm er brutto (inkl fellesareal)"
+	'end if
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="800"
+	RightMargin="360"
+	TopMargin="720"
+	BottomMargin="360"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1545"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="*y..Bedrift.Navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="283"
+		Text="*y..Bedrift.Navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="*y..Bedrift.Arstall"
+		Left="7937"
+		Top="0"
+		Width="2693"
+		Height="283"
+		Text="*y..Bedrift.Arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="=&quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="7937"
+		Top="283"
+		Width="2693"
+		Height="284"
+		Text="Sidenr"
+		SummaryType="4"
+		SummaryFunc="11"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; text-align: right; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="=now()"
+		Left="7937"
+		Top="567"
+		Width="2693"
+		Height="283"
+		Text="Dato"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; text-align: right; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="User_name"
+		Left="7937"
+		Top="850"
+		Width="2693"
+		Height="284"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-size: 8pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label30"
+		Left="0"
+		Top="0"
+		Width="4394"
+		Height="425"
+		Caption="KPI justering av leie"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 16pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field56"
+		Left="0"
+		Top="992"
+		Width="4819"
+		Height="284"
+		Visible="0"
+		Text="type antall"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="3690"
+		DataField="kontrakts_id"
+		GroupKeepTogether="2"
+		NewPage="1"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field59"
+		DataField="Kontonr"
+		Left="142"
+		Top="142"
+		Width="992"
+		Height="283"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field60"
+		DataField="Name"
+		Left="1276"
+		Top="142"
+		Width="3968"
+		Height="283"
+		Text="Name"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label49"
+		Left="142"
+		Top="709"
+		Width="3968"
+		Height="283"
+		Caption="Vedrørene regulering av leie (ref kontrakt nr."
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field61"
+		DataField="kontrakts_id"
+		Left="4110"
+		Top="709"
+		Width="567"
+		Height="283"
+		Text="nr"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 10pt; vertical-align: top; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label50"
+		Left="6236"
+		Top="709"
+		Width="1843"
+		Height="283"
+		Caption="Reguleringsdato:"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field62"
+		DataField="justeringsdato_1"
+		Left="8362"
+		Top="709"
+		Width="1134"
+		Height="283"
+		Text="justeringsdato"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 10pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label51"
+		Left="142"
+		Top="1417"
+		Width="1984"
+		Height="284"
+		Caption="Basert på indeks av:"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field58"
+		DataField="startdatokpi"
+		Left="3118"
+		Top="1417"
+		Width="1417"
+		Height="284"
+		Text="Start dato KPI"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label52"
+		Left="142"
+		Top="1701"
+		Width="1984"
+		Height="283"
+		Caption="Verdi:"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field63"
+		DataField="tidligere_kpi"
+		Left="8504"
+		Top="1701"
+		Width="1417"
+		Height="283"
+		Text="kpi utgangspunkt"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label53"
+		Left="5244"
+		Top="1417"
+		Width="2693"
+		Height="284"
+		Caption="Reguleres basert på indeks av:"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label54"
+		Left="5244"
+		Top="1701"
+		Width="1843"
+		Height="283"
+		Caption="Verdi:"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field64"
+		DataField="nykpi"
+		Left="8504"
+		Top="1417"
+		Width="1417"
+		Height="284"
+		Text="startdatokpi"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field65"
+		DataField="start_kpi"
+		Left="3118"
+		Top="1701"
+		Width="1417"
+		Height="283"
+		Text="kpi utgangspunkt"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line6"
+		X1="3827"
+		Y1="2976"
+		X2="6803"
+		Y2="2976"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field72"
+		DataField="start_kpi"
+		Left="3827"
+		Top="2693"
+		Width="567"
+		Height="283"
+		Text="kpi utgangspunkt"
+		ClassName="Normal"
+		Style="vertical-align: bottom; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label56"
+		Left="4394"
+		Top="2693"
+		Width="283"
+		Height="283"
+		Caption="+ ("
+		ClassName="Normal"
+		Style="vertical-align: bottom; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field73"
+		DataField="tidligere_kpi"
+		Left="4677"
+		Top="2693"
+		Width="567"
+		Height="283"
+		Text="kpi utgangspunkt"
+		ClassName="Normal"
+		Style="vertical-align: bottom; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label57"
+		Left="5244"
+		Top="2693"
+		Width="142"
+		Height="283"
+		Caption="-"
+		ClassName="Normal"
+		Style="vertical-align: bottom; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field74"
+		DataField="start_kpi"
+		Left="4961"
+		Top="2976"
+		Width="850"
+		Height="284"
+		Text="kpi utgangspunkt"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field75"
+		DataField="start_kpi"
+		Left="5386"
+		Top="2693"
+		Width="567"
+		Height="283"
+		Text="kpi utgangspunkt"
+		ClassName="Normal"
+		Style="vertical-align: bottom; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label58"
+		Left="5953"
+		Top="2693"
+		Width="283"
+		Height="283"
+		Caption=") x"
+		ClassName="Normal"
+		Style="vertical-align: bottom; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field76"
+		DataField="faktorkpi"
+		Left="6378"
+		Top="2693"
+		Width="425"
+		Height="283"
+		Text="faktorkpi"
+		ClassName="Normal"
+		Style="vertical-align: bottom; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label59"
+		Left="5244"
+		Top="1984"
+		Width="1843"
+		Height="284"
+		Caption="Faktor:"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field77"
+		DataField="faktorkpi"
+		Left="8504"
+		Top="1984"
+		Width="1417"
+		Height="284"
+		Text="faktorkpi"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label60"
+		Left="1276"
+		Top="2409"
+		Width="2267"
+		Height="284"
+		Caption="Beregning av ny leie:"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label61"
+		Left="4394"
+		Top="709"
+		Width="425"
+		Height="283"
+		Caption=")"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="435"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label28"
+		Left="7937"
+		Top="142"
+		Width="1417"
+		Height="283"
+		Caption="Gammel årsleie"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-style: italic; text-decoration: underline; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label29"
+		Left="4961"
+		Top="142"
+		Width="1559"
+		Height="283"
+		Caption="Gammel kvm pris"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-style: italic; text-decoration: underline; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label35"
+		Left="6661"
+		Top="142"
+		Width="1134"
+		Height="283"
+		Caption="Ny kvm pris"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-style: italic; text-decoration: underline; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label55"
+		Left="9496"
+		Top="142"
+		Width="992"
+		Height="283"
+		Caption="Ny årsleie"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-style: italic; text-decoration: underline; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="435"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field66"
+		DataField="pris2"
+		Left="6661"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Text="tl.pris"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field67"
+		DataField="pris"
+		Left="4961"
+		Top="0"
+		Width="1559"
+		Height="283"
+		Text="gammel pris"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field68"
+		DataField="tekst"
+		Left="142"
+		Top="0"
+		Width="4677"
+		Height="283"
+		Text="tekst"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field69"
+		DataField="nypris"
+		Left="9496"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Text="tl.pris"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field70"
+		DataField="gammelpris"
+		Left="7937"
+		Top="0"
+		Width="1417"
+		Height="283"
+		Text="tl.pris"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field71"
+		DataField="antall"
+		Left="2551"
+		Top="0"
+		Width="425"
+		Height="283"
+		Visible="0"
+		Text="antall"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="0"
+	>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="345"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field48"
+		DataField="nypris"
+		Left="9071"
+		Top="0"
+		Width="1417"
+		Height="283"
+		Text="antall"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line5"
+		X1="0"
+		Y1="283"
+		X2="15732"
+		Y2="283"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label34"
+		Left="425"
+		Top="0"
+		Width="2693"
+		Height="283"
+		Caption="Total ny leie:"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="1140"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label36"
+		Left="12472"
+		Top="0"
+		Width="1843"
+		Height="283"
+		Caption="Totalt kvm utleid:"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; vertical-align: middle; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field50"
+		DataField="antall"
+		Left="14315"
+		Top="0"
+		Width="992"
+		Height="283"
+		Text="antall"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; font-weight: bold; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label44"
+		Left="0"
+		Top="567"
+		Width="5811"
+		Height="283"
+		Visible="0"
+		Caption="Rapporten er laget av: Rune Synnevåg Uni Pluss AS"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

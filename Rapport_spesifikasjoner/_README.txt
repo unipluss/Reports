@@ -1,0 +1,3 @@
+Navngivning av filer:
+
+KUNDENAVN_RAPPORTNAVN_SAKSNR

@@ -1,0 +1,1082 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{0C639C15-3D83-4708-B48D-8A96CE94E8B1}" GUIDREP="{2AB06AA9-8983-41C6-911E-51C9424CBBAD}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10650"
+	DocumentName="Avregning av fellekostnader"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[dim logo
+dim skalHaLogo
+dim felleskostnadtekst
+Dim fellekostnader
+dim mvaobj
+dim mvaprct
+Dim year,jobb,skjul
+dim totalprisprkvmegen
+
+Sub OnDataInitialize
+	'm_data.Debugg=true
+	dim sql
+	felleskostnadtekst=""
+	totalprisprkvmegen = ""
+
+	m_data.AddInputMacro "{jobb}","Jobbnr:","getsql(Select max(jobbnr) from e..t_ak_felleskostavregning_jobb)"
+	m_data.AddInputMacro "{temp}","","", ""
+	m_data.AddInputMacro "{felleskostnadTekst}","Felleskostnad tekst:","Felleskostnad", ""
+	m_data.AddInputMacro "{FE}","Velg felleskostnader som skal samles ","1",,7,"Select Dimtall,navn from y..Dimensjon where dimtype=(select dimFelleskostnad from e..t_klientParametre) order by navn"
+	m_data.AddInputMacro "{skjul}", "Skjul felleskostnader uten kostnad", 0, 0,1
+	m_data.AddInputMacro "{prisprkvmegen}","Overstyr pris pr kvm:","", ""
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	fellekostnader = m_data.GetMacroValue("{FE}")
+	jobb = m_data.GetMacroValue("{jobb}")
+	skjul = m_data.GetMacroValue("{skjul}")
+	felleskostnadtekst = m_data.GetMacroValue("{felleskostnadTekst}")
+	totalprisprkvmegen = m_data.GetMacroValue("{prisprkvmegen}")
+	if len(fellekostnader)>0 then
+		fellekostnader="," & fellekostnader
+	end if
+	
+	if m_data.RunSubQuery("Select year(klientAar) as it from e..t_ak_felleskostavregning_jobb where jobbnr="& jobb,"sys")>0 then
+		year= m_data.subqueryvalue("it","sys")
+	end if
+	logosub
+
+	sql= "DECLARE @dato DATETIME "
+	sql = sql & " DECLARE @mva decimal(8,4)"
+	sql = sql & " set @dato='31.12." & year & "'"
+	sql = sql & " set @mva=('1'+(Select UtgMvaPSats from y..SYSTEM)/100)"
+	sql = sql & " select distinct l.id,l.jobbnr,l.kontrakts_id,ak.kundenummer,c.name,dim.Navn as Felleskost,round(l.kostnad,2) kostnad,Round(l.fakturert,2)fakturert,round(l.differanse,2) differanse,j.dato,j.bruker"
+	sql = sql & " ,isnull(isNull(k.fritekst,j.fritekst),'') as Fritekst,l.felleskostid,ak.kontrakt_fra,ak.kontrakt_til"
+	sql = sql & " ,(Case when isNull(ak.fakturerfktil,ak.kontrakt_til)>@dato then @dato else ak.fakturerfktil end) as fakturerfktil"	
+	'sql = sql & " ,isNull(ak.fakturerfktil,Convert(datetime,convert(varchar(8),'31.12.') + convert(varchar(4),"& year &"))) as fakturerfktil"
+	sql = sql & " ,(Case when dim.dimtall not in (-1 " & fellekostnader & ") then dim.dimtall else 0 end) as samler, ('1'+(Select UtgMvaPSats from y..SYSTEM)/100) as momsprct,va.varenr, va.momsind"
+	sql = sql & " ,(Select round(2*sum(antall+tillegg),0)/2 as antallkvm from e..t_arealres where kontrakts_id=k.kontrakts_id) as antallkvm"	
+	
+	
+	sql = sql & " ,(Select sum( Case when va2.momsind=8 then kostnad else l2.kostnad * @mva end)"
+	sql = sql & " from e..t_ak_felleskostavregning_linje l2"
+	sql = sql & " left join e..t_arealvaredim av2 on av2.dimrecordid=l2.felleskostid"
+	sql = sql & " left join c..VARER va2 on va2.varenr=(case when isNull(l2.momsind ,0)=0 then av2.vareavgiftsfri else av2.vareavgiftspliktig end)"
+	sql = sql & " where kontrakts_id=k.kontrakts_id "
+	sql = sql & " and jobbnr=j.jobbnr and l2.felleskostid in (-1 " & fellekostnader & ")) as prisprkvm"
+	
+	sql = sql & " from e..t_ak_felleskostavregning_jobb j"
+	sql = sql & " left join e..t_ak_felleskostavregning_kontrakt k on k.jobbnr=j.jobbnr"
+	sql = sql & " left join e..t_ak_felleskostavregning_linje l on k.jobbnr=l.jobbnr and l.kontrakts_id=k.kontrakts_id"
+	sql = sql & " left join e..t_arealkontrakt ak on ak.kontrakts_id=l.kontrakts_id"
+	sql = sql & " left join c..DEBITOR d on ak.kundenummer=d.kontonr"
+	sql = sql & " left join c..c_name c on c.id=d.nameid"
+	sql = sql & " left join y..Dimensjon dim on dim.dimtall=l.felleskostid"
+	sql = sql & " left join e..t_arealvaredim av on av.dimrecordid=dim.dimtall"
+	sql = sql & " left join c..VARER va on va.varenr=(case when isNull(l.momsind ,0)=0 then av.vareavgiftsfri else av.vareavgiftspliktig end)"
+	sql = sql & " where l.jobbnr='{jobb}'"
+	if skjul<>"0" then
+		sql = sql & " and (l.kostnad>1 or l.fakturert>1)"
+	end if
+	sql = sql & " order by name,l.kontrakts_id,samler,felleskost"
+	
+	m_data.SqlString = sql '& " {sort}" & " {sort2}"
+	m_data.SetupFields rpt
+End Sub
+
+
+Sub OnReportStart
+
+End Sub
+
+
+Sub OnFetchData(eof)
+	setlogo
+	
+	if left(m_data.GetValue("samler"),1)="0" then
+		rpt.Fields("felleskost").Value=felleskostnadtekst 
+		rpt.Fields("felleskostid").Value=""
+	else
+		rpt.Fields("felleskost").Value=m_data.GetValue("Felleskost")
+	end if
+	
+	if not m_data.GetValue("momsind")="8" then
+		rpt.Fields("kostnad").Value=sfcurr(rpt.Fields("kostnad").Value)*sfcurr(rpt.Fields("momsprct").Value)	
+		rpt.Fields("fakturert").Value=sfcurr(rpt.Fields("fakturert").Value)*sfcurr(rpt.Fields("momsprct").Value)
+		rpt.Fields("differanse").Value=sfcurr(rpt.Fields("differanse").Value)*sfcurr(rpt.Fields("momsprct").Value)
+	end if
+	
+	if trim(totalprisprkvmegen)="" then
+		rpt.Fields("totaltpriskvm").Value=sfcurr(rpt.Fields("prisprkvm"))/sfcurr(rpt.Fields("antallkvm"))
+	else
+		rpt.Fields("totaltpriskvm").Value=sfcurr(totalprisprkvmegen)
+	end if
+	
+'	IF rpt.fields("type").value = "1" then
+				'rpt.Sections("detail").Controls("Field42").Visible =false
+				'rpt.Sections("detail").Controls("Field43").Visible =false
+				'rpt.Sections("detail").Controls("Field52").Visible =false
+				'rpt.Sections("GroupHeader2").Controls("Label22").Visible =false
+				'rpt.Sections("GroupHeader2").Controls("Label28").Visible =false
+				'rpt.Sections("GroupHeader2").Controls("Label29").Visible =false
+				'rpt.Sections("GroupHeader2").Controls("Label38").Visible =false
+'	end if
+
+	
+	'if visFordeling =0 then
+		'Avgiftsfrie skjules
+	'	rpt.Sections("GroupHeader2").Controls("Label38").Visible =false
+	'	rpt.Sections("Detail").Controls("Field52").Visible =false
+	'end if
+End Sub
+
+sub setLogo()
+	if skalHaLogo=1 then
+		set rpt.Sections("PageHeader").Controls("Image1").Picture= LoadPicture(logo)
+	end if
+end sub
+
+sub logoSub()
+	dim fso
+	Set fso = CreateObject("Scripting.FileSystemObject")
+	
+	if m_data.RunSubQuery("Select top 1 rapport_logo_sti, (Case when len(rapport_logo_sti)=0 then 0 else 1 end) as skalHaLogo from e..t_klientParametre","sys")>0 then
+		logo= m_data.subqueryvalue("rapport_logo_sti","sys")
+		skalHaLogo= m_data.subqueryvalue("skalHaLogo","sys")
+	else
+		logo=""
+		skalHaLogo=0
+	end if
+	
+	if not fso.FileExists(logo)  then
+		logo=""
+		skalHaLogo=0
+	end if
+end sub
+
+function sfcurr(v)
+	sfcurr = m_data.sfcurr(v)
+end function]]></Script>
+<PageSettings	LeftMargin="800"
+	RightMargin="360"
+	TopMargin="720"
+	BottomMargin="360"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1950"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="*y..Bedrift.Navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="283"
+		Text="*y..Bedrift.Navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="*y..Bedrift.Arstall"
+		Left="7795"
+		Top="992"
+		Width="2693"
+		Height="284"
+		Text="*y..Bedrift.Arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="10346"
+		Y1="2551"
+		X2="-142"
+		Y2="2551"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="=&quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="7795"
+		Top="1276"
+		Width="2693"
+		Height="141"
+		Text="Sidenr"
+		SummaryType="4"
+		SummaryFunc="11"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; text-align: right; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="=now()"
+		Left="7795"
+		Top="1417"
+		Width="2693"
+		Height="284"
+		Text="Dato"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; text-align: right; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="User_name"
+		Left="7795"
+		Top="1701"
+		Width="2693"
+		Height="142"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-size: 8pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="{sort}"
+		Left="0"
+		Top="2551"
+		Width="1134"
+		Height="425"
+		Visible="0"
+		Text="Tittel"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 16pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label30"
+		Left="0"
+		Top="0"
+		Width="6945"
+		Height="425"
+		Caption="Avregning felleskostnader"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 16pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="Image1"
+		Left="7228"
+		Top="0"
+		Width="3260"
+		Height="850"
+		SizeMode="1"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="675"
+		DataField="name"
+		GroupKeepTogether="2"
+		RepeatStyle="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field23"
+		DataField="Name"
+		Left="1843"
+		Top="283"
+		Width="6661"
+		Height="284"
+		Text="Name"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; text-decoration: underline; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field22"
+		DataField="Kundenummer"
+		Left="0"
+		Top="283"
+		Width="1417"
+		Height="284"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 9pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; text-decoration: underline; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="1134"
+		Top="1417"
+		Width="2835"
+		Height="284"
+		Caption="Kundenavn"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; font-style: italic; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="0"
+		Top="1417"
+		Width="850"
+		Height="284"
+		Caption="Kundenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: left; font-family: &apos;Verdana&apos;; font-style: italic; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line4"
+		X1="0"
+		Y1="567"
+		X2="10488"
+		Y2="567"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="1695"
+		DataField="kontrakts_id"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label29"
+		Left="283"
+		Top="142"
+		Width="1276"
+		Height="283"
+		Caption="Kontrakts nr:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field54"
+		DataField="kontrakts_id"
+		Left="1701"
+		Top="142"
+		Width="708"
+		Height="283"
+		Text="kontraktsid"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field56"
+		DataField="Fritekst"
+		Left="1701"
+		Top="992"
+		Width="8645"
+		Height="284"
+		Text="fritekst"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label39"
+		Left="6661"
+		Top="1276"
+		Width="851"
+		Height="425"
+		Caption="Andel kostnad"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-style: italic; vertical-align: middle; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label40"
+		Left="7654"
+		Top="1276"
+		Width="1275"
+		Height="425"
+		Caption="Fakturert akonto"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-style: italic; vertical-align: middle; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label41"
+		Left="9071"
+		Top="1276"
+		Width="1275"
+		Height="425"
+		Caption="Avregning"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-style: italic; vertical-align: middle; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line6"
+		X1="142"
+		Y1="1701"
+		X2="10488"
+		Y2="1701"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label42"
+		Left="283"
+		Top="992"
+		Width="1276"
+		Height="284"
+		Caption="Fritekst:"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-style: italic; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label43"
+		Left="2551"
+		Top="142"
+		Width="1134"
+		Height="283"
+		Caption="Kontrakt fra:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field58"
+		DataField="kontrakt_fra"
+		Left="3827"
+		Top="142"
+		Width="992"
+		Height="283"
+		Text="kontraktsid"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label44"
+		Left="4961"
+		Top="142"
+		Width="1133"
+		Height="283"
+		Caption="Kontrakt til:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field59"
+		DataField="kontrakt_til"
+		Left="6236"
+		Top="142"
+		Width="992"
+		Height="283"
+		Text="kontraktsid"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label45"
+		Left="7370"
+		Top="142"
+		Width="1984"
+		Height="283"
+		Caption="Felleskost avregnet til:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field60"
+		DataField="fakturerfktil"
+		Left="9496"
+		Top="142"
+		Width="992"
+		Height="283"
+		Text="kontraktsid"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label46"
+		Left="2268"
+		Top="1417"
+		Width="1559"
+		Height="284"
+		Caption="Felleskostnad"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-style: italic; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field67"
+		DataField="antallkvm"
+		Left="2551"
+		Top="567"
+		Width="1418"
+		Height="283"
+		Text="antallkvm"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label47"
+		Left="283"
+		Top="567"
+		Width="1985"
+		Height="283"
+		Caption="Antall kvm (brutto):"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field68"
+		DataField="totaltpriskvm"
+		Left="7228"
+		Top="567"
+		Width="1418"
+		Height="283"
+		Text="prisprkvm"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label48"
+		Left="4961"
+		Top="567"
+		Width="1984"
+		Height="283"
+		Caption="Pris pr kvm brutto:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field69"
+		DataField="prisprkvm"
+		Left="8929"
+		Top="567"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="prisprkvm"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; vertical-align: middle; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader3"
+		Height="0"
+		DataField="samler"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field61"
+		DataField="samler"
+		Left="850"
+		Top="0"
+		Width="567"
+		Height="283"
+		Visible="0"
+		Text="samler"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Visible="0"
+		Height="0"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field42"
+		DataField="fakturert"
+		Left="7654"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="fakturert"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field47"
+		DataField="kostnad*moms"
+		Left="6661"
+		Top="0"
+		Width="851"
+		Height="283"
+		Text="kostnad"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field52"
+		DataField="differanse"
+		Left="9071"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="differanse"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field66"
+		DataField="momsprct"
+		Left="4110"
+		Top="0"
+		Width="992"
+		Height="283"
+		Visible="0"
+		Text="momsprct"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter3"
+		Height="330"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field43"
+		DataField="felleskostid"
+		Left="283"
+		Top="0"
+		Width="1560"
+		Height="283"
+		Text="fellekostid"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field49"
+		DataField="felleskost"
+		Left="2268"
+		Top="0"
+		Width="4252"
+		Height="283"
+		Text="felleskostnad"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field62"
+		DataField="fakturert"
+		Left="7654"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="fakturert"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader3"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field63"
+		DataField="kostnad"
+		Left="6661"
+		Top="0"
+		Width="851"
+		Height="283"
+		Text="kostnad"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader3"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field64"
+		DataField="differanse"
+		Left="9071"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="differanse"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader3"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; text-align: right; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="285"
+		NewPage="2"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field57"
+		DataField="differanse"
+		Left="9071"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="differanse"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader2"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label38"
+		Left="0"
+		Top="0"
+		Width="1559"
+		Height="283"
+		Caption="Avregning totalt"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line5"
+		X1="0"
+		Y1="0"
+		X2="10488"
+		Y2="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field70"
+		DataField="kostnad"
+		Left="6236"
+		Top="0"
+		Width="1276"
+		Height="283"
+		Text="kostnadsum"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader2"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field71"
+		DataField="fakturert"
+		Left="7654"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="fakturertsum"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader2"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; text-align: right; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="0"
+		NewPage="2"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line3"
+		X1="10488"
+		Y1="567"
+		X2="0"
+		Y2="567"
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="270"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label37"
+		Left="0"
+		Top="0"
+		Width="4677"
+		Height="283"
+		Visible="0"
+		Caption="Rapporten er laget av: Rune Synnevåg Uni Pluss AS"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

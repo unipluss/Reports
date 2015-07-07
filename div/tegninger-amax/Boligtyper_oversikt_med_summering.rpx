@@ -1,0 +1,751 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{00D372D9-E501-4878-BD65-A40440FBF44F}" GUIDREP="{8D7F5B48-A8C8-4E3D-8205-42F0E9E223C9}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="8970"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA['Lister opp boligtypene registert i t_boligtype og teller opp 
+'antallet registrerte enheter (fra t_boligobjekt) tilhorende boligtypen.(oeik)
+'Ekskluderer boliger som er satt innaktive (oeik)
+'Lagt inn utvalg på område (oeik)
+Sub OnDataInitialize
+  'm_data.debugg=true
+  	dim sql
+	dim aktiv
+	dim omr
+	dim bygg
+
+	m_data.AddInputMacro "{aktiv}","Aktiv/Innaktiv ","0",,2,"Select '0', 'Aktive boliger' union select '1' , 'Innaktive boliger' union select '2', 'Både aktive og innaktive'"
+	m_data.AddInputMacro "","",""
+	m_data.AddInputMacro "{om}","Boligområde ","0",,7,"Select boligomrade_id,omrade from e..t_boligomraade union select '0','Alle' order by omrade"
+	m_data.AddInputMacro "","",""
+	m_data.AddInputMacro "{bg}","Bygg ","0",1,7,"Select id,navn from e..t_bygg bygg where bygg.omrade_id in ({om}) union select '0','Alle' order by bygg.navn"
+	m_data.AddInputMacro "","",""
+
+  	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+		omr=rtrim(m_data.getmacrovalue("{OM}"))
+	    aktiv = rtrim(m_data.getmacrovalue("{aktiv}"))
+		bygg = rtrim(m_data.getmacrovalue("{bg}"))
+
+  	sql = "select omrade.omrade as omradenavn, tbygg.navn as byggnavn, etg.Etasje_Navn as etasjenavn, boob.Rom_nummer as romnavn, boob.BoligNummer as bolignr,"
+	sql = sql & " omrade.Boligomrade_id as omradeid, tbygg.id as byggid, etg.id as etasjeid, boob.Objekt_id as objektid "
+    
+	'Aktive boliger
+	if (left(omr,1)<>"0" and left(bygg,1)<>"0" and aktiv="0" )then
+	sql = sql & " ,(Select count(*) from t_boligomraade omr where omr.Boligomrade_id in ({om}) ) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.Omrade_id in ({om}) where by1.navn not like '%parkering%' ) as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e where e.Bygg_id in ({bg}) and e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where bo.Bygg_id in ({bg}) and (isnull(bo.innaktiv,0)=0) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antallobjekt"	
+    end if
+
+    if(left(omr,1)="0" and left(bygg,1)<>"0" and aktiv="0" )then
+	sql = sql & " ,(Select count(*) from t_boligomraade) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.navn not like '%parkering%') as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e where e.Bygg_id in ({bg}) and e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where bo.Bygg_id in ({bg}) and (isnull(bo.innaktiv,0)=0) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antallobjekt"	
+	end if
+	
+	if(left(omr,1)<>"0" and left(bygg,1)="0" and aktiv="0" )then
+    sql = sql & " ,(Select count(*) from t_boligomraade omr where omr.Boligomrade_id in ({om}) ) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.Omrade_id in ({om}) and by1.navn not like '%parkering%' ) as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e inner join t_bygg b on e.bygg_id=b.id where b.Omrade_id in ({om}) and e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%'))  as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where Boligomrade_id in ({om}) and (isnull(bo.innaktiv,0)=0) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antallobjekt"	
+    end if
+
+	if (left(omr,1)="0" and left(bygg,1)="0" and aktiv="0" )then
+	sql = sql & " ,(Select count(*) from t_boligomraade omr) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.navn not like '%parkering%') as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e where e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where (isnull(bo.innaktiv,0)=0) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antallobjekt"	
+    end if
+	
+	'innaktive boliger
+    if (left(omr,1)<>"0" and left(bygg,1)<>"0" and aktiv="1" )then
+	sql = sql & " ,(Select count(*) from t_boligomraade omr where omr.Boligomrade_id in ({om}) ) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.Omrade_id in ({om}) and by1.navn not like '%parkering%') as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e where e.Bygg_id in ({bg}) and e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where bo.Bygg_id in ({bg}) and not(isnull(bo.innaktiv,0)=0) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antallobjekt"	
+    end if
+
+    if(left(omr,1)="0" and left(bygg,1)<>"0" and aktiv="1" )then
+	sql = sql & " ,(Select count(*) from t_boligomraade) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.navn not like '%parkering%') as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e where e.Bygg_id in ({bg}) and e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where bo.Bygg_id in ({bg}) and not(isnull(bo.innaktiv,0)=0) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antallobjekt"	
+	end if
+	
+	if(left(omr,1)<>"0" and left(bygg,1)="0" and aktiv="1" )then
+    sql = sql & " ,(Select count(*) from t_boligomraade omr where omr.Boligomrade_id in ({om}) ) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.Omrade_id in ({om}) and by1.navn not like '%parkering%' ) as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e inner join t_bygg b on e.bygg_id=b.id where b.Omrade_id in ({om}) and e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%'))  as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where Boligomrade_id in ({om}) and not(isnull(bo.innaktiv,0)=0) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antallobjekt"	
+    end if
+
+	if (left(omr,1)="0" and left(bygg,1)="0" and aktiv="1" )then
+	sql = sql & " ,(Select count(*) from t_boligomraade omr) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.navn not like '%parkering%') as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e where e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where not(isnull(bo.innaktiv,0)=0) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antallobjekt"	
+    end if
+	
+	'Både aktive og innaktive
+	if (left(omr,1)<>"0" and left(bygg,1)<>"0" and aktiv="2" )then
+	sql = sql & " ,(Select count(*) from t_boligomraade omr where omr.Boligomrade_id in ({om}) ) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.Omrade_id in ({om}) and by1.navn not like '%parkering%') as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e where e.Bygg_id in ({bg}) and e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where bo.Bygg_id in ({bg}) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%') ) as antallobjekt"	
+    end if
+
+    if(left(omr,1)="0" and left(bygg,1)<>"0" and aktiv="2" )then
+	sql = sql & " ,(Select count(*) from t_boligomraade) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.navn not like '%parkering%') as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e where e.Bygg_id in ({bg}) and e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where bo.Bygg_id in ({bg}) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%') ) as antallobjekt"	
+	end if
+	
+	if(left(omr,1)<>"0" and left(bygg,1)="0" and aktiv="2" )then
+    sql = sql & " ,(Select count(*) from t_boligomraade omr where omr.Boligomrade_id in ({om}) ) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.Omrade_id in ({om}) and by1.navn not like '%parkering%') as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e inner join t_bygg b on e.bygg_id=b.id where b.Omrade_id in ({om}) and e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%'))  as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where Boligomrade_id in ({om}) and bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%')) as antallobjekt"	
+    end if
+
+	if (left(omr,1)="0" and left(bygg,1)="0" and aktiv="2" )then
+	sql = sql & " ,(Select count(*) from t_boligomraade omr) as antallomrade"  
+	sql = sql & " ,(Select count(*) from t_bygg by1 where by1.navn not like '%parkering%') as antallbygg"
+	sql = sql & " ,(Select count(*) from t_etasje e where e.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%') ) as antalletasje"
+	sql = sql & " ,(Select count(*) from t_boligobjekt bo where bo.Bygg_id not in (select id from t_bygg b where b.navn like '%parkering%') ) as antallobjekt"	
+    end if
+	
+	
+	'From:
+ 	sql = sql & " from e..t_boligobjekt as boob "
+  	sql = sql & " right join t_boligtype as botyp on boob.boligtype_id=botyp.boligtype_id "
+	sql = sql & " right join t_etasje as etg on boob.etasje=etg.id"
+	sql = sql & " right join t_bygg as tbygg on etg.Bygg_id=tbygg.id "
+	sql = sql & " right join t_boligomraade as omrade on omrade.Boligomrade_id=tbygg.Omrade_id "
+  	
+	'Eventuell where setning
+  
+    sql = sql & " where tbygg.navn not like '%parkering%' "
+
+	
+	if left(omr,1)<>"0" then
+		sql=Sql & " and omrade.Boligomrade_id in ({om}) "  
+    end if
+	
+	if left(bygg,1)<>"0" then
+	    sql=Sql & " and tbygg.id in ({bg}) "  
+    end if
+
+	
+	
+	if aktiv = "0" or aktiv = "1" then		
+		sql = sql & " and "		
+		if aktiv="1" then
+			sql= sql & " not "
+		end if
+ 		 sql = sql & " (isnull(boob.innaktiv,0)=0) "    
+	end if
+  
+ sql=Sql & " order by omradenavn, byggnavn, etasjenavn, romnavn " 
+ 
+  m_data.SqlString = sql
+  m_data.setupfields rpt
+
+  end sub
+Sub OnReportStart
+
+End Sub
+]]></Script>
+<PageSettings>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="2145"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape1"
+		Left="0"
+		Top="870"
+		Width="8775"
+		Height="1065"
+		LineWeight="3"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="antallobjekt"
+		Left="5584"
+		Top="1492"
+		Width="1276"
+		Height="284"
+		Text="boligid"
+		ClassName="Normal"
+		Style="text-align: right; color: rgb(255,0,0); font-weight: bold; font-family: &apos;Times New Roman&apos;; font-size: 12pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field32"
+		DataField="antalletasje"
+		Left="5584"
+		Top="1067"
+		Width="1276"
+		Height="284"
+		Text="etasjeid"
+		ClassName="Normal"
+		Style="text-align: right; color: rgb(255,0,0); font-weight: bold; font-family: &apos;Times New Roman&apos;; font-size: 12pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field33"
+		DataField="antallbygg"
+		Left="1984"
+		Top="1477"
+		Width="1276"
+		Height="284"
+		Text="byggid"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 12pt; font-weight: bold; text-align: right; color: rgb(255,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		DataField="antallomrade"
+		Left="1984"
+		Top="1052"
+		Width="1276"
+		Height="284"
+		Text="omradeid"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 12pt; font-weight: bold; text-align: right; color: rgb(255,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label17"
+		Left="60"
+		Top="154"
+		Width="3543"
+		Height="283"
+		Caption="Oppsummering:"
+		ClassName="Normal"
+		Style="font-weight: bold; color: rgb(255,0,0); font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label18"
+		Left="142"
+		Top="1052"
+		Width="1842"
+		Height="284"
+		Caption="# Områder"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label19"
+		Left="142"
+		Top="1477"
+		Width="1842"
+		Height="284"
+		Caption="# Bygg"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label20"
+		Left="3738"
+		Top="1067"
+		Width="1701"
+		Height="284"
+		Caption="# Etasjer"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label21"
+		Left="3738"
+		Top="1492"
+		Width="1701"
+		Height="284"
+		Caption="# Boligobjekt"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit1"
+		Left="202"
+		Top="539"
+		Width="8362"
+		Height="284"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[E5000000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C66305C66733230204461
+			20657220627967672C20657461736A6572206F6720626F6C69676F626A656B7420736F6D2074696C685C27663872657220627967676E61766E20736F6D20696E
+			6E686F6C646572206F7264657420227061726B6572696E672220746174742076656B6B5C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1920"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="0"
+		Top="0"
+		Width="5386"
+		Height="567"
+		Caption="Boligtre"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 16pt; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="*y..Bedrift.navn"
+		Left="0"
+		Top="567"
+		Width="5669"
+		Height="425"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field16"
+		DataField="=Now"
+		Left="6520"
+		Top="567"
+		Width="1559"
+		Height="283"
+		Text="Dato"
+		OutputFormat="dd/mm/yyyy"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field17"
+		DataField="= &quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="6520"
+		Top="283"
+		Width="1559"
+		Height="284"
+		Text="Sidenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field18"
+		DataField="*y..bedrift.arstall"
+		Left="6520"
+		Top="0"
+		Width="1559"
+		Height="283"
+		Text="klient_arstall"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field19"
+		DataField="user_name"
+		Left="6520"
+		Top="850"
+		Width="1559"
+		Height="284"
+		Text="user_name"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label5"
+		Left="3432"
+		Top="100"
+		Width="2834"
+		Height="709"
+		Visible="0"
+		Caption="Øystein V 15.03.2011. Erik F right join etc for å få inn tomme etasjer 2015-03"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label7"
+		Left="6315"
+		Top="1590"
+		Width="720"
+		Height="285"
+		Caption="Rom"
+		ClassName="Normal"
+		Style="font-weight: bold; text-align: left; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line3"
+		X1="0"
+		Y1="1890"
+		X2="8955"
+		Y2="1890"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label8"
+		Left="822"
+		Top="1606"
+		Width="1134"
+		Height="284"
+		Caption="Omrade"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="3074"
+		Top="1606"
+		Width="1134"
+		Height="284"
+		Caption="Bygg"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="5070"
+		Top="1590"
+		Width="690"
+		Height="285"
+		Caption="Etasje"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="135"
+		Top="1200"
+		Width="8220"
+		Height="330"
+		Caption="Type objekt (Omrade=1,Bygg=2,Etasje=3,Rom=4)"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="142"
+		Top="1606"
+		Width="425"
+		Height="284"
+		Caption="Id"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; color: rgb(255,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="2580"
+		Top="1605"
+		Width="330"
+		Height="285"
+		Caption="Id"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; text-align: right; color: rgb(255,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label14"
+		Left="4575"
+		Top="1590"
+		Width="425"
+		Height="284"
+		Caption="Id"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; text-align: right; color: rgb(255,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label15"
+		Left="5895"
+		Top="1590"
+		Width="425"
+		Height="284"
+		Caption="Id"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; text-align: right; color: rgb(255,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="7815"
+		Top="1590"
+		Width="945"
+		Height="285"
+		Caption="Bolignr"
+		ClassName="Normal"
+		Style="font-weight: bold; text-align: left; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="Groupheader1"
+		Height="300"
+		DataField="omradeid"
+		GroupKeepTogether="2"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		DataField="omradenavn"
+		Left="840"
+		Top="0"
+		Width="9465"
+		Height="285"
+		Text="omradenavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 12pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field25"
+		DataField="omradeid"
+		Left="105"
+		Top="0"
+		Width="720"
+		Height="285"
+		Text="id"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 12pt; font-weight: bold; text-align: left; color: rgb(255,0,0); "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="300"
+		DataField="byggnavn"
+		GroupKeepTogether="2"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="byggnavn"
+		Left="3045"
+		Top="0"
+		Width="7230"
+		Height="285"
+		Text="Byggnavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 12pt; font-weight: bold; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="byggid"
+		Left="1440"
+		Top="0"
+		Width="1485"
+		Height="285"
+		Text="id"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 0; font-size: 12pt; font-weight: bold; text-align: right; color: rgb(255,0,0); "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader3"
+		Height="285"
+		DataField="etasjenavn"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field23"
+		DataField="etasjenavn"
+		Left="5039"
+		Top="0"
+		Width="3826"
+		Height="283"
+		Text="etasjenavn"
+		ClassName="Normal"
+		Style="text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="etasjeid"
+		Left="3338"
+		Top="0"
+		Width="1701"
+		Height="283"
+		Text="id"
+		ClassName="Normal"
+		Style="text-align: right; color: rgb(255,0,0); "
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="300"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field22"
+		DataField="romnavn"
+		Left="6375"
+		Top="0"
+		Width="1365"
+		Height="285"
+		Text="romnavn"
+		ClassName="Normal"
+		Style="text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="objektid"
+		Left="4969"
+		Top="0"
+		Width="1417"
+		Height="283"
+		Text="id"
+		ClassName="Normal"
+		Style="text-align: right; color: rgb(255,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="bolignr"
+		Left="7815"
+		Top="0"
+		Width="1140"
+		Height="285"
+		Text="bolignr"
+		ClassName="Normal"
+		Style="text-align: left; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter3"
+		Height="0"
+	>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="0"
+	>
+	</Section>
+	<Section Type="GroupFooter" Name="Groupfooter1"
+		Height="0"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="0"
+		Y1="0"
+		X2="8955"
+		Y2="0"
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="15"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="0"
+	>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

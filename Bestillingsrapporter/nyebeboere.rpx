@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{26688C29-D8C7-4E61-A9DC-D5EB2223D0AB}" GUIDREP="{8F694F36-DFB7-4DEA-AA72-D2E38893843F}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="9750"
+	DocumentName="Salg pr kunde/periode/vare"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[Option Explicit
+Sub OnDataInitialize
+	'm_data.Debugg=true
+	dim sql
+	dim omr
+
+	m_data.AddInputMacro "{FD}","Fra dato","getsql(select '01.01.'+convert(varchar,year(getdate())-4))","date"
+	m_data.AddInputMacro "{TD}","Til dato","getsql(select getdate())","date"
+	'm_data.AddInputMacro "{OM}","Boligområde ","0",,7,"Select boligomrade_id, omrade from e..t_boligomraade union select '0','Alle' order by boligomrade_id"
+	'm_data.AddInputMacro "{VN}","Varenr","getsql(select '20')", "search;s_varer"
+
+	'm_data.addsortparam "{sort}","Sorter etter ","kundenr ","order by k.Kundenummer","kundenr"
+	'm_data.addsortparam "{sort}","","kundenavn","order by n.name","kundenavn"
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+
+	'omr=m_data.GetMacroValue("{OM}")
+	
+		  sql = " select count(tmp2.kundenummer) antall, year(tmp2.kontraktfra) aar, '{FD}'+' - '+'{TD}' intervall from  "
+	sqladd sql, " (select tmp.kundenummer, (select top 1 kd.kontrakt_fra from e..t_kontraktsdata kd where kd.Kundenummer=tmp.Kundenummer and kd.statusId in (1003,1004,1006,1007) order by kd.kontrakt_fra) kontraktfra "
+	sqladd sql, " from (select distinct kd.kundenummer from e..t_kontraktsdata kd  where kd.statusId in (1003,1004,1006,1007)) tmp ) tmp2 "
+	sqladd sql, " where tmp2.kontraktfra between '{FD}' and '{TD}'  group by year(tmp2.kontraktfra) "
+
+	m_data.SqlString = sql
+	m_data.SetupFields rpt
+End Sub
+
+Sub OnFetchData(eof)
+
+End Sub
+
+Sub SqlAdd(ByRef sql, code)
+    sql = sql & Replace(Replace(code, "\n", vbCrLf), "\t", vbTab) & vbCrLf
+End Sub
+Sub OnReportStart
+
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="1000"
+	RightMargin="800"
+	TopMargin="280"
+	BottomMargin="360"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1425"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="*y..Bedrift.Navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="283"
+		Text="*y..Bedrift.Navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Arial Narrow&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="*y..Bedrift.Arstall"
+		Left="7704"
+		Top="0"
+		Width="1984"
+		Height="283"
+		Text="*y..Bedrift.Arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="=&quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="7987"
+		Top="283"
+		Width="1701"
+		Height="284"
+		Text="Sidenr"
+		SummaryType="4"
+		SummaryFunc="11"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="=Now"
+		Left="7987"
+		Top="567"
+		Width="1701"
+		Height="283"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="User_name"
+		Left="7987"
+		Top="850"
+		Width="1701"
+		Height="284"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		Left="0"
+		Top="0"
+		Width="7370"
+		Height="567"
+		Text="Nye beboere"
+		ClassName="Normal"
+		Style="font-size: 24pt; font-family: &apos;Arial Narrow&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label28"
+		Left="135"
+		Top="990"
+		Width="2880"
+		Height="285"
+		Caption="Antall nye beboere pr. år i perioden"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 9pt; vertical-align: bottom; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field39"
+		DataField="intervall"
+		Left="3030"
+		Top="990"
+		Width="3420"
+		Height="285"
+		Text="fra"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 9pt; vertical-align: bottom; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="750"
+		DataField="Kundenr"
+		GroupKeepTogether="1"
+		RepeatStyle="1"
+		KeepTogether="-1"
+	>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="375"
+		DataField="Per"
+		GroupKeepTogether="1"
+		RepeatStyle="1"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label18"
+		Left="1920"
+		Top="0"
+		Width="1350"
+		Height="285"
+		Caption="Antall"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label21"
+		Left="435"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Caption="Årstall"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line5"
+		X1="300"
+		Y1="300"
+		X2="3255"
+		Y2="300"
+		LineColor="8421504"
+		LineWeight="3"
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="375"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="antall"
+		Left="1920"
+		Top="0"
+		Width="1335"
+		Height="285"
+		Text="Antall"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field38"
+		DataField="aar"
+		Left="435"
+		Top="0"
+		Width="1080"
+		Height="285"
+		Text="Årstall"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 10pt; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="75"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field36"
+		DataField="Per"
+		Left="7937"
+		Top="567"
+		Width="709"
+		Height="283"
+		Visible="0"
+		Text="Per"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line4"
+		X1="285"
+		Y1="45"
+		X2="3240"
+		Y2="45"
+		LineColor="8421504"
+		LineWeight="3"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="480"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field40"
+		DataField="antall"
+		Left="1920"
+		Top="90"
+		Width="1335"
+		Height="285"
+		Text="Antall"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 10pt; "
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="600"
+		CanShrink="1"
+	>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

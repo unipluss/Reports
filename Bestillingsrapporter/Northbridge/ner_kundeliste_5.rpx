@@ -1,0 +1,1045 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{4F6DD53C-CB06-4B99-90E6-1225313DC036}" GUIDREP="{49A7784D-D4C2-4BE2-8D02-21BA23EFD1C5}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10515"
+	DocumentName="Adresseliste kunder"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[Sub OnDataInitialize
+	'm_data.Debugg=true
+	dim sql
+
+	m_data.AddInputMacro "{FK}","Fra kunde","getsql(select min(Kontonr) from c..DEBITOR)", "search;s_kraftkunde"
+	m_data.AddInputMacro "{TK}","Til kunde","getsql(select max(Kontonr) from c..DEBITOR)", "search;s_kraftkunde"
+
+	m_data.AddInputMacro "{FKat}","Fra Kategori",""
+	m_data.AddInputMacro "{TKat}","Til Kategori","getsql(select max(Kategori_ID) from c..Kategori_Link)"
+	m_data.AddInputMacro "{dato}","Kontrakt aktiv per dato","getsql(select getdate())","date"
+	m_data.AddInputMacro "","",""
+	m_data.AddInputMacro "{Vis}","Vise i siste kolonne","1",,2,"(select TOP 1 1, 'Telefon' from c..Status UNION Select TOP 1 2, 'Telefaks' from c..Status UNION Select TOP 1 3, 'Mobiltelefon' from c..Status UNION Select TOP 1 4, 'E-post' from c..Status UNION Select TOP 1 5, 'Orgnr' from c..Status)"
+
+	m_data.Addwhereparam "{md}","Vise ","Postadresse"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Besøksadresse"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Kun merket for factoring"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}'  left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0))) and (fact_pa = -1)" 
+	m_data.Addwhereparam "{md}","","Kun aktive (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Kun aktive (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))"
+	m_data.Addwhereparam "{md}","","Kun aktive uten telefon"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (P.Phone is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Kun aktive uten telefaks"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150103) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (P.Phone is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Kun aktive uten mobil"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150102) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (P.Phone is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Kun aktive uten e-post"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (E.Mailadr is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Kun aktive uten orgnr"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (D.MvaNr is null or D.MvaNr = '') AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+
+	m_data.Addwhereparam "{md}","","Kun ikke aktive (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Kun ikke aktive (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))"
+	m_data.Addwhereparam "{md}","","Kun avgiftsfrie (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Kun avgiftsfrie (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Uten avgiftsfrie (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+	m_data.Addwhereparam "{md}","","Uten avgiftsfrie (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid)  join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'{dato}' and ak.kontrakt_til>'{dato}' and ak.statusid between 1011 and 1012 left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+
+'	m_data.Addwhereparam "{md}","Vise ","Postadresse"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Besøksadresse"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun merket for factoring"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0))) and (fact_pa = -1)" 
+'	m_data.Addwhereparam "{md}","","Kun aktive (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun aktive (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))"
+'	m_data.Addwhereparam "{md}","","Kun aktive uten telefon"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (P.Phone is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun aktive uten telefaks"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150103) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (P.Phone is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun aktive uten mobil"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150102) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (P.Phone is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun aktive uten e-post"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (E.Mailadr is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun aktive uten orgnr"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (D.MvaNr is null or D.MvaNr = '') AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'
+'	m_data.Addwhereparam "{md}","","Kun ikke aktive (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun ikke aktive (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))"
+'	m_data.Addwhereparam "{md}","","Kun avgiftsfrie (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun avgiftsfrie (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Uten avgiftsfrie (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Uten avgiftsfrie (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr and ak.kontrakt_fra<'10.01.2008' and ak.kontrakt_til>'10.01.2008' left join e..t_arealres arl on arl.kontrakts_id=ak.kontrakts_id left join e..t_etasjeareal ea on ea.etasjeid=arl.etasjearealid left join e..t_kvadratmetertype kt on kt.id=ea.kvadratmetertypeid left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+
+
+'	m_data.Addwhereparam "{md}","Vise ","Postadresse"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Besøksadresse"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun merket for factoring"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0))) and (fact_pa = -1)" 
+'	m_data.Addwhereparam "{md}","","Kun aktive (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun aktive (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))"
+'	m_data.Addwhereparam "{md}","","Kun aktive uten telefon"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (P.Phone is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun aktive uten telefaks"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150103) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (P.Phone is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun aktive uten mobil"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150102) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (P.Phone is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun aktive uten e-post"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (E.Mailadr is NULL) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun aktive uten orgnr"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) = 0) AND (D.MvaNr is null or D.MvaNr = '') AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+
+'	m_data.Addwhereparam "{md}","","Kun ikke aktive (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun ikke aktive (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Ikke_Aktiv,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))"
+'	m_data.Addwhereparam "{md}","","Kun avgiftsfrie (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Kun avgiftsfrie (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) <> 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Uten avgiftsfrie (postadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+'	m_data.Addwhereparam "{md}","","Uten avgiftsfrie (besøksadresse)"," from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join e..t_arealkontrakt ak on ak.kundenummer=D.kontonr left join c..c_address as A on (N.id=A.namelink and (A.delivery <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID where ((d.kontonr between {FK} And {TK}) AND (IsNull(D.Avgiftsfri,0) = 0) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" 
+
+'	m_data.AddInputMacro "{FP}","Fra postnr","getsql(Select min(IsNull(Postal_code,'')) from c_Address)"
+'	m_data.AddInputMacro "{TP}","Til postnr","getsql(Select max(Postal_code) from c..c_Address)"
+'	m_data.AddInputMacro "{FKom}","Velg fra kommune ","0",,2,"Select Kommunenr, (Kommunenr + ' - ' + Kommunenavn) as KNavn from m..Kommune Order by Kommunenr"
+'	m_data.AddInputMacro "{TKom}","Velg til kommune ","GetSql(Select max(Kommunenr) from m..Kommune)",,2,"Select Kommunenr, (Kommunenr + ' - ' + Kommunenavn) as KNavn from m..Kommune Order by Kommunenr"
+'	m_data.AddInputMacro "{FF}","Velg fra fylke ","0",,2,"Select Fylkesnr, (Fylkesnr + ' - ' + Fylkesnavn) as FNavn from m..Fylke Order by Fylkesnr"
+'	m_data.AddInputMacro "{TF}","Velg til fylke ","GetSql(Select max(Fylkesnr) from m..Fylke)",,2,"Select Fylkesnr, (Fylkesnr + ' - ' + Fylkesnavn) as FNavn from m..Fylke Order by Fylkesnr"
+	m_data.AddInputMacro "","",""
+	m_data.addsortparam "{sort}","Sortering etter ","Kundenr"," order by d.kontonr","Adresseliste kunder (nummerisk)"
+	m_data.addsortparam "{sort}","","Kundenavn"," order by N.Name","Adresseliste kunder (alfabetisk)"
+	m_data.addsortparam "{sort}","","Telefon"," order by P.Phone","Adresseliste kunder"
+	m_data.addsortparam "{sort}","","Telefaks"," order by (Select Top 1 P2.Phone from c..c_Phone as P2 where P2.Namelink = N.Id and ((P2.Standard = 1 AND P2.Phonetype = 150103) or P2.Namelink is null))","Adresseliste kunder"
+	m_data.addsortparam "{sort}","","Mobiltelefon"," order by (Select Top 1 P2.Phone from c..c_Phone as P2 where P2.Namelink = N.Id and ((P2.Standard = 1 AND P2.Phonetype = 150102) or P2.Namelink is null))","Adresseliste kunder"
+	m_data.addsortparam "{sort}","","E-post"," order by E.Mailadr","Adresseliste kunder"
+
+    	'm_data.AddInputMacro "{excel}", "Export til excel", 0, ,1
+ 	m_data.AddInputMacro "{kdata}", "Detaljert visning", 0, ,1
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+
+	sql = "Select D.Kontonr, arl.antall, kt.navn as ktnavn, ak.kontrakt_fra,ak.kontrakt_til, ak.justeringsdato, ak.startdatokpi, N.ID, N.name, A.Address, A.Address2, A.postal_code, A.city, E.Mailadr, P.phone, D.MvaNr,"
+	sql = sql & " (Select Top 1 P2.Phone from c..c_Phone as P2 where P2.Namelink = N.Id and ((P2.Standard = 1 AND P2.Phonetype = 150103) or P2.Namelink is null)) as Faks,"
+	sql = sql & " (Select Top 1 P2.Phone from c..c_Phone as P2 where P2.Namelink = N.Id and ((P2.Standard = 1 AND P2.Phonetype = 150102) or P2.Namelink is null)) as Mobil"
+	sql = sql & " {md}"
+'	sql = sql & " from ((c..c_Name as N left join c..c_phone as P on (N.id=p.namelink and ((P.standard=1 AND P.Phonetype=150101) or P.namelink is null))) INNER JOIN c..Debitor as D on N.id=D.nameid) left join c..c_address as A on (N.id=A.namelink and (A.mail <> 0 or A.namelink is null))  LEFT JOIN c..c_email as E on (N.ID = E.Namelink and (E.Standard <> 0 or E.Namelink is null)) LEFT JOIN c..Kategori_Link as KL on D.Kontonr = KL.FK_ID" 'LEFT JOIN m..Postnummer as PN on CONVERT(Int,A.Postal_code) = Convert(Int,PN.Postnummer) LEFT JOIN m..Kommune as K on PN.Kommunenr = K.Kommunenr LEFT JOIN m..Fylke as F on K.Fylkesnr = F.Fylkesnr"
+'	sql = sql & " where ((d.kontonr between {FK} And {TK}) AND (IsNull(KL.Kategori_ID,0) Between IsNull('{FKat}',0) and IsNull('{TKat}',0)))" ' AND (IsNull(A.Postal_code,'') Between '{FP}' and '{TP}') AND (IsNull(K.Kommunenr,0) Between '{FKom}' and '{TKom}') AND (IsNull(F.Fylkesnr,0) Between '{FF}' and '{TF}'))"
+	sql = sql & " Group By D.Kontonr, N.ID, N.name, A.Address, A.Address2, A.postal_code, A.city, E.Mailadr, P.phone, D.MvaNr, ak.kontrakt_fra,ak.kontrakt_til, ak.justeringsdato, ak.startdatokpi, arl.antall, kt.navn"
+
+	m_data.SqlString = sql & " {sort}"
+	m_data.SetupFields rpt
+End Sub
+
+Sub OnFetchData(eof)
+
+	Select case m_data.Sfcurr(m_data.GetMacroValue("{Vis}"))
+		case "1"
+			rpt.Fields("Valgfri").value = rpt.Fields("Phone")
+			rpt.Fields("Valgfrifelt").value = "Telefon"
+
+		case "2"
+			rpt.Fields("Valgfri").value = rpt.Fields("Faks")
+			rpt.Fields("Valgfrifelt").value = "Telefaks"
+
+		case "3"
+			rpt.Fields("Valgfri").value = rpt.Fields("Mobil")
+			rpt.Fields("Valgfrifelt").value = "Mobiltlf"
+
+		case "4"
+			rpt.Fields("Valgfri").value = rpt.Fields("Mailadr")
+			rpt.Fields("Valgfrifelt").value = "E-post"
+
+		case "5"
+			rpt.Fields("Valgfri").value = rpt.Fields("MvaNr")
+			rpt.Fields("Valgfrifelt").value = "Orgnr"
+	end select
+End Sub
+
+Sub OnReportStart
+    	if m_data.GetMacroValue("{kdata}") = 0 then 
+		rpt.Sections("Detail").Visible = false
+		rpt.Sections("GroupHeader1").Visible = true
+	else
+		rpt.Sections("Detail").Visible = true
+		rpt.Sections("GroupHeader1").Visible = false
+	end if
+
+'    	if m_data.GetMacroValue("{excel}") = "-1" then
+'       	rpt.Line1.Visible = False
+'        	rpt.Line2.Visible = False
+'        	rpt.Line3.Visible = False
+'        	rpt.Line4.Visible = False
+'        	rpt.Line5.Visible = False
+'        	rpt.Line6.Visible = False
+'        	rpt.Line7.Visible = False
+'        	rpt.Line8.Visible = False
+'    	end if 
+End Sub]]></Script>
+<PageSettings	LeftMargin="800"
+	RightMargin="360"
+	TopMargin="720"
+	BottomMargin="360"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1440"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="*y..Bedrift.Navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="283"
+		Text="*y..Bedrift.Navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="850"
+		Top="1134"
+		Width="2835"
+		Height="283"
+		Caption="Kundenavn"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; font-style: italic; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="*y..Bedrift.Arstall"
+		Left="7813"
+		Top="0"
+		Width="2693"
+		Height="283"
+		Text="*y..Bedrift.Arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="10488"
+		Y1="1417"
+		X2="0"
+		Y2="1417"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="0"
+		Top="1134"
+		Width="850"
+		Height="283"
+		Caption="Kundenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: left; font-family: &apos;Verdana&apos;; font-style: italic; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="=&quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="7813"
+		Top="283"
+		Width="2693"
+		Height="220"
+		Text="Sidenr"
+		SummaryType="4"
+		SummaryFunc="11"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; text-align: right; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="=Now"
+		Left="7813"
+		Top="492"
+		Width="2693"
+		Height="220"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; text-align: right; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="User_name"
+		Left="7813"
+		Top="700"
+		Width="2693"
+		Height="220"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-size: 8pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="{sort}"
+		Left="0"
+		Top="2551"
+		Width="1134"
+		Height="425"
+		Visible="0"
+		Text="Tittel"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 16pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="3685"
+		Top="1134"
+		Width="2126"
+		Height="283"
+		Caption="Adresse"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-style: italic; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label17"
+		Left="5811"
+		Top="1134"
+		Width="2551"
+		Height="283"
+		Caption="Postnr/sted"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; font-style: italic; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field32"
+		DataField="Valgfrifelt"
+		Left="8362"
+		Top="1134"
+		Width="2126"
+		Height="283"
+		Text="Valgfrifelt"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-style: italic; vertical-align: middle; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label30"
+		Left="0"
+		Top="0"
+		Width="4394"
+		Height="425"
+		Caption="Kundeliste"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 16pt; font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="285"
+		DataField="Kontonr"
+		GroupKeepTogether="2"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field22"
+		DataField="Kontonr"
+		Left="0"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field23"
+		DataField="Name"
+		Left="850"
+		Top="0"
+		Width="2835"
+		Height="283"
+		Text="Name"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		DataField="Valgfri"
+		Left="8362"
+		Top="0"
+		Width="2126"
+		Height="283"
+		Text="Valgfri"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="Address"
+		Left="3685"
+		Top="0"
+		Width="2126"
+		Height="283"
+		Text="Address"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="Postal_code"
+		Left="5811"
+		Top="0"
+		Width="567"
+		Height="283"
+		Text="Postnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; text-align: center; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="City"
+		Left="6520"
+		Top="0"
+		Width="1842"
+		Height="283"
+		Text="City"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="2100"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field38"
+		DataField="kontrakt_fra"
+		Left="4845"
+		Top="435"
+		Width="1560"
+		Height="285"
+		Text="kontrakt_fra"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field39"
+		DataField="kontrakt_til"
+		Left="4845"
+		Top="1155"
+		Width="1560"
+		Height="285"
+		Text="kontrakt_til"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field40"
+		DataField="justeringsdato"
+		Left="4845"
+		Top="720"
+		Width="1560"
+		Height="285"
+		Text="justeringsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field41"
+		DataField="startdatokpi"
+		Left="4845"
+		Top="1440"
+		Width="1560"
+		Height="270"
+		Text="startdatokpi"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label23"
+		Left="3420"
+		Top="435"
+		Width="1425"
+		Height="285"
+		Caption="Kontrakt fra"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; font-style: italic; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label24"
+		Left="3420"
+		Top="1155"
+		Width="1425"
+		Height="285"
+		Caption="Kontrakt til"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; font-style: italic; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label25"
+		Left="3420"
+		Top="720"
+		Width="1425"
+		Height="285"
+		Caption="Justeringsdato"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; font-style: italic; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label26"
+		Left="3420"
+		Top="1440"
+		Width="1425"
+		Height="270"
+		Caption="Start dato KPI"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; font-style: italic; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field33"
+		DataField="Phone"
+		Left="1410"
+		Top="435"
+		Width="1710"
+		Height="285"
+		Text="Telefon"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Verdana&apos;; font-size: 8pt; background-color: rgb(255,255,255); ddo-char-set: 1; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		DataField="Faks"
+		Left="1410"
+		Top="720"
+		Width="1710"
+		Height="285"
+		Text="Faks"
+		ClassName="Normal"
+		Style="background-color: rgb(255,255,255); font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field35"
+		DataField="Mobil"
+		Left="1410"
+		Top="1005"
+		Width="1710"
+		Height="285"
+		Text="Mobil"
+		ClassName="Normal"
+		Style="background-color: rgb(255,255,255); font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field36"
+		DataField="Mailadr"
+		Left="1410"
+		Top="1290"
+		Width="1710"
+		Height="285"
+		Text="Mailadr"
+		ClassName="Normal"
+		Style="background-color: rgb(255,255,255); font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field37"
+		DataField="MvaNr"
+		Left="1410"
+		Top="1575"
+		Width="1710"
+		Height="285"
+		Text="MvaNr"
+		ClassName="Normal"
+		Style="background-color: rgb(255,255,255); font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label19"
+		Left="135"
+		Top="420"
+		Width="1275"
+		Height="285"
+		Caption="Telefon"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; font-style: italic; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label20"
+		Left="135"
+		Top="990"
+		Width="1275"
+		Height="285"
+		Caption="Mobil"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; font-style: italic; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label21"
+		Left="135"
+		Top="1275"
+		Width="1275"
+		Height="270"
+		Caption="E-post"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; font-style: italic; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label22"
+		Left="135"
+		Top="1545"
+		Width="990"
+		Height="285"
+		Caption="Org.nr"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; font-style: italic; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label27"
+		Left="135"
+		Top="705"
+		Width="1275"
+		Height="285"
+		Caption="Fax"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; font-style: italic; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label28"
+		Left="6660"
+		Top="420"
+		Width="1560"
+		Height="285"
+		Caption="Antall KVM"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label29"
+		Left="6660"
+		Top="705"
+		Width="1560"
+		Height="285"
+		Caption="Areal type"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field42"
+		DataField="antall"
+		Left="8220"
+		Top="420"
+		Width="1560"
+		Height="285"
+		Text="antall"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field43"
+		DataField="ktnavn"
+		Left="8220"
+		Top="705"
+		Width="1560"
+		Height="285"
+		Text="ktnavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field44"
+		DataField="Kontonr"
+		Left="0"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field45"
+		DataField="Name"
+		Left="850"
+		Top="0"
+		Width="2835"
+		Height="283"
+		Text="Name"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field46"
+		DataField="Valgfri"
+		Left="8362"
+		Top="0"
+		Width="2126"
+		Height="283"
+		Text="Valgfri"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field47"
+		DataField="Address"
+		Left="3685"
+		Top="0"
+		Width="2126"
+		Height="283"
+		Text="Address"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field48"
+		DataField="Postal_code"
+		Left="5811"
+		Top="0"
+		Width="567"
+		Height="283"
+		Text="Postnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; text-align: center; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field49"
+		DataField="City"
+		Left="6520"
+		Top="0"
+		Width="1842"
+		Height="283"
+		Text="City"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; vertical-align: middle; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="10485"
+		Y1="330"
+		X2="-3"
+		Y2="330"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line3"
+		X1="10485"
+		Y1="1980"
+		X2="-3"
+		Y2="1980"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="0"
+	>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="1140"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label18"
+		Left="0"
+		Top="0"
+		Width="709"
+		Height="283"
+		Visible="0"
+		Caption="Antall:"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; vertical-align: middle; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="Kontonr"
+		Left="850"
+		Top="0"
+		Width="993"
+		Height="283"
+		Visible="0"
+		Text="Kundenr"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="2"
+		SummaryRunning="1"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8pt; font-weight: bold; vertical-align: middle; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line4"
+		X1="10488"
+		Y1="0"
+		X2="0"
+		Y2="0"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

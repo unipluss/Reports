@@ -1,0 +1,769 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{1ED4EBF7-E745-439A-9103-8EAD5F83939C}" GUIDREP="{D154219E-BB44-4A57-8F3B-66E90A0D8AC8}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10545"
+	DocumentName="Korttidsleie_kvittering"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[
+Sub OnDataInitialize
+	'm_data.Debugg=true
+	dim sql
+		'input
+		 m_data.AddInputMacro "{resid}","Reservasjons id: ","getsql(select max(id) from e..t_korttidsReservasjon)"
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+
+'output
+sql = "select Res.BeboerFornavn, Res.BeboerEtternavn, "
+sql = sql & " Best.FraDato, Best.Tildato, "
+sql = sql & " Bygg.Navn as Bygg, BT.BoligType as boligtype, B.rom_nummer, "
+sql = sql & " B.objekt_adresse, B.objekt_postnummer, B.objekt_poststed,"
+sql = sql & " Kdata.kundenummer as Kundenummer, Na.name as Kundenavn "
+
+
+sql = sql & " from e..t_korttidsReservasjon Res "
+sql = sql & " inner join e..t_korttidsBestilling Best on Res.Bestillingid=Best.id "
+sql = sql & " inner join e..t_kontraktsdata Kdata on Kdata.KorttidsReservasjonsID=Res.id "
+sql = sql & " inner join e..t_boligobjekt B on Kdata.objekt=B.Objekt_id"
+sql = sql & " inner join e..t_bygg Bygg on B.bygg_id=Bygg.id"
+sql = sql & " inner join e..t_boligomraade Omr on B.Boligomrade_id=Omr.Boligomrade_id"
+sql = sql & " inner join e..t_kunde Ku on Kdata.kundenummer=Ku.kundenummer "
+sql = sql & " inner join c..c_name Na on Ku.nameid=Na.id "
+sql = sql & " left join e..t_boligtype BT on B.Boligtype_id= BT.Boligtype_id "
+sql = sql & " where Res.id={resid} "
+
+	m_data.SqlString = sql
+	m_data.SetupFields rpt
+
+End Sub
+
+Sub OnReportStart
+End Sub
+
+Sub OnFetchData(eof)
+End Sub]]></Script>
+<PageSettings	LeftMargin="800"
+	RightMargin="360"
+	TopMargin="720"
+	BottomMargin="360"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="12480"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="*y..Bedrift.Navn"
+		Left="15"
+		Top="345"
+		Width="10455"
+		Height="360"
+		Text="*y..Bedrift.Navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field56"
+		DataField="BeboerFornavn"
+		Left="8775"
+		Top="1755"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="BeboerFornavn"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit1"
+		Left="0"
+		Top="1695"
+		Width="10425"
+		Height="10080"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[4B080000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C66636861727365743020417269616C3B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C7669
+			65776B696E64345C7563315C706172645C625C667333322020202020202020202020202020202020205C7061720D0A2020202020202020202020202020202020
+			205C756C204B6F7274746964736C656965206B766974746572696E67202F2053686F7274207465726D2072656E74616C20726563656970745C756C6E6F6E655C
+			7061720D0A5C7061720D0A2020202020202020202020202020202020204265626F657273206E61766E202F5C623020205C62204E616D65206F662074656E616E
+			743A5C623020205C7061720D0A2020202020202020202020202020202020205B214265626F6572466F726E61766E5D2020205B214265626F657245747465726E
+			61766E5D5C7061720D0A5C625C66733230202020202020202020202020202020202020202020202020205C7061720D0A20202020202020202020202020202020
+			20205C7061720D0A202020202020202020202020202020202020202020202020202020204C656965706572696F6465202F2054656E616E637920706572696F64
+			3A5C623020205C7061720D0A202020202020202020202020202020202020202020202020202020202020202020205B214672614461746F5D202D20205B215469
+			6C4461746F5D5C7061720D0A5C7061720D0A5C7061720D0A5C62202020202020202020202020202020202020202020202020202020202042796767202F204275
+			696C64696E673A5C623020205C6220202020202020202020202020426F6C6967747970652F20486F7573696E6720747970653A202020202020202020526F6D6E
+			72202F20526F6F6D206E6F3A5C7061720D0A202020202020202020202020202020202020202020202020202020205C6230205B21427967675D20202020202020
+			2020202020202020202020202020202020202020205B21626F6C6967747970655D20202020202020202020202020202020205C62202020202020202020202020
+			202020205C6230205B21726F6D5F6E756D6D65725D5C625C7061720D0A2020202020202020202020202020202020202020202020202020202020202020202020
+			20202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020
+			2020205C62305C7061720D0A5C7061720D0A20202020202020202020202020202020202020202020202020202020205C7061720D0A5C62202020202020202020
+			20202020202020202020202020202020202020204C6569656F626A656B74732061647265737365202F2054656E616E637920616464726573733A205C7061720D
+			0A202020202020202020202020202020202020202020202020202020205C6230205B216F626A656B745F616472657373655D2C205C7061720D0A202020202020
+			202020202020202020202020202020202020202020205B216F626A656B745F706F73746E756D6D65725D2C205B216F626A656B745F706F7374737465645D5C70
+			61720D0A202020202020202020202020205C7061720D0A20202020202020202020202020202020202020202020202020202020205C7061720D0A202020202020
+			202020202020202020202020202020202020202020205C622042657374696C6C6572202F2042757965723A205C7061720D0A2020202020202020202020202020
+			20202020202020202020202020205C6230205B214B756E64656E756D6D65725D202D205B214B756E64656E61766E5D5C625C7061720D0A5C7061720D0A5C7061
+			720D0A2020202020202020202020202020202020202020202020202020205C7061720D0A5C62305C7061720D0A5C7061720D0A5C7061720D0A5C7061720D0A5C
+			7061720D0A5C7061720D0A5C7061720D0A202020202020202020202020202020202020202020202020202020205C6220416E74616C6C206E5C2766386B6C6572
+			2F204E756D626572206F66206B6579735C6230203A205F5F5F5F5F5C7061720D0A5C7061720D0A5C7061720D0A202020202020202020202020202020204B7669
+			74746572696E6720666F72206D6F7474616B206176206E5C2766386B6C6572202F20202020202020202020202020202020202020202020202020202020202020
+			202020202020204E5C2766386B6C6572206C65766572742074696C62616B65202F5C7061720D0A5C6631202020205C6630202020202020202020202020202020
+			5265636569766564206B657928732920636F6E6669726D6174696F6E203A20202020202020202020202020202020202020202020202020202020202020202020
+			20202020204B65792873292072657475726E65643A205C66315C7061720D0A5C7061720D0A5C7061720D0A202020202020202020202020202020202020202020
+			5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F202020202020202020202020202020202020202020202020202020202020202020202020202020
+			20202020202020202020205F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5C7061720D0A202020202020202020202020202020202020202020
+			204461746F202F7369676E2020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020
+			20202020202020202020202020202020202020202020202020202020202020202020202020204461746F202F207369676E5C7061720D0A5C7061720D0A5C7061
+			720D0A5C7061720D0A5C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field57"
+		DataField="BeboerEtternavn"
+		Left="8775"
+		Top="2115"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="BeboerEtternavn"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape1"
+		Left="735"
+		Top="10530"
+		Width="8655"
+		Height="1950"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="4995"
+		Y1="10560"
+		X2="4995"
+		Y2="12465"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label60"
+		Left="0"
+		Top="0"
+		Width="2880"
+		Height="330"
+		Caption="Utleier / Landlord:"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Arial&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field58"
+		DataField="FraDato"
+		Left="8805"
+		Top="2520"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="FraDato"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field59"
+		DataField="TilDato"
+		Left="8805"
+		Top="2880"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="TilDato"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field60"
+		DataField="Bygg"
+		Left="8805"
+		Top="3240"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="Bygg"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field61"
+		DataField="objekt_adresse"
+		Left="8805"
+		Top="3900"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="objekt_adresse"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field62"
+		DataField="objekt_postnummer"
+		Left="8805"
+		Top="4320"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="objekt_postnummer"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field63"
+		DataField="objekt_poststed"
+		Left="8805"
+		Top="4680"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="objekt_poststed"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field64"
+		DataField="Kundenummer"
+		Left="8805"
+		Top="5040"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="Kundenummer"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field65"
+		DataField="Kundenavn"
+		Left="8805"
+		Top="5400"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="Kundenavn"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field66"
+		DataField="rom_nummer"
+		Left="8790"
+		Top="3585"
+		Width="1590"
+		Height="225"
+		Visible="0"
+		Text="rom_nummer"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field68"
+		DataField="boligtype"
+		Left="8787"
+		Top="5811"
+		Width="1559"
+		Height="142"
+		Visible="0"
+		Text="boligtype"
+		OutputFormat="dd.mm.yyyy"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; vertical-align: middle; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field69"
+		DataField="*y..Bedrift.Mailadr"
+		Left="7710"
+		Top="975"
+		Width="2670"
+		Height="225"
+		Text="*y..Bedrift.Mailadr"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field70"
+		DataField="*y..Bedrift.Adresse"
+		Left="0"
+		Top="705"
+		Width="6615"
+		Height="225"
+		Text="*y..Bedrift.Adresse"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field71"
+		DataField="*y..Bedrift.Adresse2"
+		Left="15"
+		Top="945"
+		Width="5745"
+		Height="225"
+		Text="*y..Bedrift.Adresse2"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field72"
+		DataField="*y..Bedrift.Postnr"
+		Left="0"
+		Top="1185"
+		Width="840"
+		Height="225"
+		Text="*y..Bedrift.Postnr"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field73"
+		DataField="*y..Bedrift.Poststed"
+		Left="855"
+		Top="1185"
+		Width="3345"
+		Height="225"
+		Text="*y..Bedrift.Postnr"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field74"
+		DataField="*y..Bedrift.Telefon"
+		Left="7710"
+		Top="1245"
+		Width="2625"
+		Height="225"
+		Text="*y..Bedrift.Telefon"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field75"
+		DataField="*y..Bedrift.MVAnr"
+		Left="7710"
+		Top="705"
+		Width="2640"
+		Height="225"
+		Text="*y..Bedrift.MVAnr"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="Image1"
+		Left="7335"
+		Top="945"
+		Width="390"
+		Height="285"
+		>
+		<Data><![CDATA[010000006C74000018060000FFD8FFE000104A46494600010101006000600000FFE100C04578696600004D4D002A000000080005011A0005000000010000004A
+			011B0005000000010000005201280003000000010002000001310002000000120000005A87690004000000010000006C00000000000000600000000100000060
+			000000015061696E742E4E45542076332E352E3130000001928600070000003A0000007E000000004C00450041004400200054006500630068006E006F006C00
+			6F006700690065007300200049006E0063002E002000560031002E00300031000000FFDB00430001010101010101010101010101010101010101010101010101
+			010101010101010101010101010101010101010101010101010101010101010101010101010101FFDB0043010101010101010101010101010101010101010101
+			0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101FFC00011080013001403012200021101031101FF
+			C4001F0000010501010101010100000000000000000102030405060708090A0BFFC400B5100002010303020403050504040000017D0102030004110512213141
+			0613516107227114328191A1082342B1C11552D1F02433627282090A161718191A25262728292A3435363738393A434445464748494A535455565758595A6364
+			65666768696A737475767778797A838485868788898A92939495969798999AA2A3A4A5A6A7A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6D7
+			D8D9DAE1E2E3E4E5E6E7E8E9EAF1F2F3F4F5F6F7F8F9FAFFC4001F0100030101010101010101010000000000000102030405060708090A0BFFC400B511000201
+			02040403040705040400010277000102031104052131061241510761711322328108144291A1B1C109233352F0156272D10A162434E125F11718191A26272829
+			2A35363738393A434445464748494A535455565758595A636465666768696A737475767778797A82838485868788898A92939495969798999AA2A3A4A5A6A7A8
+			A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6D7D8D9DAE2E3E4E5E6E7E8E9EAF2F3F4F5F6F7F8F9FAFFDA000C03010002110311003F00FE87BF
+			69BFDB23C71AFF00C55F88DF0C6CFE20F807C13F057C15E05D0355F8B7E25F17596A43C3FA5E9DF12754D42DFE18F81068FA56DF1578CBE227C4EF0D69D79E2F
+			BAD162D6345D1E3F045FF87F415F08EB5A9EB1AA5E9F9AEE7E2DFC61FD9F2E6E357F0CEAFE05F86BF1153C07E20F8BFE16F0E7837579754F0B7C69F86DE04BDB
+			9B6D46C7C4DE0CD4B45D2912FE6D2D26D6746105D6ADAAAE892EB0DA56BDE18D62DA4797E62FDBC7E184BE06F8A3F1B3C1FE32F1E5FF00C2FB7F12F8F3E0CFC4
+			DB5F889E32F02F8BF5BF0A4B2FC14F086AFF000DFC196DA92F82B47D6E7D4344F1AFC38D63C277FA6F8BACEC9743D33E247837C7FE08D4A5D1B5BB08E18B95F8
+			D1F157C29E23F8B3E1EF8FDA87C44F08F8D7C2FE0FFD91BC3FF0BBE18085EEB51F1BF8E7E20EA9A7F88A1D73C4BE2FD0D5AFF5AF855A4DAC9E27D42F3C75A978
+			EECF47CC42CEC609AF2592EE33E8C21174E3EEC5C5DB4B2BDFDDDE5A5DB5AEFBE9AA68F3E539FB47ACD4AE95AEECBE16D25B6AFEE5AEEF5FEADFF660FDA03C25
+			FB517C01F85DF1EBC0F70B71A0FC46F0DAEA4D0882FA03A4F8834DBEBCD03C61E1C916FED6CA79A6F0BF8BB48D73C3B3DE240D657F369725EE9B7379A75C5ADE
+			4E5713FB107C1BF037C00FD943E087C2DF875E2A1E37F07E93E10FF848B4BF18477315DD9789E7F88BAAEA5F12358D7B47961B6B554F0EEADADF8B751BEF0CDB
+			BC6F3DAF87A7D32DAE2EAF678A4BC9CAF3E492934B64DA57DEC9E973D03D4BE327C1CF86BF167C3D1278FBC2F6FAE4BE157BDD7FC35A8457FAB68BACE83ABC7A
+			75C43F6BD235CD02FF004BD66C3CD8982DD5BDB5F476B79E55BB5DC3335B5B98BF043FE098FE25D4BE3D7ED03E30F017C5C8B44F19F82BC3FE03D7FC5369E15B
+			CF0CF86EC341BFD76C7C55A6787EC2F3C4FA668DA4E9B6BE334D3F4FD4EEE4B0B2F17C7AE5858EADF66F105ADAC3AFD8586A76C515B41BF655357F7B33925CD0
+			7657BEF6D775D4FE93BCB8FB2281C9C0000C92493818E492493DC924F34514560687FFD9]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="Image2"
+		Left="7320"
+		Top="1245"
+		Width="390"
+		Height="255"
+		>
+		<Data><![CDATA[010000006C74000089050000FFD8FFE000104A46494600010101006000600000FFE100C84578696600004D4D002A000000080005011A0005000000010000004A
+			011B0005000000010000005201280003000000010002000001310002000000120000005A87690004000000010000006C00000000000000600000000100000060
+			000000015061696E742E4E45542076332E352E313000000192860007000000400000007E00000000554E49434F444500004C0045004100440020005400650063
+			0068006E006F006C006F006700690065007300200049006E0063002E002000560031002E003000310000FFDB0043000101010101010101010101010101010101
+			0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101FFDB004301010101010101010101010101
+			01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101FFC000110800100016030122
+			00021101031101FFC4001F0000010501010101010100000000000000000102030405060708090A0BFFC400B5100002010303020403050504040000017D010203
+			00041105122131410613516107227114328191A1082342B1C11552D1F02433627282090A161718191A25262728292A3435363738393A434445464748494A5354
+			55565758595A636465666768696A737475767778797A838485868788898A92939495969798999AA2A3A4A5A6A7A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8
+			C9CAD2D3D4D5D6D7D8D9DAE1E2E3E4E5E6E7E8E9EAF1F2F3F4F5F6F7F8F9FAFFC4001F0100030101010101010101010000000000000102030405060708090A0B
+			FFC400B51100020102040403040705040400010277000102031104052131061241510761711322328108144291A1B1C109233352F0156272D10A162434E125F1
+			1718191A262728292A35363738393A434445464748494A535455565758595A636465666768696A737475767778797A82838485868788898A9293949596979899
+			9AA2A3A4A5A6A7A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6D7D8D9DAE2E3E4E5E6E7E8E9EAF2F3F4F5F6F7F8F9FAFFDA000C0301000211
+			0311003F00FE80FF00E0ACDFB4E7EDD5F0DBC73E0FF017ECADA07C54B4D1E5D47C256BE25D5BC13F0DECB55D0752D0FC5DABE876D2788F58F88BAF69F6B6BA08
+			F0CDCDBEBB6F716FA378D7C116DA3C5676E3C537DE22B2F1A5A43E0FFCABF86DFF000510FF00828EFECE1F1A6D3C1BFB43FED17E17D66DAE34CF19F8EFC41E1B
+			D53C14BE2732F84FC05A55DEB7E1AB1F0E453F89FC51AAF882E3C6B6B73F63F14E9BE19F147C3FBAF0A4D67A9B6B7E298E5F0BDEAD9FF41BFF00050D6FDA15AD
+			74BB4F017C1DF187C61F86177E1E3737ABF0DF4AF0DEA9E2AF0378DF4CD435013EAF7DA6EA9E35B1F136BB6DAF687A969F65A0DAF82FE1F78B2EF4F1A4F8AE1D
+			5AFF004D8FC41A65BDEFF3710FEC23F1ABF69FFDB83F6741A0F80EFAFEC06B3E19F12FC788FE2AFC26BDF879A1FC05F867F0A75DD008D1BC5DE19D64DE47ADF8
+			97C676A20FF842BC0D3DB58DE78C759FED0D4B5E853C36FE30F1268DF4D82FA93C0A9D7FA9A74A9CDCE0BD94ABCAD27AD45514A6E73692828C745CBCB2386A7B
+			475DC212AB172B5A4E32704AF7D1AF752EF67CDAEAB73FAA5FF827B7ED8FA6FEDD5FB3668DF1E34ED16DF443378B7C6BE09BE4D3E6966D1B54BDF05EB9369275
+			FD0FED124B776BA6EB76A2D6FC69977717B368F7935E690BAB6BB6F6306B9A915F5A7827C09E07F869E19D3BC17F0E7C1BE14F00783B47376748F09F827C3DA4
+			7857C33A59BFBDB8D4AF8E9DA0E856761A5D89BDD46F2EEFEEFECD6B17DA6F6EAE2EA6DF3CF2C8C57CED5942552A4A9C3D9D394E4E14F99CB922DB718F3349CB
+			956976B5B1DA934926EED249BDAEFBDB5DFD4FFFD9]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label61"
+		Left="7035"
+		Top="705"
+		Width="675"
+		Height="225"
+		Caption="Org.nr:"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+	
+dim BeboerFornavn	
+dim BeboerEtternavn
+dim FraDato
+dim TilDato
+dim Bygg
+dim rom_nummer
+dim objekt_adresse
+dim objekt_postnummer
+dim objekt_poststed
+dim Kundenummer
+dim Kundenavn
+dim boligtype
+
+BeboerFornavn	 = rpt.fields("BeboerFornavn").Value
+BeboerEtternavn	 = rpt.fields("BeboerEtternavn").Value
+FraDato	 = rpt.fields("FraDato").Value
+TilDato	 = rpt.fields("TilDato").Value
+Bygg	 = rpt.fields("Bygg").Value
+rom_nummer	 = rpt.fields("rom_nummer").Value
+objekt_adresse	 = rpt.fields("objekt_adresse").Value
+objekt_postnummer	 = rpt.fields("objekt_postnummer").Value
+objekt_poststed	 = rpt.fields("objekt_poststed").Value
+Kundenummer	 = rpt.fields("Kundenummer").Value
+Kundenavn	 = rpt.fields("Kundenavn").Value
+boligtype	 = rpt.fields("boligtype").Value
+
+	dim a 
+	set a = rpt.Sections("PageHeader").Controls
+	' dim b as IRichEdit
+	dim p
+	dim i 
+	on error resume next
+	for i = 0 to ( a.Count - 1 )
+		set b = a.item(i)
+		p = instr(1,b.name, "Rich", 1 )
+		if not isnull(p) then
+			if p > 0 then
+		
+				call b.replacefield("BeboerFornavn",BeboerFornavn)
+				call b.replacefield("BeboerEtternavn",BeboerEtternavn)
+				call b.replacefield("FraDato",FraDato)
+				call b.replacefield("TilDato",TilDato)
+				call b.replacefield("Bygg",Bygg)
+				call b.replacefield("rom_nummer",rom_nummer)
+				call b.replacefield("objekt_adresse",objekt_adresse)
+				call b.replacefield("objekt_postnummer",objekt_postnummer)
+				call b.replacefield("objekt_poststed",objekt_poststed)
+				call b.replacefield("Kundenummer",Kundenummer)
+				call b.replacefield("Kundenavn",Kundenavn)
+				call b.replacefield("boligtype",boligtype)
+		end if
+		end if	
+	next 
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="0"
+		KeepTogether="-1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="270"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label59"
+		Left="0"
+		Top="0"
+		Width="3827"
+		Height="283"
+		Visible="0"
+		Caption="Rapport laget av: Øystein Vindenes 11.09.12"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
