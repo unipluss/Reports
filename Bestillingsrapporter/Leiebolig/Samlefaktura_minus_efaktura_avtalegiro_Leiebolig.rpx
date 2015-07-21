@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{7D86C306-46A2-42A7-A760-9D2B9A12098B}" GUIDREP="{35BE8044-F347-4A0E-8DA1-22D5598C925A}" 
+	GUIDLIB="{17C3C6DD-F23E-4D30-8510-2B6E0B65CBF8}" GUIDREP="{AF1F37B8-C8CF-4189-894D-C94BBBA193E5}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
 		740066000000"
 	PrintWidth="10365"
@@ -425,8 +425,12 @@ Sub OnFetchData(eof)
 		End if
  
  	
- 		
-		rpt.Fields("Prisfelt").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Pris")) - m_data.sfcurr(rpt.Fields("Mva")))
+ 		if rpt.Fields("Mva") > 0 then  
+			rpt.Fields("Prisfelt").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Pris"))-m_data.sfcurr(rpt.Fields("Mva")/rpt.Fields("Antall")))    'Hvis det finnes mva på fakturalinjen: Del total mva på antall varer og trekk mva fra prisen slik at det vises pris ex mva.
+		else
+		      rpt.Fields("Prisfelt").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Pris")) )
+		end if
+		'rpt.Fields("Prisfelt").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Pris")) - m_data.sfcurr(rpt.Fields("Mva")))
 		Sfelt = m_data.sfcurr((rpt.Fields("Antall")) * m_data.sfcurr(rpt.Fields("Prisfelt"))) * ((100 - m_data.sfcurr(rpt.Fields("Rabatt")))/100)
 		
 		'Mvabelop= m_data.sfcurr(rpt.fields("Mva"))
