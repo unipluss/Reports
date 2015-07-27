@@ -1,0 +1,922 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{FA01239C-F358-494E-BC93-EE92B86425C8}" GUIDREP="{58ED1F5D-1813-480B-BFB4-D389A60E7AD7}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10650"
+	DocumentName="Fakturajournal"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[Sub OnDataInitialize
+	'm_data.Debugg=true
+	dim sql
+	dim fra_dato
+	
+	fra_dato = "01.01." & cstr(  year( now() ) - 3 )
+
+	m_data.AddInputMacro "{vare}","Varenummer for husleie","getsql(select min(varenr) from c..varer where varenavn1 like '%husleie%')"
+	m_data.AddInputMacro "{faktDato}","Fakturadato (fra og med)",cstr( fra_dato ),"date"
+	m_data.AddInputMacro "{fd}","Forfallsdato (til og med)","Now()","date"
+	m_data.AddInputMacro "{FK}","Fra kunde","getsql(Select min(kontonr) from c..debitor)"
+	m_data.AddInputMacro "{TK}","Til kunde","getsql(Select max(kontonr) from c..debitor)"
+	m_data.AddInputMacro "","",""
+	m_data.addwhereparam "{hvor}","Vise ","Alle",""
+	m_data.addwhereparam "{hvor}","","Kun for kunder som ikke purres","AND (d.Purres_ikke <> 0)"
+
+	m_data.AddInputMacro "{SumGruppe}","Summere pr forfallsdato?","1",,2,"(select TOP 1 1, 'NEI' from c..Status UNION Select TOP 1 2, 'JA (må sorteres på forfallsdato)' from c..Status)"
+
+	m_data.addsortparam "{sort}","Sortering etter ","Fakturanr"," ORDER BY F.Fakturanr"
+	m_data.addsortparam "{sort}","","Forfallsdato"," ORDER BY F.Forfallsdato, F.Fakturanr"
+	m_data.addsortparam "{sort}","","Dato"," ORDER BY F.Fakturadato"
+	m_data.addsortparam "{sort}","","Kundenr"," ORDER BY F.Kundenr"
+	m_data.addsortparam "{sort}","","Kundenavn"," ORDER BY NA.Name"
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+
+	sql = "select distinct F.Fakturanr, F.Kundenr, NA.Name, F.Totalsum, F.Moms, F.Fakturadato, F.forfallsdato, F.Vaar_Ref, S.Beskrivelse,"
+	sql = sql & " (IsNull(Totalsum,0) - IsNull(Innbet_sum,0) - abs(IsNull(Kreditert_Sum,0))) as Rest,"
+	sql = sql & " IsNull((Select Max(Purring_nr) from c..Purring where fakturanr = F.Fakturanr),0) as Purring_nr"
+	sql = sql & " from c..faktura as F "
+	sql = sql & " left join c..varelnfakt VL on F.Fakturanr=VL.Fakturanr"
+	sql = sql & " left join c..status as S on F.status=S.ID"
+	sql = sql & " LEFT JOIN c..DEBITOR as D on F.Kundenr = D.Kontonr"
+	sql = sql & " LEFT JOIN c..c_Name as NA on D.NameID = NA.ID"
+	sql = sql & " where ((IsNull(f.Status,0) in (0,110110))"
+	sql = sql & " AND (forfallsdato <= '{fd}')"
+	sql = sql & " AND (F.Kundenr Between {FK} and {TK}) {hvor})"
+	sql = sql & " AND VL.varenr='{vare}' "
+	sql = sql & " AND F.Fakturadato >= '{faktDato}' "
+	
+	m_data.SqlString = sql & " {sort}"
+	m_data.SetupFields rpt
+End Sub
+
+Sub OnReportStart
+
+End Sub
+
+Sub OnFetchData(eof)
+	if m_data.GetMacroValue("{SumGruppe}") = "2" then 
+		rpt.Sections("GroupFooter1").Visible = True
+	else
+		rpt.Sections("GroupFooter1").Visible = False
+	end if
+	if m_data.Sfcurr(rpt.Fields("Purring_nr")) <> 0 Then rpt.Fields("PurFelt").Value = rpt.Fields("Purring_nr") else rpt.Fields("PurFelt").Value = ""
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="800"
+	RightMargin="360"
+	TopMargin="720"
+	BottomMargin="360"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1455"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label24"
+		Left="9960"
+		Top="1134"
+		Width="670"
+		Height="283"
+		Caption="Purring"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: center; font-size: 8pt; font-style: italic; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="*y..Bedrift.Navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="283"
+		Text="*y..Bedrift.Navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="850"
+		Top="1134"
+		Width="709"
+		Height="283"
+		Caption="Kundenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="*y..Bedrift.Arstall"
+		Left="8929"
+		Top="0"
+		Width="1701"
+		Height="220"
+		Text="*y..Bedrift.Arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="10630"
+		Y1="1417"
+		X2="0"
+		Y2="1417"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="0"
+		Top="1134"
+		Width="850"
+		Height="283"
+		Caption="Fakturanr"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: left; font-family: &apos;Times New Roman&apos;; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="3400"
+		Top="1134"
+		Width="1100"
+		Height="283"
+		Caption="Totalsum"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; font-family: &apos;Times New Roman&apos;; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="4500"
+		Top="1134"
+		Width="850"
+		Height="283"
+		Caption="Mva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; font-family: &apos;Times New Roman&apos;; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="6450"
+		Top="1134"
+		Width="850"
+		Height="283"
+		Caption="Dato"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: center; font-family: &apos;Times New Roman&apos;; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="=&quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="8929"
+		Top="220"
+		Width="1701"
+		Height="220"
+		Text="Sidenr"
+		SummaryType="4"
+		SummaryFunc="11"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="=Now"
+		Left="8929"
+		Top="440"
+		Width="1701"
+		Height="220"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="User_name"
+		Left="8929"
+		Top="660"
+		Width="1701"
+		Height="220"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label14"
+		Left="7300"
+		Top="1134"
+		Width="850"
+		Height="283"
+		Caption="Forfall"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: center; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label15"
+		Left="8150"
+		Top="1134"
+		Width="1100"
+		Height="283"
+		Caption="Referanse"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="9250"
+		Top="1134"
+		Width="700"
+		Height="283"
+		Caption="Status"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; font-style: italic; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label17"
+		Left="1559"
+		Top="1134"
+		Width="1843"
+		Height="283"
+		Caption="Kundenavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label18"
+		Left="0"
+		Top="0"
+		Width="4875"
+		Height="570"
+		Caption="Forfalte, ubetalte faktura med varenr."
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 16pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label20"
+		Left="5350"
+		Top="1134"
+		Width="1100"
+		Height="283"
+		Caption="Rest"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; font-family: &apos;Times New Roman&apos;; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field39"
+		DataField="{vare}"
+		Left="4860"
+		Top="0"
+		Width="1110"
+		Height="570"
+		Text="{vare}"
+		ClassName="Normal"
+		Style="font-size: 16pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Visible="0"
+		Height="0"
+		DataField="Forfallsdato"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="Forfallsdato"
+		Left="0"
+		Top="0"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="Forfallsdato"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="315"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field37"
+		DataField="PurFelt"
+		Left="9960"
+		Top="0"
+		Width="670"
+		Height="250"
+		Text="PurFelt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: center; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field15"
+		DataField="Fakturanr"
+		Left="0"
+		Top="0"
+		Width="850"
+		Height="250"
+		Text="Fakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field16"
+		DataField="Kundenr"
+		Left="850"
+		Top="0"
+		Width="709"
+		Height="250"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field17"
+		DataField="Name"
+		Left="1559"
+		Top="0"
+		Width="1843"
+		Height="250"
+		Text="Kundenavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field18"
+		DataField="Totalsum"
+		Left="3400"
+		Top="0"
+		Width="1100"
+		Height="250"
+		Text="Totalsum"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field19"
+		DataField="moms"
+		Left="4500"
+		Top="0"
+		Width="850"
+		Height="250"
+		Text="moms"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field20"
+		DataField="Fakturadato"
+		Left="6450"
+		Top="0"
+		Width="850"
+		Height="250"
+		Text="Ordredato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: center; font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field23"
+		DataField="Forfallsdato"
+		Left="7300"
+		Top="0"
+		Width="850"
+		Height="250"
+		Text="Forfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: center; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		DataField="Vaar_Ref"
+		Left="8150"
+		Top="0"
+		Width="1100"
+		Height="250"
+		Text="Vaar_Ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field25"
+		DataField="Beskrivelse"
+		Left="9250"
+		Top="0"
+		Width="700"
+		Height="250"
+		Text="Beskrivelse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: left; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="Rest"
+		Left="5350"
+		Top="0"
+		Width="1100"
+		Height="250"
+		Text="Rest"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field38"
+		DataField="Purring_nr"
+		Left="2551"
+		Top="1276"
+		Width="709"
+		Height="283"
+		Visible="0"
+		Text="Purring_nr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: center; vertical-align: middle; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="650"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="Totalsum"
+		Left="3400"
+		Top="0"
+		Width="1100"
+		Height="283"
+		Text="Totalsum"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field32"
+		DataField="moms"
+		Left="4500"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="moms"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field33"
+		DataField="Forfallsdato"
+		Left="2409"
+		Top="0"
+		Width="851"
+		Height="283"
+		Text="Forfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: center; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		DataField="Rest"
+		Left="5350"
+		Top="0"
+		Width="1100"
+		Height="283"
+		Text="Rest"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label21"
+		Left="1701"
+		Top="0"
+		Width="708"
+		Height="283"
+		Caption="Sum for:"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line3"
+		X1="0"
+		Y1="0"
+		X2="10630"
+		Y2="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field35"
+		DataField="Fakturanr"
+		Left="567"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="AntallFaktura"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="2"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label22"
+		Left="0"
+		Top="0"
+		Width="567"
+		Height="283"
+		Caption="Antall:"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="585"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="142"
+		Top="283"
+		Width="3401"
+		Height="284"
+		Visible="0"
+		Caption="Laget av R.Milde (02.10.2001)"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="Totalsum"
+		Left="3400"
+		Top="0"
+		Width="1100"
+		Height="283"
+		Text="Totalsum"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; font-weight: bold; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="Moms"
+		Left="4500"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="Moms"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; font-weight: bold; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label19"
+		Left="1701"
+		Top="0"
+		Width="1701"
+		Height="283"
+		Caption="Totalsum"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; vertical-align: middle; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="Rest"
+		Left="5350"
+		Top="0"
+		Width="1100"
+		Height="283"
+		Text="Rest"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; font-weight: bold; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="0"
+		Y1="0"
+		X2="10630"
+		Y2="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field36"
+		DataField="Fakturanr"
+		Left="567"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="Fakturanr"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="2"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Times New Roman&apos;; font-size: 8pt; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label23"
+		Left="0"
+		Top="0"
+		Width="567"
+		Height="283"
+		Caption="Antall:"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
