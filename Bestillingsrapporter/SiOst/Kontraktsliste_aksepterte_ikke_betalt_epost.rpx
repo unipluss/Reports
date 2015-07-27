@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{2EB5F412-63D5-44D9-BBAD-80DE38312007}" GUIDREP="{AF6D927B-62B5-429E-BF8D-AEDEF58528D8}" 
+	LICENSE="10000000"
+	PrintWidth="15375"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[
+sub onDatainitialize
+  	dim sql
+	
+	if not m_data.ShowInputDialog("") then exit sub
+	
+sql =  " select k.Kundenummer, k.Kontrakt_fra, st.status, k.LagetDato, "
+sql = sql & " k.SvarFrist, BE.DSum, BO.Omrade, BO1.BoligType, KU.NameID, c.name, e.mailadr "
+sql = sql & " from ((((t_kontraktsdata as k "
+sql = sql & " LEFT JOIN t_betdep as BE on k.Kontrakts_ID=BE.Kontrakt_id) "
+sql = sql & " LEFT JOIN t_boligomraade as BO on k.TildeltOmrade_id=BO.Boligomrade_id) "
+sql = sql & " LEFT  JOIN t_boligtype as BO1 on k.tildelt_boligtype=BO1.BoligType_id) "
+sql = sql & " INNER JOIN t_kunde as KU on k.Kundenummer=KU.Kundenummer) "
+sql = sql & " INNER JOIN c..c_name as c on KU.NameID=c.ID "
+sql = sql & " LEFT JOIN c..c_email as e on KU.NameID=e.namelink "
+sql = sql & " LEFT JOIN e..t_status as st on k.statusid=st.status_id "
+sql = sql & " WHERE k.statusId=1002 and ( BE.DSum is null or BE.DSum = 0) "
+
+sql = sql & " ORDER by BO.Omrade, c.name "
+	 
+	m_data.SqlString = sql 
+	m_data.setupfields rpt
+  end sub
+
+Sub OnReportStart
+End Sub
+
+Sub OnFetchData(eof)
+
+End Sub
+
+Function sflong(v)
+    Dim rv
+    On Error Resume Next
+    rv = Clng(v)
+    If Err Then rv = 0
+    sflong = rv
+End Function
+
+
+]]></Script>
+<PageSettings	LeftMargin="500"
+	RightMargin="500"
+	TopMargin="300"
+	BottomMargin="300"
+	Orientation="2"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="1650"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="0"
+		Top="0"
+		Width="6945"
+		Height="567"
+		Caption="Aksepterte kontrakter, ubetalt depositum"
+		ClassName="Normal"
+		Style="font-size: 16pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field11"
+		DataField="*y..Bedrift.navn"
+		Left="0"
+		Top="567"
+		Width="5669"
+		Height="283"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 12pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field12"
+		DataField="*y..Bedrift.Arstall"
+		Left="5811"
+		Top="567"
+		Width="1134"
+		Height="283"
+		Text="*y..Bedrift.Arstall"
+		ClassName="Normal"
+		Style="font-size: 12pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="0"
+		Y1="1524"
+		X2="15307"
+		Y2="1524"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="0"
+		Top="1245"
+		Width="1140"
+		Height="285"
+		Caption="Kundenr"
+		ClassName="Normal"
+		Style="font-style: italic; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label2"
+		Left="1140"
+		Top="1245"
+		Width="1140"
+		Height="285"
+		Caption="Navn"
+		ClassName="Normal"
+		Style="font-style: italic; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label3"
+		Left="3975"
+		Top="1245"
+		Width="1140"
+		Height="285"
+		Caption="Utstedt dato"
+		ClassName="Normal"
+		Style="font-style: italic; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="5100"
+		Top="1245"
+		Width="1140"
+		Height="285"
+		Caption="Svarfrist"
+		ClassName="Normal"
+		Style="font-style: italic; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label5"
+		Left="6236"
+		Top="1245"
+		Width="1276"
+		Height="283"
+		Caption="Kontrakt fra"
+		ClassName="Normal"
+		Style="font-style: italic; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="9853"
+		Top="1215"
+		Width="1134"
+		Height="283"
+		Caption="Boligtype"
+		ClassName="Normal"
+		Style="font-style: italic; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="11622"
+		Top="1245"
+		Width="1134"
+		Height="283"
+		Caption="E-post"
+		ClassName="Normal"
+		Style="font-style: italic; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="7602"
+		Top="1245"
+		Width="1275"
+		Height="283"
+		Caption="Område"
+		ClassName="Normal"
+		Style="font-style: italic; font-weight: bold; "
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="330"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		DataField="Kundenummer"
+		Left="0"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Text="Kundenummer"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="name"
+		Left="1134"
+		Top="0"
+		Width="2835"
+		Height="283"
+		Text="name"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="LagetDato"
+		Left="3969"
+		Top="0"
+		Width="1133"
+		Height="283"
+		Text="LagetDato"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="SvarFrist"
+		Left="5102"
+		Top="0"
+		Width="1134"
+		Height="283"
+		Text="Svarfrist"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="Kontrakt_fra"
+		Left="6240"
+		Top="0"
+		Width="1125"
+		Height="285"
+		Text="Kontrakt_fra"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="boligtype"
+		Left="9825"
+		Top="0"
+		Width="1725"
+		Height="285"
+		Text="boligtype"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		DataField="mailadr"
+		Left="11622"
+		Top="0"
+		Width="3685"
+		Height="283"
+		Text="mailadr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="omrade"
+		Left="7605"
+		Top="0"
+		Width="2190"
+		Height="285"
+		Text="omrade"
+		Multiline="0"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="0"
+	>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

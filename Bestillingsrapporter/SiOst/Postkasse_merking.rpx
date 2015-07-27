@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{EFB0D402-66D1-434C-849B-989BDE9E6D3C}" GUIDREP="{03F0368B-E841-4E5D-AF98-D47F5F66A964}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="11175"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[sub onDatainitialize
+	'm_data.Debugg=true
+	dim sql
+	dim utvalgBygg
+	dim utvalgEtasje
+
+	m_data.AddInputMacro "{dato}","Dato","getsql(select getdate())","date"
+  	m_data.AddInputMacro "","",""	
+	m_data.AddInputMacro "{S}","Status ","1003",,7,"Select '1001' , 'Tildelt' union Select '1002' , 'Akseptert' union Select '1003' , 'Innflyttet' union select '1006' , 'Oppsagt' "
+	m_data.AddInputMacro "{OI}","Boligomraade ","GetSql(Select min(boligomrade_id) from e..t_boligomraade)",,2,"Select boligomrade_id, omrade from e..t_boligomraade order by omrade "
+	m_data.AddInputMacro "{B}","Bygg ","0",,2,"Select id, navn from e..t_bygg where omrade_id={OI} union select '0','Alle' order by id "	
+	m_data.AddInputMacro "{Etg}","Etasje ","0",,2,"Select id, etasje_navn from e..t_etasje where Bygg_id={B} union select '0','Alle' order by id "	
+	
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	utvalgBygg = m_data.GetMacroValue("{B}")
+	utvalgEtasje = m_data.GetMacroValue("{Etg}")
+
+		sql = "Select distinct D.Kundenummer, N.name, P.phone as mobil, kd.statusid, e.etasje_navn, e.id as etasjeid, omrade,bygg.navn as byggnavn, bygg.Adresse as byggadresse, bygg.postnr, bygg.poststed, b.Rom_nummer as romnr "
+		sql = sql & " from ((c..c_Name as N "
+		sql = sql & " left join c..c_phone P on (N.id=p.namelink and isnull(abs(P.standard),0)=1 AND isnull(P.Phonetype,0)=150102 )) "
+		sql = sql & " INNER JOIN e..t_kunde D on N.id=D.nameid) "
+		sql = sql & " INNER JOIN e..t_kontraktsdata kd on d.kundenummer=kd.kundenummer "
+		sql = sql & " INNER JOIN e..t_boligobjekt b on kd.objekt=b.objekt_id " 
+		sql = sql & " left join e..t_etasje e on b.etasje = e.id "
+		sql = sql & " left join e..t_bygg bygg on b.bygg_id = bygg.id "
+		sql = sql & " left join e..t_boligomraade omrade on b.Boligomrade_id=omrade.Boligomrade_id "
+		sql = sql & " where kd.statusid in ({S}) and b.boligomrade_id={OI} "
+		sql = sql & " and '{dato}' between kd.kontrakt_fra and isnull(kd.Kontrakt_til, isnull(Virkelig_utflyttet, isnull(kontrakt_utgaar,getdate()+1))) "
+
+		if utvalgBygg <>"0" then
+			sql = sql & " and b.bygg_id in({B}) "
+				if utvalgEtasje <>"0" then
+					sql = sql & " and e.id in ({Etg}) "		
+				end if
+		end if
+		
+        sql = sql & " order by omrade, byggnavn, etasjeid, romnr "
+
+	m_data.SqlString = sql 
+	m_data.SetupFields rpt
+end sub
+
+Sub OnReportStart
+
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="360"
+	RightMargin="360"
+	TopMargin="360"
+	BottomMargin="360"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="0"
+	>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="1440"
+		DataField="etasjeid"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="omrade"
+		Left="1545"
+		Top="30"
+		Width="7050"
+		Height="285"
+		Text="omrade"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 14pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field8"
+		DataField="byggnavn"
+		Left="1545"
+		Top="330"
+		Width="9405"
+		Height="285"
+		Text="byggnavn"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 14pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="etasje_navn"
+		Left="1545"
+		Top="915"
+		Width="6090"
+		Height="285"
+		Text="etasje_navn"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 14pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		DataField="byggadresse"
+		Left="1545"
+		Top="630"
+		Width="9435"
+		Height="285"
+		Text="byggadresse"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 14pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="0"
+		Top="30"
+		Width="1200"
+		Height="285"
+		Caption="Område"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label2"
+		Left="0"
+		Top="330"
+		Width="1200"
+		Height="285"
+		Caption="Byggnavn"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label3"
+		Left="0"
+		Top="630"
+		Width="1200"
+		Height="285"
+		Caption="Byggadresse"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="0"
+		Top="915"
+		Width="1200"
+		Height="285"
+		Caption="Etasje"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="0"
+		Y1="1335"
+		X2="11175"
+		Y2="1335"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label5"
+		Left="9075"
+		Top="0"
+		Width="570"
+		Height="285"
+		Caption="Dato:"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="{dato}"
+		Left="9669"
+		Top="13"
+		Width="1418"
+		Height="284"
+		Text="{dato}"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="480"
+		ColumnCount="0"
+		ColumnDirection="1"
+		ColumnSpacing="500"
+		KeepTogether="-1"
+		CanGrow="0"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="Name"
+		Left="2970"
+		Top="0"
+		Width="6390"
+		Height="375"
+		Text="Name"
+		ClassName="Normal"
+		Style="font-size: 18pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field11"
+		DataField="romnr"
+		Left="0"
+		Top="0"
+		Width="2835"
+		Height="375"
+		Text="romnr"
+		ClassName="Normal"
+		Style="font-size: 18pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field12"
+		DataField="etasjeid"
+		Left="9780"
+		Top="0"
+		Width="1350"
+		Height="285"
+		Visible="0"
+		Text="etasjeid"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="0"
+		NewPage="2"
+		KeepTogether="-1"
+	>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
