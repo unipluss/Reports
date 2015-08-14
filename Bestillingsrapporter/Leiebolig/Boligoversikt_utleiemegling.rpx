@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{84164A3B-6E33-4926-BDA5-8122F4562CA7}" GUIDREP="{D06B3E6C-2F47-4749-AF19-232988EDA81E}" 
+	GUIDLIB="{B593B5D2-4303-4043-92F1-668D22D03BEF}" GUIDREP="{611A65B3-F14B-4868-8668-72A0C8BB57E2}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
 		740066000000"
 	PrintWidth="16560"
@@ -34,27 +34,27 @@ Sub OnDataInitialize
 	sql = sql & " 	 	and getdate() between tl.Fra_dato and tl.Til_dato )as leiepris, "
 	sql = sql & " /**/ kdata.kundenummer as knr, (select status from e..t_status S where kdata.statusid=S.status_id) as kontraktstatus, "
 	sql = sql & " /**/ knavn.Name as Leietaker, "
-	'Lagt til 16 juni 2015:
+	'Lagt til 16 juni 2015, endret 13 august 2015 pga sak 11726.
 	'------------------------
 	sql = sql & " /**/ (select COUNT (kon.kundenummer) from e..t_kontraktsdata kon where kon.Kontrakts_ID=kdata.Kontrakts_ID and kon.statusid in (1001,1002,1003,1006)) as antLeietakere, "
-	sql = sql & " /**/ (select COUNT (KM.id)+1 from e..t_kontraktHarMedLeietakere KM inner join uni_11..c_contacts C on C.id=KM.kontaktid where KM.kontraktsid= kdata.Kontrakts_ID and getdate() between KM.fradato and isnull(KM.tildato,getdate()+1) ) antMedleie, "
+	sql = sql & " /**/ (select COUNT (KM.id)+1 from e..t_kontraktHarMedLeietakere KM inner join c..c_contacts C on C.id=KM.kontaktid where KM.kontraktsid= kdata.Kontrakts_ID and getdate() between KM.fradato and isnull(KM.tildato,getdate()+1) ) antMedleie, "
 	sql = sql & " /**/ (Select COUNT (ActLi.ID) from c..Activity_Link ActLi inner join c..Activity  Ac on ActLi.FK_activity=Ac.id where fk_table = 9 and fk_id=bo.Objekt_id and not (isnull(statusid,0)=3) ) as antAktiviteter, "
-	sql = sql & " /**/ case when kdata.kundenummer IN (Select kundenr from c..Purring Pur where not abs(isnull(Pur.betalt,0))=1 and Pur.status not in (3)) then 'Ja' else 'Nei' end as Purring, "
-	sql = sql & " /**/ case when kdata.kundenummer IN (Select kundenr from c..FAKTURA Fa "
-	sql = sql & " /**/                                inner join c..InkassoInvoice I on Fa.fakturanr=I.invoiceid "
-	sql = sql & " /**/                                inner join c..InkassoCase Ic on I.CaseID=Ic.CaseID "
-	sql = sql & " /**/                                where isnull(Ic.Rest,0) > 0 And isnull(Ic.CaseStatus,0) in (1) ) then 'Ja' else 'Nei' end as Inkasso,	"
+	sql = sql & " /**/ (select case when sum(p.purring_nr)>0 then convert(varchar(30),sum(p.purring_nr)) else '0' end "
+	sql = sql & " /**/  from c..faktura f join c..Purring p on p.Fakturanr=f.Fakturanr where f.Kundenr=kdata.kundenummer) as antPurringer, "
+	sql = sql & " /**/ (select case when count(*) > 0 then convert(varchar(30),count(*)) else '0' end "
+	sql = sql & " /**/ from c..inkassoinvoice as II inner join c..faktura as F on F.Fakturanr = II.InvoiceID inner join c..InkassoCase IC on ic.CaseID=ii.CaseID where f.Kundenr=kdata.kundenummer) as antInkasso, "
+	
 	'--------------------------
 	sql = sql & " /**/ case when kdata.DepositumTypeId=2 then 'Ja' else 'Nei' end as Dep, "
 	sql = sql & " /**/ case when kdata.DepositumTypeId=3 then 'Ja' else 'Nei' end as LBgaranti, "	
-	sql = sql & " /**/  (select  max(isnull(ab.Sist_endret, ab.Startdato)) "
+	sql = sql & " /**/  (select  max(tl.Fra_dato) "
 	sql = sql & " 		from c..ABONNEMENT ab "
 	sql = sql & " 		inner join c..TARIFF tar on ab.Tariff = tar.Tariffnr "
 	sql = sql & " 		inner join c..TARIFFLINJE tl on tar.Tariffnr =tl.Tariffnr "
 	sql = sql & " 		where ab.ID = kdata.Kontrakts_ID "
 	sql = sql & " 		and tl.Varenr = '1' "
 	sql = sql & " 		and getdate() between tl.Fra_dato and tl.Til_dato "
-	sql = sql & " 		)as aboSistEndret, "
+	sql = sql & " 		)as tariffLinjeFraDato, "
 	sql = sql & " /**/ kdata.Kontrakt_fra as Leiestart, "	
 	sql = sql & " /**/ isnull(virkelig_utflyttet, isnull(kdata.kontrakt_utgaar, kdata.Kontrakt_til)) as Leieslutt, "
 	sql = sql & " /**/ bo.ForventetLeiepris as ForventetLeiepris,"
@@ -1054,7 +1054,7 @@ End Sub
 		<Control 
 		Type="AR.Label"
 		Name="Label25"
-		Left="8235"
+		Left="8160"
 		Top="1635"
 		Width="1020"
 		Height="495"
@@ -1078,11 +1078,11 @@ End Sub
 		<Control 
 		Type="AR.Label"
 		Name="Label27"
-		Left="9255"
-		Top="1845"
+		Left="9180"
+		Top="1635"
 		Width="780"
-		Height="285"
-		Caption="Inkasso"
+		Height="495"
+		Caption="Antall inkasso"
 		ClassName="Normal"
 		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
 		>
@@ -1090,11 +1090,11 @@ End Sub
 		<Control 
 		Type="AR.Label"
 		Name="Label28"
-		Left="10050"
-		Top="1845"
-		Width="780"
-		Height="285"
-		Caption="Purring"
+		Left="9975"
+		Top="1635"
+		Width="930"
+		Height="495"
+		Caption="Antall purringer"
 		ClassName="Normal"
 		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 10pt; font-style: italic; "
 		>
@@ -1103,7 +1103,8 @@ End Sub
 	<Section Type="GroupHeader" Name="GroupHeader2"
 		Height="285"
 		DataField="byggnavn"
-		GroupKeepTogether="1"
+		GroupKeepTogether="2"
+		KeepTogether="-1"
 	>
 		<Control 
 		Type="AR.Shape"
@@ -1157,7 +1158,7 @@ End Sub
 End Sub]]></Script>
 	</Section>
 	<Section Type="Detail" Name="Detail"
-		Height="270"
+		Height="285"
 	>
 		<Control 
 		Type="AR.Field"
@@ -1282,12 +1283,12 @@ End Sub]]></Script>
 		<Control 
 		Type="AR.Field"
 		Name="sistIndeksRegulert"
-		DataField="aboSistEndret"
+		DataField="tariffLinjeFraDato"
 		Left="12015"
 		Top="0"
 		Width="1110"
 		Height="285"
-		Text="aboSistEndret"
+		Text="tariffLinjeFraDato"
 		OutputFormat="dd.mm.yyyy"
 		ClassName="Normal"
 		Style="text-align: left; "
@@ -1351,7 +1352,7 @@ End Sub]]></Script>
 		Type="AR.Field"
 		Name="Field30"
 		DataField="antMedleie"
-		Left="8385"
+		Left="8310"
 		Top="0"
 		Width="540"
 		Height="285"
@@ -1364,12 +1365,12 @@ End Sub]]></Script>
 		<Control 
 		Type="AR.Field"
 		Name="Field32"
-		DataField="Inkasso"
-		Left="9180"
+		DataField="antInkasso"
+		Left="9075"
 		Top="0"
 		Width="645"
 		Height="285"
-		Text="Inkasso"
+		Text="antInkasso"
 		OutputFormat="#,##0"
 		ClassName="Normal"
 		Style="text-align: right; "
@@ -1378,12 +1379,12 @@ End Sub]]></Script>
 		<Control 
 		Type="AR.Field"
 		Name="Field33"
-		DataField="Purring"
+		DataField="antPurringer"
 		Left="10080"
 		Top="0"
-		Width="585"
+		Width="444"
 		Height="285"
-		Text="Purring"
+		Text="antPurringer"
 		OutputFormat="#,##0"
 		ClassName="Normal"
 		Style="text-align: right; "
