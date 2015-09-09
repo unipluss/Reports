@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{E3028D13-44BA-4ABD-B8F0-389211F4CC12}" GUIDREP="{1013A0C2-1410-41F8-A12D-7E4B7A79E836}" 
+	GUIDLIB="{08FC31B5-16C5-4EF1-8850-E8A72756CCF0}" GUIDREP="{D268182F-5831-4450-AA5E-45488845726E}" 
 	LICENSE="10000000"
 	PrintWidth="9780"
 	DocumentName="ActiveReports Document"
@@ -32,6 +32,7 @@ sub onDatainitialize
 
 	sql = sql & " /**/, (select top 1 pris From c..TARIFFLINJE where Tariffnr = (select Tariff From c..ABONNEMENT where id = "& KontraktId &")and Varenr = (select top 1 varenr_husleie From e..t_klientParametre) order by id desc, Fra_dato desc ) as totatlprisTariff"
 	sql = sql & " /**/, (select top 1 FraDato From c..TARIFFLINJE where Tariffnr = (select Tariff From c..ABONNEMENT where id = "& KontraktId &")and Varenr = (select top 1 varenr_husleie From e..t_klientParametre) order by id desc, Fra_dato desc ) as fraDatoTariff"
+	sql = sql & " /**/, (select top 1 FraDato -1 From c..TARIFFLINJE where Tariffnr = (select Tariff From c..ABONNEMENT where id = "& KontraktId &")and Varenr = (select top 1 varenr_husleie From e..t_klientParametre) order by id desc, Fra_dato desc ) as sisteDatoGammelTariff"
 	
 	sql = sql & " /**/, (select top 1 mailadr from c..c_email em where em.namelink = ku.NameID and abs(isnull(standard, 0)) =1) as epost "
 	sql = sql & " /**/, (select top 1 navn from y..BEDRIFT) as bedriftsNavn "
@@ -383,17 +384,6 @@ End Function
 		</Control>
 		<Control 
 		Type="AR.Field"
-		Name="Field27"
-		Left="0"
-		Top="567"
-		Width="2693"
-		Height="283"
-		Text="Adresse:"
-		ClassName="Normal"
-		>
-		</Control>
-		<Control 
-		Type="AR.Field"
 		Name="Field28"
 		DataField="adresse"
 		Left="0"
@@ -444,7 +434,7 @@ End Function
 		Type="AR.Field"
 		Name="Field34"
 		Left="4535"
-		Top="1134"
+		Top="1843"
 		Width="1418"
 		Height="283"
 		Text="E-post:"
@@ -456,7 +446,7 @@ End Function
 		Name="Field38"
 		DataField="epost"
 		Left="6520"
-		Top="1134"
+		Top="1843"
 		Width="3118"
 		Height="283"
 		Text="epost"
@@ -566,6 +556,12 @@ End Function
 		ClassName="Normal"
 		>
 		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
 	</Section>
 	<Section Type="Detail" Name="Detail"
 		Height="420"
@@ -627,6 +623,28 @@ End Function
 <![CDATA[
 Sub OnFormat
 
+	dim sisteDatoGammelTariff
+	
+	sisteDatoGammelTariff = rpt.Fields("sisteDatoGammelTariff").Value
+
+	
+
+	dim a 
+	set a = rpt.Sections("GroupFooter1").Controls
+	dim p
+	dim i 
+	dim b
+	on error resume next
+	for i = 0 to ( a.Count - 1 )
+		set b = a.item(i)
+		p = instr(1,b.name, "Rich", 1 )
+		if not isnull(p) then
+			if p > 0 then
+				call b.replacefield("sisteDatoGammelTariff",sisteDatoGammelTariff)				
+			end if
+		end if	
+	next 
+
 End Sub
 Function sflong(v)
 		Dim rv
@@ -641,7 +659,7 @@ End Function]]></Script>
 	>
 	</Section>
 	<Section Type="GroupFooter" Name="GroupFooter1"
-		Height="4260"
+		Height="5205"
 		NewPage="2"
 		KeepTogether="-1"
 	>
@@ -651,7 +669,7 @@ End Function]]></Script>
 		Left="0"
 		Top="0"
 		Width="9780"
-		Height="850"
+		Height="855"
 		BackStyle="1"
 		BackColor="14737632"
 		LineColor="14737632"
@@ -660,7 +678,7 @@ End Function]]></Script>
 		<Control 
 		Type="AR.Label"
 		Name="Label11"
-		Left="1701"
+		Left="1559"
 		Top="283"
 		Width="1417"
 		Height="284"
@@ -673,10 +691,10 @@ End Function]]></Script>
 		Type="AR.Field"
 		Name="Field89"
 		DataField="fraDatoTariff"
-		Left="3118"
-		Top="283"
-		Width="1984"
-		Height="284"
+		Left="3120"
+		Top="285"
+		Width="1980"
+		Height="285"
 		Text="fraDatoTariff"
 		ClassName="Normal"
 		Style="font-weight: bold; "
@@ -704,36 +722,14 @@ End Function]]></Script>
 		Type="AR.Field"
 		Name="Field90"
 		DataField="totatlprisTariff"
-		Left="5244"
-		Top="283"
-		Width="3827"
-		Height="284"
+		Left="5250"
+		Top="285"
+		Width="3825"
+		Height="285"
 		Text="totatlprisTariff"
 		OutputFormat="#,##0.00"
 		ClassName="Normal"
 		Style="font-weight: bold; text-align: right; "
-		>
-		</Control>
-		<Control 
-		Type="AR.Line"
-		Name="Line3"
-		X1="283"
-		Y1="3543"
-		X2="4252"
-		Y2="3543"
-		>
-		</Control>
-		<Control 
-		Type="AR.Field"
-		Name="Field91"
-		DataField="name"
-		Left="425"
-		Top="3543"
-		Width="3685"
-		Height="284"
-		Text="name"
-		ClassName="Normal"
-		Style="text-align: center; "
 		>
 		</Control>
 		<Control 
@@ -749,24 +745,81 @@ End Function]]></Script>
 		>
 		</Control>
 		<Control 
+		Type="AR.RTF"
+		Name="RichEdit1"
+		Left="142"
+		Top="1134"
+		Width="9496"
+		Height="2551"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[42020000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C6663686172736574302040417269616C20556E69636F6465204D533B7D7B5C66315C666E696C5C6663686172736574302054696D6573204E65772052
+			6F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C66305C66733234204C656965206672612062657374696C6C696E672074696C205B2173
+			697374654461746F47616D6D656C5461726966665D2020626C69722066616B74757265727420705C276535206567656E2066616B747572612E5C7061720D0A5C
+			7061720D0A44657474652074696C6C6567676574206861722073616D6D65206B6F6E7472616B747374696420736F6D206C6569656B6F6E7472616B74656E2C20
+			6F67207265676C657220666F72206F7070736967656C736520665C2766386C6765722061762064656E6E652E2056656E6E6C696773742062656B726566742061
+			74206F76656E73745C276535656E646520657220617674616C7420766564205C27653520646174657265206F67207369676E65726520646574746520646F6B75
+			6D656E746574206F672072657475726E657265206465742074696C3A204C656965626F6C696720466F7276616C746E696E672041532C2050422034372C203034
+			3130204F534C4F205C7061720D0A656C6C65722070722E20652D706F73743A205C62206F6B6F6E6F6D69406C6569652D626F6C69672E6E6F5C66315C66733230
+			5C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field100"
+		DataField="sisteDatoGammelTariff"
+		Left="3260"
+		Top="709"
+		Width="1984"
+		Height="283"
+		Visible="0"
+		Text="sisteDatoGammelTariff"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field91"
+		DataField="name"
+		Left="283"
+		Top="4819"
+		Width="3686"
+		Height="283"
+		Text="name"
+		ClassName="Normal"
+		Style="text-align: center; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line3"
+		X1="142"
+		Y1="4819"
+		X2="4110"
+		Y2="4819"
+		>
+		</Control>
+		<Control 
 		Type="AR.Line"
 		Name="Line4"
 		X1="5102"
-		Y1="3543"
+		Y1="4819"
 		X2="9071"
-		Y2="3543"
+		Y2="4819"
 		>
 		</Control>
 		<Control 
 		Type="AR.Label"
 		Name="Label15"
 		Left="5386"
-		Top="3543"
+		Top="4819"
 		Width="3401"
-		Height="284"
+		Height="283"
 		Caption="Sted / dato"
 		ClassName="Normal"
-		Style="text-align: center; "
+		Style="text-align: center; vertical-align: bottom; "
 		>
 		</Control>
 <Script>
@@ -784,15 +837,15 @@ Function sfcurr(v)
 End Function]]></Script>
 	</Section>
 	<Section Type="PageFooter" Name="PageFooter"
-		Height="330"
+		Height="195"
 	>
 		<Control 
 		Type="AR.Label"
 		Name="Label2"
 		Left="0"
 		Top="0"
-		Width="1276"
-		Height="283"
+		Width="1275"
+		Height="285"
 		Caption="Rapportdato:"
 		ClassName="Normal"
 		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: left; "
@@ -802,10 +855,10 @@ End Function]]></Script>
 		Type="AR.Field"
 		Name="Field4"
 		DataField="= Now"
-		Left="1276"
+		Left="1275"
 		Top="0"
-		Width="2267"
-		Height="283"
+		Width="2265"
+		Height="285"
 		Text="Dato"
 		ClassName="Normal"
 		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: left; "
@@ -814,10 +867,10 @@ End Function]]></Script>
 		<Control 
 		Type="AR.Label"
 		Name="Label3"
-		Left="3543"
+		Left="3540"
 		Top="0"
-		Width="1276"
-		Height="283"
+		Width="1275"
+		Height="285"
 		Caption="Utskriftsansvarlig:"
 		ClassName="Normal"
 		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: left; "
@@ -827,10 +880,10 @@ End Function]]></Script>
 		Type="AR.Field"
 		Name="Field5"
 		DataField="User_name"
-		Left="4819"
+		Left="4815"
 		Top="0"
-		Width="2268"
-		Height="283"
+		Width="2265"
+		Height="285"
 		Text="User_name"
 		ClassName="Normal"
 		Style="text-align: left; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
@@ -839,10 +892,10 @@ End Function]]></Script>
 		<Control 
 		Type="AR.Label"
 		Name="Label8"
-		Left="8504"
+		Left="8505"
 		Top="0"
-		Width="425"
-		Height="283"
+		Width="420"
+		Height="285"
 		Caption="Side:"
 		ClassName="Normal"
 		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: left; "
@@ -852,10 +905,10 @@ End Function]]></Script>
 		Type="AR.Field"
 		Name="Field65"
 		DataField="= Now"
-		Left="8929"
+		Left="8925"
 		Top="0"
-		Width="709"
-		Height="283"
+		Width="720"
+		Height="285"
 		Text="Side1"
 		SummaryType="4"
 		SummaryFunc="0"
