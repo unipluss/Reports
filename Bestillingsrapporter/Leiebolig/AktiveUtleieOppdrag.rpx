@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{AAEAA0D8-F196-40C2-9C30-177A1285B387}" GUIDREP="{A2E7E38F-B86F-48A3-B08B-7BD4D178955C}" 
+	GUIDLIB="{B7725948-F9FE-47D0-BCF3-A46C83B5B1CA}" GUIDREP="{7A87939A-DAC6-454A-8D30-E899272052C7}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
 		740066000000"
 	PrintWidth="15375"
@@ -24,6 +24,7 @@ if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
 
 sql = sql & " select "
 sql = sql & " b.Objekt_id,"
+sql = sql & " b.rom_nummer,"
 sql = sql & " n.name as oppdragsgiver, "
 sql = sql & " O.oppdragsnr as oppdragsnr, "
 sql = sql & " O.id,"
@@ -31,7 +32,8 @@ sql = sql & " bolei.Heading as overskrift,  "
 sql = sql & " ANS.navn as UtleieKonsulent,  "
 sql = sql & " ANS2.navn as Selger,  "
 sql = sql & " bolei.FraDato as datoAnnonsert,"
-sql = sql & " (select max(isnull(Planlagt_utflytting, Kontrakt_til)) from e..t_kontraktsdata where objekt= b.objekt_id and statusId <> 1005) as ledigFra, "
+sql = sql & " bolei.LeieFra as ledigFra,"
+sql = sql & " (select max(isnull(Planlagt_utflytting, Kontrakt_til)) from e..t_kontraktsdata where objekt= b.objekt_id and statusId <> 1005) as ledigFraOld, "
 'Ny visningsdato:
 sql = sql & " (select Min (v1.visningsdato) from e..t_visning v1 where v1.boligId  = b.Objekt_id and v1.visningsdato > GETDATE()) as nyVisning,  " 
 'Siste (forrige) visningsdato:
@@ -226,11 +228,11 @@ End Sub
 		<Control 
 		Type="AR.Label"
 		Name="Label39"
-		Left="12345"
+		Left="12540"
 		Top="450"
-		Width="855"
+		Width="705"
 		Height="495"
-		Caption="Ant visn (historikk)"
+		Caption="Ant visn (hist.)"
 		ClassName="Normal"
 		Style="text-align: center; "
 		>
@@ -238,7 +240,7 @@ End Sub
 		<Control 
 		Type="AR.Label"
 		Name="Label40"
-		Left="13260"
+		Left="13320"
 		Top="450"
 		Width="510"
 		Height="495"
@@ -325,11 +327,23 @@ End Sub
 		<Control 
 		Type="AR.Label"
 		Name="Label44"
-		Left="8655"
+		Left="8355"
 		Top="465"
 		Width="1080"
 		Height="285"
 		Caption="Ledig fra"
+		ClassName="Normal"
+		Style="text-align: center; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label45"
+		Left="9495"
+		Top="450"
+		Width="651"
+		Height="495"
+		Caption="Romnr"
 		ClassName="Normal"
 		Style="text-align: center; "
 		>
@@ -426,7 +440,7 @@ End Sub
 		Type="AR.Field"
 		Name="Field_Adresse"
 		DataField="Adresse"
-		Left="10245"
+		Left="10440"
 		Top="0"
 		Width="2100"
 		Height="195"
@@ -440,9 +454,9 @@ End Sub
 		Type="AR.Field"
 		Name="Field_antallVisninger"
 		DataField="antallVisninger"
-		Left="12450"
+		Left="12645"
 		Top="0"
-		Width="750"
+		Width="600"
 		Height="195"
 		Text="antallVisninger"
 		Multiline="0"
@@ -454,7 +468,7 @@ End Sub
 		Type="AR.Field"
 		Name="Field_antallRom"
 		DataField="antallRom"
-		Left="13350"
+		Left="13410"
 		Top="0"
 		Width="450"
 		Height="195"
@@ -496,11 +510,25 @@ End Sub
 		Type="AR.Field"
 		Name="Field9"
 		DataField="ledigFra"
-		Left="8805"
+		Left="8460"
 		Top="15"
 		Width="915"
 		Height="195"
 		Text="ledigFra"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		DataField="rom_nummer"
+		Left="9525"
+		Top="0"
+		Width="660"
+		Height="195"
+		Text="romnr"
 		Multiline="0"
 		ClassName="Normal"
 		Style="font-family: &apos;Arial&apos;; ddo-char-set: 1; font-size: 8pt; "
