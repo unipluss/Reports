@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{49DFA5F8-C8F2-45E2-8C20-1C06AD3BF15E}" GUIDREP="{BE4FC67F-7390-423D-83EB-4C28BB260CBD}" 
+	GUIDLIB="{EF8BD2CE-9770-44A7-8898-C1B91147EB6F}" GUIDREP="{0B517795-A82E-401D-BB44-8A1D3EF0FF1A}" 
 	LICENSE="10000000"
 	PrintWidth="9720"
 	DocumentName="ActiveReports Document"
@@ -68,8 +68,8 @@ sub onDatainitialize
 		sql = sql & "  /**/ huav.EierNr,huav.InnbetalingDennePerioden, huav.Id,huav.Aar aar,huav.Jobnr,(huav.husleie *-1) as leiepris,"
 		sql = sql & " /**/ (select isnull(sum(nettoUtbetalt),0) from e..t_husleieAvregning where UtbetaltAar = " & aar &" and UtbetaltMnd = " & md & " and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID) as nettoUtbetalt,"
 		sql = sql & " /**/ (select sum(provisjon) from e..t_husleieAvregning where UtbetaltAar = " & aar &" and UtbetaltMnd = " & md & " and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID and abs(HusleieBetalt) = 1) as provisjon,"
-		sql = sql & " /**/ (select isnull((sum(husleie) * -1),0) from e..t_husleieAvregning where UtbetaltAar = " & aar &" and UtbetaltMnd =  " & md & "  and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID and abs(HusleieBetalt) = 1) as husleie,"
-		sql = sql & " /**/ (select isnull(sum(isnull(husleie,0)) * -1,0) from e..t_husleieAvregning where UtbetaltAar = " & aar &" and UtbetaltMnd = " & md & "and EierNr = huAv.EierNr ) as totalHusleie," 
+		sql = sql & " /**/ (select isnull((sum(husleie) * -1),0) from e..t_husleieAvregning where UtbetaltAar = " & aar &" and UtbetaltMnd =  " & md & "  and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID and abs(HusleieBetalt) = 1) as husleie,"				
+		sql = sql & " /**/ (select isnull(sum(isnull(husleie,0)) * -1,0) from e..t_husleieAvregning where ((UtbetaltAar = " & aar &" and UtbetaltMnd = " & md & " and isnull(status,0)>0 ) or   ( isnull(UtbetaltAar,0) = 0 and isnull(UtbetaltMnd,0) = 0 and ISNULL(status,0) in (2, 3) and Mnd = " & md & "  and Aar = " & aar &" )) and EierNr = huAv.EierNr ) as totalHusleie," 
 		sql = sql & " /**/ (select isnull(sum(isnull(provisjon,0))* -1,0) from e..t_husleieAvregning where UtbetaltAar = " & aar &" and UtbetaltMnd = " & md & "and EierNr = huAv.EierNr ) as SumForvHonorar ,"
 		sql = sql & " /**/ (select isnull(sum (isnull(EkstraKostnadPris,0)),0) from e..t_logHusleieAvregningEkstraKostnader where EierId = huAv.EierNr and JobNr = huav.Jobnr and (EkstraKostnadPris < 0 and isnull(EkstraKostnadTypeId,1) = 1)) as SumAndreTrekkKostnader,"
 		sql = sql & " /**/ (select isnull(sum (isnull(EkstraKostnadPris,0)),0) from e..t_logHusleieAvregningEkstraKostnader where EierId = huAv.EierNr and JobNr = huav.Jobnr and (EkstraKostnadPris > 0 or isnull(EkstraKostnadTypeId,0) = 4)) as sumAndreInntekter,"
