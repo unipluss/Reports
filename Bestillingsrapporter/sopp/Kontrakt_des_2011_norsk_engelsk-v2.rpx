@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{B4C8FC6F-EAA9-4C66-B1C2-A9F024C93789}" GUIDREP="{D8F49C79-68B8-4CF1-A83F-EB083E92CF9C}" 
+	GUIDLIB="{00000000-0000-0000-0000-000000000000}" GUIDREP="{00000000-0000-0000-0000-000000000000}" 
 	LICENSE="10000000"
 	PrintWidth="10770"
 	DocumentName="ActiveReports Document"
+	TOCWidth="1800"
 	ScriptLang="VBScript"
 >
 <Watermark
@@ -1097,7 +1098,6 @@ End Sub
 		Width="9960"
 		Height="2550"
 		BackColor="16777215"
-		BulletIndet="360"
 		>
 		<Data><![CDATA[88030000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
 			6E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C66305C667332305C2761
@@ -1294,7 +1294,6 @@ End Sub
 		Width="9960"
 		Height="3540"
 		BackColor="16777215"
-		BulletIndet="360"
 		>
 		<Data><![CDATA[02050000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
 			6E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C66305C6673323020204C
@@ -1399,9 +1398,9 @@ End Sub
 <Script>
 <![CDATA[Sub OnFormat
 '1
-	dim kontraktfra  ' fra kontrakt_fra
-	dim kontrakttil  ' fra kontrakt_til
-	dim utleiernavn  ' skrives inn for hver enkelt
+	dim kontraktfra ' fra kontrakt_fra
+	dim kontrakttil ' fra kontrakt_til
+	dim utleiernavn ' skrives inn for hver enkelt
 	dim returadresse ' skrives inn for hver enkelt
 	dim navn 		' navn
 	dim omrade		' omrade
@@ -1418,13 +1417,13 @@ End Sub
 	dim rom		' rom_nummer
 	dim objekt_adresse ' objekt_adresse
 '20
-	dim objekt_postnr  ' objekt_postnummer
+	dim objekt_postnr ' objekt_postnummer
 	dim objekt_poststed ' objekt_poststed
 	dim etasje		' etasjenavn
 	dim bygg		' byggnavn
 	dim pris		' pris
 	dim lagetdato 	' lagetdato
-	dim webside	'  skrives inn for hver enkelt, dette er hjemmesiden til utleier
+	dim webside	' skrives inn for hver enkelt, dette er hjemmesiden til utleier
 	dim benevning ' dette er forkortelsen for utleierens navn/ eller annen benevning av utleier. f.eks SiB, utleier, OAS, osv.
 	dim reglement ' beskivelse av de dokumenter etc. med regelement som leietaker skal vedta bindende.
 	dim signatur ' beskrivelse person som skriver under, eks: Direktør for Studentboligene, Studentsamskipnaden i Bergen
@@ -1459,9 +1458,9 @@ End Sub
 	land = rpt.fields("country").Value
 	oppgang = rpt.fields("oppgang").Value
 	rom = rpt.fields("rom_nummer").Value
-	objekt_adresse  = rpt.fields("objekt_adresse").Value
-	objekt_postnr   = rpt.fields("objekt_postnummer").Value
-	objekt_poststed  = rpt.fields("objekt_poststed").Value
+	objekt_adresse = rpt.fields("objekt_adresse").Value
+	objekt_postnr = rpt.fields("objekt_postnummer").Value
+	objekt_poststed = rpt.fields("objekt_poststed").Value
 	etasje = rpt.fields("etasje_navn").Value
 	bygg	 = rpt.fields("byggnavn").Value
 	pris	 = rpt.fields("pris").Value
