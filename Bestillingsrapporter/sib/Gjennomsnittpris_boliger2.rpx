@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{5D44D536-6CE8-4AF3-83BC-890704BA8DA2}" GUIDREP="{2CAA294E-6C0C-4476-BAA9-4917B1CAD261}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="9150"
+	DocumentName="Gjennomsnittspris"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[Option Explicit
+
+sub onDatainitialize
+	dim dato 
+	dim sql
+	dim omradeinput 
+	dim boliginput
+  'm_data.debugg = true
+  
+  	'INPUT MENY:
+	m_data.AddInputMacro "{omr}","Område","0",,7,"select boligomrade_id, omrade from e..t_boligomraade union select '0','<Alle områder>' order by omrade " 
+    m_data.AddInputMacro "{botyp}","Boligtype","0",,7,"select boligtype_id, boligtype from e..t_boligtype union select '0','<Alle boligtyper>' order by boligtype " 	
+    m_data.AddInputMacro "{dato}", "Dato", cstr(dato), "date"
+    
+		
+	if not m_data.ShowInputDialog("Gjennomsnittspris") then exit sub
+	omradeinput = m_data.GetMacroValue("{omr}")
+	boliginput = m_data.GetMacroValue("{botyp}")
+	'SQL KODE:
+	sql ="Select  B.Objekt_id Objekt_id , BT.Boligtype Boligtype,TL.Tariffnr tnr, TL.tekst tekst, TL.Pris tariffpris, BM.Omrade Omrade" 
+	
+	sql=sql & " from c..TARIFFLINJE TL "
+	sql=sql & " inner join c..Tariff T on TL.tariffnr=T.tariffnr "
+	sql=sql & " inner join e..t_boligobjekt B on T.Tariffnr=B.PrisMatrise_ID "
+	sql=sql & " inner join e..t_boligomraade BM on B.Boligomrade_id=BM.Boligomrade_id "
+	sql=sql & " inner join e..t_boligtype BT on B.Boligtype_id=BT.Boligtype_id "	
+
+
+	sql=sql & " where isnull(B.innaktiv,0)=0 and "
+	if omradeinput <> "0" then
+		sql=sql & " B.Boligomrade_id in ({omr}) and"	
+	end if
+		if boliginput <> "0" then
+		sql=sql & " BT.Boligtype_id in ({botyp}) and"
+		'Skjuler alt i Groupfooter1 hvis man ikke velger alle boligtypene, slik at totalen ikke blir feil på området.
+		rpt.Sections("GroupFooter2").Controls("Field15").Visible = False  '
+		rpt.Sections("GroupFooter2").Controls("Field11").Visible = False 
+		rpt.Sections("GroupFooter2").Controls("Field9").Visible = False 
+		rpt.Sections("GroupFooter2").Controls("Field10").Visible = False 
+		rpt.Sections("GroupFooter2").Controls("Label8").Visible = False 
+		rpt.Sections("GroupFooter2").Controls("Label9").Visible = False 
+	end if
+	sql=sql & " '{dato}' between TL.Fra_dato and TL.Til_dato"
+	sql=sql & " and TL.tekst not like '%A-Konto%' and tl.varenr like '1' "	
+	sql=sql & " and TL.Pris > 0 "	
+	sql=sql & " group by B.Objekt_id, BT.Boligtype,TL.Tariffnr, TL.tekst, TL.Pris, BM.Omrade"
+	sql=sql & " order by BM.omrade, BT.Boligtype"
+
+	
+       
+
+	'SENDER DATA TIL RAPPORT
+	m_data.SqlString = sql '& " {sort}"
+	m_data.setupfields rpt
+
+end sub
+
+Sub OnReportStart
+
+End Sub
+
+
+]]></Script>
+<PageSettings	LeftMargin="1000"
+	RightMargin="1000"
+	TopMargin="800"
+	BottomMargin="800"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1470"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="0"
+		Top="0"
+		Width="4260"
+		Height="420"
+		Caption="Gjennomsnittspris Boligtyper"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 16pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		DataField="*y..Bedrift.navn"
+		Left="0"
+		Top="495"
+		Width="6240"
+		Height="435"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Times New Roman&apos;; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="*y..Bedrift.arstall"
+		Left="7143"
+		Top="0"
+		Width="1984"
+		Height="425"
+		Text="*y..Bedrift.arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="= &quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="7426"
+		Top="283"
+		Width="1701"
+		Height="426"
+		Text="Sidenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= now"
+		Left="7426"
+		Top="567"
+		Width="1701"
+		Height="425"
+		Text="Dato"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="User_name"
+		Left="7143"
+		Top="709"
+		Width="1984"
+		Height="425"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="4680"
+		Top="45"
+		Width="2115"
+		Height="915"
+		Visible="0"
+		Caption="Laget av Øystein V. 15.06.2011 og senere korrigert minst av erik etc."
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit1"
+		Left="135"
+		Top="990"
+		Width="6690"
+		Height="465"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[15010000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C66305C6673323020412D
+			6B6F6E746F20657220696B6B652074617474206D656420692062657265676E696E67656E2E204B756E20616B7469766520626F6C69676F626A656B742E5C7061
+			720D0A4B756E20626F6C69676F626A656B74206D656420616B74697620707269736B6F64652E204B756E20626F6C69676F626A656B74206D6564207072697320
+			73745C27663872726520656E6E206E756C6C2E5C7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="0"
+		GroupKeepTogether="2"
+		KeepTogether="-1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="1050"
+		DataField="omrade"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="omrade"
+		Left="0"
+		Top="567"
+		Width="9071"
+		Height="425"
+		Text="omrade"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line4"
+		X1="5811"
+		Y1="992"
+		X2="0"
+		Y2="992"
+		LineWeight="4"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader3"
+		Height="0"
+		DataField="Boligtype"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label5"
+		Left="7370"
+		Top="0"
+		Width="992"
+		Height="283"
+		Visible="0"
+		Caption="Pris"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; font-style: italic; "
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Visible="0"
+		Height="30"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field6"
+		DataField="tnr"
+		Left="122"
+		Top="0"
+		Width="992"
+		Height="283"
+		Text="tariffnr"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; font-size: 12pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="tekst"
+		Left="1701"
+		Top="0"
+		Width="5811"
+		Height="283"
+		Text="tekst"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; font-size: 12pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field8"
+		DataField="Tariffpris"
+		Left="10772"
+		Top="0"
+		Width="1700"
+		Height="283"
+		Text="Pris"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; font-size: 12pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter3"
+		Height="600"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field16"
+		DataField="TariffPris"
+		Left="5625"
+		Top="300"
+		Width="1620"
+		Height="285"
+		Text="TotalPris"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader3"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; font-weight: bold; font-size: 12pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field17"
+		DataField="TariffPris"
+		Left="7350"
+		Top="315"
+		Width="1515"
+		Height="285"
+		Text="Snitt"
+		OutputFormat="#,##0.00"
+		SummaryType="3"
+		SummaryFunc="1"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader3"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; font-weight: bold; font-size: 12pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field18"
+		DataField="tnr"
+		Left="3915"
+		Top="285"
+		Width="1335"
+		Height="285"
+		Text="tariffnr antall"
+		SummaryType="3"
+		SummaryFunc="2"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader3"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; font-weight: bold; font-size: 12pt; font-style: italic; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="boligtype"
+		Left="0"
+		Top="105"
+		Width="3495"
+		Height="255"
+		Text="boligtype"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="0"
+		Y1="0"
+		X2="9090"
+		Y2="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="3915"
+		Top="0"
+		Width="780"
+		Height="285"
+		Caption="Antall:"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Times New Roman&apos;; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label7"
+		Left="5625"
+		Top="30"
+		Width="1695"
+		Height="285"
+		Caption="Totalpris"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label6"
+		Left="7305"
+		Top="30"
+		Width="915"
+		Height="285"
+		Caption="Snittpris"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="795"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="TariffPris"
+		Left="5970"
+		Top="510"
+		Width="1500"
+		Height="285"
+		Text="TotalPris"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader2"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-weight: bold; font-size: 12pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		DataField="TariffPris"
+		Left="7440"
+		Top="510"
+		Width="1320"
+		Height="285"
+		Text="Snitt"
+		OutputFormat="#,##0.00"
+		SummaryType="3"
+		SummaryFunc="1"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader2"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-weight: bold; font-size: 12pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="9090"
+		Y1="140"
+		X2="0"
+		Y2="140"
+		LineWeight="4"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field11"
+		DataField="tnr"
+		Left="3975"
+		Top="195"
+		Width="1305"
+		Height="285"
+		Text="tariffnr antall"
+		SummaryType="3"
+		SummaryFunc="2"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader2"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; font-weight: bold; font-size: 12pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field15"
+		Left="15"
+		Top="195"
+		Width="3345"
+		Height="285"
+		Text="Antall boligobjekt i hele området:"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label8"
+		Left="7440"
+		Top="225"
+		Width="945"
+		Height="285"
+		Caption="Snittpris"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="5970"
+		Top="225"
+		Width="1485"
+		Height="285"
+		Caption="Totalpris"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="1590"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field22"
+		DataField="TariffPris"
+		Left="5953"
+		Top="992"
+		Width="1559"
+		Height="284"
+		Text="TotalPris"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-weight: bold; font-size: 12pt; font-style: italic; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field23"
+		DataField="TariffPris"
+		Left="7370"
+		Top="992"
+		Width="1417"
+		Height="284"
+		Text="Snitt"
+		OutputFormat="#,##0.00"
+		SummaryType="3"
+		SummaryFunc="1"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-weight: bold; font-size: 12pt; font-style: italic; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line5"
+		X1="9071"
+		Y1="283"
+		X2="0"
+		Y2="283"
+		LineColor="255"
+		LineWeight="10"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		DataField="tnr"
+		Left="2916"
+		Top="634"
+		Width="1418"
+		Height="283"
+		Text="tariffnr antall"
+		SummaryType="3"
+		SummaryFunc="2"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; ddo-char-set: 0; font-weight: bold; font-size: 12pt; font-style: italic; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field25"
+		Left="142"
+		Top="425"
+		Width="2693"
+		Height="709"
+		Text="Totalt antall boligobjekt i valgte områder/boligtyper:"
+		ClassName="Normal"
+		Style="font-weight: bold; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label14"
+		Left="7365"
+		Top="570"
+		Width="1260"
+		Height="300"
+		Caption="Snittpris"
+		ClassName="Normal"
+		Style="color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label15"
+		Left="5953"
+		Top="567"
+		Width="1559"
+		Height="425"
+		Caption="Totalpris"
+		ClassName="Normal"
+		Style="color: rgb(0,0,0); "
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
