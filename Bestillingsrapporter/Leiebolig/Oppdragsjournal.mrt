@@ -96,7 +96,7 @@
         <SqlCommand>declare @dt varchar(10)
 set @dt = '01.'+convert(varchar(2),{Mnd})+'.'+convert(varchar(4),{Aar})
 set dateformat dmy
-select oa.Id, oa.Oppdragsnr, FORMAT(oa.startdato, 'dd.MM.yyyy')as startdato, na.Name,
+select oa.Id, oa.Oppdragsnr, convert(varchar(20), oa.startdato, 104)as startdato, na.Name,
 	bo.Objekt_adresse + ' ' + convert(varchar(8),bo.Objekt_postnummer) + ' '+ bo.Objekt_poststed+ ', '+bo.BoligNummer+ ', '+ convert(varchar(8),byg.gnr)+', '+ convert(varchar(8),byg.bnr) as adresse,
 	byg.kommuneNr+ ' '+ ko.Kommunenavn as kommune,
 	typ.BoligType, DATEDIFF(DAY, oa.startdato, oa.sluttdato) as varighet, 
@@ -682,10 +682,10 @@ and ans.Ansatte_id in({Ansatt})</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/10/2015 8:40:53 AM</ReportChanged>
+  <ReportChanged>12/10/2015 9:01:09 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\uni\Oppdragsjournal2.mrt</ReportFile>
-  <ReportGuid>054f15fe68ae409490dd73eff2ebdd7f</ReportGuid>
+  <ReportFile>C:\uni\Oppdragsjournal.mrt</ReportFile>
+  <ReportGuid>c8bdb1e80f2f4d0ab377cda023c90dad</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2012.1.1300</ReportVersion>
