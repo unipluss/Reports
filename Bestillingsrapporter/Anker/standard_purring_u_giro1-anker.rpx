@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{7DA2BE94-ED38-4DA6-A25A-66B540A20D4D}" GUIDREP="{4EEA35B6-09D8-4417-92A7-1222782CE27A}" 
+	GUIDLIB="{EC585E4E-AB5D-464D-919C-B2CF96FDE773}" GUIDREP="{3C860C56-87A3-4777-8FB3-F1418E1EADB7}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
 		740066000000"
 	PrintWidth="10230"
@@ -31,10 +31,10 @@ Sub OnDataInitialize
 	m_data.AddInputMacro "","",""
 	m_data.addsortparam "{sort}","Sortering ","Kundenummer og fakturanr"," order by P.Kundenr, P.Fakturanr"
 	m_data.addsortparam "{sort}","","Fakturanr og kundenummer"," order by P.Fakturanr,  P.Kundenr"
-	m_data.addsortparam "{sort}","","Postnr, adresse1, adresse2 og kundenummer"," order by  KPostnr, KAdr, KAdr2, P.Kundenr"
-	m_data.addsortparam "{sort}","","Land, postnr, adresse og kundenummer"," order by KLand, KPostnr, KAdr, KAdr2, P.Kundenr"
-	m_data.addsortparam "{sort}","","Adresse1, adresse2 og kundenummer"," order by KAdr, KAdr2, P.Kundenr"
-	m_data.addsortparam "{sort}","","Adresse2, adresse1 og kundenummer"," order by  KAdr2, KAdr, P.Kundenr"
+	m_data.addsortparam "{sort}","","Postnr, adresse1, adresse2 og kundenummer"," order by  f.postnr, f.adresse, f.adresse2, P.Kundenr"
+	m_data.addsortparam "{sort}","","Land, postnr, adresse og kundenummer"," order by f.land, f.postnr, f.adresse, f.adresse2, P.Kundenr"
+	m_data.addsortparam "{sort}","","Adresse1, adresse2 og kundenummer"," order by f.adresse, f.adresse2, P.Kundenr"
+	m_data.addsortparam "{sort}","","Adresse2, adresse1 og kundenummer"," order by f.adresse2, f.adresse, P.Kundenr"
 	
 	
 
