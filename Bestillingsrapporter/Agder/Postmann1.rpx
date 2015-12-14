@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{C3D9DDB9-F5F3-4171-A0AF-50570E8D12B5}" GUIDREP="{DF5A4838-1D3E-4E89-8ACD-ED99D00ED507}" 
+	LICENSE="10000000"
+	PrintWidth="10215"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[sub onDatainitialize
+  	dim sql
+	'm_data.debugg=true
+	m_data.AddInputMacro "{OM}","Boligområde ","0",,7,"Select boligomrade_id, omrade from e..t_boligomraade union select '0','Alle' order by boligomrade_id"
+	m_data.AddInputMacro "","",""
+	m_data.addsortparam "{sort}","Sortering ","Bygg og romnummer","order by omrade,BG.navn,rom_nummer"
+	m_data.addsortparam "{sort}","","Bygg og beboers navn","order by omrade,BG.navn,v.name collate Danish_Norwegian_CI_AI ,rom_nummer"
+	
+	
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	typpe = m_data.GetMacroValue("{OM}")
+	sql="select omrade, BG.navn, oppgang as oppgang_navn, rom_nummer, name, V.kundenummer, B.Telefon_nummer as telefon, kunde.SAMB_NAVN as samboer, " 
+	sql=sql & " kunde.personnummer, B.objekt_adresse, B.objekt_postnummer, B.objekt_poststed, kunde.kjonn, " 
+	sql=sql & " (select top 1 p.Phone  from c..c_Phone p where p.NameLink = kunde.NameID and phonetype = 150102) as mobil " 
+	sql=sql & " from (((e..v_name as V inner join e..t_kontraktsdata as K on v.Kundenummer=k.kundenummer) " 
+	sql=sql & " inner join e..t_boligobjekt as B on k.objekt=b.objekt_id)" 
+	sql=sql & " inner join e..t_boligomraade as O on B.boligomrade_id=O.Boligomrade_id)" 
+	sql=sql & " inner join e..t_bygg as BG on B.Bygg_id=BG.id "
+	sql=sql & " inner join e..t_kunde as kunde on kunde.Kundenummer = v.Kundenummer "
+	sql=sql & " where ((k.statusId=1003 or k.statusId=1006)) "
+'Sjekke om "alle" er valgt. I så fall så dropper vi den siste "and"
+	if typpe<>"0" then
+		sql=Sql & " and o.boligomrade_id in({OM})"
+	end if
+      m_data.SqlString = sql & " {sort}"
+	m_data.setupfields rpt
+  end sub
+
+Sub OnReportStart
+
+End Sub
+
+Sub OnFetchData(eof)
+	rpt.fields("omrade").value=rpt.fields("omrade").value & ", " & rpt.fields("navn").value
+End Sub
+
+
+]]></Script>
+<PageSettings	LeftMargin="720"
+	RightMargin="720"
+	TopMargin="720"
+	BottomMargin="720"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="915"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="0"
+		Top="0"
+		Width="8000"
+		Height="360"
+		Caption="Beboerliste"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 16pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		DataField="*y..Bedrift.navn"
+		Left="0"
+		Top="425"
+		Width="6236"
+		Height="284"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 12pt; font-family: &apos;Arial&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="*y..Bedrift.arstall"
+		Left="8079"
+		Top="0"
+		Width="1984"
+		Height="360"
+		Text="*y..Bedrift.arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Arial&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="= &quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="8362"
+		Top="283"
+		Width="1701"
+		Height="360"
+		Text="Sidenr"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Arial&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= Now"
+		Left="8362"
+		Top="567"
+		Width="1701"
+		Height="360"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8.5pt; text-align: right; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="570"
+		DataField="omrade"
+		RepeatStyle="1"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape1"
+		Left="0"
+		Top="283"
+		Width="9921"
+		Height="284"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field6"
+		DataField="omrade"
+		Left="0"
+		Top="0"
+		Width="6803"
+		Height="283"
+		Text="omrade"
+		ClassName="Normal"
+		Style="font-size: 12pt; font-family: &apos;Arial Black&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="navn"
+		Left="6803"
+		Top="0"
+		Width="3118"
+		Height="283"
+		Visible="0"
+		Text="navn"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label3"
+		Left="142"
+		Top="283"
+		Width="850"
+		Height="284"
+		Caption="Romnr."
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-style: italic; vertical-align: middle; text-align: center; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="1276"
+		Top="283"
+		Width="4252"
+		Height="284"
+		Caption="Kunde"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-style: italic; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label8"
+		Left="5811"
+		Top="283"
+		Width="3969"
+		Height="284"
+		Caption="Samboer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-style: italic; vertical-align: middle; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="165"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="rom_nummer"
+		Left="142"
+		Top="0"
+		Width="850"
+		Height="142"
+		Text="rom_nummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; vertical-align: middle; text-align: center; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		DataField="name"
+		Left="1276"
+		Top="0"
+		Width="4252"
+		Height="142"
+		Text="name"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field15"
+		DataField="samboer"
+		Left="5811"
+		Top="0"
+		Width="3969"
+		Height="142"
+		Text="samboer "
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; ddo-char-set: 0; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="0"
+		Y1="150"
+		X2="9915"
+		Y2="150"
+		LineStyle="3"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="345"
+	>
+		<Control 
+		Type="AR.PageBreak"
+		Name="PageBreak1"
+		Left="0"
+		Top="283"
+		Width="360"
+		Height="60"
+		Visible="0"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="600"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label7"
+		Left="7087"
+		Top="142"
+		Width="1984"
+		Height="283"
+		Caption="Totalt antall beboere:"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="kundenummer"
+		Left="9071"
+		Top="142"
+		Width="1134"
+		Height="283"
+		Text="kundenummer"
+		SummaryType="1"
+		SummaryFunc="2"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
