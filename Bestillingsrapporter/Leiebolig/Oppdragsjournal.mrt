@@ -75,7 +75,7 @@
       </Bedrift>
       <Oppdrag Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Oppdrag</Alias>
-        <Columns isList="true" count="20">
+        <Columns isList="true" count="21">
           <value>Oppdragsnr,System.Int32</value>
           <value>startdato,System.String</value>
           <value>Name,System.String</value>
@@ -96,6 +96,7 @@
           <value>kortstatus,System.String</value>
           <value>kortkommune,System.String</value>
           <value>aksjenummer,System.String</value>
+          <value>eier2,System.String</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -112,7 +113,8 @@ select oa.Id, oa.Oppdragsnr, convert(varchar(20), oa.startdato, 104)as startdato
 	typ.BoligType, DATEDIFF(DAY, oa.startdato, oa.sluttdato) as varighet, 
 	convert(varchar(10),oa.statusId)+ '-'+ st.Status as status, st.Status kortstatus,
 	ans.Navn, ans.Ansatte_id, bo.seksjonsnr, bo.Objekt_adresse + ', ' + convert(varchar(8),bo.Objekt_postnummer) + ' '+ bo.Objekt_poststed kortadr
-	, byg.bnr, byg.gnr, bo.BoligNummer hnr, bo.andelsnr, bo.aksjenummer
+	, byg.bnr, byg.gnr, bo.BoligNummer hnr, bo.andelsnr, bo.aksjenummer,
+	 (select top 1 name from c..c_contacts where id=fa.MedeierKontaktId) eier2
 	from e..t_oppdragsAvtale oa
 inner join e..t_status st on oa.statusId = st.Status_id
 left join e..t_oppdragsAvtaleHarBolig harbo on oa.Id = harbo.OppdragsAvtaleId
@@ -587,8 +589,8 @@ nr</Text>
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanShrink>True</CanShrink>
-          <ClientRectangle>0,3.61,27.7,1.6</ClientRectangle>
-          <Components isList="true" count="16">
+          <ClientRectangle>0,3.61,27.7,2.09</ClientRectangle>
+          <Components isList="true" count="17">
             <Text1 Ref="36" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0,1.01,0.4</ClientRectangle>
@@ -601,6 +603,7 @@ nr</Text>
               <Text>{Oppdrag.Oppdragsnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text1>
             <Text4 Ref="37" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -614,6 +617,7 @@ nr</Text>
               <Text>{Oppdrag.startdato}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text4>
             <Text5 Ref="38" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -627,6 +631,7 @@ nr</Text>
               <Text>{Oppdrag.Name}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text5>
             <Text6 Ref="39" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -640,6 +645,7 @@ nr</Text>
               <Text>{Oppdrag.kortadr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text6>
             <Text7 Ref="40" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -653,6 +659,7 @@ nr</Text>
               <Text>{Oppdrag.kortkommune}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text7>
             <Text8 Ref="41" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -666,6 +673,7 @@ nr</Text>
               <Text>{Oppdrag.BoligType}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text8>
             <Text9 Ref="42" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -679,6 +687,7 @@ nr</Text>
               <Text>{Oppdrag.varighet}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text9>
             <Text10 Ref="43" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -692,6 +701,7 @@ nr</Text>
               <Text>{Oppdrag.kortstatus}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text10>
             <Text11 Ref="44" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -705,10 +715,11 @@ nr</Text>
               <Text>{Oppdrag.Navn}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text11>
             <SubReport1 Ref="45" type="SubReport" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.8,0.4,25.8,1.2</ClientRectangle>
+              <ClientRectangle>1.8,1.01,25.8,1.08</ClientRectangle>
               <Components isList="true" count="0" />
               <Enabled>False</Enabled>
               <Name>SubReport1</Name>
@@ -729,6 +740,7 @@ nr</Text>
               <Text>{Oppdrag.seksjonsnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text24>
             <Text30 Ref="47" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -743,6 +755,7 @@ nr</Text>
               <Text>{Oppdrag.bnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text30>
             <Text32 Ref="48" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -757,6 +770,7 @@ nr</Text>
               <Text>{Oppdrag.gnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text32>
             <Text34 Ref="49" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -771,6 +785,7 @@ nr</Text>
               <Text>{Oppdrag.hnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text34>
             <Text36 Ref="50" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -785,6 +800,7 @@ nr</Text>
               <Text>{Oppdrag.andelsnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text36>
             <Text38 Ref="51" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -799,7 +815,24 @@ nr</Text>
               <Text>{Oppdrag.aksjenummer}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
             </Text38>
+            <Text39 Ref="52" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <CanShrink>True</CanShrink>
+              <ClientRectangle>2.72,0.43,4.79,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>d78f361da31547138a68e5d076fc9e87</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text39</Name>
+              <Page isRef="9" />
+              <Parent isRef="35" />
+              <Text>{Oppdrag.eier2}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text39>
           </Components>
           <Conditions isList="true" count="0" />
           <DataRelationName isNull="true" />
@@ -822,23 +855,23 @@ nr</Text>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="52" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="53" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
-    <subReport_1 Ref="53" type="Page" isKey="true">
+    <subReport_1 Ref="54" type="Page" isKey="true">
       <Border>None;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Components isList="true" count="1">
-        <DataBand2 Ref="54" type="DataBand" isKey="true">
+        <DataBand2 Ref="55" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanBreak>True</CanBreak>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,0.4,25.8,1.2</ClientRectangle>
           <Components isList="true" count="1">
-            <Text21 Ref="55" type="Text" isKey="true">
+            <Text21 Ref="56" type="Text" isKey="true">
               <AllowHtmlTags>True</AllowHtmlTags>
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
@@ -850,8 +883,8 @@ nr</Text>
               <GrowToHeight>True</GrowToHeight>
               <Margins>0,0,0,0</Margins>
               <Name>Text21</Name>
-              <Page isRef="53" />
-              <Parent isRef="54" />
+              <Page isRef="54" />
+              <Parent isRef="55" />
               <Text>{Kommentar.tekst}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
@@ -864,8 +897,8 @@ nr</Text>
           <DataSourceName>Kommentar</DataSourceName>
           <Filters isList="true" count="0" />
           <Name>DataBand2</Name>
-          <Page isRef="53" />
-          <Parent isRef="53" />
+          <Page isRef="54" />
+          <Parent isRef="54" />
           <Sort isList="true" count="0" />
         </DataBand2>
       </Components>
@@ -875,15 +908,15 @@ nr</Text>
       <Name>subReport_1</Name>
       <Orientation>Landscape</Orientation>
       <PageHeight>27.8</PageHeight>
-      <PageWidth>29.7</PageWidth>
+      <PageWidth>27.8</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="56" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="57" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </subReport_1>
   </Pages>
-  <PrinterSettings Ref="57" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="58" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -895,10 +928,10 @@ nr</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/22/2016 3:19:16 PM</ReportChanged>
+  <ReportChanged>1/26/2016 2:39:50 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\erik\AppData\Local\Temp\Oppdragsjournal.mrt</ReportFile>
-  <ReportGuid>b410f19a6b2c4f4f9dfd8e0b9f737885</ReportGuid>
+  <ReportGuid>42643634946d44cdb6ae58ecec8a6ebe</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -927,7 +960,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="3">
-    <lightBlue Ref="58" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <lightBlue Ref="59" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[222:233:244]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -935,7 +968,7 @@ namespace Reports
       <Name>lightBlue</Name>
       <TextBrush>Black</TextBrush>
     </lightBlue>
-    <Style1 Ref="59" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="60" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[146:187:205]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -943,7 +976,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <LightGrey Ref="60" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <LightGrey Ref="61" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
