@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9DppoURfQzXiR5z4egSkf9Faz89WV7qkf3vtAHOE4w/9NHtIRl1SmP1JuMx5XDUv+WqRiUsJw6RFdCkISwDkj+FwZSnGGPOI8Fuohek9NUb0blNs</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Dr5oUQFQ4zpR5zJdgTjf9Fw+yxWX1ntRnu5CHzcsS/9NJFsRlkBOfJ4hOx5TKivwmppj00IS7xpR6AE5QDrj99w9YzIXdPx4Rl9gXcBd2bT</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -75,7 +75,7 @@
       </Bedrift>
       <Oppdrag Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Oppdrag</Alias>
-        <Columns isList="true" count="21">
+        <Columns isList="true" count="23">
           <value>Oppdragsnr,System.Int32</value>
           <value>startdato,System.String</value>
           <value>Name,System.String</value>
@@ -97,6 +97,8 @@
           <value>kortkommune,System.String</value>
           <value>aksjenummer,System.String</value>
           <value>eier2,System.String</value>
+          <value>akseptdato,System.String</value>
+          <value>kundesignertdato,System.String</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -106,15 +108,16 @@
         <SqlCommand>declare @dt varchar(10)
 set @dt = '01.'+convert(varchar(2),{Mnd})+'.'+convert(varchar(4),{Aar})
 set dateformat dmy
-select oa.Id, oa.Oppdragsnr, convert(varchar(20), oa.startdato, 104)as startdato, na.Name,
+select oa.Id, oa.Oppdragsnr, convert(varchar(20), oa.startdato, 104)as startdato, na.Name, convert(varchar(20), oa.akseptertdato, 104)as akseptdato,
 	bo.Objekt_adresse + ' ' + convert(varchar(8),bo.Objekt_postnummer) + ' '+ bo.Objekt_poststed+ ', '+bo.BoligNummer+ ', '+ convert(varchar(8),byg.gnr)+', '+ convert(varchar(8),byg.bnr) as adresse,
 	byg.kommuneNr  collate Danish_Norwegian_CI_AS + ' '+ ko.Kommunenavn  collate Danish_Norwegian_CI_AS as kommune,
 	ko.Kommunenavn kortkommune,
 	typ.BoligType, DATEDIFF(DAY, oa.startdato, oa.sluttdato) as varighet, 
-	convert(varchar(10),oa.statusId)+ '-'+ st.Status as status, st.Status kortstatus,
+	convert(varchar(10),oa.statusId)+ '-'+ st.Status as status, case when oa.statusid=19025 then 'Trukket' else st.Status end kortstatus,
 	ans.Navn, ans.Ansatte_id, bo.seksjonsnr, bo.Objekt_adresse + ', ' + convert(varchar(8),bo.Objekt_postnummer) + ' '+ bo.Objekt_poststed kortadr
 	, byg.bnr, byg.gnr, bo.BoligNummer hnr, bo.andelsnr, bo.aksjenummer,
-	 (select top 1 name from c..c_contacts where id=fa.MedeierKontaktId) eier2
+	 (select top 1 name from c..c_contacts where id=fa.MedeierKontaktId) eier2,
+	convert(varchar(20), oa.signert_dato_kunde, 104)as kundesignertdato
 	from e..t_oppdragsAvtale oa
 inner join e..t_status st on oa.statusId = st.Status_id
 left join e..t_oppdragsAvtaleHarBolig harbo on oa.Id = harbo.OppdragsAvtaleId
@@ -211,12 +214,12 @@ order by oa.oppdragsnr</SqlCommand>
     <Report isRef="0" />
     <Variables isList="true" count="8">
       <value>,Aar,År,text_x007C_sql_x003D_select_x0020_YEAR_x0028_GETDATE_x0028__x0029__x0029_,System.Int32,_x0032_015,False,False,False</value>
-      <value>,Mnd,Måned,combo_x007C_sql_x003D_select_x0020_id_x002C_kortnavn_x0020_from_x0020_m..maaneder,System.Int32,_x0034_,False,False,False</value>
+      <value>,Mnd,Måned,combo_x007C_sql_x003D_select_x0020_id_x002C_kortnavn_x0020_from_x0020_m..maaneder,System.Int32,_x0031_,False,False,False</value>
       <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031_4_x002C_16_x002C_21_x002C_22_x002C_24_x002C_27_x002C_28_x002C_29_x002C_30_x002C_31_x002C_32_x002C_6_x002C_9,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
-      <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0034_3,True,False</value>
+      <value>System,UserCountryCode,UserCountryCode,System.String,no,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0031_3,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_015,True,False</value>
     </Variables>
   </Dictionary>
@@ -353,7 +356,7 @@ order by oa.oppdragsnr</SqlCommand>
         <ColumnHeaderBand1 Ref="19" type="Stimulsoft.Report.Components.StiColumnHeaderBand" isKey="true">
           <Brush>[192:202:216]</Brush>
           <ClientRectangle>0,2.08,27.7,0.73</ClientRectangle>
-          <Components isList="true" count="15">
+          <Components isList="true" count="16">
             <Text12 Ref="20" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.08,1.01,0.59</ClientRectangle>
@@ -372,7 +375,7 @@ nummer
             </Text12>
             <Text13 Ref="21" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.08,0.19,1.6,0.48</ClientRectangle>
+              <ClientRectangle>1.08,0.11,1.38,0.56</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>914f1c2242c6466cb147d0bc6bb58145</Guid>
@@ -380,14 +383,15 @@ nummer
               <Name>Text13</Name>
               <Page isRef="9" />
               <Parent isRef="19" />
-              <Text>Startdato</Text>
+              <Text>Aksept-
+dato</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Bottom</VertAlignment>
             </Text13>
             <Text14 Ref="22" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.72,0.21,4.79,0.46</ClientRectangle>
+              <ClientRectangle>3.94,0.21,4.63,0.46</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -401,7 +405,7 @@ nummer
             </Text14>
             <Text15 Ref="23" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>7.54,0.21,5.56,0.46</ClientRectangle>
+              <ClientRectangle>8.6,0.21,5.29,0.46</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -416,7 +420,7 @@ nummer
             </Text15>
             <Text16 Ref="24" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>17.91,0.19,1.97,0.48</ClientRectangle>
+              <ClientRectangle>18.62,0.19,1.97,0.48</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -430,7 +434,7 @@ nummer
             </Text16>
             <Text17 Ref="25" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>19.92,0.19,1.8,0.48</ClientRectangle>
+              <ClientRectangle>20.69,0.19,1.74,0.48</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -444,7 +448,7 @@ nummer
             </Text17>
             <Text18 Ref="26" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>21.77,0.04,0.81,0.63</ClientRectangle>
+              <ClientRectangle>22.48,0.04,0.81,0.63</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>658ac17d8f664e709453b43d272ffda6</Guid>
@@ -460,7 +464,7 @@ het</Text>
             </Text18>
             <Text19 Ref="27" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>22.73,0.21,2.21,0.46</ClientRectangle>
+              <ClientRectangle>23.32,0.21,1.78,0.46</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -474,7 +478,7 @@ het</Text>
             </Text19>
             <Text20 Ref="28" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>25.01,0.21,2.68,0.46</ClientRectangle>
+              <ClientRectangle>25.15,0.21,2.54,0.46</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -488,7 +492,7 @@ het</Text>
             </Text20>
             <Text23 Ref="29" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>15.44,0.04,0.77,0.63</ClientRectangle>
+              <ClientRectangle>16.15,0.04,0.77,0.63</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>95ff9e552bc34910a61a47278264b91b</Guid>
@@ -504,7 +508,7 @@ onsnr</Text>
             </Text23>
             <Text25 Ref="30" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>14.73,0.21,0.65,0.46</ClientRectangle>
+              <ClientRectangle>15.44,0.21,0.65,0.46</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>a98be4da40dc4ca38de4072d65dce47b</Guid>
@@ -519,7 +523,7 @@ onsnr</Text>
             </Text25>
             <Text31 Ref="31" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>14.12,0.21,0.56,0.46</ClientRectangle>
+              <ClientRectangle>14.83,0.21,0.56,0.46</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>bdb7fdd83d8849adae411a8e53c3b2a0</Guid>
@@ -534,7 +538,7 @@ onsnr</Text>
             </Text31>
             <Text33 Ref="32" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>13.2,0.21,0.89,0.46</ClientRectangle>
+              <ClientRectangle>13.91,0.21,0.89,0.46</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>860db431bb9948babc74a6de5783c487</Guid>
@@ -549,7 +553,7 @@ onsnr</Text>
             </Text33>
             <Text35 Ref="33" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>16.29,0.04,0.68,0.63</ClientRectangle>
+              <ClientRectangle>17,0.04,0.68,0.63</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>7ccc1cd7c7f54fc6b7510db06929b7bf</Guid>
@@ -565,7 +569,7 @@ nr</Text>
             </Text35>
             <Text37 Ref="34" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>17.05,0.04,0.8,0.63</ClientRectangle>
+              <ClientRectangle>17.76,0.04,0.8,0.63</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>a422c827329a457caefe7f865f091e15</Guid>
@@ -579,19 +583,35 @@ nr</Text>
               <Type>Expression</Type>
               <VertAlignment>Bottom</VertAlignment>
             </Text37>
+            <Text40 Ref="35" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.5,0.11,1.38,0.56</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7,Bold</Font>
+              <Guid>042edf1fef94469cba211bf2f115bf25</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text40</Name>
+              <Page isRef="9" />
+              <Parent isRef="19" />
+              <Text>Signert
+kunde</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Bottom</VertAlignment>
+            </Text40>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>ColumnHeaderBand1</Name>
           <Page isRef="9" />
           <Parent isRef="9" />
         </ColumnHeaderBand1>
-        <DataBand1 Ref="35" type="DataBand" isKey="true">
+        <DataBand1 Ref="36" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,3.61,27.7,2.09</ClientRectangle>
-          <Components isList="true" count="17">
-            <Text1 Ref="36" type="Text" isKey="true">
+          <Components isList="true" count="18">
+            <Text1 Ref="37" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0,1.01,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -599,240 +619,255 @@ nr</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text1</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.Oppdragsnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text1>
-            <Text4 Ref="37" type="Text" isKey="true">
+            <Text4 Ref="38" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.08,0,1.6,0.4</ClientRectangle>
+              <ClientRectangle>1.08,0,1.38,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text4</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
-              <Text>{Oppdrag.startdato}</Text>
+              <Parent isRef="36" />
+              <Text>{Oppdrag.akseptdato}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text4>
-            <Text5 Ref="38" type="Text" isKey="true">
+            <Text5 Ref="39" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.72,0,4.79,0.4</ClientRectangle>
+              <ClientRectangle>3.94,0,4.63,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text5</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.Name}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text5>
-            <Text6 Ref="39" type="Text" isKey="true">
+            <Text6 Ref="40" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>7.54,0,5.56,0.4</ClientRectangle>
+              <ClientRectangle>8.6,0,5.29,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text6</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.kortadr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text6>
-            <Text7 Ref="40" type="Text" isKey="true">
+            <Text7 Ref="41" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>17.91,0,1.97,0.4</ClientRectangle>
+              <ClientRectangle>18.62,0,1.97,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text7</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.kortkommune}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text7>
-            <Text8 Ref="41" type="Text" isKey="true">
+            <Text8 Ref="42" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>19.92,0,1.8,0.4</ClientRectangle>
+              <ClientRectangle>20.69,0,1.74,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text8</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.BoligType}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text8>
-            <Text9 Ref="42" type="Text" isKey="true">
+            <Text9 Ref="43" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>21.77,0,0.81,0.4</ClientRectangle>
+              <ClientRectangle>22.48,0,0.81,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text9</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.varighet}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text9>
-            <Text10 Ref="43" type="Text" isKey="true">
+            <Text10 Ref="44" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>22.73,0,2.21,0.4</ClientRectangle>
+              <ClientRectangle>23.32,0,1.78,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text10</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.kortstatus}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text10>
-            <Text11 Ref="44" type="Text" isKey="true">
+            <Text11 Ref="45" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>25.01,0,2.68,0.4</ClientRectangle>
+              <ClientRectangle>25.15,0,2.54,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text11</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.Navn}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text11>
-            <SubReport1 Ref="45" type="SubReport" isKey="true">
+            <SubReport1 Ref="46" type="SubReport" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>1.8,1.01,25.8,1.08</ClientRectangle>
               <Components isList="true" count="0" />
               <Enabled>False</Enabled>
               <Name>SubReport1</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <SubReportPageGuid>245bd06d076f42f3979d6162359b530c</SubReportPageGuid>
             </SubReport1>
-            <Text24 Ref="46" type="Text" isKey="true">
+            <Text24 Ref="47" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>15.44,0,0.77,0.4</ClientRectangle>
+              <ClientRectangle>16.15,0,0.77,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Guid>75e30a4c7e844c90a9391dd7964ce990</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text24</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.seksjonsnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text24>
-            <Text30 Ref="47" type="Text" isKey="true">
+            <Text30 Ref="48" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>14.73,0,0.65,0.4</ClientRectangle>
+              <ClientRectangle>15.44,0,0.65,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Guid>d37662cde9684473beed81bdedd8029b</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text30</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.bnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text30>
-            <Text32 Ref="48" type="Text" isKey="true">
+            <Text32 Ref="49" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>14.12,0,0.56,0.4</ClientRectangle>
+              <ClientRectangle>14.83,0,0.56,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Guid>2d840147307242eabebfac9d7098b967</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text32</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.gnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text32>
-            <Text34 Ref="49" type="Text" isKey="true">
+            <Text34 Ref="50" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>13.2,0,0.89,0.4</ClientRectangle>
+              <ClientRectangle>13.91,0,0.89,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Guid>d758ba84900f4414b298c5581a415d3a</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text34</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.hnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text34>
-            <Text36 Ref="50" type="Text" isKey="true">
+            <Text36 Ref="51" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>16.29,0,0.68,0.4</ClientRectangle>
+              <ClientRectangle>17,0,0.68,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Guid>e654142280eb4642a600face75c25c08</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text36</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.andelsnr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text36>
-            <Text38 Ref="51" type="Text" isKey="true">
+            <Text38 Ref="52" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>17.05,0.02,0.8,0.4</ClientRectangle>
+              <ClientRectangle>17.76,0.02,0.8,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Guid>22d0181f78d5438fa19cf208c5739f60</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text38</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.aksjenummer}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text38>
-            <Text39 Ref="52" type="Text" isKey="true">
+            <Text39 Ref="53" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>2.72,0.43,4.79,0.4</ClientRectangle>
+              <ClientRectangle>3.94,0.43,4.63,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
               <Guid>d78f361da31547138a68e5d076fc9e87</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text39</Name>
               <Page isRef="9" />
-              <Parent isRef="35" />
+              <Parent isRef="36" />
               <Text>{Oppdrag.eier2}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text39>
+            <Text41 Ref="54" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.5,0,1.38,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>1eed8d40a0aa40a1acb32191490972d0</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text41</Name>
+              <Page isRef="9" />
+              <Parent isRef="36" />
+              <Text>{Oppdrag.kundesignertdato}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text41>
           </Components>
           <Conditions isList="true" count="0" />
           <DataRelationName isNull="true" />
@@ -855,23 +890,23 @@ nr</Text>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="53" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="55" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
-    <subReport_1 Ref="54" type="Page" isKey="true">
+    <subReport_1 Ref="56" type="Page" isKey="true">
       <Border>None;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Components isList="true" count="1">
-        <DataBand2 Ref="55" type="DataBand" isKey="true">
+        <DataBand2 Ref="57" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanBreak>True</CanBreak>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,0.4,25.8,1.2</ClientRectangle>
           <Components isList="true" count="1">
-            <Text21 Ref="56" type="Text" isKey="true">
+            <Text21 Ref="58" type="Text" isKey="true">
               <AllowHtmlTags>True</AllowHtmlTags>
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
@@ -883,8 +918,8 @@ nr</Text>
               <GrowToHeight>True</GrowToHeight>
               <Margins>0,0,0,0</Margins>
               <Name>Text21</Name>
-              <Page isRef="54" />
-              <Parent isRef="55" />
+              <Page isRef="56" />
+              <Parent isRef="57" />
               <Text>{Kommentar.tekst}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
@@ -897,8 +932,8 @@ nr</Text>
           <DataSourceName>Kommentar</DataSourceName>
           <Filters isList="true" count="0" />
           <Name>DataBand2</Name>
-          <Page isRef="54" />
-          <Parent isRef="54" />
+          <Page isRef="56" />
+          <Parent isRef="56" />
           <Sort isList="true" count="0" />
         </DataBand2>
       </Components>
@@ -910,13 +945,13 @@ nr</Text>
       <PageHeight>27.8</PageHeight>
       <PageWidth>27.8</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="57" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="59" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </subReport_1>
   </Pages>
-  <PrinterSettings Ref="58" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="60" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -928,10 +963,10 @@ nr</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/26/2016 2:39:50 PM</ReportChanged>
+  <ReportChanged>2/2/2016 2:44:12 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\erik\AppData\Local\Temp\Oppdragsjournal.mrt</ReportFile>
-  <ReportGuid>42643634946d44cdb6ae58ecec8a6ebe</ReportGuid>
+  <ReportGuid>19aba9474d854d0baa74b43f333c9ccb</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -960,7 +995,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="3">
-    <lightBlue Ref="59" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <lightBlue Ref="61" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[222:233:244]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -968,7 +1003,7 @@ namespace Reports
       <Name>lightBlue</Name>
       <TextBrush>Black</TextBrush>
     </lightBlue>
-    <Style1 Ref="60" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="62" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[146:187:205]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -976,7 +1011,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <LightGrey Ref="61" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <LightGrey Ref="63" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
