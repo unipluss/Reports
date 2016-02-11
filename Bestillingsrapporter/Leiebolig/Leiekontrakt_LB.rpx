@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{E9113499-DA53-4B70-8E9B-817FEECB9621}" GUIDREP="{9313BFE4-E02D-4887-9EB7-9A2E8E5077D6}" 
+	GUIDLIB="{B27B09A6-8773-4A63-9036-1FBB398265A5}" GUIDREP="{5334BC41-57AD-4228-989A-E8C23C4E23CA}" 
 	LICENSE="10000000"
 	PrintWidth="10695"
 	DocumentName="ActiveReports Document"
@@ -3232,6 +3232,12 @@ End Sub
 	end if
 
 	if instr(depositumType, "Firma") then
+		rpt.Sections("ReportHeader").Controls("RichEdit117").Visible=True
+		rpt.Sections("ReportHeader").Controls("RichEdit102").Visible=False
+		rpt.Sections("ReportHeader").Controls("RichEdit108").Visible=False	
+	end if
+
+	if depositumKategori=0 then
 		rpt.Sections("ReportHeader").Controls("RichEdit117").Visible=True
 		rpt.Sections("ReportHeader").Controls("RichEdit102").Visible=False
 		rpt.Sections("ReportHeader").Controls("RichEdit108").Visible=False	
