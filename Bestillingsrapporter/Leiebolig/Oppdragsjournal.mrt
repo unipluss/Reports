@@ -131,7 +131,8 @@ left join e..t_boligtype typ on bo.Boligtype_id = typ.BoligType_id
 left join e..t_ansatte ans on ans.Ansatte_id = fa.ansvarligMegler 
 where 
 /* CONVERT(datetime, @dt, 104) BETWEEN dateadd(dd, -DAY (oa.startdato) + 1, oa.startdato) and dateadd(dd, -DAY (oa.sluttdato) + 1, oa.sluttdato) */
-(month(oa.startdato)={Mnd} and year(oa.startdato)={Aar})
+/* (month(oa.startdato)={Mnd} and year(oa.startdato)={Aar}) */
+(month(oa.akseptertdato)={Mnd} and year(oa.akseptertdato)={Aar})
 and ans.Ansatte_id in({Ansatt})
 and isnull(oa.oppdragsnr,0)&gt;0
 
@@ -213,8 +214,8 @@ order by oa.oppdragsnr</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="8">
-      <value>,Aar,År,text_x007C_sql_x003D_select_x0020_YEAR_x0028_GETDATE_x0028__x0029__x0029_,System.Int32,_x0032_015,False,False,False</value>
-      <value>,Mnd,Måned,combo_x007C_sql_x003D_select_x0020_id_x002C_kortnavn_x0020_from_x0020_m..maaneder,System.Int32,_x0031_,False,False,False</value>
+      <value>,Aar,Akseptert_x0020_år,text_x007C_sql_x003D_select_x0020_YEAR_x0028_GETDATE_x0028__x0029__x0029_,System.Int32,_x0032_015,False,False,False</value>
+      <value>,Mnd,Akseptert_x0020_måned,combo_x007C_sql_x003D_select_x0020_id_x002C_kortnavn_x0020_from_x0020_m..maaneder,System.Int32,_x0031_,False,False,False</value>
       <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031_4_x002C_16_x002C_21_x002C_22_x002C_24_x002C_27_x002C_28_x002C_29_x002C_30_x002C_31_x002C_32_x002C_6_x002C_9,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
@@ -963,10 +964,10 @@ kunde</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>2/2/2016 2:44:12 PM</ReportChanged>
+  <ReportChanged>2/16/2016 2:42:00 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\erik\AppData\Local\Temp\Oppdragsjournal.mrt</ReportFile>
-  <ReportGuid>19aba9474d854d0baa74b43f333c9ccb</ReportGuid>
+  <ReportGuid>6c8c26eb963444efba4808aece2800e1</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
