@@ -75,7 +75,7 @@
       </Bedrift>
       <Oppdrag Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Oppdrag</Alias>
-        <Columns isList="true" count="24">
+        <Columns isList="true" count="25">
           <value>Oppdragsnr,System.Int32</value>
           <value>startdato,System.String</value>
           <value>Name,System.String</value>
@@ -100,6 +100,7 @@
           <value>akseptdato,System.String</value>
           <value>kundesignertdato,System.String</value>
           <value>ansvarligMegler,System.String</value>
+          <value>aksjeBorettslag,System.String</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -119,6 +120,7 @@ select oa.Id, oa.Oppdragsnr, convert(varchar(20), oa.startdato, 104)as startdato
 	, byg.bnr, byg.gnr, bo.BoligNummer hnr, bo.andelsnr, bo.aksjenummer,
 	 (select top 1 name from c..c_contacts where id=fa.MedeierKontaktId) eier2,
 	convert(varchar(20), oa.signert_dato_kunde, 104)as kundesignertdato, oa.ansvarligMegler
+	, (select top 1  isnull(case len(akskjeselskapNavn) when 0 then null else akskjeselskapNavn end, case len( borettslagNavn) when 0 then null else borettslagNavn end)from e..t_bygg where ID = byg.id) as aksjeBorettslag
 	from e..t_oppdragsAvtale oa
 inner join e..t_status st on oa.statusId = st.Status_id
 left join e..t_oppdragsAvtaleHarBolig harbo on oa.Id = harbo.OppdragsAvtaleId
@@ -215,9 +217,9 @@ order by oa.oppdragsnr</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="8">
-      <value>,Aar,Akseptert_x0020_år,text_x007C_sql_x003D_select_x0020_YEAR_x0028_GETDATE_x0028__x0029__x0029_,System.Int32,_x0032_015,False,False,False</value>
+      <value>,Aar,Akseptert_x0020_år,text_x007C_sql_x003D_select_x0020_YEAR_x0028_GETDATE_x0028__x0029__x0029_,System.Int32,_x0032_016,False,False,False</value>
       <value>,Mnd,Akseptert_x0020_måned,combo_x007C_sql_x003D_select_x0020_id_x002C_kortnavn_x0020_from_x0020_m..maaneder,System.Int32,_x0031_,False,False,False</value>
-      <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031_4_x002C_16_x002C_21_x002C_22_x002C_24_x002C_27_x002C_28_x002C_29_x002C_30_x002C_31_x002C_32_x002C_6_x002C_9,False,False,False</value>
+      <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031__x002C_10_x002C_11_x002C_12_x002C_13_x002C_14_x002C_15_x002C_16_x002C_17_x002C_18_x002C_19_x002C_2_x002C_21_x002C_24_x002C_27_x002C_28_x002C_29_x002C_3_x002C_30_x002C_32_x002C_33_x002C_4_x002C_5_x002C_6_x002C_7_x002C_8_x002C_9,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
@@ -612,7 +614,7 @@ kunde</Text>
           <BusinessObjectGuid isNull="true" />
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,3.61,27.7,2.09</ClientRectangle>
-          <Components isList="true" count="18">
+          <Components isList="true" count="19">
             <Text1 Ref="37" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0,1.01,0.4</ClientRectangle>
@@ -870,6 +872,22 @@ kunde</Text>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text41>
+            <Text42 Ref="55" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <CanShrink>True</CanShrink>
+              <ClientRectangle>8.6,0.39,5.29,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>0c68a09bd6be4a8daceb29d20328734e</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text42</Name>
+              <Page isRef="9" />
+              <Parent isRef="36" />
+              <Text>{Oppdrag.aksjeBorettslag}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text42>
           </Components>
           <Conditions isList="true" count="0" />
           <DataRelationName isNull="true" />
@@ -892,23 +910,23 @@ kunde</Text>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="55" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="56" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
-    <subReport_1 Ref="56" type="Page" isKey="true">
+    <subReport_1 Ref="57" type="Page" isKey="true">
       <Border>None;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Components isList="true" count="1">
-        <DataBand2 Ref="57" type="DataBand" isKey="true">
+        <DataBand2 Ref="58" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanBreak>True</CanBreak>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,0.4,25.8,1.2</ClientRectangle>
           <Components isList="true" count="1">
-            <Text21 Ref="58" type="Text" isKey="true">
+            <Text21 Ref="59" type="Text" isKey="true">
               <AllowHtmlTags>True</AllowHtmlTags>
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
@@ -920,8 +938,8 @@ kunde</Text>
               <GrowToHeight>True</GrowToHeight>
               <Margins>0,0,0,0</Margins>
               <Name>Text21</Name>
-              <Page isRef="56" />
-              <Parent isRef="57" />
+              <Page isRef="57" />
+              <Parent isRef="58" />
               <Text>{Kommentar.tekst}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
@@ -934,8 +952,8 @@ kunde</Text>
           <DataSourceName>Kommentar</DataSourceName>
           <Filters isList="true" count="0" />
           <Name>DataBand2</Name>
-          <Page isRef="56" />
-          <Parent isRef="56" />
+          <Page isRef="57" />
+          <Parent isRef="57" />
           <Sort isList="true" count="0" />
         </DataBand2>
       </Components>
@@ -947,13 +965,13 @@ kunde</Text>
       <PageHeight>27.8</PageHeight>
       <PageWidth>27.8</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="59" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="60" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </subReport_1>
   </Pages>
-  <PrinterSettings Ref="60" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="61" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -965,10 +983,10 @@ kunde</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>3/15/2016 7:49:32 AM</ReportChanged>
+  <ReportChanged>3/15/2016 8:46:15 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\Oppdragsjournal.mrt</ReportFile>
-  <ReportGuid>23fdcef546a2456e8728c7b58dd594eb</ReportGuid>
+  <ReportGuid>cc80e86e1ca84a6dbd2dbefaaecae1b0</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -997,7 +1015,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="3">
-    <lightBlue Ref="61" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <lightBlue Ref="62" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[222:233:244]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -1005,7 +1023,7 @@ namespace Reports
       <Name>lightBlue</Name>
       <TextBrush>Black</TextBrush>
     </lightBlue>
-    <Style1 Ref="62" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="63" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[146:187:205]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -1013,7 +1031,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <LightGrey Ref="63" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <LightGrey Ref="64" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
