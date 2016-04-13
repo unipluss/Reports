@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{893C5B00-2AE6-4A29-A50A-0B6BC6D1C59D}" GUIDREP="{35576118-3E2A-4A6A-B062-274B603DF67C}" 
+	GUIDLIB="{72102BA5-D5E7-45D9-AA7B-4E85E7C01E87}" GUIDREP="{F00243E9-3014-4AAD-BD79-6D20843676B3}" 
 	LICENSE="10000000"
 	PrintWidth="9615"
 	DocumentName="ActiveReports Document"
@@ -12,13 +12,16 @@
 <Script>
 <![CDATA[sub onDatainitialize
   	dim sql
-	dim omr
+	dim omr, bt
 	'm_data.debugg=true
 	m_data.AddInputMacro "{OM}","Boligområde ","0",,7,"Select boligomrade_id, omrade from e..t_boligomraade union select '0','Alle' order by boligomrade_id"
+	m_data.AddInputMacro "{BT}","Boligtype ","0",,7,"Select boligtype_id, boligtype from e..t_boligtype union select '0',' Alle' order by Boligtype"
 	
 
 	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
 	omr=m_data.getmacrovalue("{OM}")
+	bt=m_data.getmacrovalue("{BT}")
+
 	sql=" "
 	sqladd sql, "Select o.Omrade, bg.Navn, b.Etasje, e.Etasje_Navn, t.BoligType,"
 	sqladd Sql, " b.rom_nummer, b.Oppgang, b.objekt_id, b.areal "
@@ -30,6 +33,9 @@
 	sqladd Sql, " where isnull(b.Innaktiv,0)=0 "
 	if omr<>"0" then
 		sqladd Sql, " and o.Boligomrade_id in ({om})"
+	end if
+	if bt<>"0" then
+		sqladd Sql, " and b.boligtype_id in ({bt})"
 	end if
 
       m_data.SqlString = sql & " order by o.omrade, bg.navn, b.etasje, b.rom_nummer asc"
