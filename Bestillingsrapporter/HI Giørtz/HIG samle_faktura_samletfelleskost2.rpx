@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{26E4C724-A94D-4DE0-AF18-C3C7180F94D7}" GUIDREP="{CA44397A-C420-42CC-8211-7ECFC9200E36}" 
+	GUIDLIB="{BFED5106-6653-415F-AD9C-D1EAF5E4D415}" GUIDREP="{E3FB85C8-9259-4D3C-8E34-523765A9F00C}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
 		740066000000"
 	PrintWidth="10200"
@@ -460,7 +460,9 @@ Sub OnFetchData(eof)
 		End if
  
 		rpt.Fields("Prisfelt").value = m_data.gjemnull2(rpt.Fields("ValutaPrice"))
-		Sfelt = m_data.gjemnull2(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Netto")))) / m_data.sfcurr(VKurs)) 'm_data.sfcurr((m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall"))))) * m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Prisfelt"))))) * ((100 - m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt"))))))/100)
+		'Sfelt = m_data.gjemnull2(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Netto")))) / m_data.sfcurr(VKurs)) 'm_data.sfcurr((m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall"))))) * m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Prisfelt"))))) * ((100 - m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt"))))))/100)
+		'Fiks for årspris med 1/12 istedenfor å bruke 0.08 - Esben 25.05.2016
+		Sfelt = m_data.gjemnull2(m_data.sfdbl(rpt.Fields("Netto")))
 		rpt.Fields("Sumfelt").value = m_data.gjemnull2(Sfelt)
 		rpt.Fields("NettoSumFelt").Value = m_data.gjemnull2(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Nettosum")))) / m_data.sfcurr(VKurs))
 		rpt.Fields("TotalSumFelt").Value = m_data.gjemnull2(rpt.Fields("ValutaSum"))
@@ -586,7 +588,9 @@ Sub OnFetchData(eof)
  
 		rpt.Fields("Prisfelt").value = m_data.gjemnull2(m_data.sfdbl(rpt.Fields("Pris")))
  'Sfelt = m_data.Sfcurr(rpt.Fields("Netto")) 'm_data.sfcurr((m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall"))))) * m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Prisfelt")))))) * ((100 - m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt"))))))/100)
-		Sfelt = m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall"))))) * m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Pris"))))))) * ((100 - m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt")))))))/100)
+		'Sfelt = m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall"))))) * m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Pris"))))))) * ((100 - m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt")))))))/100)
+		'Fiks for årspris med 1/12 istedenfor å bruke 0.08 - Esben 25.05.2016
+		Sfelt = m_data.gjemnull2(m_data.sfdbl(rpt.Fields("Netto")))
 		rpt.Fields("Sumfelt").value = m_data.gjemnull(Sfelt)
 		rpt.Fields("NettoSumFelt").Value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Nettosum")))
 		rpt.Fields("TotalSumFelt").Value = m_data.gjemnull(rpt.Fields("TotalSum"))
