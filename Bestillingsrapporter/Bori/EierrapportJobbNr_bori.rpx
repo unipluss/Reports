@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{AB5353F6-28EA-45DD-A853-68E415931AE4}" GUIDREP="{144B0338-02A5-4154-A3B1-7D92A11840C3}" 
+	GUIDLIB="{A7E5213E-526B-4957-AF70-CA49CEBD789F}" GUIDREP="{D0A7DE2D-BFFA-469F-A66F-33D05D703A6B}" 
 	LICENSE="10000000"
 	PrintWidth="9780"
 	DocumentName="ActiveReports Document"
@@ -105,6 +105,7 @@ sub onDatainitialize
 	sql = sql & " /**/ left join e..t_logHusleieAvregningEkstraKostnader ekstra on ekstra.JobNr = huav.Jobnr and ekstra.KontraktsID =huAv.KontraktsID and huav.EierNr=ekstra.eierid and (ekstra.HusleieManed = huav.mnd or isnull(ekstra.HusleieManed,0) =0)"
 	sql = sql & " /**/ where huav.Jobnr =" & JobbNr 	
 	sql = sql & " /**/ and ISNULL(huAv.status,0)>0"	
+	sql = sql & " /**/ and isnull(huav.slettet,0) = 0"
 
 	if kategori = 3 then
 		sql = sql & " /**/ and huav.EierNr = " & valgteEiere

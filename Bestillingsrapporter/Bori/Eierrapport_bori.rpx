@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{18F2FD7D-DD30-4902-84A9-232DF2EBC1A0}" GUIDREP="{79041C07-3E6E-4EC8-B65D-D4CFADA5EEC8}" 
+	GUIDLIB="{235996BE-3605-41F5-B6B8-DEBDFE1A7C44}" GUIDREP="{2B702064-81DC-4435-BFEA-6A4B8B1D2E61}" 
 	LICENSE="10000000"
 	PrintWidth="9780"
 	DocumentName="ActiveReports Document"
@@ -125,6 +125,7 @@ sub onDatainitialize
 		sql = sql & " /**/  and huav.Mnd = " & md & " "
 		sql = sql & " /**/  and huav.Aar = " & aar & " " 
 		sql = sql & " /**/  ))"
+		sql = sql & " /**/ and isnull(huav.slettet,0) = 0"
 			
 		if len(trim(eiere)) > 0 then
 			sql = sql & " /**/ and huav.EierNr in (" & eiere &") "
