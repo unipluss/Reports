@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{0B8A84CA-59EA-46C2-8F61-0FC5E808F43A}" GUIDREP="{ED5696A6-76C5-4BD9-87A7-38080AB964C5}" 
+	GUIDLIB="{61B38F74-F36C-41A3-898E-B28314B85F1D}" GUIDREP="{82ED18F7-595F-475B-97D2-6148A3B5B6F3}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
 		740066000000"
 	PrintWidth="10230"
@@ -153,7 +153,7 @@ Sub OnFetchData(eof)
 	end if
 
 	'Create total
-	tot = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("Totalsum").value))))) - (m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("Kreditert_sum").value)))))) - m_data.sfcurr(rpt.fields("Innbet_sum").value)
+	tot = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("Totalsum").value))) - (m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("Kreditert_sum").value)))) - m_data.sfcurr(rpt.fields("Innbet_sum").value)
 	rpt.Fields("tot").value = (tot)
 	rpt.fields("tot2").value = m_data.DelBelop(rpt.Fields("tot"))
 
@@ -199,7 +199,7 @@ Sub OnFetchData(eof)
 	end if
 
 	rpt.Fields("Rabfelt").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Rabatt")))' / 100)
-	if ViseMvafelt then rpt.Fields("Mvafelt").value = m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Momsprosent")))))) / 100) else rpt.Fields("Mvafelt").value = ""
+	if ViseMvafelt then rpt.Fields("Mvafelt").value = m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Momsprosent")))) / 100) else rpt.Fields("Mvafelt").value = ""
 
 	if ViseUtenAvg then
 		Select case m_data.Sfcurr(rpt.Fields("Momskode"))
@@ -233,7 +233,7 @@ Sub OnFetchData(eof)
 		rpt.Sections("Detail").Controls("Field115").Visible = False
 	End if
 
-	innrykk = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Komp_level")))))) * 5
+	innrykk = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Komp_level")))) * 5
 	rpt.Fields("KompVare").value = String(innrykk, " ") & rpt.Fields("Varenr") & " - " & rpt.Fields("Varetekst")
 
 	'Visningstype hvis komponentvare er vis detaljert og komponentene gir prisen
@@ -361,12 +361,12 @@ Sub OnFetchData(eof)
  ' Valutafaktura og kontantfaktura
 	if rpt.Fields("ValutaKode") <= "0" Then rpt.Fields("ValutaKode").Value = ""
 	if Len(Trim(rpt.Fields("ValutaKode"))) > 0 Then
-		if m_data.sfcurr(rpt.Fields("Valutasum")) <> 0 THEN VKurs = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("TotalSum")))))) / m_data.sfcurr(rpt.Fields("Valutasum")) ELSE VKurs = 1
+		if m_data.sfcurr(rpt.Fields("Valutasum")) <> 0 THEN VKurs = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("TotalSum")))) / m_data.sfcurr(rpt.Fields("Valutasum")) ELSE VKurs = 1
 		m_data.AddGroupCounter "fakturanr",Clng(Antlinje2)
 		rpt.Fields("Sidetall").Value = "Page " & rpt.Fields("_groupcounter") & " of " & AntSider2(rpt.Fields("AntLinjer"))
  
 		If m_data.sfcurr(rpt.Fields("Factoring")) = 0 Then
-			rpt.Fields("InnbetKred").Value = m_data.gjemnull(((m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Innbet_sum"))))))) + (m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Kreditert_sum")))))))) / m_data.sfcurr(VKurs))
+			rpt.Fields("InnbetKred").Value = m_data.gjemnull(((m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Innbet_sum"))))) + (m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Kreditert_sum")))))) / m_data.sfcurr(VKurs))
 			if m_data.sfcurr(rpt.Fields("InnbetKred")) <> 0 Then rpt.Fields("InnbetKredTxt").Value = "- Credit/payment"
 			if m_data.sfcurr(rpt.Fields("Totalsum").value) >= 0 Then
 				rpt.Fields("FaktTxt").Value = "INVOICE"
@@ -389,9 +389,9 @@ Sub OnFetchData(eof)
 		End if
  
 		rpt.Fields("Prisfelt").value = m_data.gjemnull2(rpt.Fields("ValutaPrice"))
-		Sfelt = m_data.gjemnull2(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Netto"))))) / m_data.sfcurr(VKurs)) 'm_data.sfcurr((m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall")))))) * m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Prisfelt")))))) * ((100 - m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt")))))))/100)
+		Sfelt = m_data.gjemnull2(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Netto"))) / m_data.sfcurr(VKurs)) 'm_data.sfcurr((m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall")))) * m_data.SFCurr(m_data.SFCurr(rpt.Fields("Prisfelt")))) * ((100 - m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt")))))/100)
 		rpt.Fields("Sumfelt").value = m_data.gjemnull2(Sfelt)
-		rpt.Fields("NettoSumFelt").Value = m_data.gjemnull2(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Nettosum"))))) / m_data.sfcurr(VKurs))
+		rpt.Fields("NettoSumFelt").Value = m_data.gjemnull2(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Nettosum"))) / m_data.sfcurr(VKurs))
 		rpt.Fields("TotalSumFelt").Value = m_data.gjemnull2(rpt.Fields("ValutaSum"))
 		rpt.Fields("KIDTxt").Value = ""
 		rpt.Fields("KIDFelt").Value = ""
@@ -431,10 +431,10 @@ Sub OnFetchData(eof)
  'rpt.Sections("GroupFooter1").Controls("NokHoySum").Visible = true
  
  If m_data.sfcurr(rpt.Fields("MvaProsentHøy").Value) <> 0 Then
- rpt.Fields("HoyMva").Value = "+ " & rpt.Fields("MvaProsentHøy").Value & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlHoy")))))) / m_data.sfcurr(VKurs))
+ rpt.Fields("HoyMva").Value = "+ " & rpt.Fields("MvaProsentHøy").Value & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlHoy")))) / m_data.sfcurr(VKurs))
  rpt.Fields("NokHoyText").Value = "+ " & rpt.Fields("MvaProsentHøy").Value & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlHoy")))
  Else
- rpt.Fields("HoyMva").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats") & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlHoy")))))) / m_data.sfcurr(VKurs))
+ rpt.Fields("HoyMva").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats") & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlHoy")))) / m_data.sfcurr(VKurs))
  rpt.Fields("NokHoyText").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats") & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlHoy")))
  End If
  End If 
@@ -445,10 +445,10 @@ Sub OnFetchData(eof)
  'rpt.Sections("GroupFooter1").Controls("NokMellomSum").Visible = true
  
  If m_data.sfcurr(rpt.Fields("MvaProsentLav").Value) <> 0 Then
- rpt.Fields("LavMva").Value = "+ " & rpt.Fields("MvaProsentLav").Value & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlLav")))))) / m_data.sfcurr(VKurs))
+ rpt.Fields("LavMva").Value = "+ " & rpt.Fields("MvaProsentLav").Value & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlLav")))) / m_data.sfcurr(VKurs))
  rpt.Fields("NokMellomText").Value = "+ " & rpt.Fields("MvaProsentLav").Value & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlLav")))
  Else
- rpt.Fields("LavMva").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats2") & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlLav")))))) / m_data.sfcurr(VKurs))
+ rpt.Fields("LavMva").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats2") & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("GrlLav")))) / m_data.sfcurr(VKurs))
  rpt.Fields("NokMellomText").Value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats2") & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("GrlLav")))
  End If 
  End If
@@ -458,7 +458,7 @@ Sub OnFetchData(eof)
  'rpt.Sections("GroupFooter1").Controls("NokLavText").Visible = true
  'rpt.Sections("GroupFooter1").Controls("NokLavSum").Visible = true
  
- rpt.Fields("personmvatekst").Value = "+ " & rpt.Fields("MvaProsentPersongrunnlag").Value & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull((m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("persongrunnlag")))))) / m_data.sfcurr(VKurs)))
+ rpt.Fields("personmvatekst").Value = "+ " & rpt.Fields("MvaProsentPersongrunnlag").Value & "% VAT of " & rpt.Fields("ValutaKode") & " " & m_data.gjemnull((m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("persongrunnlag")))) / m_data.sfcurr(VKurs)))
  rpt.Fields("NokLavText").Value = "+ " & rpt.Fields("MvaProsentPersongrunnlag").Value & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("persongrunnlag")))
  else 
  rpt.Fields("NokLavText").value = "+ " & m_data.GetValue("*y..System.UtgMvaPSats3") & "% m.v.a. av NOK kr " & m_data.gjemnull(m_data.sfcurr(rpt.Fields("persongrunnlag")))
@@ -468,15 +468,15 @@ Sub OnFetchData(eof)
 		rpt.Fields("NokLavSum").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("personmva")))
 		rpt.Fields("NokMellomSum").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("MomsLav")))
 		rpt.Fields("NokHoySum").value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("MomsHoy")))
-		rpt.Fields("MomsLavfelt").value = m_data.gjemnull2(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("MomsLav")))))) / m_data.sfcurr(VKurs))
-		rpt.Fields("MomsHoyfelt").value = m_data.gjemnull2(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("MomsHoy")))))) / m_data.sfcurr(VKurs))
- rpt.Fields("personmva").value = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("personmva").value))))) / m_data.sfcurr(VKurs)
+		rpt.Fields("MomsLavfelt").value = m_data.gjemnull2(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("MomsLav")))) / m_data.sfcurr(VKurs))
+		rpt.Fields("MomsHoyfelt").value = m_data.gjemnull2(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("MomsHoy")))) / m_data.sfcurr(VKurs))
+ rpt.Fields("personmva").value = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("personmva").value))) / m_data.sfcurr(VKurs)
  
 		'if m_data.sfcurr(rpt.Fields("MomsHoy")) = 0 Then
 		'	if m_data.sfcurr(rpt.Fields("MomsLav")) = 0 Then
 		'		if m_data.sfcurr(rpt.Fields("Moms")) <> 0 Then
-		'			rpt.Fields("HoyMva").Value = "+ " & m_data.sfcurr(rpt.Fields("FMoms")) & "% VAT of " & rpt.Fields("ValutaKode") & " " &m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Mvagrunnlag")))))) / m_data.sfcurr(VKurs))
-		'			rpt.Fields("MomsHoyfelt").Value = m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Moms")))))) / m_data.sfcurr(VKurs))
+		'			rpt.Fields("HoyMva").Value = "+ " & m_data.sfcurr(rpt.Fields("FMoms")) & "% VAT of " & rpt.Fields("ValutaKode") & " " &m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Mvagrunnlag")))) / m_data.sfcurr(VKurs))
+		'			rpt.Fields("MomsHoyfelt").Value = m_data.gjemnull(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Moms")))) / m_data.sfcurr(VKurs))
 		'		end if
 		'	end if
 		'End if
@@ -486,7 +486,7 @@ Sub OnFetchData(eof)
 		rpt.Fields("Sidetall").Value = "Side " & rpt.Fields("_groupcounter") & " av " & AntSider(rpt.Fields("AntLinjer"))
  
 		If m_data.sfcurr(rpt.Fields("Factoring")) = 0 Then
-			rpt.Fields("InnbetKred").Value = m_data.gjemnull((m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Innbet_sum"))))))) + (m_data.sfcurr(rpt.Fields("Kreditert_sum"))))
+			rpt.Fields("InnbetKred").Value = m_data.gjemnull((m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Innbet_sum"))))) + (m_data.sfcurr(rpt.Fields("Kreditert_sum"))))
 			if m_data.sfcurr(rpt.Fields("InnbetKred")) <> 0 Then rpt.Fields("InnbetKredTxt").Value = "- Kreditert/Innbetalt"
 			if m_data.sfcurr(rpt.Fields("Totalsum").value) >= 0 Then
 				If m_data.sfcurr(rpt.Fields("Type")) = 1001 OR m_data.sfcurr(rpt.Fields("Type")) = 1002 Then
@@ -520,13 +520,9 @@ Sub OnFetchData(eof)
 		End if
  
 		rpt.Fields("Prisfelt").value = m_data.gjemnull2(m_data.sfdbl(rpt.Fields("Pris")))
- 		'Sfelt = m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall")))))) * m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Pris")))))))) * ((100 - m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt"))))))))/100)
-		'Fiks for årspris med 1/12 istedenfor å bruke 0.08 - Esben 25.05.2016
-		Sfelt = m_data.gjemnull2(m_data.sfdbl(rpt.Fields("Netto")))
-		
+ 'Sfelt = m_data.Sfcurr(rpt.Fields("Netto")) 'm_data.sfcurr((m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall")))) * m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Prisfelt"))))) * ((100 - m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt")))))/100)
+		Sfelt = m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Antall")))) * m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Pris")))))) * ((100 - m_data.sfdbl(m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.Fields("Rabatt"))))))/100)
 		rpt.Fields("Sumfelt").value = m_data.gjemnull(Sfelt)
-
-		
 		rpt.Fields("NettoSumFelt").Value = m_data.gjemnull(m_data.sfcurr(rpt.Fields("Nettosum")))
 		rpt.Fields("TotalSumFelt").Value = m_data.gjemnull(rpt.Fields("TotalSum"))
 		if Len(Trim(rpt.Fields("KID"))) > 0 Then rpt.Fields("KIDTxt").Value = "KID" else rpt.Fields("KIDFelt").Value = ""
@@ -609,7 +605,7 @@ Sub OnFetchData(eof)
 		if Len(Trim(rpt.Fields("Levering"))) > 1 Then
 			rpt.Fields("LeveringFelt").Value = rpt.Fields("Levering")
 		else
-			rpt.Fields("LeveringFelt").value = rpt.Fields("Kundenavn") & Chr(13) & rpt.Fields("Adresse") & Chr(13) & rpt.Fields("Adresse2") & Chr(13) & rpt.Fields("Postnr") & " " & rpt.Fields("Poststed") & Chr(13) & rpt.Fields("Land")
+			rpt.Fields("LeveringFelt").value = rpt.Fields("Kundenavn") & Chr(13) & rpt.Fields("Adresse") & Chr(13) & rpt.Fields("Adresse2") & Chr(13) & rpt.Fields("Postnr") & "  " & rpt.Fields("Poststed") & Chr(13) & rpt.Fields("Land")
 		end if
 
 		rpt.Fields("Kundenavn").value = rpt.Fields("KjedeNavn")
@@ -1999,7 +1995,7 @@ Sub OnFormat
 		rpt.Sections("GroupHeader1").Controls("Label20").Caption = "Your reference"
 		rpt.Sections("GroupHeader1").Controls("Label29").Caption = "Acc. ref."
 
-		if m_data.sfcurr(rpt.Fields("Valutasum")) <> 0 THEN Valutakurs = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("TotalSum")))))) / m_data.sfcurr(rpt.Fields("Valutasum")) ELSE Valutakurs = 1
+		if m_data.sfcurr(rpt.Fields("Valutasum")) <> 0 THEN Valutakurs = m_data.sfcurr(m_data.SFCurr(m_data.SFCurr(rpt.fields("TotalSum")))) / m_data.sfcurr(rpt.Fields("Valutasum")) ELSE Valutakurs = 1
 
 		rpt.Sections("GroupFooter1").Controls("Label3").Caption = "Sub Total"
 		rpt.Sections("GroupFooter1").Controls("Label7").Caption = "Total " & rpt.Fields("ValutaKode")
