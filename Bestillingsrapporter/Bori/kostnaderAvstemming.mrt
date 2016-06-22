@@ -54,8 +54,7 @@ from e..t_oppdragsAvtale op
 left join e..t_forvaltningsAvtale fa on op.forvaltningsAvtaleId = fa.Id
 left join e..t_kunde ku on fa.kreditorId = ku.Kundenummer
 left join c..c_name na on na.id = ku.NameID
-where isnull(op.avsluttet_oppdrag_dato,''01.01.1900'') between''01.01.2015'' and ''01.01.2017''
-order by op.avsluttet_oppdrag_dato
+where isnull(op.avsluttet_oppdrag_dato,''01.01.1900'') between''{FraDato}'' and ''{TilDato}''
 '
 execute(@query)</SqlCommand>
       </Data>
@@ -63,7 +62,7 @@ execute(@query)</SqlCommand>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="7">
-      <value>,FraDato,FraDato,search_x003B_date,System.String,_x0030_1.06.2015,False,False,False</value>
+      <value>,FraDato,FraDato,search_x003B_date,System.String,_x0030_1.06.2016,False,False,False</value>
       <value>,TilDato,TilDato,search_x003B_date,System.String,_x0033_0.06.2016,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
@@ -202,7 +201,7 @@ i perioden {FraDato} - {TilDato}</Text>
         </PageFooterBand1>
         <GroupHeaderBand1 Ref="14" type="GroupHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,3.2,27.7,1</ClientRectangle>
+          <ClientRectangle>0,3.2,27.7,1.2</ClientRectangle>
           <Components isList="true" count="8">
             <Text3 Ref="15" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
@@ -330,12 +329,12 @@ utleieklient</Text>
         <DataBand1 Ref="23" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,5,27.7,1.2</ClientRectangle>
+          <ClientRectangle>0,5.2,27.7,0.8</ClientRectangle>
           <Components isList="true" count="9">
             <Text2 Ref="24" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.2,1.6,0.6</ClientRectangle>
+              <ClientRectangle>0,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -348,7 +347,7 @@ utleieklient</Text>
             <Text4 Ref="25" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.4,0.2,1.6,0.6</ClientRectangle>
+              <ClientRectangle>2.4,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -361,7 +360,7 @@ utleieklient</Text>
             <Text6 Ref="26" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0.2,2.2,0.6</ClientRectangle>
+              <ClientRectangle>5.8,0,2.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -377,7 +376,7 @@ utleieklient</Text>
             <Text8 Ref="28" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>10.2,0.2,5,0.6</ClientRectangle>
+              <ClientRectangle>10.2,0,5,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -390,7 +389,7 @@ utleieklient</Text>
             <Text10 Ref="29" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>9,0.2,1.2,0.6</ClientRectangle>
+              <ClientRectangle>9,0,1.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -403,7 +402,7 @@ utleieklient</Text>
             <Text11 Ref="30" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>15.2,0.2,2.8,0.6</ClientRectangle>
+              <ClientRectangle>15.2,0,2.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -424,7 +423,7 @@ utleieklient</Text>
             <Text13 Ref="32" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>18.4,0.2,2.4,0.6</ClientRectangle>
+              <ClientRectangle>18.4,0,2.4,0.6</ClientRectangle>
               <Conditions isList="true" count="1">
                 <value>Data.registrertUtleie,NotEqualTo,Data.registrertForvalt,,Expression,Red,Transparent,Arial_x002C_8_x002C_Bold,True,False,,,None</value>
               </Conditions>
@@ -447,7 +446,7 @@ utleieklient</Text>
             <Text15 Ref="34" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>21.2,0.2,2.4,0.6</ClientRectangle>
+              <ClientRectangle>21.2,0,2.4,0.6</ClientRectangle>
               <Conditions isList="true" count="2">
                 <value>Data.fakturertForvalt,NotEqualTo,Data.registrertForvalt,,Expression,Red,Transparent,Arial_x002C_8_x002C_Bold,True,False,,,None</value>
                 <value>Data.registrertUtleie,NotEqualTo,Data.registrertForvalt,,Expression,Red,Transparent,Arial_x002C_8_x002C_Bold,True,False,,,None</value>
@@ -471,7 +470,7 @@ utleieklient</Text>
             <Text17 Ref="36" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>24.4,0.2,2.4,0.6</ClientRectangle>
+              <ClientRectangle>24.4,0,2.4,0.6</ClientRectangle>
               <Conditions isList="true" count="1">
                 <value>Data.fakturertUtleie,NotEqualTo,Data.registrertForvalt,,Expression,Red,Transparent,Arial_x002C_8_x002C_Bold,True,False,,,None</value>
               </Conditions>
@@ -499,7 +498,10 @@ utleieklient</Text>
           <Name>DataBand1</Name>
           <Page isRef="4" />
           <Parent isRef="4" />
-          <Sort isList="true" count="0" />
+          <Sort isList="true" count="2">
+            <value>ASC</value>
+            <value>{Data.Oppdragsnr}</value>
+          </Sort>
         </DataBand1>
       </Components>
       <Conditions isList="true" count="1">
@@ -530,10 +532,10 @@ utleieklient</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>6/22/2016 6:03:19 AM</ReportChanged>
+  <ReportChanged>6/22/2016 3:56:25 PM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\kostanderAvstemming.mrt</ReportFile>
-  <ReportGuid>7308c73f68f24b00b3514fa5edc9ee0a</ReportGuid>
+  <ReportGuid>73a9a6293ef4461f934b792123757ba1</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
