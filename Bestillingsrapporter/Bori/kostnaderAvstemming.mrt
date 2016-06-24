@@ -12,7 +12,7 @@
     <DataSources isList="true" count="1">
       <Data Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Data</Alias>
-        <Columns isList="true" count="9">
+        <Columns isList="true" count="11">
           <value>Oppdragsnr,System.Int32</value>
           <value>forvaltningsAvtaleId,System.Int32</value>
           <value>avsluttet_oppdrag_dato,System.DateTime</value>
@@ -22,6 +22,8 @@
           <value>registrertUtleie,System.Decimal</value>
           <value>fakturertForvalt,System.Decimal</value>
           <value>fakturertUtleie,System.Decimal</value>
+          <value>Diff,Diff,System.Decimal,Data.fakturertForvalt_x0020_-_x0020_Data.fakturertUtleie</value>
+          <value>formidlingsnr,System.Int32</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -47,6 +49,7 @@ select op.Oppdragsnr
 ,(select isnull(sum(lsum),0) from c..VARELNFAKT where dim5 = op.forvaltningsAvtaleId and dim7 = op.Oppdragsnr and Varenr in (select VarenrSikkerhetsillelseHonorar from e..t_klientParametre union select VarenrUtleieHonorar from e..t_klientParametre union select varenrVisning from e..t_klientParametre union select VarenrAnnonseHonorar from e..t_klientParametre union select VarenrGebyrGrunnbok from e..t_klientParametre union select VarenrGebyrInnflytning from e..t_klientParametre
 
 )) as fakturertForvalt
+, (select isnull( ( select top 1 dim6 from e..t_utleiehonorarer where dim5=op.forvaltningsAvtaleId and dim7 = op.Oppdragsnr ),0)) as formidlingsnr
 ,(select isnull(sum(lsum),0) from uni_' + @otherClient + '..VARELNFAKT where dim5 = op.forvaltningsAvtaleId and dim7 = op.Oppdragsnr and Varenr in (select VarenrSikkerhetsillelseHonorar from unie_' + @otherClient + '..t_klientParametre union select VarenrUtleieHonorar from unie_' + @otherClient + '..t_klientParametre union select varenrVisning from unie_' + @otherClient + '..t_klientParametre union select VarenrAnnonseHonorar from unie_' + @otherClient + '..t_klientParametre union select VarenrGebyrGrunnbok from unie_' + @otherClient + '..t_klientParametre union select VarenrGebyrInnflytning from unie_' + @otherClient + '..t_klientParametre
 
 )) as fakturertUtleie
@@ -62,7 +65,7 @@ execute(@query)</SqlCommand>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="7">
-      <value>,FraDato,FraDato,search_x003B_date,System.String,_x0030_1.06.2016,False,False,False</value>
+      <value>,FraDato,FraDato,search_x003B_date,System.String,_x0030_1.06.2015,False,False,False</value>
       <value>,TilDato,TilDato,search_x003B_date,System.String,_x0033_0.06.2016,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
@@ -201,12 +204,12 @@ i perioden {FraDato} - {TilDato}</Text>
         </PageFooterBand1>
         <GroupHeaderBand1 Ref="14" type="GroupHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,3.2,27.7,1.2</ClientRectangle>
-          <Components isList="true" count="8">
+          <ClientRectangle>0,3.2,27.7,1.6</ClientRectangle>
+          <Components isList="true" count="10">
             <Text3 Ref="15" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.4,2.2,0.6</ClientRectangle>
+              <ClientRectangle>0,0.4,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -219,29 +222,31 @@ i perioden {FraDato} - {TilDato}</Text>
             <Text5 Ref="16" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.4,0.4,3.2,0.6</ClientRectangle>
+              <ClientRectangle>2.2,0.2,2,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text5</Name>
               <Page isRef="4" />
               <Parent isRef="14" />
-              <Text>Forvaltningsavtale</Text>
+              <Text>Forvaltnings-
+avtale</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text5>
             <Text7 Ref="17" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0,3.2,1</ClientRectangle>
+              <ClientRectangle>6.6,0,3.2,1.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text7</Name>
               <Page isRef="4" />
               <Parent isRef="14" />
-              <Text>Dato for avslutting 
-av oppdragsavtale
+              <Text>Dato for 
+avslutting av
+oppdragsavtale
 </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -249,7 +254,7 @@ av oppdragsavtale
             <Text9 Ref="18" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>9,0.4,0.8,0.6</ClientRectangle>
+              <ClientRectangle>10.4,0.4,0.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -262,14 +267,15 @@ av oppdragsavtale
             <Text12 Ref="19" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>15.2,0,3,1</ClientRectangle>
+              <ClientRectangle>15.2,0,3,1.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text12</Name>
               <Page isRef="4" />
               <Parent isRef="14" />
-              <Text>Registrert i
+              <Text>Utsatte 
+ordreposter i
 forvaltningsklient</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -277,14 +283,15 @@ forvaltningsklient</Text>
             <Text14 Ref="20" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>18.4,0,2.6,1</ClientRectangle>
+              <ClientRectangle>18.4,0,2.6,1.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text14</Name>
               <Page isRef="4" />
               <Parent isRef="14" />
-              <Text>Registrert i 
+              <Text>Utsatte
+ordreposter i 
 utleieklient</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -319,6 +326,36 @@ utleieklient</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text18>
+            <Text29 Ref="23" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4.4,0.2,2,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Guid>df0398bbcc19480a81c58f3e081b549c</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text29</Name>
+              <Page isRef="4" />
+              <Parent isRef="14" />
+              <Text>Formidlings-
+nr.</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text29>
+            <HorizontalLinePrimitive3 Ref="24" type="HorizontalLinePrimitive" isKey="true">
+              <ClientRectangle>0,1.4,27.6,0.0254</ClientRectangle>
+              <Color>Black</Color>
+              <EndCap Ref="25" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </EndCap>
+              <Guid>2f749b6c823e4bc1b7d0dc103fbff491</Guid>
+              <Name>HorizontalLinePrimitive3</Name>
+              <Page isRef="4" />
+              <Parent isRef="14" />
+              <StartCap Ref="26" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </StartCap>
+            </HorizontalLinePrimitive3>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>GroupHeaderBand1</Name>
@@ -326,12 +363,12 @@ utleieklient</Text>
           <Parent isRef="4" />
           <PrintOnAllPages>True</PrintOnAllPages>
         </GroupHeaderBand1>
-        <DataBand1 Ref="23" type="DataBand" isKey="true">
+        <DataBand1 Ref="27" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,5.2,27.7,0.8</ClientRectangle>
-          <Components isList="true" count="9">
-            <Text2 Ref="24" type="Text" isKey="true">
+          <ClientRectangle>0,5.6,27.7,1.8</ClientRectangle>
+          <Components isList="true" count="14">
+            <Text2 Ref="28" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0,1.6,0.6</ClientRectangle>
@@ -340,11 +377,11 @@ utleieklient</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text2</Name>
               <Page isRef="4" />
-              <Parent isRef="23" />
+              <Parent isRef="27" />
               <Text>{Data.Oppdragsnr}</Text>
               <TextBrush>Black</TextBrush>
             </Text2>
-            <Text4 Ref="25" type="Text" isKey="true">
+            <Text4 Ref="29" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>2.4,0,1.6,0.6</ClientRectangle>
@@ -353,27 +390,27 @@ utleieklient</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text4</Name>
               <Page isRef="4" />
-              <Parent isRef="23" />
+              <Parent isRef="27" />
               <Text>{Data.forvaltningsAvtaleId}</Text>
               <TextBrush>Black</TextBrush>
             </Text4>
-            <Text6 Ref="26" type="Text" isKey="true">
+            <Text6 Ref="30" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0,2.2,0.6</ClientRectangle>
+              <ClientRectangle>6.6,0,2.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text6</Name>
               <Page isRef="4" />
-              <Parent isRef="23" />
+              <Parent isRef="27" />
               <Text>{Data.avsluttet_oppdrag_dato}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="27" type="DateFormat" isKey="true">
+              <TextFormat Ref="31" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
             </Text6>
-            <Text8 Ref="28" type="Text" isKey="true">
+            <Text8 Ref="32" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>10.2,0,5,0.6</ClientRectangle>
@@ -382,11 +419,11 @@ utleieklient</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text8</Name>
               <Page isRef="4" />
-              <Parent isRef="23" />
+              <Parent isRef="27" />
               <Text>{Data.Eier}</Text>
               <TextBrush>Black</TextBrush>
             </Text8>
-            <Text10 Ref="29" type="Text" isKey="true">
+            <Text10 Ref="33" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>9,0,1.2,0.6</ClientRectangle>
@@ -395,11 +432,11 @@ utleieklient</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text10</Name>
               <Page isRef="4" />
-              <Parent isRef="23" />
+              <Parent isRef="27" />
               <Text>{Data.kreditorId}</Text>
               <TextBrush>Black</TextBrush>
             </Text10>
-            <Text11 Ref="30" type="Text" isKey="true">
+            <Text11 Ref="34" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>15.2,0,2.8,0.6</ClientRectangle>
@@ -408,10 +445,10 @@ utleieklient</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text11</Name>
               <Page isRef="4" />
-              <Parent isRef="23" />
+              <Parent isRef="27" />
               <Text>{Data.registrertForvalt}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="31" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="35" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
                 <NegativePattern>12</NegativePattern>
@@ -420,7 +457,7 @@ utleieklient</Text>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
             </Text11>
-            <Text13 Ref="32" type="Text" isKey="true">
+            <Text13 Ref="36" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>18.4,0,2.4,0.6</ClientRectangle>
@@ -431,10 +468,10 @@ utleieklient</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text13</Name>
               <Page isRef="4" />
-              <Parent isRef="23" />
+              <Parent isRef="27" />
               <Text>{Data.registrertUtleie}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="33" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="37" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
                 <NegativePattern>12</NegativePattern>
@@ -443,7 +480,7 @@ utleieklient</Text>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
             </Text13>
-            <Text15 Ref="34" type="Text" isKey="true">
+            <Text15 Ref="38" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>21.2,0,2.4,0.6</ClientRectangle>
@@ -455,10 +492,10 @@ utleieklient</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text15</Name>
               <Page isRef="4" />
-              <Parent isRef="23" />
+              <Parent isRef="27" />
               <Text>{Data.fakturertForvalt}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="35" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="39" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
                 <NegativePattern>12</NegativePattern>
@@ -467,7 +504,7 @@ utleieklient</Text>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
             </Text15>
-            <Text17 Ref="36" type="Text" isKey="true">
+            <Text17 Ref="40" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>24.4,0,2.4,0.6</ClientRectangle>
@@ -478,10 +515,10 @@ utleieklient</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text17</Name>
               <Page isRef="4" />
-              <Parent isRef="23" />
+              <Parent isRef="27" />
               <Text>{Data.fakturertUtleie}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="37" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="41" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
                 <NegativePattern>12</NegativePattern>
@@ -490,6 +527,79 @@ utleieklient</Text>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
             </Text17>
+            <Text25 Ref="42" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>24.4,0.6,3,0.8</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Data.Diff,NotEqualTo,_x0030_,,Numeric,Red,Transparent,Arial_x002C_12_x002C_Bold_x002C_Point_x002C_False_x002C_0,True,False,,,None</value>
+              </Conditions>
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text25</Name>
+              <Page isRef="4" />
+              <Parent isRef="27" />
+              <Text>{Data.Diff}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="43" type="NumberFormat" isKey="true">
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>1</NegativePattern>
+              </TextFormat>
+            </Text25>
+            <Text26 Ref="44" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>23.4,0.6,0.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text26</Name>
+              <Page isRef="4" />
+              <Parent isRef="27" />
+              <Text>Diff:</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text26>
+            <Text27 Ref="45" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4.4,0,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text27</Name>
+              <Page isRef="4" />
+              <Parent isRef="27" />
+              <Text>{Data.formidlingsnr}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text27>
+            <HorizontalLinePrimitive1 Ref="46" type="HorizontalLinePrimitive" isKey="true">
+              <ClientRectangle>0,1.4,27.6,0.0254</ClientRectangle>
+              <Color>Transparent</Color>
+              <EndCap Ref="47" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </EndCap>
+              <Name>HorizontalLinePrimitive1</Name>
+              <Page isRef="4" />
+              <Parent isRef="27" />
+              <StartCap Ref="48" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </StartCap>
+            </HorizontalLinePrimitive1>
+            <HorizontalLinePrimitive2 Ref="49" type="HorizontalLinePrimitive" isKey="true">
+              <ClientRectangle>0,1.4,27.6,0.0254</ClientRectangle>
+              <Color>Black</Color>
+              <EndCap Ref="50" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </EndCap>
+              <Name>HorizontalLinePrimitive2</Name>
+              <Page isRef="4" />
+              <Parent isRef="27" />
+              <StartCap Ref="51" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </StartCap>
+            </HorizontalLinePrimitive2>
           </Components>
           <Conditions isList="true" count="0" />
           <DataRelationName isNull="true" />
@@ -505,7 +615,7 @@ utleieklient</Text>
         </DataBand1>
       </Components>
       <Conditions isList="true" count="1">
-        <value>Data.registrertUtleie,NotEqualTo,Data.registrertForvalt,,Expression,Red,Transparent,Arial_x002C_8_x002C_Bold,True,False,,,None</value>
+        <value>Data.registrertUtleie,NotEqualTo,Data.registrertForvalt,,Expression,Red,Transparent,Arial_x002C_12_x002C_Bold_x002C_Point_x002C_False_x002C_0,True,False,,,None</value>
       </Conditions>
       <Guid>7c5fa630afb34d7baa8c7db6672f0fbd</Guid>
       <Margins>1,1,1,1</Margins>
@@ -514,13 +624,13 @@ utleieklient</Text>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="38" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="52" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
   </Pages>
-  <PrinterSettings Ref="39" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="53" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -532,23 +642,47 @@ utleieklient</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>6/22/2016 3:56:25 PM</ReportChanged>
+  <ReportChanged>6/24/2016 7:12:35 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
-  <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\kostanderAvstemming.mrt</ReportFile>
-  <ReportGuid>73a9a6293ef4461f934b792123757ba1</ReportGuid>
+  <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\kostnaderAvstemming.mrt</ReportFile>
+  <ReportGuid>b7fe676a668e4adbabf75d3c2469c8c0</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
-  <Script />
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        
+        public Report()
+        {
+            this.InitializeComponent();
+        }
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="1">
-    <Style1 type="Stimulsoft.Report.StiDialogStyle" isKey="true">
-      <BackColor>White</BackColor>
+    <Style1 Ref="54" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Brush>Transparent</Brush>
       <Conditions isList="true" count="0" />
       <Description />
       <Font>Arial,8</Font>
-      <ForeColor>Black</ForeColor>
       <Name>Style1</Name>
+      <TextBrush>[0:192:0]</TextBrush>
     </Style1>
   </Styles>
 </StiSerializer>
