@@ -44,8 +44,8 @@ select op.Oppdragsnr
 	, op.avsluttet_oppdrag_dato
 	, na.Name as Eier
 	, fa.kreditorId
-	,(select isnull(sum(pris),0) from e..t_utleiehonorarer where dim5 = op.forvaltningsAvtaleId and dim7 = op.Oppdragsnr) as registrertForvalt
-,(select isnull(sum(pris),0) from unie_' + @otherClient + '..t_utleiehonorarer where dim5 = op.forvaltningsAvtaleId and dim7 = op.Oppdragsnr) as registrertUtleie
+	,(select isnull(sum(pris*antall),0) from e..t_utleiehonorarer where dim5 = op.forvaltningsAvtaleId and dim7 = op.Oppdragsnr) as registrertForvalt
+,(select isnull(sum(pris*antall),0) from unie_' + @otherClient + '..t_utleiehonorarer where dim5 = op.forvaltningsAvtaleId and dim7 = op.Oppdragsnr) as registrertUtleie
 ,(select isnull(sum(lsum),0) from c..VARELNFAKT where dim5 = op.forvaltningsAvtaleId and dim7 = op.Oppdragsnr and Varenr in (select VarenrSikkerhetsillelseHonorar from e..t_klientParametre union select VarenrUtleieHonorar from e..t_klientParametre union select varenrVisning from e..t_klientParametre union select VarenrAnnonseHonorar from e..t_klientParametre union select VarenrGebyrGrunnbok from e..t_klientParametre union select VarenrGebyrInnflytning from e..t_klientParametre
 
 )) as fakturertForvalt
@@ -413,7 +413,7 @@ avtale</Text>
             <Text10 Ref="32" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>9,0,1.2,0.6</ClientRectangle>
+              <ClientRectangle>8.8,0,1.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -690,10 +690,10 @@ avtale</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>6/27/2016 6:50:23 AM</ReportChanged>
+  <ReportChanged>6/27/2016 7:06:40 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\kostnaderAvstemming.mrt</ReportFile>
-  <ReportGuid>ebc9266808c44795afc609949144ccb3</ReportGuid>
+  <ReportGuid>e8adbd4d7d5448b7b7d14ffe321dde78</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
