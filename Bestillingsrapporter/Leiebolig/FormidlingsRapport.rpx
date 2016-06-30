@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{6E86580B-AB99-4290-ADA8-2D25C9E33B46}" GUIDREP="{09E8E71F-AFF7-458D-AE7B-B8DC2920B138}" 
+	GUIDLIB="{45468FF7-CD70-4918-A807-D4997F0F5E18}" GUIDREP="{45BAEC03-E011-411E-91B7-9A7D181F7BDF}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED2000640065006D006F006C0069006300410052003400350036003200330034000000"
 	PrintWidth="16590"
 	DocumentName="ActiveReports Document"
@@ -22,6 +22,8 @@
 	'm_data.AddInputMacro "{Aar}", "Årstall", Year(Now) ,""
 	m_data.AddInputMacro "{Aar}","År: ",Year(Now),,2,"select distinct year y1, year y2 from uniadmin..adm_Client order by y1 desc"	
 	m_data.AddInputMacro "{Md}","Måned: ",Month(Now),,2,"select id, navn from utool..maaneder"
+
+
 
   if not m_data.ShowInputDialog("Velg periode") then exit sub
   m_data.sqlstring = "object:ef_RapFormidlingLib.ef_Rap_Formidlinger:FormidlingsRapportMd;{Aar};{ansvarligmegler};{Md}"

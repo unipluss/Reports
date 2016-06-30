@@ -75,7 +75,7 @@
       </Bedrift>
       <Oppdrag Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Oppdrag</Alias>
-        <Columns isList="true" count="25">
+        <Columns isList="true" count="24">
           <value>Oppdragsnr,System.Int32</value>
           <value>startdato,System.String</value>
           <value>Name,System.String</value>
@@ -85,7 +85,6 @@
           <value>varighet,System.Int32</value>
           <value>status,System.String</value>
           <value>Navn,System.String</value>
-          <value>Ansatte_id,System.Int32</value>
           <value>Id,System.Int32</value>
           <value>seksjonsnr,System.String</value>
           <value>kortadr,System.String</value>
@@ -116,7 +115,7 @@ select oa.Id, oa.Oppdragsnr, convert(varchar(20), oa.startdato, 104)as startdato
 	ko.Kommunenavn kortkommune,
 	typ.BoligType, DATEDIFF(DAY, oa.startdato, oa.sluttdato) as varighet, 
 	convert(varchar(10),oa.statusId)+ '-'+ st.Status as status, case when oa.statusid=19025 then 'Trukket' else st.Status end kortstatus,
-	ans.Navn, ans.Ansatte_id, bo.seksjonsnr, bo.Objekt_adresse + ', ' + convert(varchar(8),bo.Objekt_postnummer) + ' '+ bo.Objekt_poststed kortadr
+	kd.anvsarligMeglerVedAksept as Navn, bo.seksjonsnr, bo.Objekt_adresse + ', ' + convert(varchar(8),bo.Objekt_postnummer) + ' '+ bo.Objekt_poststed kortadr
 	, byg.bnr, byg.gnr, bo.BoligNummer hnr, bo.andelsnr, bo.aksjenummer,
 	 (select top 1 name from c..c_contacts where id=fa.MedeierKontaktId) eier2,
 	convert(varchar(20), oa.signert_dato_kunde, 104)as kundesignertdato, oa.ansvarligMegler
@@ -131,12 +130,12 @@ left join e..t_kunde ei on ei.Kundenummer = fa.kreditorId
 left join c..c_Name na on ei.NameID = na.ID
 left join m..Kommune ko on ko.Kommunenr  collate Danish_Norwegian_CI_AS = case when len(byg.kommuneNr)=3 then '0'+byg.kommuneNr else byg.kommuneNr end collate Danish_Norwegian_CI_AS
 left join e..t_boligtype typ on bo.Boligtype_id = typ.BoligType_id
-left join e..t_ansatte ans on ans.Ansatte_id = fa.ansvarligMegler 
+left join e..t_kontraktsdata kd on  oa.id = kd.OppdragsavtaleId
 where 
 /* CONVERT(datetime, @dt, 104) BETWEEN dateadd(dd, -DAY (oa.startdato) + 1, oa.startdato) and dateadd(dd, -DAY (oa.sluttdato) + 1, oa.sluttdato) */
 /* (month(oa.startdato)={Mnd} and year(oa.startdato)={Aar}) */
 (month(oa.akseptertdato)={Mnd} and year(oa.akseptertdato)={Aar})
-and ans.Ansatte_id in({Ansatt})
+and kd.anvsarligMeglerVedAksept in (select navn from e..t_ansatte where Ansatte_id in ({Ansatt}))
 and isnull(oa.oppdragsnr,0)&gt;0
 
 order by oa.oppdragsnr</SqlCommand>
@@ -248,7 +247,7 @@ order by oa.oppdragsnr</SqlCommand>
     <Variables isList="true" count="8">
       <value>,Aar,Akseptert_x0020_år,text_x007C_sql_x003D_select_x0020_YEAR_x0028_GETDATE_x0028__x0029__x0029_,System.Int32,_x0032_016,False,False,False</value>
       <value>,Mnd,Akseptert_x0020_måned,combo_x007C_sql_x003D_select_x0020_id_x002C_kortnavn_x0020_from_x0020_m..maaneder,System.Int32,_x0035_,False,False,False</value>
-      <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031__x002C_10_x002C_11_x002C_12_x002C_13_x002C_14_x002C_15_x002C_16_x002C_17_x002C_18_x002C_19_x002C_2_x002C_21_x002C_24_x002C_27_x002C_28_x002C_29_x002C_3_x002C_30_x002C_32_x002C_33_x002C_34_x002C_35_x002C_4_x002C_5_x002C_6_x002C_7_x002C_8_x002C_9,False,False,False</value>
+      <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0033_5,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
@@ -1037,10 +1036,10 @@ kunde</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>6/1/2016 10:05:39 AM</ReportChanged>
+  <ReportChanged>6/30/2016 7:27:12 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\Oppdragsjournal.mrt</ReportFile>
-  <ReportGuid>233d66e1746e45a7b80d8c0676d506a4</ReportGuid>
+  <ReportGuid>1846f823fe5f4f09b005af93ac5e1df0</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
