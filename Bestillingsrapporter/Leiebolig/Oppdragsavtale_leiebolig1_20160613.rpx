@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{C59ADA27-47A0-4460-886F-2432DC94A094}" GUIDREP="{4D5265B9-CAAC-4A74-80B8-45EBDDB75288}" 
+	GUIDLIB="{C5720138-20EB-4901-8F88-47E3801959EC}" GUIDREP="{404566BC-641F-48D9-A6C6-17DED1BE0419}" 
 	LICENSE="10000000"
 	PrintWidth="11220"
 	DocumentName="ActiveReports Document"
@@ -90,7 +90,7 @@ End Sub
 		<Control 
 		Type="AR.RTF"
 		Name="RichEdit72"
-		Left="425"
+		Left="283"
 		Top="14315"
 		Width="10630"
 		Height="16866"
@@ -1617,6 +1617,84 @@ End Sub
 		ClassName="Normal"
 		>
 		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field187"
+		DataField="visning"
+		Left="6803"
+		Top="24661"
+		Width="1417"
+		Height="284"
+		Visible="0"
+		Text="visning"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field188"
+		DataField="kostnad6"
+		Left="6803"
+		Top="25087"
+		Width="1418"
+		Height="284"
+		Visible="0"
+		Text="kostnad6"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field189"
+		DataField="kostnad7"
+		Left="6803"
+		Top="25512"
+		Width="1418"
+		Height="284"
+		Visible="0"
+		Text="kostnad7"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field190"
+		DataField="kostnad8"
+		Left="6803"
+		Top="25937"
+		Width="1418"
+		Height="284"
+		Visible="0"
+		Text="kostnad8"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field191"
+		DataField="kostnad9"
+		Left="6803"
+		Top="26362"
+		Width="1418"
+		Height="284"
+		Visible="0"
+		Text="kostnad9"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field192"
+		DataField="kostnad10"
+		Left="6803"
+		Top="26787"
+		Width="1418"
+		Height="284"
+		Visible="0"
+		Text="kostnad10"
+		ClassName="Normal"
+		>
+		</Control>
 <Script>
 <![CDATA[Sub OnFormat
 
@@ -1665,6 +1743,12 @@ End Sub
 	dim MedEierAdresse2
 	dim MedEierPostNr
 	dim MedEierPostSted
+	dim visning
+	dim kostnad6
+	dim kostnad7
+	dim kostnad8
+	dim kostnad9
+	dim kostnad10
 	
 	BoligNummer = rpt.fields("BoligNummer").Value
 	eier_nr  = rpt.fields("eier_nr").Value
@@ -1714,6 +1798,12 @@ End Sub
 	MedEierAdresse2 = rpt.fields("MedEierAdresse2").Value
 	MedEierPostNr = rpt.fields("MedEierPostNr").Value
 	MedEierPostSted = rpt.fields("MedEierPostSted").Value
+	visning = rpt.fields("visning").Value
+	kostnad6  = rpt.fields("kostnad6").Value
+	kostnad7  = rpt.fields("kostnad7").Value
+	kostnad8  = rpt.fields("kostnad8").Value
+	kostnad9  = rpt.fields("kostnad9").Value
+	kostnad10  = rpt.fields("kostnad10").Value
 	
 	dim a 
 	set a = rpt.Sections("Detail").Controls
@@ -1774,6 +1864,12 @@ End Sub
 				call b.replacefield("MedEierAdresse2", MedEierAdresse2)
 				call b.replacefield("MedEierPostNr", MedEierPostNr)
 				call b.replacefield("MedEierPostSted", MedEierPostSted)
+				call b.replacefield("visning", visning)
+				call b.replacefield("kostnad6", kostnad6)
+				call b.replacefield("kostnad7", kostnad7)
+				call b.replacefield("kostnad8", kostnad8)
+				call b.replacefield("kostnad9", kostnad9)
+				call b.replacefield("kostnad10", kostnad10)
 			end if
 		end if	
 	next 
