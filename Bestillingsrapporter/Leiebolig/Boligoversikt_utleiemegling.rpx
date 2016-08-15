@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{B593B5D2-4303-4043-92F1-668D22D03BEF}" GUIDREP="{611A65B3-F14B-4868-8668-72A0C8BB57E2}" 
+	GUIDLIB="{23635792-E0D4-4A73-BB81-869B7155B15F}" GUIDREP="{66F88D33-3A47-4078-94E6-ED2DA30D6F56}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
 		740066000000"
 	PrintWidth="16560"
@@ -83,7 +83,7 @@ Sub OnDataInitialize
 	
 	sql = sql & " /**/ where eier.kundenummer= {eiernr} "
 	sql = sql & " /**/ and not bo.Status = 23001"
-	sql = sql & " /**/ order by b.adresse, oppdragsnr, Leilnr" 
+	sql = sql & " /**/ order by b.adresse, bo.Oppgang, Leilnr" 
 
   m_data.SqlString = sql
   m_data.setupfields rpt
