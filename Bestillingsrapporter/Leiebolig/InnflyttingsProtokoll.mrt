@@ -158,7 +158,7 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
         <PageHeaderBand1 Ref="7" type="PageHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,0.4,27.7,2.6</ClientRectangle>
-          <Components isList="true" count="5">
+          <Components isList="true" count="6">
             <Text1 Ref="8" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,0.4,6.4,0.6</ClientRectangle>
@@ -220,17 +220,29 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Text>{DataSource1.Rom_nummer}</Text>
               <TextBrush>Black</TextBrush>
             </Text5>
+            <Text33 Ref="13" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4.6,-0.2,5.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text33</Name>
+              <Page isRef="6" />
+              <Parent isRef="7" />
+              <Text>{DataSource1.Malerstand}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text33>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>PageHeaderBand1</Name>
           <Page isRef="6" />
           <Parent isRef="6" />
         </PageHeaderBand1>
-        <PageFooterBand1 Ref="13" type="PageFooterBand" isKey="true">
+        <PageFooterBand1 Ref="14" type="PageFooterBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,18.2,27.7,0.8</ClientRectangle>
           <Components isList="true" count="6">
-            <Text6 Ref="14" type="Text" isKey="true">
+            <Text6 Ref="15" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>2.6,0.1,4.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -238,11 +250,11 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Margins>0,0,0,0</Margins>
               <Name>Text6</Name>
               <Page isRef="6" />
-              <Parent isRef="13" />
+              <Parent isRef="14" />
               <Text>{Time}</Text>
               <TextBrush>Black</TextBrush>
             </Text6>
-            <Text8 Ref="15" type="Text" isKey="true">
+            <Text8 Ref="16" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.1,2.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -250,12 +262,12 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Margins>0,0,0,0</Margins>
               <Name>Text8</Name>
               <Page isRef="6" />
-              <Parent isRef="13" />
+              <Parent isRef="14" />
               <Text>Rapport generert</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text8>
-            <Text9 Ref="16" type="Text" isKey="true">
+            <Text9 Ref="17" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>24.2,0.1,1,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -263,12 +275,12 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Margins>0,0,0,0</Margins>
               <Name>Text9</Name>
               <Page isRef="6" />
-              <Parent isRef="13" />
+              <Parent isRef="14" />
               <Text>Side</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text9>
-            <Text7 Ref="17" type="Text" isKey="true">
+            <Text7 Ref="18" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>25,0.1,0.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -277,11 +289,11 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Margins>0,0,0,0</Margins>
               <Name>Text7</Name>
               <Page isRef="6" />
-              <Parent isRef="13" />
+              <Parent isRef="14" />
               <Text>{PageNumber}</Text>
               <TextBrush>Black</TextBrush>
             </Text7>
-            <Text10 Ref="18" type="Text" isKey="true">
+            <Text10 Ref="19" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>26,0.1,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -289,11 +301,11 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Margins>0,0,0,0</Margins>
               <Name>Text10</Name>
               <Page isRef="6" />
-              <Parent isRef="13" />
+              <Parent isRef="14" />
               <Text>{TotalPageCount}</Text>
               <TextBrush>Black</TextBrush>
             </Text10>
-            <Text11 Ref="19" type="Text" isKey="true">
+            <Text11 Ref="20" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>25.6,0.1,0.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -302,7 +314,7 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Margins>0,0,0,0</Margins>
               <Name>Text11</Name>
               <Page isRef="6" />
-              <Parent isRef="13" />
+              <Parent isRef="14" />
               <Text>av</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -313,12 +325,12 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
           <Page isRef="6" />
           <Parent isRef="6" />
         </PageFooterBand1>
-        <DataBand1 Ref="20" type="DataBand" isKey="true">
+        <DataBand1 Ref="21" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <ClientRectangle>0,3.8,27.7,14</ClientRectangle>
-          <Components isList="true" count="31">
-            <Text12 Ref="21" type="Text" isKey="true">
+          <Components isList="true" count="30">
+            <Text12 Ref="22" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>4.4,0.17,3.56,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -326,11 +338,11 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Margins>0,0,0,0</Margins>
               <Name>Text12</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.Oppdragsnummer}</Text>
               <TextBrush>Black</TextBrush>
             </Text12>
-            <Text13 Ref="22" type="Text" isKey="true">
+            <Text13 Ref="23" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,0.2,3,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -338,11 +350,11 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Margins>0,0,0,0</Margins>
               <Name>Text13</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Oppdragsnummer</Text>
               <TextBrush>Black</TextBrush>
             </Text13>
-            <Text16 Ref="23" type="Text" isKey="true">
+            <Text16 Ref="24" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>4.4,1.4,3.63,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -350,11 +362,11 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Margins>0,0,0,0</Margins>
               <Name>Text16</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.Nokkel_nummer}</Text>
               <TextBrush>Black</TextBrush>
             </Text16>
-            <Text17 Ref="24" type="Text" isKey="true">
+            <Text17 Ref="25" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,1.4,2.8,1</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -362,13 +374,13 @@ and bi.ProtokollId = {Innflyttingsprotokoll}
               <Margins>0,0,0,0</Margins>
               <Name>Text17</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Systemnøkkel-
 nummer</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text17>
-            <Text14 Ref="25" type="Text" isKey="true">
+            <Text14 Ref="26" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>4.4,0.8,3.56,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -376,11 +388,11 @@ nummer</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text14</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.nokkelskapNr}</Text>
               <TextBrush>Black</TextBrush>
             </Text14>
-            <Text15 Ref="26" type="Text" isKey="true">
+            <Text15 Ref="27" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,0.8,3,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -388,12 +400,12 @@ nummer</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text15</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Nøkkelskapnr.</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text15>
-            <CheckBox1 Ref="27" type="CheckBox" isKey="true">
+            <CheckBox1 Ref="28" type="CheckBox" isKey="true">
               <Brush>Transparent</Brush>
               <Checked>{DataSource1.utleierFullmakt}</Checked>
               <CheckStyleForFalse>NoneRectangle</CheckStyleForFalse>
@@ -403,10 +415,10 @@ nummer</Text>
               <ContourColor>Black</ContourColor>
               <Name>CheckBox1</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <TextBrush>Black</TextBrush>
             </CheckBox1>
-            <Text18 Ref="28" type="Text" isKey="true">
+            <Text18 Ref="29" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,3.8,3.6,1</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -414,13 +426,13 @@ nummer</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text18</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Utleier representert
 med fullmakt</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text18>
-            <Text19 Ref="29" type="Text" isKey="true">
+            <Text19 Ref="30" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>4.4,4.8,5,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -428,11 +440,11 @@ med fullmakt</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text19</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.utleieRepresentant}</Text>
               <TextBrush>Black</TextBrush>
             </Text19>
-            <Text20 Ref="30" type="Text" isKey="true">
+            <Text20 Ref="31" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,4.8,3.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -440,12 +452,12 @@ med fullmakt</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text20</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Leiebolig representat</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text20>
-            <CheckBox2 Ref="31" type="CheckBox" isKey="true">
+            <CheckBox2 Ref="32" type="CheckBox" isKey="true">
               <Brush>Transparent</Brush>
               <Checked>{DataSource1.leietakerTilstede}</Checked>
               <CheckStyleForFalse>NoneRectangle</CheckStyleForFalse>
@@ -455,10 +467,10 @@ med fullmakt</Text>
               <ContourColor>Black</ContourColor>
               <Name>CheckBox2</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <TextBrush>Black</TextBrush>
             </CheckBox2>
-            <Text21 Ref="32" type="Text" isKey="true">
+            <Text21 Ref="33" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,5.4,2.8,1</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -466,13 +478,13 @@ med fullmakt</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text21</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Leietaker
 tilstede</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text21>
-            <Text23 Ref="33" type="Text" isKey="true">
+            <Text23 Ref="34" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>12.8,4.2,3.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -480,12 +492,12 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text23</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Sikkerhetstillelse</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text23>
-            <Text25 Ref="34" type="Text" isKey="true">
+            <Text25 Ref="35" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>16.2,4.2,4.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -493,11 +505,11 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text25</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.DepositumType}</Text>
               <TextBrush>Black</TextBrush>
             </Text25>
-            <Text22 Ref="35" type="Text" isKey="true">
+            <Text22 Ref="36" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>16.2,4.8,5.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -505,10 +517,10 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text22</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.sikkehetstillesleSum}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="36" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="37" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
                 <NegativePattern>12</NegativePattern>
@@ -516,7 +528,7 @@ tilstede</Text>
                 <Symbol>kr</Symbol>
               </TextFormat>
             </Text22>
-            <Text24 Ref="37" type="Text" isKey="true">
+            <Text24 Ref="38" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>16.2,2.6,5.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -524,10 +536,10 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text24</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.husleie}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="38" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="39" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
                 <NegativePattern>12</NegativePattern>
@@ -535,7 +547,7 @@ tilstede</Text>
                 <Symbol>kr</Symbol>
               </TextFormat>
             </Text24>
-            <Text26 Ref="39" type="Text" isKey="true">
+            <Text26 Ref="40" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>12.8,2.6,2.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -543,12 +555,12 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text26</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Husleie</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text26>
-            <Text27 Ref="40" type="Text" isKey="true">
+            <Text27 Ref="41" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>16.2,3.4,5.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -556,10 +568,10 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text27</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.fakturertBelop1Mnd}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="41" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="42" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
                 <NegativePattern>12</NegativePattern>
@@ -567,7 +579,7 @@ tilstede</Text>
                 <Symbol>kr</Symbol>
               </TextFormat>
             </Text27>
-            <Text28 Ref="42" type="Text" isKey="true">
+            <Text28 Ref="43" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>12.8,3.2,3.2,1</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -575,13 +587,13 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text28</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Fakturert beløp
 1. måned</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text28>
-            <Text29 Ref="43" type="Text" isKey="true">
+            <Text29 Ref="44" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
               <ClientRectangle>0.4,7.8,27,5.8</ClientRectangle>
@@ -590,13 +602,13 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text29</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.boligensTilstand}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
               <Type>Expression</Type>
             </Text29>
-            <Text30 Ref="44" type="Text" isKey="true">
+            <Text30 Ref="45" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,7.2,3.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -605,12 +617,12 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text30</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Boligens tilstand</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text30>
-            <Text31 Ref="45" type="Text" isKey="true">
+            <Text31 Ref="46" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>16.2,5.6,5.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -618,11 +630,11 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text31</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.hafslundReferanse}</Text>
               <TextBrush>Black</TextBrush>
             </Text31>
-            <Text32 Ref="46" type="Text" isKey="true">
+            <Text32 Ref="47" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>12.8,5.6,3.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -630,12 +642,12 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text32</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Hafslund referanse</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text32>
-            <Text34 Ref="47" type="Text" isKey="true">
+            <Text34 Ref="48" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>12.8,6.4,3.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -643,23 +655,11 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text34</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Målerstand strøm</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text34>
-            <Text33 Ref="48" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>16.2,6.4,5.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10</Font>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text33</Name>
-              <Page isRef="6" />
-              <Parent isRef="20" />
-              <Text>{DataSource1.Malerstand}</Text>
-              <TextBrush>Black</TextBrush>
-            </Text33>
             <Text35 Ref="49" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>23.8,0.2,3.4,0.6</ClientRectangle>
@@ -668,7 +668,7 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text35</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.fullfortDato}</Text>
               <TextBrush>Black</TextBrush>
             </Text35>
@@ -680,7 +680,7 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text36</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Gjennomført dato</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -694,7 +694,7 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text51</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.antallNokler}</Text>
               <TextBrush>Black</TextBrush>
             </Text51>
@@ -707,7 +707,7 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text52</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Antall nøkler utlevert</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -721,7 +721,7 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text78</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>{DataSource1.leietaker}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="54" type="CurrencyFormat" isKey="true">
@@ -742,7 +742,7 @@ tilstede</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text79</Name>
               <Page isRef="6" />
-              <Parent isRef="20" />
+              <Parent isRef="21" />
               <Text>Leietaker</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -1558,16 +1558,18 @@ tilstede</Text>
           <Alias>Signature</Alias>
           <Border>None;Transparent;1;Solid;False;4;Black</Border>
           <Brush>Transparent</Brush>
-          <ClientRectangle>0.4,3.4,26.2,3.2</ClientRectangle>
+          <ClientRectangle>0.4,3.4,23.8,3.8</ClientRectangle>
           <Conditions isList="true" count="0" />
           <GlobalizedName>Signature</GlobalizedName>
+          <MultipleFactor>0.5</MultipleFactor>
           <Name>Signature</Name>
           <Page isRef="105" />
           <Parent isRef="105" />
+          <Smoothing>False</Smoothing>
         </Signature>
         <Text85 Ref="118" type="Text" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0.4,7.6,26.2,0.6</ClientRectangle>
+          <ClientRectangle>0.4,8.2,26.2,0.6</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Font>Arial,10</Font>
           <Guid>8e9f12a82bb14492b3fae5fca9c09ef1</Guid>
@@ -1588,7 +1590,7 @@ tilstede</Text>
         </Text85>
         <Text86 Ref="120" type="Text" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>2.4,6.8,10.6,0.6</ClientRectangle>
+          <ClientRectangle>2.4,7.4,10.6,0.6</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Font>Arial,10</Font>
           <Guid>881cd725b436428584122f8474afdeb1</Guid>
@@ -1609,7 +1611,7 @@ tilstede</Text>
         </Text86>
         <Text87 Ref="122" type="Text" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0.4,6.8,2,0.6</ClientRectangle>
+          <ClientRectangle>0.4,7.4,2,0.6</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Font>Arial,10</Font>
           <Guid>6a69b9b2d7934dc6b461360c5fb55b81</Guid>
@@ -1651,10 +1653,10 @@ tilstede</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>9/5/2016 8:11:00 AM</ReportChanged>
+  <ReportChanged>9/5/2016 1:41:25 PM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\InnflyttingsProtokoll.mrt</ReportFile>
-  <ReportGuid>644ba346668542d09d7a870d26d10a2d</ReportGuid>
+  <ReportGuid>a9d2e54e65ea4a30bcbfcae4b60485a7</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
