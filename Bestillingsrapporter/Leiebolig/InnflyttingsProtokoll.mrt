@@ -110,36 +110,38 @@ order by slo.id desc</SqlCommand>
       </Kontrollpunkt>
       <Bilder Ref="5" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Bilder</Alias>
-        <Columns isList="true" count="9">
-          <value>bildeUrl,System.String</value>
-          <value>Id,System.Int32</value>
-          <value>ProtokollType,System.Int32</value>
-          <value>Slettet,System.Boolean</value>
-          <value>BildeNavn,System.String</value>
-          <value>OrgFilnavn,System.String</value>
-          <value>Beskrivelse,System.String</value>
-          <value>Guid,System.String</value>
-          <value>ProtokollId,System.Int32</value>
+        <Columns isList="true" count="3">
+          <value>beskrivelse,System.String</value>
+          <value>doknavn,System.String</value>
+          <value>Url,System.String</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
         <Name>Bilder</Name>
         <NameInSource>Connection</NameInSource>
         <Parameters isList="true" count="0" />
-        <SqlCommand>select 
-	std.protokollbildeurl + bi.Guid + '.' + RIGHT(bi.OrgFilnavn, CHARINDEX('.', REVERSE(bi.OrgFilnavn)) -1) as bildeUrl,
-bi.*
-from e..t_protokollBilder bi, e..t_standardVerdier std
-where bi.ProtokollType = 1 
-and isnull(bi.slettet,0)= 0
-and bi.ProtokollId = {Innflyttingsprotokoll}
+        <SqlCommand>select bi.beskrivelse, bi.doknavn, pro.Url
+	from c..Dok bi
+left join c..ArchiveCodeLink li on li.ForeignKey = bi.id and li.type = 2
+left join e..t_protokollbilder pro on pro.DokId = bi.id
+where li.ArchiveCode in 
+(
+select co.ArchiveCode from e..t_innflyttingsprotokoll inn
+left join e..t_SjekklisteJobb jo on inn.KontraktsId = jo.kontraktsid and jo.kategoriid = 2004
+left join c..ArchiveCodeLink co on co.type = 42 and co.ForeignKey = jo.id
+where inn.id = 29
+)
+and RIGHT(convert(varchar(1000), bi.binHeader) , CHARINDEX('.', REVERSE(convert(varchar(1000), bi.binHeader))) -1) in ('png', 'PNG','jpg','JPG', 'JPEG','jpeg', 'bmp','BMP')
+and pro.ProtokollType = 1
+and isnull(pro.slettet,0)= 0
+and pro.ProtokollId = 29
 </SqlCommand>
       </Bilder>
     </DataSources>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="6">
-      <value>,Innflyttingsprotokoll,Innflyttingsprotokoll,text_x007C_,System.String,_x0031_8,False,False,False</value>
+      <value>,Innflyttingsprotokoll,Innflyttingsprotokoll,text_x007C_,System.String,_x0032_9,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
@@ -1323,7 +1325,7 @@ tilstede</Text>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0,14,10.8</ClientRectangle>
               <Conditions isList="true" count="0" />
-              <ImageURL>{Bilder.bildeUrl}</ImageURL>
+              <ImageURL>{Bilder.Url}</ImageURL>
               <Name>Image1</Name>
               <Page isRef="86" />
               <Parent isRef="98" />
@@ -1338,8 +1340,9 @@ tilstede</Text>
               <Name>Text70</Name>
               <Page isRef="86" />
               <Parent isRef="98" />
-              <Text>{Bilder.BildeNavn}</Text>
+              <Text>{Bilder.doknavn}</Text>
               <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
             </Text70>
             <Text71 Ref="101" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
@@ -1365,9 +1368,10 @@ tilstede</Text>
               <Name>Text72</Name>
               <Page isRef="86" />
               <Parent isRef="98" />
-              <Text>{Bilder.Beskrivelse}</Text>
+              <Text>{Bilder.beskrivelse}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
+              <Type>DataColumn</Type>
             </Text72>
             <Text73 Ref="103" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
@@ -1409,7 +1413,7 @@ tilstede</Text>
     <Page4 Ref="105" type="Page" isKey="true">
       <Border>None;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
-      <Components isList="true" count="6">
+      <Components isList="true" count="8">
         <PageHeaderBand3 Ref="106" type="PageHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,0.4,27.7,2.6</ClientRectangle>
@@ -1626,6 +1630,36 @@ tilstede</Text>
           </TextFormat>
           <Type>Expression</Type>
         </Text87>
+        <Text88 Ref="124" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>10.6,15,5.4,2.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,8</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text88</Name>
+          <Page isRef="105" />
+          <Parent isRef="105" />
+          <Text>  Leiebolig Utleie AS
+  Tlf:           + 47 23 00 61 20
+  E-mail:      utleie@leie-bolig.no
+  Gullhaug Torg 1
+  0484 Oslo
+ 
+   
+</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+        </Text88>
+        <Image2 Ref="125" type="Image" isKey="true">
+          <Border>None;Transparent;1;Solid;False;4;Black</Border>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.2,15,10.2,2.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <File>\\esben10\Shared\lbsign.jpg</File>
+          <Name>Image2</Name>
+          <Page isRef="105" />
+          <Parent isRef="105" />
+        </Image2>
       </Components>
       <Conditions isList="true" count="0" />
       <Guid>e8d3baac18b44a51918aed8f4d2fc052</Guid>
@@ -1635,13 +1669,13 @@ tilstede</Text>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="124" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="126" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page4>
   </Pages>
-  <PrinterSettings Ref="125" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="127" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -1653,10 +1687,10 @@ tilstede</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>9/5/2016 1:41:25 PM</ReportChanged>
+  <ReportChanged>9/9/2016 11:58:41 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\InnflyttingsProtokoll.mrt</ReportFile>
-  <ReportGuid>a9d2e54e65ea4a30bcbfcae4b60485a7</ReportGuid>
+  <ReportGuid>4ff3ca9d516f451bb47dc7bc0c535505</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
