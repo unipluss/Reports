@@ -129,19 +129,19 @@ where li.ArchiveCode in
 select co.ArchiveCode from e..t_innflyttingsprotokoll inn
 left join e..t_SjekklisteJobb jo on inn.KontraktsId = jo.kontraktsid and jo.kategoriid = 2004
 left join c..ArchiveCodeLink co on co.type = 42 and co.ForeignKey = jo.id
-where inn.id = 29
+where inn.id = {Innflyttingsprotokoll}
 )
 and RIGHT(convert(varchar(1000), bi.binHeader) , CHARINDEX('.', REVERSE(convert(varchar(1000), bi.binHeader))) -1) in ('png', 'PNG','jpg','JPG', 'JPEG','jpeg', 'bmp','BMP')
 and pro.ProtokollType = 1
 and isnull(pro.slettet,0)= 0
-and pro.ProtokollId = 29
+and pro.ProtokollId = {Innflyttingsprotokoll}
 </SqlCommand>
       </Bilder>
     </DataSources>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="6">
-      <value>,Innflyttingsprotokoll,Innflyttingsprotokoll,text_x007C_,System.String,_x0032_9,False,False,False</value>
+      <value>,Innflyttingsprotokoll,Innflyttingsprotokoll,text_x007C_,System.String,_x0033_4,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
@@ -1323,17 +1323,21 @@ tilstede</Text>
             <Image1 Ref="99" type="Image" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0,14,10.8</ClientRectangle>
+              <CanShrink>True</CanShrink>
+              <ClientRectangle>0.2,0.2,18.4,13.2</ClientRectangle>
               <Conditions isList="true" count="0" />
+              <HorAlignment>Center</HorAlignment>
               <ImageURL>{Bilder.Url}</ImageURL>
               <Name>Image1</Name>
               <Page isRef="86" />
               <Parent isRef="98" />
+              <Stretch>True</Stretch>
+              <VertAlignment>Center</VertAlignment>
             </Image1>
             <Text70 Ref="100" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>16.4,0.2,9.4,0.6</ClientRectangle>
+              <ClientRectangle>18.8,0.6,8.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -1347,7 +1351,7 @@ tilstede</Text>
             <Text71 Ref="101" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>14.4,0.2,1.8,0.6</ClientRectangle>
+              <ClientRectangle>18.8,0.2,1.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -1361,7 +1365,7 @@ tilstede</Text>
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>16.4,1,9.4,4.4</ClientRectangle>
+              <ClientRectangle>18.8,3,8.4,4.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -1376,7 +1380,7 @@ tilstede</Text>
             <Text73 Ref="103" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>14.4,1,2,0.6</ClientRectangle>
+              <ClientRectangle>18.8,2.4,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -1687,10 +1691,10 @@ tilstede</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>9/9/2016 11:58:41 AM</ReportChanged>
+  <ReportChanged>9/12/2016 9:48:20 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\InnflyttingsProtokoll.mrt</ReportFile>
-  <ReportGuid>4ff3ca9d516f451bb47dc7bc0c535505</ReportGuid>
+  <ReportGuid>03ddbdc6dbbc48109caebb5ade6de778</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
