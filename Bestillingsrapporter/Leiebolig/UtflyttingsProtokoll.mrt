@@ -76,7 +76,7 @@ left join e..t_oppsigelsesKategori kat on ut.oppsigelsesKategoriId = kat.Id
 left join e..t_kontraktsdata kd on ut.KontraktsId = kd.Kontrakts_ID
 left join e..t_kunde ku on kd.Kundenummer = ku.Kundenummer
 left join c..c_Name na on ku.NameID = na.ID
-where ut.id = 11</SqlCommand>
+where ut.id = {Utflyttingsprotokoll}</SqlCommand>
       </DataSource1>
       <Kontrollpunkt Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Kontrollpunkt</Alias>
@@ -162,7 +162,7 @@ and pro.ProtokollId = {Utflyttingsprotokoll}
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="6">
-      <value>,Utflyttingsprotokoll,Utflyttingsprotokoll,text_x007C_,System.String,_x0031_1,False,False,False</value>
+      <value>,Utflyttingsprotokoll,Utflyttingsprotokoll,text_x007C_,System.String,_x0031_2,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
@@ -1982,10 +1982,10 @@ kategori</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>9/12/2016 9:49:07 AM</ReportChanged>
+  <ReportChanged>9/12/2016 10:55:52 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\UtflyttingsProtokoll.mrt</ReportFile>
-  <ReportGuid>0f2eb2b84c84436789dc0102745aef16</ReportGuid>
+  <ReportGuid>1fab393e2afb404d961f8f3d3ccf8f94</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
