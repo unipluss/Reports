@@ -37,7 +37,7 @@
         <Parameters isList="true" count="0" />
         <SqlCommand>set dateformat dmy
 
-select tmp.* from (
+select  tmp.* from (
 	select 
 case when coalesce(vlo.Registreringsdato, o.Registreringsdato, o.ordredato) is null and isnull(vlo.ab_avregnid,0)&lt;&gt;0 then 
 (select top 1 abavr.dato from c..AB_AVREGNING abavr where abavr.id=vlo.AB_AVREGNID) else coalesce(vlo.Registreringsdato, o.Registreringsdato, o.ordredato) end regdato,
@@ -74,13 +74,13 @@ order by  tmp.varenr, tmp.regdato, tmp.ordrenr
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="9">
-      <value>,Fradato,Fradato,date_x007C_sql_x003D_Select_x0020_convert_x0028_date_x002C_GetDate_x0028__x0029_-30_x0029_,System.DateTime,_x0031__x002F_12_x002F_2016_x0020_3:09:22_x0020_PM,False,False,False</value>
-      <value>,Tildato,Tildato,date_x007C_sql_x003D_Select_x0020_convert_x0028_date_x002C_GetDate_x0028__x0029__x0029_,System.DateTime,_x0031__x002F_13_x002F_2016_x0020_3:09:22_x0020_PM,False,False,False</value>
+      <value>,Fradato,Fradato,date_x007C_sql_x003D_Select_x0020_convert_x0028_date_x002C_GetDate_x0028__x0029_-30_x0029_,System.String,_x0032_0160824,False,False,False</value>
+      <value>,Tildato,Tildato,date_x007C_sql_x003D_Select_x0020_convert_x0028_date_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0160923,False,False,False</value>
       <value>,Person,Person,combo_x007C_sql_x003D_select_x0020__x0027__x0020_Alle_x0027__x0020_person_x0020_union_x0020_select_x0020_Name_x0020_collate_x0020_Danish_Norwegian_CI_AS_x0020_from_x0020_uniadmin..adm_User_x0020_where_x0020_isnull_x0028_inactive_x002C_0_x0029__x003D_0_x0020_union_x0020_select_x0020_distinct_x0020_signatur_x0020_from_x0020_c..ordre_x0020_order_x0020_by_x0020_person,System.String,_x0020_Alle,False,False,False</value>
       <value>,Varer,Varer,combo_x007C_sql_x003D_select_x0020__x0027_Alle_x0027__x0020_varer_x0020_union_x0020_select_x0020__x0027_Kun_x0020_firesifrede_x0027__x0020_order_x0020_by_x0020_varer_x0020_desc,System.String,Kun_x0020_firesifrede,False,False,False</value>
-      <value>System,UserName,UserName,System.String,Administrator,True,False</value>
-      <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
-      <value>System,UserCountryCode,UserCountryCode,System.String,no,True,False</value>
+      <value>System,UserName,UserName,System.String,Erik_x0020_Faugstad,True,False</value>
+      <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
+      <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
       <value>System,ClientNr,ClientNr,System.Int32,_x0032_9,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_016,True,False</value>
     </Variables>
@@ -119,7 +119,7 @@ order by  tmp.varenr, tmp.regdato, tmp.ordrenr
               <Name>Text39</Name>
               <Page isRef="4" />
               <Parent isRef="5" />
-              <Text>{Format("{0:dd.MM.yyyy}", Fradato)}</Text>
+              <Text>{Substring(Fradato,6,2)}.{Substring(Fradato,4,2)}.{Substring(Fradato,0,4)}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text39>
@@ -132,7 +132,7 @@ order by  tmp.varenr, tmp.regdato, tmp.ordrenr
               <Name>Text41</Name>
               <Page isRef="4" />
               <Parent isRef="5" />
-              <Text>{Format("{0:dd.MM.yyyy}", Tildato)}</Text>
+              <Text>{Substring(Tildato,6,2)}.{Substring(Tildato,4,2)}.{Substring(Tildato,0,4)}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text41>
@@ -835,10 +835,10 @@ order by  tmp.varenr, tmp.regdato, tmp.ordrenr
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>7/11/2016 10:18:27 AM</ReportChanged>
+  <ReportChanged>9/23/2016 10:47:36 AM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
-  <ReportFile>C:\Users\erik\AppData\Local\Temp\ordrelinjer001.mrt</ReportFile>
-  <ReportGuid>5273361f9ff04ac19cf02b71f37e40f9</ReportGuid>
+  <ReportFile>C:\Users\ERIK~1.UNI\AppData\Local\Temp\ordrelinjer002-fikse.mrt</ReportFile>
+  <ReportGuid>d38ee4875bea417d8dba40e54173dd4d</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
