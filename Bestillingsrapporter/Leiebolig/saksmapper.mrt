@@ -28,7 +28,8 @@
         <Name>ordreln</Name>
         <NameInSource>Klient 87</NameInSource>
         <Parameters isList="true" count="0" />
-        <SqlCommand>--set dateformat dmy
+        <SqlCommand>--kontraktskobling vs kundekobling: Det logiske er kontrakt, men LB.Hilde har bedt om at koblingen sjekkes på kundenivå, til tross for advarsel om unøyaktighet
+
 
 select	n.Name kundenavn, kd.kundenummer, b.Objekt_adresse, b.Rom_nummer, kd.FormidlingsNr, o.Oppdragsnr, en.name eiernavn, boligeier.eier eiernr, kd.Innflytting_dato
 
@@ -45,8 +46,13 @@ left join c..c_name en on en.ID=ek.NameID
 
 where kd.statusid in (1003,1004,1006) and kd.Kontrakt_fra&gt;convert(date,'{Fradato}') and
 (select count(*) FROM  (Select AL2.ForeignKey, AL2.ArchiveCode from c..ArchiveCodeLink AL1 inner join c..Archivecodelink AL2
-    on AL1.ArchiveCode = AL2.ArchiveCode and AL1.Type = 22 and AL2.Type = 2
-    where AL1.Foreignkey = kd.kontrakts_id ) as AL left join c..Dok as DO on DO.ID = AL.ForeignKey 
+
+    --on AL1.ArchiveCode = AL2.ArchiveCode and AL1.Type = 22 and AL2.Type = 2 -- sjekk på kontraktskobling
+	on AL1.ArchiveCode = AL2.ArchiveCode and AL1.Type = 5 and AL2.Type = 2 -- sjekk på kundekobling
+
+    --where AL1.Foreignkey = kd.kontrakts_id ) as AL left join c..Dok as DO on DO.ID = AL.ForeignKey  -- sjekk på kontraktskobling
+	where AL1.Foreignkey = kd.kundenummer ) as AL left join c..Dok as DO on DO.ID = AL.ForeignKey  -- sjekk på kundekobling
+
 	where do.DokKategoriID=6 and do.binheader like '%.pdf') = 0
 	and kd.FormidlingsNr between 3000000 and 3999999
 order by kd.Innflytting_dato
@@ -457,10 +463,10 @@ order by kd.Innflytting_dato
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>10/24/2016 9:50:00 AM</ReportChanged>
+  <ReportChanged>10/27/2016 10:18:41 AM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
   <ReportFile>C:\Users\PN-3PU~1\AppData\Local\Temp\2\saksmapper.mrt</ReportFile>
-  <ReportGuid>f350a62879644fbdb1f056c04095d295</ReportGuid>
+  <ReportGuid>b2c72ba4805d4914a0dc45f419e92598</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
