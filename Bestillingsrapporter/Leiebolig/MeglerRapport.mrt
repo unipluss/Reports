@@ -1,0 +1,1041 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="0" />
+    <Databases isList="true" count="1">
+      <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
+        <Alias>Connection</Alias>
+        <ConnectionStringEncrypted>9CjBoURxQ5zpR5yY8kyxF4ts0Q/YTZLtRlu5CMs9oufDVrnPRmcBiHlE0dxjTKiv8xJpLu92c91qGYRY9ADrL/Fw2QLmfZLt4VrR1GOE</ConnectionStringEncrypted>
+        <Name>Connection</Name>
+      </Connection>
+    </Databases>
+    <DataSources isList="true" count="3">
+      <Bedrift Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>Bedrift</Alias>
+        <Columns isList="true" count="52">
+          <value>Adresse,System.String</value>
+          <value>Adresse2,System.String</value>
+          <value>Arstall,System.Int16</value>
+          <value>Bankadresse,System.String</value>
+          <value>Bankadresse2,System.String</value>
+          <value>Bankadresse3,System.String</value>
+          <value>Bankgiro,System.String</value>
+          <value>Bankkode,System.String</value>
+          <value>Banklandkode,System.String</value>
+          <value>Banknavn,System.String</value>
+          <value>dcAccountPayments,System.Int32</value>
+          <value>dcAgency,System.Int32</value>
+          <value>dcAgencyAccountNumber,System.Int32</value>
+          <value>dcAgencyFactoringActive,System.Int32</value>
+          <value>dcRemindersBeforeDebtCollection,System.Int32</value>
+          <value>DirAvtaleID,System.String</value>
+          <value>DiremBetAccount,System.Int32</value>
+          <value>DirKundeID,System.String</value>
+          <value>DirRemFilnavn,System.Int32</value>
+          <value>EORInr,System.String</value>
+          <value>Foretaksregister,System.Int16</value>
+          <value>IBANnr,System.String</value>
+          <value>Katalog,System.String</value>
+          <value>Klientnr,System.Int16</value>
+          <value>Kontaktpers,System.String</value>
+          <value>Land,System.String</value>
+          <value>Landkode,System.String</value>
+          <value>Mailadr,System.String</value>
+          <value>MainClientID,System.String</value>
+          <value>mainClientNr,System.Int32</value>
+          <value>Mobil,System.String</value>
+          <value>MVAnr,System.String</value>
+          <value>Navn,System.String</value>
+          <value>NKLCustNo,System.String</value>
+          <value>OCRAvtaleID,System.String</value>
+          <value>OCRKundeID,System.String</value>
+          <value>Postgiro,System.String</value>
+          <value>Postnr,System.String</value>
+          <value>Poststed,System.String</value>
+          <value>RemitBankgiro,System.String</value>
+          <value>RoundRef,System.Int16</value>
+          <value>SWIFTkode,System.String</value>
+          <value>SWIFTkodeRembBank,System.String</value>
+          <value>TeleFax,System.String</value>
+          <value>Telefon,System.String</value>
+          <value>TPBrukerID,System.String</value>
+          <value>TPDivisjon,System.String</value>
+          <value>TPForetak,System.String</value>
+          <value>Url,System.String</value>
+          <value>UseInterimRetFil,System.Int32</value>
+          <value>useModulus11,System.Int32</value>
+          <value>Versjon,System.Decimal</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Name>Bedrift</Name>
+        <NameInSource>Connection</NameInSource>
+        <Parameters isList="true" count="0" />
+        <SqlCommand>select * from y..BEDRIFT</SqlCommand>
+      </Bedrift>
+      <Ansatte Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>Ansatte</Alias>
+        <Columns isList="true" count="10">
+          <value>ErMegler,System.Boolean</value>
+          <value>Ansatte_id,System.Int32</value>
+          <value>Omrade,System.Int32</value>
+          <value>uniBrukerId,System.Int32</value>
+          <value>deaktivert,System.Int16</value>
+          <value>Navn,System.String</value>
+          <value>Stilling,System.String</value>
+          <value>E_post,System.String</value>
+          <value>Telefon,System.String</value>
+          <value>Mobil,System.String</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Name>Ansatte</Name>
+        <NameInSource>Connection</NameInSource>
+        <Parameters isList="true" count="0" />
+        <SqlCommand>SELECT * FROM e..t_ansatte</SqlCommand>
+      </Ansatte>
+      <Kontrakter Ref="5" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>Kontrakter</Alias>
+        <Columns isList="true" count="23">
+          <value>FormidlingsNr,System.Int32</value>
+          <value>godkjentInnflyttingsmappe,System.Boolean</value>
+          <value>oppdragsNr,System.Int32</value>
+          <value>antallVisninger,System.Int32</value>
+          <value>kostnad1,System.Decimal</value>
+          <value>kostnad2,System.Int32</value>
+          <value>kostnad3,System.Decimal</value>
+          <value>kostand4,System.Int32</value>
+          <value>kostnad5,System.Decimal</value>
+          <value>kostnad6,System.Decimal</value>
+          <value>kostnad7,System.Decimal</value>
+          <value>kostnad8,System.Decimal</value>
+          <value>kostnad9,System.Decimal</value>
+          <value>kostnad10,System.Decimal</value>
+          <value>Objekt_adresse,System.String</value>
+          <value>Objekt_poststed,System.String</value>
+          <value>Objekt_postnummer,System.String</value>
+          <value>Rom_nummer,System.String</value>
+          <value>totalt,System.Decimal</value>
+          <value>prisPrVisning,System.Decimal</value>
+          <value>Navn,System.String</value>
+          <value>fraDatoAsDato,System.DateTime</value>
+          <value>tilDatoAsDato,System.DateTime</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Name>Kontrakter</Name>
+        <NameInSource>Connection</NameInSource>
+        <Parameters isList="true" count="0" />
+        <SqlCommand>set dateformat dmy
+
+select  dateadd(yy,0,'{fraDato}') as fraDatoAsDato,dateadd(yy,0,'{TilDato}') as tilDatoAsDato , an.Navn, kd.FormidlingsNr, CAST(CASE godkjentInnflyttingsmappe WHEN 1 THEN 1 ELSE 0 END AS BIT)  as godkjentInnflyttingsmappe
+	, oa.oppdragsNr 
+	, kd.antallVisninger
+	, oa.utleieHonorar as kostnad1, oa.sikkerhetsStillelsesHonorar as kostnad2, oa.annonseHonorar as kostnad3, oa.grunnbokGebyr as kostand4, oa.gebyrInnFlytning as kostnad5,   oa.kostnad6, oa.kostnad7, oa.kostnad8, oa.kostnad9, oa.kostnad10
+	, bo.Objekt_adresse, bo.Objekt_poststed, bo.Objekt_postnummer, bo.Rom_nummer
+	, oa.utleieHonorar + oa.sikkerhetsStillelsesHonorar + oa.annonseHonorar + oa.grunnbokGebyr + oa.gebyrInnFlytning + oa.kostnad6 + oa.kostnad7 + oa.kostnad8 + oa.kostnad9 + oa.kostnad10  + (isnull(oa.prisPrVisning,0) * isnull(kd.antallVisninger,0)) as totalt
+	, oa.prisPrVisning, kd.antallVisninger
+	from e..t_kontraktsdata kd
+inner join e..t_forvaltningsAvtale fa on fa.id = kd.ForvaltningsavtaleId
+inner join e..t_boligobjekt bo on bo.objekt_id = kd.Objekt
+left join e..t_oppdragsAvtale oa on kd.OppdragsavtaleId = oa.id
+left join e..t_ansatte an on fa.ansvarligUtleieKonsulentId = an.Ansatte_id
+
+where isnull(fa.ansvarligUtleieKonsulentId,0) in ({Ansatt})
+and '{fraDato}' &lt;= kd.Innflytting_dato
+and '{TilDato}' &gt; = kd.Innflytting_dato
+and kd.statusid in (1003,1004,1006)
+
+order by oa.Oppdragsnr,kd.FormidlingsNr
+
+
+
+</SqlCommand>
+      </Kontrakter>
+    </DataSources>
+    <Relations isList="true" count="0" />
+    <Report isRef="0" />
+    <Variables isList="true" count="8">
+      <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0036_,False,False,False</value>
+      <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
+      <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
+      <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0032_05,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_016,True,False</value>
+      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0151215,False,False,False</value>
+      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0171215,False,False,False</value>
+    </Variables>
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="0" />
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="6" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="4">
+        <PageHeaderBand1 Ref="7" type="PageHeaderBand" isKey="true">
+          <Brush>[183:209:226]</Brush>
+          <ClientRectangle>0,0.4,27.7,0.88</ClientRectangle>
+          <Components isList="true" count="6">
+            <Text22 Ref="8" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0.06,3.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,12,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text22</Name>
+              <Page isRef="6" />
+              <Parent isRef="7" />
+              <Text>Meglerrapport</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text22>
+            <Text26 Ref="9" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>23,0.06,4.6,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8,Bold</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text26</Name>
+              <Page isRef="6" />
+              <Parent isRef="7" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>5</ShrinkFontToFitMinimumSize>
+              <Text>{Bedrift.Navn}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text26>
+            <Text27 Ref="10" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>25.6,0.46,2,0.39</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8,Bold</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text27</Name>
+              <Page isRef="6" />
+              <Parent isRef="7" />
+              <Text>{Bedrift.Arstall}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text27>
+            <Text43 Ref="11" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.8,0.06,2.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,12,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text43</Name>
+              <Page isRef="6" />
+              <Parent isRef="7" />
+              <Text>{Kontrakter.fraDatoAsDato}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="12" type="DateFormat" isKey="true">
+                <StringFormat>dd/MM/yyyy</StringFormat>
+              </TextFormat>
+            </Text43>
+            <Text44 Ref="13" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.2,0.06,4.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,12,Bold</Font>
+              <Guid>02faf5f9eb734d509f8c8a32218c4e01</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text44</Name>
+              <Page isRef="6" />
+              <Parent isRef="7" />
+              <Text>{Kontrakter.tilDatoAsDato}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="14" type="DateFormat" isKey="true">
+                <StringFormat>dd/MM/yyyy</StringFormat>
+              </TextFormat>
+              <Type>DataColumn</Type>
+            </Text44>
+            <Text45 Ref="15" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6,0.06,0.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,12,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text45</Name>
+              <Page isRef="6" />
+              <Parent isRef="7" />
+              <Text>-</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text45>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Name>PageHeaderBand1</Name>
+          <Page isRef="6" />
+          <Parent isRef="6" />
+        </PageHeaderBand1>
+        <PageFooterBand1 Ref="16" type="PageFooterBand" isKey="true">
+          <Border>None;Black;1;Solid;False;4;Black;True</Border>
+          <Brush>EmptyBrush</Brush>
+          <ClientRectangle>0,18.4,27.7,0.6</ClientRectangle>
+          <Components isList="true" count="3">
+            <Text3 Ref="17" type="Text" isKey="true">
+              <AllowHtmlTags>True</AllowHtmlTags>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>24,0.1,3.6,0.45</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text3</Name>
+              <Page isRef="6" />
+              <Parent isRef="16" />
+              <Text>Side &lt;b&gt;{PageNumber}&lt;/b&gt; av &lt;b&gt;{TotalPageCount}&lt;/b&gt;</Text>
+              <TextBrush>Black</TextBrush>
+              <TextQuality>Wysiwyg</TextQuality>
+              <Type>Expression</Type>
+            </Text3>
+            <Text28 Ref="18" type="Text" isKey="true">
+              <AllowHtmlTags>True</AllowHtmlTags>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.4,0.1,3.8,0.47</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Guid>ba927a26a2f241168b584bca48e2c073</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text28</Name>
+              <Page isRef="6" />
+              <Parent isRef="16" />
+              <Text>&lt;b&gt;{Time}&lt;/b&gt;</Text>
+              <TextBrush>Black</TextBrush>
+              <TextQuality>Wysiwyg</TextQuality>
+              <Type>Expression</Type>
+            </Text28>
+            <Text29 Ref="19" type="Text" isKey="true">
+              <AllowHtmlTags>True</AllowHtmlTags>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0.1,2.4,0.47</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Guid>fd67c8a5c5bb44679a43b01a9fa1d8ad</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text29</Name>
+              <Page isRef="6" />
+              <Parent isRef="16" />
+              <Text>Utskriftstidspunkt</Text>
+              <TextBrush>Black</TextBrush>
+              <TextQuality>Wysiwyg</TextQuality>
+              <Type>Expression</Type>
+            </Text29>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Name>PageFooterBand1</Name>
+          <Page isRef="6" />
+          <Parent isRef="6" />
+        </PageFooterBand1>
+        <HeaderBand1 Ref="20" type="HeaderBand" isKey="true">
+          <Brush>[183:209:226]</Brush>
+          <ClientRectangle>0,2.08,27.7,1</ClientRectangle>
+          <Components isList="true" count="14">
+            <Text2 Ref="21" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0.12,2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text2</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>Oppdragsnr
+</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text2>
+            <Text5 Ref="22" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.2,0.12,2.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text5</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>FormidlingsNr</Text>
+              <TextBrush>Black</TextBrush>
+            </Text5>
+            <Text7 Ref="23" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>5.2,0.12,1.4,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text7</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>Innfl.-
+mappe</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text7>
+            <Text8 Ref="24" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.6,0.32,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text8</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>kostnad1</Text>
+              <TextBrush>Black</TextBrush>
+            </Text8>
+            <Text10 Ref="25" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>8.4,0.32,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text10</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>kostnad2</Text>
+              <TextBrush>Black</TextBrush>
+            </Text10>
+            <Text12 Ref="26" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>10.2,0.32,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text12</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>kostnad3</Text>
+              <TextBrush>Black</TextBrush>
+            </Text12>
+            <Text14 Ref="27" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>12,0.32,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text14</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>kostand4</Text>
+              <TextBrush>Black</TextBrush>
+            </Text14>
+            <Text16 Ref="28" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>13.8,0.32,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text16</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>kostnad5</Text>
+              <TextBrush>Black</TextBrush>
+            </Text16>
+            <Text18 Ref="29" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>15.6,0.32,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text18</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>kostnad6</Text>
+              <TextBrush>Black</TextBrush>
+            </Text18>
+            <Text20 Ref="30" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>17.4,0.32,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text20</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>kostnad7</Text>
+              <TextBrush>Black</TextBrush>
+            </Text20>
+            <Text23 Ref="31" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>19.2,0.32,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text23</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>kostnad8</Text>
+              <TextBrush>Black</TextBrush>
+            </Text23>
+            <Text25 Ref="32" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>21,0.32,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text25</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>kostnad9</Text>
+              <TextBrush>Black</TextBrush>
+            </Text25>
+            <Text31 Ref="33" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>22.8,0.32,1.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text31</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>kostnad10</Text>
+              <TextBrush>Black</TextBrush>
+            </Text31>
+            <Text37 Ref="34" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>25.2,0.32,2.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text37</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Text>Total kostnad</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text37>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Name>HeaderBand1</Name>
+          <Page isRef="6" />
+          <Parent isRef="6" />
+        </HeaderBand1>
+        <DataBand1 Ref="35" type="DataBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
+          <ClientRectangle>0,3.88,27.7,2</ClientRectangle>
+          <Components isList="true" count="23">
+            <Text1 Ref="36" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0.12,1.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text1</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.oppdragsNr}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text1>
+            <Text4 Ref="37" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.2,0.12,2.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text4</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.FormidlingsNr}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text4>
+            <CheckBox1 Ref="38" type="CheckBox" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <Checked>{Kontrakter.godkjentInnflyttingsmappe}</Checked>
+              <CheckStyleForFalse>NoneRectangle</CheckStyleForFalse>
+              <CheckStyleForTrue>CheckRectangle</CheckStyleForTrue>
+              <ClientRectangle>5.2,0.12,0.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <ContourColor>Black</ContourColor>
+              <Name>CheckBox1</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <TextBrush>Black</TextBrush>
+            </CheckBox1>
+            <Text32 Ref="39" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0.72,7.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text32</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.Objekt_adresse}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text32>
+            <Text33 Ref="40" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,1.32,1.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text33</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.Rom_nummer}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text33>
+            <Text34 Ref="41" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.2,1.32,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text34</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.Objekt_postnummer}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text34>
+            <Text35 Ref="42" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.8,1.32,4.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text35</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.Objekt_poststed}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text35>
+            <Text38 Ref="43" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>17.6,1.12,3.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text38</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.antallVisninger}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text38>
+            <Text39 Ref="44" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>15,1.12,2.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Italic</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text39</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>Antall visninger</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text39>
+            <Text40 Ref="45" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>12.8,1.12,2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text40</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.prisPrVisning}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="46" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseGroupSeparator>False</UseGroupSeparator>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text40>
+            <Text41 Ref="47" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>10.2,1.12,2.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Italic</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text41</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>Pris pr. visning</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text41>
+            <Text6 Ref="48" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.6,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text6</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.kostnad1}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="49" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text6>
+            <Text9 Ref="50" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>8.4,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text9</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.kostnad2}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="51" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text9>
+            <Text11 Ref="52" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>10.2,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text11</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.kostnad3}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="53" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text11>
+            <Text13 Ref="54" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>12,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text13</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.kostand4}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="55" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text13>
+            <Text15 Ref="56" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>13.8,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text15</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.kostnad5}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="57" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text15>
+            <Text17 Ref="58" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>15.6,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text17</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.kostnad6}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="59" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text17>
+            <Text19 Ref="60" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>17.4,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text19</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.kostnad7}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="61" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text19>
+            <Text21 Ref="62" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>19.2,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text21</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.kostnad8}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="63" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text21>
+            <Text24 Ref="64" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>21,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text24</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.kostnad9}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="65" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text24>
+            <Text30 Ref="66" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>22.8,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text30</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.kostnad10}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="67" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text30>
+            <Text36 Ref="68" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>25.2,0.2,2.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text36</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.totalt}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="69" type="CurrencyFormat" isKey="true">
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text36>
+            <Text42 Ref="70" type="Text" isKey="true">
+              <Border>None;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>23.4,1.32,4.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Italic</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text42</Name>
+              <Page isRef="6" />
+              <Parent isRef="35" />
+              <Text>{Kontrakter.Navn}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text42>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <DataRelationName isNull="true" />
+          <DataSourceName>Kontrakter</DataSourceName>
+          <Filters isList="true" count="0" />
+          <Name>DataBand1</Name>
+          <OddStyle>LightGrey</OddStyle>
+          <Page isRef="6" />
+          <Parent isRef="6" />
+          <Sort isList="true" count="0" />
+        </DataBand1>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Guid>161755a740e24b7f94244106f8c41b15</Guid>
+      <Margins>1,1,1,1</Margins>
+      <Name>Page1</Name>
+      <Orientation>Landscape</Orientation>
+      <PageHeight>21</PageHeight>
+      <PageWidth>29.7</PageWidth>
+      <Report isRef="0" />
+      <Watermark Ref="71" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+        <Font>Arial,100</Font>
+        <TextBrush>[50:0:0:0]</TextBrush>
+      </Watermark>
+    </Page1>
+  </Pages>
+  <PrinterSettings Ref="72" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>12/15/2016 1:59:47 PM</ReportChanged>
+  <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
+  <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\MeglerRapport.mrt</ReportFile>
+  <ReportGuid>be79b6af93d648c29a9e63aa62f18cea</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Centimeters</ReportUnit>
+  <ReportVersion>2013.1.1600</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="3">
+    <lightBlue Ref="73" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Brush>[222:233:244]</Brush>
+      <Conditions isList="true" count="0" />
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>lightBlue</Name>
+      <TextBrush>Black</TextBrush>
+    </lightBlue>
+    <Style1 Ref="74" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Brush>[146:187:205]</Brush>
+      <Conditions isList="true" count="0" />
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Style1</Name>
+      <TextBrush>Black</TextBrush>
+    </Style1>
+    <LightGrey Ref="75" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Brush>WhiteSmoke</Brush>
+      <Conditions isList="true" count="0" />
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>LightGrey</Name>
+      <TextBrush>Black</TextBrush>
+    </LightGrey>
+  </Styles>
+</StiSerializer>
