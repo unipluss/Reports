@@ -96,7 +96,7 @@
       </Ansatte>
       <boliger Ref="5" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>boliger</Alias>
-        <Columns isList="true" count="8">
+        <Columns isList="true" count="9">
           <value>id,System.Int32</value>
           <value>ansvarligUtleieKonsulentId,System.Int32</value>
           <value>Kundenummer,System.Int32</value>
@@ -105,6 +105,7 @@
           <value>antallBoliger,System.Int32</value>
           <value>Navn,System.String</value>
           <value>forvalter,System.String</value>
+          <value>eierType,System.String</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -117,6 +118,7 @@
 ,(select count(*) from e..t_forvaltningsAvtaleHarBolig harbo inner join e..t_forvaltningsAvtale fa2 on harbo.forvaltingsAvtaleId = fa2.Id where harbo.forvaltingsAvtaleId = fa2.id and GETDATE() between isnull(harbo.fradato, fa2.forvaltningsavtalestart ) and isnull(harbo.tildato, isnull(fa2.nySluttDato, fa2.forvaltningsavtaleslutt)) and fa2.ansvarligUtleieKonsulentId = fa.ansvarligUtleieKonsulentId) antallBoliger
 ,an.Navn
 ,(select navn from e..t_ansatte where ansatte_id = fa.forvalterAnsattId) as forvalter
+, (select case when ei.kundetype = 1 then 'Privat' else 'Proff' end) as eierType
 from e..t_forvaltningsAvtale  fa
 inner join e..t_kunde ei on fa.kreditorId = ei.Kundenummer
 left join c..c_name na on ei.NameID = na.ID
@@ -133,12 +135,12 @@ order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="6">
+      <value>,Ansatt,Ansatt,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0033_0_x002C_40_x002C_36,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
       <value>System,ClientNr,ClientNr,System.Int32,_x0032_05,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_016,True,False</value>
-      <value>,Ansatt,Ansatt,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0033_0_x002C_40_x002C_36,False,False,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -328,12 +330,12 @@ order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <ClientRectangle>0,3.88,27.7,1.6</ClientRectangle>
-          <ColumnCount>7</ColumnCount>
-          <Components isList="true" count="14">
+          <ColumnCount>8</ColumnCount>
+          <Components isList="true" count="16">
             <Table1_Cell1 Ref="21" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0,4,0.8</ClientRectangle>
+              <ClientRectangle>0,0,3.6,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
               <ID>0</ID>
@@ -350,7 +352,7 @@ order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
             <Table1_Cell2 Ref="22" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>4,0,4,0.8</ClientRectangle>
+              <ClientRectangle>3.6,0,3.6,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
               <ID>1</ID>
@@ -367,30 +369,47 @@ order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
             <Table1_Cell3 Ref="23" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>8,0,4,0.8</ClientRectangle>
+              <ClientRectangle>7.2,0,3.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
-              <ID>2</ID>
+              <ID>38</ID>
               <JoinCells isList="true" count="0" />
               <Margins>0,0,0,0</Margins>
               <Name>Table1_Cell3</Name>
               <Page isRef="6" />
               <Parent isRef="20" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>Forvaltningsavtale</Text>
+              <Text>Eiertype</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Table1_Cell3>
             <Table1_Cell4 Ref="24" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>12,0,4,0.8</ClientRectangle>
+              <ClientRectangle>10.6,0,3.4,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,9</Font>
+              <ID>2</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell4</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>Forvaltningsavtale</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Table1_Cell4>
+            <Table1_Cell5 Ref="25" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
+              <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>14,0,3.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
               <ID>3</ID>
               <JoinCells isList="true" count="0" />
               <Margins>0,0,0,0</Margins>
-              <Name>Table1_Cell4</Name>
+              <Name>Table1_Cell5</Name>
               <Page isRef="6" />
               <Parent isRef="20" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
@@ -398,85 +417,85 @@ order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
               <TextBrush>Black</TextBrush>
               <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
               <Type>Expression</Type>
-            </Table1_Cell4>
-            <Table1_Cell5 Ref="25" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
-              <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
-              <Brush>Transparent</Brush>
-              <ClientRectangle>16,0,4,0.8</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,9</Font>
-              <ID>4</ID>
-              <JoinCells isList="true" count="0" />
-              <Margins>0,0,0,0</Margins>
-              <Name>Table1_Cell5</Name>
-              <Page isRef="6" />
-              <Parent isRef="20" />
-              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>Forvalter</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
             </Table1_Cell5>
             <Table1_Cell6 Ref="26" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>20,0,3.8,0.8</ClientRectangle>
+              <ClientRectangle>17.4,0,3.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
-              <ID>25</ID>
+              <ID>4</ID>
               <JoinCells isList="true" count="0" />
               <Margins>0,0,0,0</Margins>
               <Name>Table1_Cell6</Name>
               <Page isRef="6" />
               <Parent isRef="20" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>Ans. utleiekonsulent</Text>
+              <Text>Forvalter</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Table1_Cell6>
             <Table1_Cell7 Ref="27" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>23.8,0,3.9,0.8</ClientRectangle>
+              <ClientRectangle>20.8,0,3.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
-              <ID>36</ID>
+              <ID>25</ID>
               <JoinCells isList="true" count="0" />
               <Margins>0,0,0,0</Margins>
               <Name>Table1_Cell7</Name>
               <Page isRef="6" />
               <Parent isRef="20" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>Totalt antall boliger</Text>
+              <Text>Ans. utleiekonsulent</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Table1_Cell7>
             <Table1_Cell8 Ref="28" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.8,4,0.8</ClientRectangle>
+              <ClientRectangle>24.2,0,3.5,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
-              <ID>27</ID>
+              <ID>36</ID>
               <JoinCells isList="true" count="0" />
               <Margins>0,0,0,0</Margins>
               <Name>Table1_Cell8</Name>
               <Page isRef="6" />
               <Parent isRef="20" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>{boliger.Kundenummer}</Text>
+              <Text>Totalt antall boliger</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Table1_Cell8>
             <Table1_Cell9 Ref="29" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>4,0.8,4,0.8</ClientRectangle>
+              <ClientRectangle>0,0.8,3.6,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,9</Font>
+              <ID>27</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell9</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{boliger.Kundenummer}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Table1_Cell9>
+            <Table1_Cell10 Ref="30" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
+              <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.6,0.8,3.6,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
               <ID>28</ID>
               <JoinCells isList="true" count="0" />
               <Margins>0,0,0,0</Margins>
-              <Name>Table1_Cell9</Name>
+              <Name>Table1_Cell10</Name>
               <Page isRef="6" />
               <Parent isRef="20" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
@@ -484,92 +503,109 @@ order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
               <TextBrush>Black</TextBrush>
               <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
               <Type>DataColumn</Type>
-            </Table1_Cell9>
-            <Table1_Cell10 Ref="30" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
-              <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
-              <Brush>Transparent</Brush>
-              <ClientRectangle>8,0.8,4,0.8</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,9</Font>
-              <ID>29</ID>
-              <JoinCells isList="true" count="0" />
-              <Margins>0,0,0,0</Margins>
-              <Name>Table1_Cell10</Name>
-              <Page isRef="6" />
-              <Parent isRef="20" />
-              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>{boliger.id}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>DataColumn</Type>
             </Table1_Cell10>
             <Table1_Cell11 Ref="31" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>12,0.8,4,0.8</ClientRectangle>
+              <ClientRectangle>7.2,0.8,3.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
-              <ID>30</ID>
+              <ID>39</ID>
               <JoinCells isList="true" count="0" />
               <Margins>0,0,0,0</Margins>
               <Name>Table1_Cell11</Name>
               <Page isRef="6" />
               <Parent isRef="20" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>{boliger.aktiveBoliger}</Text>
+              <Text>{boliger.eierType}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
             </Table1_Cell11>
             <Table1_Cell12 Ref="32" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>16,0.8,4,0.8</ClientRectangle>
+              <ClientRectangle>10.6,0.8,3.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
-              <ID>31</ID>
+              <ID>29</ID>
               <JoinCells isList="true" count="0" />
               <Margins>0,0,0,0</Margins>
               <Name>Table1_Cell12</Name>
               <Page isRef="6" />
               <Parent isRef="20" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>{boliger.forvalter}</Text>
+              <Text>{boliger.id}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
             </Table1_Cell12>
             <Table1_Cell13 Ref="33" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>20,0.8,3.8,0.8</ClientRectangle>
+              <ClientRectangle>14,0.8,3.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
-              <ID>32</ID>
+              <ID>30</ID>
               <JoinCells isList="true" count="0" />
               <Margins>0,0,0,0</Margins>
               <Name>Table1_Cell13</Name>
               <Page isRef="6" />
               <Parent isRef="20" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>{boliger.Navn}</Text>
+              <Text>{boliger.aktiveBoliger}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
             </Table1_Cell13>
             <Table1_Cell14 Ref="34" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>23.8,0.8,3.9,0.8</ClientRectangle>
+              <ClientRectangle>17.4,0.8,3.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9</Font>
-              <ID>37</ID>
+              <ID>31</ID>
               <JoinCells isList="true" count="0" />
               <Margins>0,0,0,0</Margins>
               <Name>Table1_Cell14</Name>
               <Page isRef="6" />
               <Parent isRef="20" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>{boliger.antallBoliger}</Text>
+              <Text>{boliger.forvalter}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
             </Table1_Cell14>
+            <Table1_Cell15 Ref="35" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
+              <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>20.8,0.8,3.4,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,9</Font>
+              <ID>32</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell15</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{boliger.Navn}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+            </Table1_Cell15>
+            <Table1_Cell16 Ref="36" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
+              <Border>None;DimGray;1;Solid;False;4;DimGray</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>24.2,0.8,3.5,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,9</Font>
+              <ID>37</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell16</Name>
+              <Page isRef="6" />
+              <Parent isRef="20" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{boliger.antallBoliger}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+            </Table1_Cell16>
           </Components>
           <Conditions isList="true" count="0" />
           <DataRelationName isNull="true" />
@@ -578,14 +614,14 @@ order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
           <HeaderRowsCount>1</HeaderRowsCount>
           <MinHeight>0.4</MinHeight>
           <Name>Table1</Name>
-          <NumberID>38</NumberID>
+          <NumberID>40</NumberID>
           <OddStyle>LightGrey</OddStyle>
           <Page isRef="6" />
           <Parent isRef="6" />
           <RowCount>2</RowCount>
           <Sort isList="true" count="0" />
         </Table1>
-        <GroupFooterBand1 Ref="35" type="GroupFooterBand" isKey="true">
+        <GroupFooterBand1 Ref="37" type="GroupFooterBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,6.28,27.7,1</ClientRectangle>
           <Components isList="true" count="0" />
@@ -603,13 +639,13 @@ order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="36" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="38" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
   </Pages>
-  <PrinterSettings Ref="37" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="39" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -621,10 +657,10 @@ order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/20/2016 7:59:17 AM</ReportChanged>
+  <ReportChanged>12/20/2016 10:33:03 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AntallBoligerKundeAnsvarUtleiemegler.mrt</ReportFile>
-  <ReportGuid>cf9232e27f244a63b3505b4dbe2fd475</ReportGuid>
+  <ReportGuid>7c9f81fad8ac4c8496d2361a38921852</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -653,7 +689,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="3">
-    <lightBlue Ref="38" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <lightBlue Ref="40" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[222:233:244]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -661,7 +697,7 @@ namespace Reports
       <Name>lightBlue</Name>
       <TextBrush>Black</TextBrush>
     </lightBlue>
-    <Style1 Ref="39" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="41" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[146:187:205]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -669,7 +705,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <LightGrey Ref="40" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <LightGrey Ref="42" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
