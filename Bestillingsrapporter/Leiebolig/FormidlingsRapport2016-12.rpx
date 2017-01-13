@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{E28D58AC-A1C5-45F4-BEF4-00634232A092}" GUIDREP="{E9EA579B-0E84-4465-ADEF-12383EA54463}" 
+	GUIDLIB="{005CE645-CBBF-439B-836F-A305864ECFB7}" GUIDREP="{B28D04E2-D51C-48F5-89DD-63933A83326E}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED2000640065006D006F006C0069006300410052003400350036003200330034000000"
 	PrintWidth="16590"
 	DocumentName="ActiveReports Document"
@@ -33,7 +33,7 @@ valgteEiere = "{ansvarligmegler}"
   SqlAdd sql, " op.id as oppdragsAvtaleId,kon.FormidlingsNr as formidlingsNr,op.Oppdragsnr as oppdragsNr, "
   SqlAdd sql, " kon.formidlingsdato, nam.Name as eierNavn, "
   SqlAdd sql, " ( select  name from c..c_Contacts where id=fo.MedeierKontaktId) medeier, "
-  SqlAdd sql, " kon.objekt as  boligId, (select '') as boligAdresse, kon.anvsarligMeglerVedAksept as saksBehandler, kon.GrunnprisLeie as omsettningsBelop, "
+  SqlAdd sql, " kon.objekt as  boligId, (select '') as boligAdresse, kon.anvsarligMeglerVedAksept as saksBehandler, kon.GrunnprisLeie*12 as omsettningsBelop, "
   SqlAdd sql, " op.utleieHonorar as utleieHonorar, op.sikkerhetsStillelsesHonorar as sikkerhetsStillelsesHonorar, "
   SqlAdd sql, " op.annonseHonorar as anonnseHonorar, op.grunnbokGebyr as grunnboksGebyr, kon.Kontrakt_fra, "
   SqlAdd sql, " (isnull (op.gebyrInnFlytning,0)) as gebyrInnFlytning,ltn.Name leietakernavn, "
@@ -442,7 +442,7 @@ End Sub
 		Top="840"
 		Width="855"
 		Height="570"
-		Caption="Omsetningsbeløp"
+		Caption="Omsetnin- gsbeløp"
 		ClassName="Normal"
 		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 8pt; vertical-align: bottom; "
 		>
