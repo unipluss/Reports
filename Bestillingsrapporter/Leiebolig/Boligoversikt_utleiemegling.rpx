@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{23635792-E0D4-4A73-BB81-869B7155B15F}" GUIDREP="{66F88D33-3A47-4078-94E6-ED2DA30D6F56}" 
+	GUIDLIB="{05C76075-7F0F-4D1C-9185-E4F5E9A2A76E}" GUIDREP="{C44CF7CB-105E-44BC-93C3-4135017A98EA}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
 		740066000000"
 	PrintWidth="16560"
@@ -75,14 +75,16 @@ Sub OnDataInitialize
 	sql = sql & " /**/ left join e..t_boligomraade o on o.Boligomrade_id=b.omrade_id  "
 	sql = sql & " /**/ left join e..t_kontraktsdata kdata on bo.Objekt_id=kdata.Objekt and kdata.statusId in (1002,1003,1006) and GETDATE() between kdata.Kontrakt_fra And isnull(kdata.virkelig_utflyttet, isnull(kdata.kontrakt_utgaar, isnull(kontrakt_til, getdate()+2))) "
 	sql = sql & " /**/ inner join e..t_forvaltningsAvtaleHarBolig fhb on fhb.boligId=bo.objekt_id "
-	sql = sql & " /**/ inner join e..t_forvaltningsAvtale F on F.Id=fhb.forvaltingsAvtaleId and ((GETDATE() between isnull(fhb.fradato,F.forvaltningsavtalestart) And isnull(fhb.tildato,f.forvaltningsavtaleslutt) and f.statusid=19003) or (f.statusId in (19004,19005))) "
+	sql = sql & " /**/ inner join e..t_forvaltningsAvtale F on F.Id=fhb.forvaltingsAvtaleId "
 	sql = sql & " /**/ left join e..t_kunde ku on kdata.kundenummer=ku.kundenummer  "
 	sql = sql & " /**/ left join e..t_kunde eier on F.kreditorId=eier.kundenummer  "
 	sql = sql & " /**/ left join c..c_name knavn on knavn.id=ku.nameid  "
 	sql = sql & " /**/ left join c..c_name enavn on enavn.id=eier.nameid  "
 	
 	sql = sql & " /**/ where eier.kundenummer= {eiernr} "
-	sql = sql & " /**/ and not bo.Status = 23001"
+	sql = sql & " /**/ and not isnull(bo.Status,0) = 23001"  
+	sql = sql & " /**/ and f.statusId in (19003,19004,19005,19006)"
+	sql = sql & " /**/ and GETDATE() between isnull(fhb.fradato,F.forvaltningsavtalestart) and   isnull(fhb.tildato, isnull(f.nysluttdato, f.forvaltningsavtaleslutt)) "
 	sql = sql & " /**/ order by b.adresse, bo.Oppgang, Leilnr" 
 
   m_data.SqlString = sql
