@@ -161,7 +161,8 @@ and pro.ProtokollId = {Innflyttingsprotokoll}
         <Parameters isList="true" count="0" />
         <SqlCommand>select * from c..kommentar 
 where fk_table = 7 and fk_id = {Innflyttingsprotokoll}
-and isnull(slettet,0) = 0</SqlCommand>
+and isnull(slettet,0) = 0
+and isnull(lagtTilAv,'') &lt;&gt; 'System'</SqlCommand>
       </Kommentar>
     </DataSources>
     <Relations isList="true" count="0" />
@@ -1813,10 +1814,10 @@ tilstede</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/30/2017 10:15:33 AM</ReportChanged>
+  <ReportChanged>2/2/2017 11:18:59 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\InnflyttingsProtokoll.mrt</ReportFile>
-  <ReportGuid>d6b7f8ea12cc4145bb418ab8e81bc269</ReportGuid>
+  <ReportGuid>db7452ba6e844a7da9a093c419176f82</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>

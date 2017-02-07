@@ -182,7 +182,8 @@ and pro.ProtokollId = {Utflyttingsprotokoll}
         <Parameters isList="true" count="0" />
         <SqlCommand>select * from c..kommentar 
 where fk_table = 8 and fk_id = {Utflyttingsprotokoll}
-and isnull(slettet,0) = 0</SqlCommand>
+and isnull(slettet,0) = 0
+and isnull(lagtTilAv,'') &lt;&gt; 'System'</SqlCommand>
       </Kommentar>
     </DataSources>
     <Relations isList="true" count="0" />
@@ -1805,7 +1806,7 @@ kategori</Text>
     <Page4 Ref="130" type="Page" isKey="true">
       <Border>None;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
-      <Components isList="true" count="8">
+      <Components isList="true" count="9">
         <PageHeaderBand3 Ref="131" type="PageHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,0.4,27.7,2.6</ClientRectangle>
@@ -1954,7 +1955,7 @@ kategori</Text>
           <Alias>Signature</Alias>
           <Border>None;Transparent;1;Solid;False;4;Black</Border>
           <Brush>Transparent</Brush>
-          <ClientRectangle>0.2,3.2,23.8,3.8</ClientRectangle>
+          <ClientRectangle>0.2,8.6,23.8,3.8</ClientRectangle>
           <Conditions isList="true" count="0" />
           <GlobalizedName>Signature</GlobalizedName>
           <Guid>69d95a6af5b84bd0b7f07ddc978aedee</Guid>
@@ -1966,7 +1967,7 @@ kategori</Text>
         </Signature>
         <Text98 Ref="143" type="Text" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0.2,8,26.2,0.6</ClientRectangle>
+          <ClientRectangle>0.2,13.4,26.2,0.6</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Font>Arial,10</Font>
           <Guid>caca7aa0570941119d8a919c2c307bb7</Guid>
@@ -1987,7 +1988,7 @@ kategori</Text>
         </Text98>
         <Text99 Ref="145" type="Text" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0.2,7.2,2,0.6</ClientRectangle>
+          <ClientRectangle>0.2,12.6,2,0.6</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Font>Arial,10</Font>
           <Guid>a55eb10148ac4e5c831da8e7882e0141</Guid>
@@ -2004,7 +2005,7 @@ kategori</Text>
         </Text99>
         <Text100 Ref="147" type="Text" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>2.4,7.2,4.6,0.6</ClientRectangle>
+          <ClientRectangle>2.4,12.6,4.6,0.6</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Font>Arial,10</Font>
           <Guid>423ac5f1c7234a67912f6f78e89f34e7</Guid>
@@ -2055,6 +2056,22 @@ kategori</Text>
           <Page isRef="130" />
           <Parent isRef="130" />
         </Image2>
+        <Text106 Ref="151" type="Text" isKey="true">
+          <Border>None;Transparent;1;Solid;False;4;Black</Border>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.6,3.4,26.6,3.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12,Bold</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text106</Name>
+          <Page isRef="130" />
+          <Parent isRef="130" />
+          <Text>Leietaker har nå overlevert boligen til utleier. 
+Dersom det er feil og mangler i boligen vil det påløpe et administrasjonshonorar på kroner 500,- for administrasjon av oppgjøret. 
+Dersom det skal utføres utbedringer, belastes det et administrasjonshonorar på kroner 670,- per bestilling.</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+        </Text106>
       </Components>
       <Conditions isList="true" count="0" />
       <Guid>edeca012a0e747758b9621f5af9423a1</Guid>
@@ -2064,13 +2081,13 @@ kategori</Text>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="151" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="152" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page4>
   </Pages>
-  <PrinterSettings Ref="152" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="153" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -2082,10 +2099,10 @@ kategori</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/30/2017 10:17:33 AM</ReportChanged>
+  <ReportChanged>2/7/2017 8:27:15 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\UtflyttingsProtokoll.mrt</ReportFile>
-  <ReportGuid>d5ac36bf1f2f44b6a8e54156a6e886a0</ReportGuid>
+  <ReportGuid>18b985f015914b049b2681e5fe319e1d</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
