@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9CjBoUhWQ6TpbKGYekyxF4ts0WzYBQHtRlu5vXxcsRvRcLnPRnHScUV4TYVhXGSP8RLVKFYFS4FhYb3U/QQie/Vw0c1LevpdcUk=</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9CjBoUhWQ6TpbKGYekyxF4ts0WzYBQHtRlu5vXxcsRvRcLnPRnHScUV4TZVhXGSP8RLVKFYFS4FhYb3U/QQie/Vw0c1LevpdcUk=</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -151,11 +151,11 @@ select  dateadd(yy,0,'{fraDato}') as fraDatoAsDato,dateadd(yy,0,'{TilDato}') as 
 inner join e..t_forvaltningsAvtale fa on fa.id = kd.ForvaltningsavtaleId
 inner join e..t_boligobjekt bo on bo.objekt_id = kd.Objekt
 left join e..t_oppdragsAvtale oa on kd.OppdragsavtaleId = oa.id
-left join e..t_ansatte an on isnull(bo.ansvarligUtleieKonsulentId, fa.ansvarligUtleieKonsulentId) = an.Ansatte_id
+left join e..t_ansatte an on isnull(kd.ansvarligMeglerGodkjentSaksmappe, isnull(bo.ansvarligUtleieKonsulentId, fa.ansvarligUtleieKonsulentId)) = an.Ansatte_id
 
-where isnull(bo.ansvarligUtleieKonsulentId, isnull(fa.ansvarligUtleieKonsulentId,0)) in ({Ansatt})
-and '{fraDato}' &lt;= kd.Innflytting_dato
-and '{TilDato}' &gt; = kd.Innflytting_dato
+where isnull(kd.ansvarligMeglerGodkjentSaksmappe, isnull(bo.ansvarligUtleieKonsulentId, fa.ansvarligUtleieKonsulentId)) in ({Ansatt})
+and '{fraDato}' &lt;= kd.godkjentInnflyttingsmappeDato
+and '{TilDato}' &gt; = kd.godkjentInnflyttingsmappeDato
 and kd.statusid in (1003,1004,1006)
 and isnull(kd.godkjentInnflyttingsmappe,0) = 1
 
@@ -190,14 +190,14 @@ order by oa.Oppdragsnr,kd.FormidlingsNr
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="8">
-      <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0032_,False,False,False</value>
-      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0161101,False,False,False</value>
-      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0171130,False,False,False</value>
+      <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031__x002C_10_x002C_11_x002C_12_x002C_13_x002C_14_x002C_15_x002C_16_x002C_17_x002C_18_x002C_19_x002C_2_x002C_21_x002C_24_x002C_25_x002C_29_x002C_3_x002C_30_x002C_32_x002C_33_x002C_34_x002C_35_x002C_36_x002C_37_x002C_38_x002C_39_x002C_4_x002C_40_x002C_41_x002C_5_x002C_6_x002C_8_x002C_9,False,False,False</value>
+      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0170224,False,False,False</value>
+      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0180224,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0033_,True,False</value>
-      <value>System,ClientYear,ClientYear,System.Int32,_x0032_016,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0037_,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_017,True,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -1687,10 +1687,10 @@ order by oa.Oppdragsnr,kd.FormidlingsNr
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/12/2017 7:33:51 AM</ReportChanged>
+  <ReportChanged>2/24/2017 1:37:49 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\MeglerRapport.mrt</ReportFile>
-  <ReportGuid>3cfa75cc3e6e4b04a86ca7d6c815272a</ReportGuid>
+  <ReportGuid>27cd1187b79046a0b7b6848205b511b7</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
