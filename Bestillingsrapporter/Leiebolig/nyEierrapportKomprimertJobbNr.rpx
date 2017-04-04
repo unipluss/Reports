@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{FD457180-B91A-42C7-9B61-610C03A145D2}" GUIDREP="{B46A3EE9-2F24-46FE-A574-70F6EFE3E3A1}" 
+	GUIDLIB="{8F907838-4AFB-48E2-9354-4E31E66C0750}" GUIDREP="{23EE434F-2C4E-4E48-A75D-AA50E993C340}" 
 	LICENSE="10000000"
 	PrintWidth="16305"
 	DocumentName="ActiveReports Document"
@@ -72,7 +72,7 @@ sub onDatainitialize
 		sql = sql & " /**/ (select sum(provisjon) from e..t_husleieAvregning where UtbetaltAar = huav.UtbetaltAar and UtbetaltMnd = huav.UtbetaltMnd and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID and abs(HusleieBetalt) = 1) as provisjon,"
 		sql = sql & " /**/ (select isnull((sum(husleie) * -1),0) from e..t_husleieAvregning where ((UtbetaltAar = huav.UtbetaltAar and UtbetaltMnd =  huav.UtbetaltMnd and abs(HusleieBetalt) = 1) or (isnull(UtbetaltAar,0) = 0  and isnull(UtbetaltMnd,0) = 0 and ISNULL(status,0) = 3 and Mnd = huav.mnd  and Aar = huav.aar)) and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID ) as husleie,"			
 		sql = sql & " /**/ (select isnull(sum(isnull(husleie,0)) * -1,0) from e..t_husleieAvregning where ((UtbetaltAar = isnull(huav.UtbetaltAar, huav.aar)  and UtbetaltMnd = isnull(huav.UtbetaltMnd, huav.mnd)  and abs(HusleieBetalt) = 1) or (isnull(UtbetaltAar,0) = 0  and isnull(UtbetaltMnd,0) = 0 and ISNULL(status,0) = 3 and Mnd = huav.mnd and Aar = huav.aar)) and EierNr = huAv.EierNr ) as totalHusleie," 			
-		sql = sql & " /**/ (select isnull(sum(isnull(husleie,0)) * -1,0) from e..t_husleieAvregning where  UtbetaltAar= (select max(UtbetaltAar) from e..t_husleieAvregning where Jobnr = huav.jobnr) and UtbetaltMnd = (select max(UtbetaltMnd) from e..t_husleieAvregning where Jobnr = huav.jobnr)  and EierNr = huAv.EierNr and ABS(HusleieBetalt) = 1) as totalHusleieSomUtbetales," 
+		sql = sql & " /**/ (select isnull(sum(isnull(husleie,0)) * -1,0) from e..t_husleieAvregning where  UtbetaltAar= (select max(hav.UtbetaltAar) from e..t_husleieAvregning hav where hav.Jobnr = huav.jobnr and hav.EierNr = huAv.EierNr) and UtbetaltMnd = (select max(hav.UtbetaltMnd) from e..t_husleieAvregning  hav where hav.Jobnr = huav.jobnr and hav.EierNr = huAv.EierNr)  and EierNr = huAv.EierNr and ABS(HusleieBetalt) = 1) as totalHusleieSomUtbetales," 
 		sql = sql & " /**/ (select isnull(sum(isnull(provisjon,0))* -1,0) from e..t_husleieAvregning where UtbetaltAar = isnull(huav.UtbetaltAar, huav.aar) and UtbetaltMnd = isnull(huav.UtbetaltMnd, huav.mnd) and EierNr = huAv.EierNr ) as SumForvHonorar ,"
 		sql = sql & " /**/ (select isnull(sum (isnull(EkstraKostnadPris,0)),0) from e..t_logHusleieAvregningEkstraKostnader where EierId = huAv.EierNr and JobNr = huav.Jobnr and (EkstraKostnadPris < 0 and isnull(EkstraKostnadTypeId,1) = 1)) as SumAndreTrekkKostnader,"
 		sql = sql & " /**/ (select isnull(sum (isnull(EkstraKostnadPris,0)),0) from e..t_logHusleieAvregningEkstraKostnader where EierId = huAv.EierNr and JobNr = huav.Jobnr and (EkstraKostnadPris > 0 or isnull(EkstraKostnadTypeId,0) = 4)) as sumAndreInntekter,"
@@ -126,7 +126,7 @@ sub onDatainitialize
 		'''sql = sql & " /**/ where lek.KontraktsID = ekstra.KontraktsID"		
 		'''sql = sql & " /**/ and lek.JobNr = ekstra.JobNr "
 		'''sql = sql & " /**/ and lek.EkstraKostnadPris < 0"
-		'''sql = sql & " /**/ and ekstra.EierId = lek.EierId"
+		'''sql = sql & " /**/ and ekstra.EierId = lek.EierId"totakEkstraAndreInnttotakEkstraAndreInnt
 		'''sql = sql & " /**/ ) "
 		'''sql = sql & " /**/ when ekstra.EkstraKostnadPris < 0 then ekstra.EkstraKostnadPris else null end) as kostnad "
 		
