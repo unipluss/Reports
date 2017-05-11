@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{C60CC7CF-7FFD-4C56-A031-1ADD134736E2}" GUIDREP="{7572FF23-1DBE-415B-B795-610F60B85428}" 
+	LICENSE="10000000"
+	PrintWidth="15345"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[dim valg 
+sub onDatainitialize
+  	dim sql
+	dim replacement
+	dim header
+
+	'm_data.debugg=true
+	m_data.AddInputMacro "{OM}","Type ","1",,2,"select '1','Alle postbokser' union select '2','Ledige postbokser' union select '3','Sperrede postbokser' union select '4','Postbokser i bruk'"
+	m_data.AddInputMacro "","",""
+
+	m_data.addsortparam "{sort}","Sorter etter ","Postboksnr"," order by pb.pbnr"
+	m_data.addsortparam "{sort}","","Kundenummer"," order by k.kundenummer"
+	m_data.addsortparam "{sort}","","Område og postboksnr"," order by o.omrade,pb.pbnr"
+	m_data.addsortparam "{sort}","","Sperrekategori"," order by s.sperrebeskrivelse"
+	m_data.addsortparam "{sort}","","Kundenavn"," order by n.name "
+	m_data.addsortparam "{sort}","","Bruker", " order by bruker "
+	
+sql = sql & " select "
+sql = sql & " pb.name"
+sql = sql & " ,pb.pbnr"
+sql = sql & " ,o.omrade"
+sql = sql & " ,b.navn"
+sql = sql & " ,pb.kapasitet"
+sql = sql & " ,s.sperrebeskrivelse"
+sql = sql & " , (select count(*) "
+sql = sql & " 	from e..t_adressepostboks ap "
+sql = sql & " 	where ap.postboxid=pb.id)as brukere"
+sql = sql & " ,n.name  bruker "
+sql = sql & " ,k.samb_navn samboer "
+sql = sql & " ,k.kundenummer  kundenr"
+sql = sql & " , (select top 1 name from c..c_Contacts where id=(select f.fremleietaker_id from e..t_fremleieSoknad f "
+sql = sql & " where f.kontrakt_id=(select top 1 kd.kontrakts_id from e..t_kontraktsdata kd where kd.tildeltOmrade_id=pb.omraade and kd.Kundenummer=k.Kundenummer "
+sql = sql & " and getdate() between kd.Kontrakt_fra and kd.Kontrakt_til) and getdate() between f.aktivfra and f.aktivtil and f.statusid=21002 ) ) fremleietaker "
+' sib har fått beskjed om unøyaktigheten i uthenting av fremleietaker
+sql = sql & " ,1 cnt"
+sql = sql & " from e..t_postbox pb "
+sql = sql & " left join e..t_boligomraade o on pb.omraade=o.Boligomrade_id"
+sql = sql & " left join e..t_bygg b on pb.bygg=b.id"
+sql = sql & " left join e..t_sperrekategori s on pb.sperret=s.id"
+sql = sql & " left join e..t_adressepostboks pb1 on pb1.postboxid=pb.id"
+sql = sql & " left join c..c_address a on pb1.adresseid=a.id"
+sql = sql & " left join c..c_name n on a.namelink=n.id"
+sql = sql & " left join e..t_kunde k on a.namelink=k.nameid"
+sql = sql & " where 1 = 1 {where} "
+
+
+
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	valg=m_data.getmacrovalue ("{OM}")	
+	replacement= ""
+ 	select case valg
+		case "1"
+			header="Postboksliste - Alle postbokser"
+		case "2"
+			header="Postboksliste - Ledige postbokser"
+			replacement= " and (select count(*) from e..t_adressepostboks ap where ap.postboxid=pb.id)<pb.kapasitet and ((sperret is null) or (sperret=0))"
+		case "3"
+			header="Postboksliste - Sperrede postbokser"
+			replacement=  " and isnull( pb.sperret, 0 ) <> 0 "
+		case "4"
+			header="Postboksliste - Postbokser i bruk"
+			replacement= " and (select count(*) from e..t_adressepostboks ap where ap.postboxid=pb.id)>0"
+	end select
+	sql = replace(sql, "{where}", replacement)
+	rpt.Sections("ReportHeader").Controls("label11").caption=header
+
+      m_data.SqlString = sql & " {sort}"
+	m_data.setupfields rpt
+  end sub
+
+Sub OnReportStart
+End Sub
+
+Sub OnFetchData(eof)
+	if rpt.fields("sperrebeskrivelse").value="" then 
+		rpt.fields("sperrebeskrivelse").value="Ikke sperret"
+	end if
+	rpt.fields("bruker").value=rpt.fields("kundenr").value & " " & rpt.fields("bruker").value
+End Sub
+
+private function sfdbl(v)
+	on error resume next
+	sfdbl=cdbl(v)
+end function
+]]></Script>
+<PageSettings	LeftMargin="720"
+	RightMargin="720"
+	Orientation="2"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="1275"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		DataField="*y..Bedrift.navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="360"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="*y..Bedrift.arstall"
+		Left="12962"
+		Top="0"
+		Width="1984"
+		Height="425"
+		Text="*y..Bedrift.arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="= &quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="13245"
+		Top="283"
+		Width="1701"
+		Height="426"
+		Text="Sidenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= Now"
+		Left="13245"
+		Top="567"
+		Width="1701"
+		Height="425"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="User_name"
+		Left="13245"
+		Top="855"
+		Width="1695"
+		Height="300"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="0"
+		Top="0"
+		Width="7370"
+		Height="567"
+		Caption="Postbokser"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-size: 16pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="585"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label2"
+		Left="0"
+		Top="111"
+		Width="1134"
+		Height="283"
+		Caption="Pbnr"
+		ClassName="Normal"
+		Style="font-style: italic; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label3"
+		Left="2835"
+		Top="111"
+		Width="3118"
+		Height="283"
+		Caption="Kunde"
+		ClassName="Normal"
+		Style="font-style: italic; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="0"
+		Y1="425"
+		X2="15569"
+		Y2="425"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="709"
+		Top="111"
+		Width="2126"
+		Height="283"
+		Caption="Område"
+		ClassName="Normal"
+		Style="font-style: italic; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="13235"
+		Top="111"
+		Width="1705"
+		Height="283"
+		Caption="Status"
+		ClassName="Normal"
+		Style="font-style: italic; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label15"
+		Left="6705"
+		Top="105"
+		Width="3118"
+		Height="283"
+		Caption="Samboer"
+		ClassName="Normal"
+		Style="font-style: italic; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="10010"
+		Top="90"
+		Width="3118"
+		Height="283"
+		Caption="Fremleietaker"
+		ClassName="Normal"
+		Style="font-style: italic; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+	
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="394"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field6"
+		DataField="pbnr"
+		Left="0"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="pbnr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="omrade"
+		Left="709"
+		Top="0"
+		Width="2126"
+		Height="283"
+		Text="omrade"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field8"
+		DataField="bruker"
+		Left="2835"
+		Top="0"
+		Width="3840"
+		Height="285"
+		Text="bruker"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="sperrebeskrivelse"
+		Left="13235"
+		Top="0"
+		Width="2045"
+		Height="283"
+		Text="sperrebeskrivelse"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field11"
+		DataField="kundenr"
+		Left="4819"
+		Top="0"
+		Width="397"
+		Height="170"
+		Visible="0"
+		Text="kundenr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field12"
+		DataField="cnt"
+		Left="14634"
+		Top="57"
+		Width="567"
+		Height="226"
+		Visible="0"
+		Text="cnt"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="samboer"
+		Left="6720"
+		Top="0"
+		Width="3225"
+		Height="285"
+		Text="samboer"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="fremleietaker"
+		Left="10005"
+		Top="0"
+		Width="3045"
+		Height="285"
+		Text="fremleietaker"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="750"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="0"
+		Y1="142"
+		X2="15569"
+		Y2="142"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		DataField="cnt"
+		Left="13926"
+		Top="142"
+		Width="1559"
+		Height="283"
+		Text="pbnr"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label14"
+		Left="13075"
+		Top="142"
+		Width="851"
+		Height="283"
+		Caption="Antall:"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
