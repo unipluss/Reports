@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Klient_x0020_87 Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Klient 87</Alias>
-        <ConnectionStringEncrypted>9Fb5oU1NQjVhfOVEekzhF4twwQ9NV5KZ7Hu5XORE60/R8vtJZ1TzXWkVuexNFa4T2Vr37VsFAZ3pCP3s9FQqL8J40cLJSns=</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9CjBoUhxQ6TpbJyYekyxF4tsy2zYTQHNRlu5CEtcsefDVrnPRl3ScUVJ0YFjXOuP82rdLkt6S4FhbO29ebRhr41w+w1bWVrt7G21</ConnectionStringEncrypted>
         <Name>Klient 87</Name>
       </Klient_x0020_87>
     </Databases>
@@ -66,11 +66,11 @@ select ArchiveCode from c..ArchiveCodeLink where Type = 42 and ForeignKey in ({J
         <NameInSource>Klient 87</NameInSource>
         <Parameters isList="true" count="0" />
         <SqlCommand>Select 
-	slj.Id as pkId, isnull(infoOmObjektEng,infoOmObjekt) as infoOmObjekt, isnull(slj.engNavn, slj.navn) as navn, Notat, Opprettet, isnull(k.EngelskNavn,k.Navn) as kontrollPunktNavn, 
+	slj.Id as pkId, isnull(nullif(infoOmObjektEng,''), infoOmObjekt) as infoOmObjekt, isnull(nullif(slj.engNavn,''), slj.navn) as navn, Notat, Opprettet, isnull(k.EngelskNavn,k.Navn) as kontrollPunktNavn, 
 	slj.Signatur, s.StatusEngelsk as sjekklistJobbStatus, fullfortDato, Frist, u.Name,slo.id, 
-	isnull(slo.engNavn, slo.navn) as sjekklisteJobbNavn, isnull(slo.engBeskrivelse,slo.Beskrivelse) as Beskrivelse, slo.Kommentar, 
+	isnull(nullif(slo.engNavn,''), slo.navn) as sjekklisteJobbNavn, isnull(nullif(convert(varchar,slo.engBeskrivelse),''),slo.Beskrivelse) as Beskrivelse, slo.Kommentar, 
 	(select st.StatusEngelsk from e..t_status st where st.status_id=slo.StatusId)as oppgaveStatus, 
-	(select st.status_id from e..t_status st where st.status_id=slo.StatusId)as oppgaveStatus_id, 
+(select st.status_id from e..t_status st where st.status_id=slo.StatusId)as oppgaveStatus_id, 
 	slo.registrertDato,
 	st.StatusEngelsk sjekklisteOppgave, slo.aktivitetsId , slo.sorteringsVekt
  
@@ -92,7 +92,7 @@ order by slo.sorteringsVekt, slo.id desc</SqlCommand>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0031_7,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0031_2,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_017,True,False</value>
     </Variables>
   </Dictionary>
@@ -745,10 +745,10 @@ order by slo.sorteringsVekt, slo.id desc</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>5/12/2017 12:35:07 PM</ReportChanged>
+  <ReportChanged>5/16/2017 11:13:13 AM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\Sjekklister_Eng.mrt</ReportFile>
-  <ReportGuid>2fd63ee8739f43019bfea3b3e2a77a2a</ReportGuid>
+  <ReportGuid>cebcb5746ab843ebb227645b4f3cfeec</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
