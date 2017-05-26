@@ -1,0 +1,2185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{E45B580B-26BF-465D-B892-5DEE3D8FD810}" GUIDREP="{34470BFD-CA4A-4F7D-8C13-77B985C7FED9}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10110"
+	DocumentName="Budsjettoversikt 1 dimensjon"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[Sub OnDataInitialize
+	'm_data.Debugg=true
+
+	m_data.AddInputMacro "{DT1}","Velg dimensjon 1  ","getsql(select min(id) from y..dimensjonstype)",,2,"Select id, navn from y..dimensjonstype"
+	m_data.AddInputMacro "{DT11}", "Velg min nr","getsql(select min(dimtall) from y..dimensjon where dimtype = {DT1})"
+	m_data.AddInputMacro "{DT12}", "Velg max nr","getsql(select max(dimtall) from y..dimensjon where dimtype = {DT1})"
+	m_data.AddInputMacro "","",""
+	m_data.AddInputMacro "{RegnAAr}","Velg regnskapsår","getsql(select max(Year) from y..PerSum)",,2,"(Select Year, convert(varchar(4),Year) from y..PerSum Group by year Order by Year desc)"
+	m_data.AddInputMacro "{BudAAr}","Velg budsjettår","getsql(select max(Dim101) from c..BudTrans)",,2,"(Select Dim101, convert(varchar(20),Dim101) from c..BudTrans Group by Dim101 Order by Dim101 desc)"
+	m_data.AddInputMacro "{BudVer}","Velg budsjettversjon","getsql(select min(Btype) from c..BudsjettVer)",,2,"(Select Btype, VersjonsBeskr from c..BudsjettVer where BStatus = 130201 And Year = {BudAAr})"
+	m_data.AddInputMacro "","",""
+	m_data.AddInputMacro "{FK}","Fra konto","getsql(select HResKnrFra from y..System)"
+	m_data.AddInputMacro "{TK}","Til konto","getsql(select HResKnrTil from y..System)"
+	m_data.AddInputMacro "{FP}","Fra periode","getsql(select min(periode) from y..PerSum where periode <> 0)"
+	m_data.AddInputMacro "{TP}","Til periode","getsql(select max(periode) from y..PerSum)"
+	m_data.AddInputMacro "","",""
+	m_data.AddInputMacro "{Visning}","Vise rapporten","1",,2,"(select TOP 1 '1', 'Detaljert' from c..Status UNION Select TOP 1 '2', 'Akkumulert' from c..Status UNION Select TOP 1 '3', 'Akkumulert m/detaljsum' from c..Status)"
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+
+	m_data.SqlString = "object:uf_kostrarapp.KostraBudFellesraad:{DT1}|{DT11}|{DT12}|{RegnAAr}|{BudAAr}|{BudVer}|{FK}|{TK}|{FP}|{TP}|1"
+	m_data.SetupFields rpt
+End Sub
+
+Sub OnReportStart
+
+End Sub
+'28
+Sub OnFetchData(eof)
+	rpt.Fields("Dim1").Value = rpt.Fields("DT1Navn") & ": " & rpt.Fields("DT1") & "  " & rpt.Fields("Dim1Navn")
+	rpt.Fields("SumDim1").Value = "Sum " & rpt.Fields("DT1Navn") & ": " & rpt.Fields("DT1") & " - " & rpt.Fields("Dim1Navn")
+
+	rpt.Fields("Regaar").Value = "Regn " & m_data.GetMacroValue("{RegnAAr}")
+	rpt.Fields("Budaar").Value = "Budsjett " & m_data.GetMacroValue("{BudAAr}")
+
+	if len(sfcurr(rpt.Fields("Kontonr"))) = 3 then rpt.Fields("Art").value = "0" & Mid(rpt.Fields("Kontonr"),1,2)
+	if len(sfcurr(rpt.Fields("Kontonr"))) = 4 then rpt.Fields("Art").value = Mid(rpt.Fields("Kontonr"),1,3)
+	if len(sfcurr(rpt.Fields("Kontonr"))) = 5 then rpt.Fields("Art").value = Mid(rpt.Fields("Kontonr"),2,3)
+
+	rpt.Fields("Avvik").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+
+	if sfcurr(rpt.Fields("Sumbud")) <> 0 Then rpt.Fields("Forbr").Value = (sfcurr(rpt.Fields("SumRegn")) / sfcurr(rpt.Fields("Sumbud")))
+
+	Select case rpt.Fields("Art")
+		'Loenn
+		case "010","011","012","013","014","015","016","017","018","019","020","021","022","023","024","025","026","027","028","029","030","031","032","033","034","035","036","037","038","039","040","041","042","043","044","045","046","047","048","049","050","051","052","053","054","055","056","057","058","059","060","061","062","063","064","065","066","067","068","069","070","071","072","073","074","075","076","077","078","079","160","161","162","163","164","165","166","167","168","169"
+			rpt.Fields("SumUtgifter").value = rpt.Fields("SumRegn")
+			rpt.Fields("SumBudUtgifter").value = rpt.Fields("Sumbud")
+			rpt.Fields("AvvikUtgifter").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+
+		'Sosiale utgifter
+		case "080","081","082","083","084","085","086","087","088","089","090","091","092","093","094","095","096","097","098","099"
+			rpt.Fields("SumUtgifter").value = rpt.Fields("SumRegn")
+			rpt.Fields("SumBudUtgifter").value = rpt.Fields("Sumbud")
+			rpt.Fields("AvvikUtgifter").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+
+		'Kjoep av varer og tjenester som inngaar i kommunal tjenesteproduksjon
+		case "100","101","102","103","104","105","106","107","108","109","110","111","112","113","114","115","116","117","118","119","120","121","122","123","124","125","126","127","128","129","130","131","132","133","134","135","136","137","138","139","140","141","142","143","144","145","146","147","148","149","150","151","152","153","154","155","156","157","158","159","170","171","172","173","174","175","176","177","178","179","180","181","182","183","184","185","186","187","188","189","190","191","192","193","194","195","196","197","198","199","200","201","202","203","204","205","206","207","208","209","210","211","212","213","214","215","216","217","218","219","220","221","222","223","224","225","226","227","228","229","230","231","232","233","234","235","236","237","238","239","240","241","242","243","244","245","246","247","248","249","250","251","252","253","254","255","256","257","258","259","260","261","262","263","264","265","266","267","268","269","270","271","272","273","274","275","276","277","278","279","280","281","282","283","284","285","286","287","288","289","290","291","292","293","294","295","296","297","298","299"
+			rpt.Fields("SumUtgifter").value = rpt.Fields("SumRegn")
+			rpt.Fields("SumBudUtgifter").value = rpt.Fields("Sumbud")
+			rpt.Fields("AvvikUtgifter").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+
+		'Kjoep av tjenester som erstatter kommunal tjenesteprodukjon
+		case "300","301","302","303","304","305","306","307","308","309","310","311","312","313","314","315","316","317","318","319","320","321","322","323","324","325","326","327","328","329","330","331","332","333","334","335","336","337","338","339","340","341","342","343","344","345","346","347","348","349","350","351","352","353","354","355","356","357","358","359","360","361","362","363","364","365","366","367","368","369","370","371","372","373","374","375","376","377","378","379","380","381","382","383","384","385","386","387","388","389","390","391","392","393","394","395","396","397","398","399"
+			rpt.Fields("SumUtgifter").value = rpt.Fields("SumRegn")
+			rpt.Fields("SumBudUtgifter").value = rpt.Fields("Sumbud")
+			rpt.Fields("AvvikUtgifter").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+
+		'Overfoeringer
+		case "400","401","402","403","404","405","406","407","408","409","410","411","412","413","414","415","416","417","418","419","420","421","422","423","424","425","426","427","428","429","430","431","432","433","434","435","436","437","438","439","440","441","442","443","444","445","446","447","448","449","450","451","452","453","454","455","456","457","458","459","460","461","462","463","464","465","466","467","468","469","470","471","472","473","474","475","476","477","478","479","480","481","482","483","484","485","486","487","488","489","490","491","492","493","494","495","496","497","498","499"
+			rpt.Fields("SumUtgifter").value = rpt.Fields("SumRegn")
+			rpt.Fields("SumBudUtgifter").value = rpt.Fields("Sumbud")
+			rpt.Fields("AvvikUtgifter").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+
+		'Finansutgifter
+		case "500","501","502","503","504","505","506","507","508","509","510","511","512","513","514","515","516","517","518","519","520","521","522","523","524","525","526","527","528","529","530","531","532","533","534","535","536","537","538","539","540","541","542","543","544","545","546","547","548","549","550","551","552","553","554","555","556","557","558","559","560","561","562","563","564","565","566","567","568","569","570","571","572","573","574","575","576","577","578","579","580","581","582","583","584","585","586","587","588","589","590","591","592","593","594","595","596","597","598","599"
+			rpt.Fields("SumFinansUt").value = rpt.Fields("SumRegn")
+			rpt.Fields("SumBudFinansUt").value = rpt.Fields("Sumbud")
+			rpt.Fields("AvvikFinUt").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+
+		'Salgsinntekter
+		case "600","601","602","603","604","605","606","607","608","609","610","611","612","613","614","615","616","617","618","619","620","621","622","623","624","625","626","627","628","629","630","631","632","633","634","635","636","637","638","639","640","641","642","643","644","645","646","647","648","649","650","651","652","653","654","655","656","657","658","659","660","661","662","663","664","665","666","667","668","669","670","671","672","673","674","675","676","677","678","679","680","681","682","683","684","685","686","687","688","689","690","691","692","693","694","695","696","697","698","699"
+			rpt.Fields("SumInntekter").value = rpt.Fields("SumRegn")
+			rpt.Fields("SumBudInntekter").value = rpt.Fields("Sumbud")
+			rpt.Fields("AvvikInntekter").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+
+		'Overfoeringer med krav til motytelse
+		case "700","701","702","703","704","705","706","707","708","709","710","711","712","713","714","715","716","717","718","719","720","721","722","723","724","725","726","727","728","729","730","731","732","733","734","735","736","737","738","739","740","741","742","743","744","745","746","747","748","749","750","751","752","753","754","755","756","757","758","759","760","761","762","763","764","765","766","767","768","769","770","771","772","773","774","775","776","777","778","779","780","781","782","783","784","785","786","787","788","789","790","791","792","793","794","795","796","797","798","799"
+			rpt.Fields("SumInntekter").value = rpt.Fields("SumRegn")
+			rpt.Fields("SumBudInntekter").value = rpt.Fields("Sumbud")
+			rpt.Fields("AvvikInntekter").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+
+		'Overfoeringer uten krav til motytelse
+		case "800","801","802","803","804","805","806","807","808","809","810","811","812","813","814","815","816","817","818","819","820","821","822","823","824","825","826","827","828","829","830","831","832","833","834","835","836","837","838","839","840","841","842","843","844","845","846","847","848","849","850","851","852","853","854","855","856","857","858","859","860","861","862","863","864","865","866","867","868","869","870","871","872","873","874","875","876","877","878","879","880","881","882","883","884","885","886","887","888","889","890","891","892","893","894","895","896","897","898","899"
+			rpt.Fields("SumInntekter").value = rpt.Fields("SumRegn")
+			rpt.Fields("SumBudInntekter").value = rpt.Fields("Sumbud")
+			rpt.Fields("AvvikInntekter").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+	
+		'Finansinntekter
+		case "900","901","902","903","904","905","906","907","908","909","910","911","912","913","914","915","916","917","918","919","920","921","922","923","924","925","926","927","928","929","930","931","932","933","934","935","936","937","938","939","940","941","942","943","944","945","946","947","948","949","950","951","952","953","954","955","956","957","958","959","960","961","962","963","964","965","966","967","968","969","970","971","972","973","974","975","976","977","978","979","980","981","982","983","984","985","986","987","988","989","990","991","992","993","994","995","996","997","998","999"
+			rpt.Fields("SumFinansInn").value = rpt.Fields("SumRegn")
+			rpt.Fields("SumBudFinansInn").value = rpt.Fields("Sumbud")
+			rpt.Fields("AvvikFinInn").Value = sfcurr(rpt.Fields("Sumbud")) - sfcurr(rpt.Fields("SumRegn"))
+	end select
+'103
+	if m_data.GetMacroValue("{Visning}") = "2" then 
+		rpt.Sections("GroupHeader1").Visible = False
+		rpt.Sections("Detail").Visible = False
+		rpt.Sections("GroupFooter2").Visible = True
+		rpt.Sections("GroupFooter1").Visible = False
+		rpt.Sections("PageHeader").Controls("Line11").Visible = True
+'		rpt.Sections("ReportFooter").Controls("Field135").Visible = False
+'		rpt.Sections("ReportFooter").Controls("Field136").Visible = False
+'		rpt.Sections("ReportFooter").Controls("Field137").Visible = False
+'		rpt.Sections("ReportFooter").Controls("Field138").Visible = False
+'		rpt.Sections("ReportFooter").Controls("Field139").Visible = False
+'		rpt.Sections("ReportFooter").Controls("Field140").Visible = False
+'		rpt.Sections("ReportFooter").Controls("Field141").Visible = False
+'		rpt.Sections("ReportFooter").Controls("Field142").Visible = False
+'		rpt.Sections("ReportFooter").Controls("Label26").Visible = False
+'		rpt.Sections("ReportFooter").Controls("Label27").Visible = False
+		rpt.Sections("ReportFooter").NewPage = 0
+
+			rpt.Sections("GroupFooter2").Controls("Field154").Style = "text-align: right; font-size: 8pt; font-weight: (null); vertical-align: middle; "
+			rpt.Sections("GroupFooter2").Controls("Field155").Style = "text-align: right; font-size: 8pt; font-weight: (null); vertical-align: middle; "
+			rpt.Sections("GroupFooter2").Controls("Field157").Style = "text-align: right; font-size: 8pt; font-weight: (null); vertical-align: middle; "
+			rpt.Sections("GroupFooter2").Controls("Field158").Style = "text-align: right; font-size: 8pt; font-weight: (null); vertical-align: middle; "
+			rpt.Sections("GroupFooter2").Controls("Field156").Style = "font-size: 8pt; font-weight: (null); vertical-align: middle;"
+
+	else
+		if m_data.GetMacroValue("{Visning}") = "3" then 
+			rpt.Sections("GroupHeader1").Visible = False
+			rpt.Sections("Detail").Visible = False
+			rpt.Sections("PageHeader").Controls("Line11").Visible = True
+			rpt.Sections("GroupFooter1").Controls("Line10").Visible = False
+
+'			rpt.Sections("ReportFooter").Controls("Field135").Visible = False
+'			rpt.Sections("ReportFooter").Controls("Field136").Visible = False
+'			rpt.Sections("ReportFooter").Controls("Field137").Visible = False
+'			rpt.Sections("ReportFooter").Controls("Field138").Visible = False
+'			rpt.Sections("ReportFooter").Controls("Field139").Visible = False
+'			rpt.Sections("ReportFooter").Controls("Field140").Visible = False
+'			rpt.Sections("ReportFooter").Controls("Field141").Visible = False
+'			rpt.Sections("ReportFooter").Controls("Field142").Visible = False
+'			rpt.Sections("ReportFooter").Controls("Label26").Visible = False
+'			rpt.Sections("ReportFooter").Controls("Label27").Visible = False
+			rpt.Sections("ReportFooter").NewPage = 0
+
+			rpt.Sections("GroupFooter1").Controls("Label14").Style = "font-weight: (null); font-size: 8pt; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Label15").Style = "font-weight: (null); font-size: 8pt; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Label16").Style = "font-weight: (null); font-size: 8pt; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Label17").Style = "font-weight: (null); font-size: 8pt; vertical-align: middle;"
+
+			rpt.Sections("GroupFooter1").Controls("Field72").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field73").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field74").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field75").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+
+			rpt.Sections("GroupFooter1").Controls("Field77").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field78").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field79").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field80").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+
+			rpt.Sections("GroupFooter1").Controls("Field127").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field128").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field129").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field130").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+
+			rpt.Sections("GroupFooter1").Controls("Field146").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field147").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field148").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+			rpt.Sections("GroupFooter1").Controls("Field149").Style = "font-size: 8pt; font-weight: (null); text-align: right; vertical-align: middle;"
+		end if
+	end if
+End Sub
+
+Function sfcurr(v)
+    Dim rv
+    On Error Resume Next
+    rv = CCur(v)
+    If Err Then rv = 0
+    sfcurr = rv
+End Function
+]]></Script>
+<PageSettings	LeftMargin="1000"
+	RightMargin="800"
+	TopMargin="1000"
+	BottomMargin="720"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1560"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="*y..Bedrift.Navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="283"
+		Text="*y..Bedrift.Navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="*y..Bedrift.Arstall"
+		Left="8079"
+		Top="0"
+		Width="1984"
+		Height="283"
+		Text="*y..Bedrift.Arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="=&quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="8362"
+		Top="283"
+		Width="1701"
+		Height="284"
+		Text="Sidenr"
+		SummaryType="4"
+		SummaryFunc="11"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="=Now"
+		Left="8362"
+		Top="567"
+		Width="1701"
+		Height="283"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="User_name"
+		Left="8362"
+		Top="850"
+		Width="1701"
+		Height="284"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field55"
+		DataField="Regaar"
+		Left="4961"
+		Top="1276"
+		Width="1275"
+		Height="283"
+		Text="Regaar"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-style: italic; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field56"
+		DataField="Budaar"
+		Left="6236"
+		Top="1276"
+		Width="1276"
+		Height="283"
+		Text="Budaar"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-style: italic; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field63"
+		DataField="= &quot;Budsjettoversikt &quot; &amp; rpt.Fields(&quot;DT1Navn&quot;)"
+		Left="0"
+		Top="0"
+		Width="7087"
+		Height="425"
+		Text="Budsjettoversikt &quot;dimensjon&quot;"
+		ClassName="Normal"
+		Style="font-size: 16pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label24"
+		Left="8232"
+		Top="1276"
+		Width="1275"
+		Height="283"
+		Caption="Avvik"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; font-style: italic; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label25"
+		Left="8790"
+		Top="1275"
+		Width="1275"
+		Height="285"
+		Visible="0"
+		Caption="Forb.%"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; font-style: italic; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line11"
+		X1="0"
+		Y1="1559"
+		X2="10063"
+		Y2="1559"
+		Visible="0"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="300"
+		DataField="Dim1"
+		RepeatStyle="1"
+		NewPage="1"
+		CanGrow="0"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="Dim1"
+		Left="0"
+		Top="0"
+		Width="10063"
+		Height="283"
+		Text="Dim1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-weight: bold; vertical-align: middle; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="0"
+		Y1="283"
+		X2="10063"
+		Y2="283"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Visible="0"
+		Height="0"
+		DataField="Dim1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="1815"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field37"
+		DataField="Kontonr"
+		Left="709"
+		Top="0"
+		Width="708"
+		Height="283"
+		Text="Kontonr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field38"
+		DataField="KNavn"
+		Left="1559"
+		Top="0"
+		Width="3260"
+		Height="283"
+		Text="KNavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field39"
+		DataField="SumRegn"
+		Left="4961"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="SumRegn"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field40"
+		DataField="Sumbud"
+		Left="6236"
+		Top="0"
+		Width="1276"
+		Height="283"
+		Text="Sumbud"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field59"
+		DataField="DT1"
+		Left="142"
+		Top="1134"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="DT1"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field61"
+		DataField="DT1Navn"
+		Left="1843"
+		Top="1134"
+		Width="1417"
+		Height="283"
+		Visible="0"
+		Text="DT1Navn"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field33"
+		DataField="Dim1Navn"
+		Left="3543"
+		Top="1134"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="Dim1Navn"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(192,192,192); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field76"
+		DataField="Art"
+		Left="4961"
+		Top="1134"
+		Width="850"
+		Height="283"
+		Visible="0"
+		Text="Art"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="text-align: center; font-size: 8pt; vertical-align: middle; background-color: rgb(192,192,192); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field110"
+		DataField="Avvik"
+		Left="8232"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="Avvik"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field111"
+		DataField="Forbr"
+		Left="8787"
+		Top="0"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="Forbr"
+		OutputFormat="0.00%"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Visible="0"
+		Height="285"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field154"
+		DataField="SumRegn"
+		Left="4961"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="SumRegn"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; font-weight: bold; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field155"
+		DataField="Sumbud"
+		Left="6236"
+		Top="0"
+		Width="1276"
+		Height="283"
+		Text="Sumbud"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; font-weight: bold; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field156"
+		DataField="SumDim1"
+		Left="0"
+		Top="0"
+		Width="4677"
+		Height="283"
+		Text="SumDim1"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field157"
+		DataField="Avvik"
+		Left="8232"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="Avvik"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field158"
+		DataField="pro1"
+		Left="8787"
+		Top="0"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="pro1"
+		OutputFormat="0.00%"
+		ClassName="Normal"
+		Style="text-align: right; background-color: rgb(255,255,255); font-weight: bold; vertical-align: middle; font-size: 8pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+	if m_data.Sfcurr(rpt.Sections("GroupFooter2").Controls("Field155").DataValue) <> 0 Then
+		rpt.Sections("GroupFooter2").Controls("Field158").DataValue  = rpt.Sections("GroupFooter2").Controls("Field154").DataValue / rpt.Sections("GroupFooter2").Controls("Field155").DataValue
+	end if
+End Sub
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="2055"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label14"
+		Left="0"
+		Top="0"
+		Width="2976"
+		Height="283"
+		Caption="Sum utgifter"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label15"
+		Left="0"
+		Top="283"
+		Width="2976"
+		Height="284"
+		Caption="Sum inntekter"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="0"
+		Top="567"
+		Width="2976"
+		Height="283"
+		Caption="Sum finansutgifter"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label17"
+		Left="0"
+		Top="850"
+		Width="2976"
+		Height="284"
+		Caption="Sum finansinntekter"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field68"
+		DataField="SumRegn"
+		Left="4961"
+		Top="1134"
+		Width="1275"
+		Height="283"
+		Text="SumRegn"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; font-weight: bold; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field69"
+		DataField="Sumbud"
+		Left="6236"
+		Top="1134"
+		Width="1276"
+		Height="283"
+		Text="Sumbud"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; font-weight: bold; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line5"
+		X1="0"
+		Y1="1134"
+		X2="10063"
+		Y2="1134"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line6"
+		X1="0"
+		Y1="1417"
+		X2="10063"
+		Y2="1417"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field72"
+		DataField="SumUtgifter"
+		Left="4961"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="SumUtgifter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field73"
+		DataField="SumInntekter"
+		Left="4961"
+		Top="283"
+		Width="1275"
+		Height="284"
+		Text="SumInntekter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field74"
+		DataField="SumFinansInn"
+		Left="4961"
+		Top="850"
+		Width="1275"
+		Height="284"
+		Text="SumFinansInn"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field75"
+		DataField="SumFinansUt"
+		Left="4961"
+		Top="567"
+		Width="1275"
+		Height="283"
+		Text="SumFinansUt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field77"
+		DataField="SumBudUtgifter"
+		Left="6236"
+		Top="0"
+		Width="1276"
+		Height="283"
+		Text="SumBudUtgifter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field78"
+		DataField="SumBudInntekter"
+		Left="6236"
+		Top="283"
+		Width="1276"
+		Height="284"
+		Text="SumBudInntekter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field79"
+		DataField="SumBudFinansUt"
+		Left="6236"
+		Top="567"
+		Width="1276"
+		Height="283"
+		Text="SumBudFinansUt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field80"
+		DataField="SumBudFinansInn"
+		Left="6236"
+		Top="850"
+		Width="1276"
+		Height="284"
+		Text="SumBudFinansInn"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field109"
+		DataField="SumDim1"
+		Left="0"
+		Top="1134"
+		Width="4677"
+		Height="283"
+		Text="SumDim1"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field113"
+		DataField="Avvik"
+		Left="8232"
+		Top="1134"
+		Width="1275"
+		Height="283"
+		Text="Avvik"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field127"
+		DataField="AvvikUtgifter"
+		Left="8232"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="AvvikUtgifter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field128"
+		DataField="AvvikInntekter"
+		Left="8232"
+		Top="283"
+		Width="1275"
+		Height="284"
+		Text="AvvikInntekter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field129"
+		DataField="AvvikFinUt"
+		Left="8232"
+		Top="567"
+		Width="1275"
+		Height="283"
+		Text="AvvikFinUt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field130"
+		DataField="AvvikFinInn"
+		Left="8232"
+		Top="850"
+		Width="1275"
+		Height="284"
+		Text="AvvikFinInn"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="3"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line10"
+		X1="0"
+		Y1="0"
+		X2="10063"
+		Y2="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field144"
+		DataField="pro1"
+		Left="8787"
+		Top="1134"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="pro1"
+		OutputFormat="0.00%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; background-color: rgb(255,255,255); font-weight: bold; vertical-align: middle; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field146"
+		DataField="Pro"
+		Left="8787"
+		Top="0"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="Pro"
+		OutputFormat="0.00%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; text-align: right; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field147"
+		DataField="Pro"
+		Left="8787"
+		Top="283"
+		Width="1276"
+		Height="284"
+		Visible="0"
+		Text="Pro"
+		OutputFormat="0.00%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; text-align: right; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field148"
+		DataField="Pro"
+		Left="8787"
+		Top="567"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="Pro"
+		OutputFormat="0.00%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; text-align: right; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field149"
+		DataField="Pro"
+		Left="8787"
+		Top="850"
+		Width="1276"
+		Height="284"
+		Visible="0"
+		Text="Pro"
+		OutputFormat="0.00%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8pt; vertical-align: middle; text-align: right; font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+Sub OnBeforePrint
+	if m_data.Sfcurr(rpt.Sections("GroupFooter1").Controls("Field69").DataValue) <> 0 Then
+		rpt.Sections("GroupFooter1").Controls("Field144").DataValue  = rpt.Sections("GroupFooter1").Controls("Field68").DataValue / rpt.Sections("GroupFooter1").Controls("Field69").DataValue
+	end if
+
+	if m_data.Sfcurr(rpt.Sections("GroupFooter1").Controls("Field77").DataValue) <> 0 Then
+		rpt.Sections("GroupFooter1").Controls("Field146").DataValue  = rpt.Sections("GroupFooter1").Controls("Field72").DataValue / rpt.Sections("GroupFooter1").Controls("Field77").DataValue
+	end if
+
+	if m_data.Sfcurr(rpt.Sections("GroupFooter1").Controls("Field78").DataValue) <> 0 Then
+		rpt.Sections("GroupFooter1").Controls("Field147").DataValue  = rpt.Sections("GroupFooter1").Controls("Field73").DataValue / rpt.Sections("GroupFooter1").Controls("Field78").DataValue
+	end if
+
+	if m_data.Sfcurr(rpt.Sections("GroupFooter1").Controls("Field79").DataValue) <> 0 Then
+		rpt.Sections("GroupFooter1").Controls("Field148").DataValue  = rpt.Sections("GroupFooter1").Controls("Field75").DataValue / rpt.Sections("GroupFooter1").Controls("Field79").DataValue
+	end if
+
+	if m_data.Sfcurr(rpt.Sections("GroupFooter1").Controls("Field80").DataValue) <> 0 Then
+		rpt.Sections("GroupFooter1").Controls("Field149").DataValue  = rpt.Sections("GroupFooter1").Controls("Field74").DataValue / rpt.Sections("GroupFooter1").Controls("Field80").DataValue
+	end if
+
+	if ABS(m_data.Sfcurr(rpt.Sections("GroupFooter1").Controls("Field144").DataValue)) > 1000 Then
+		rpt.Sections("GroupFooter1").Controls("Field144").Visible = False
+	End if
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="2610"
+		NewPage="1"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="0"
+		Top="1984"
+		Width="3402"
+		Height="284"
+		Visible="0"
+		Caption="Laget av R.Milde (29.01.2002)"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label19"
+		Left="0"
+		Top="283"
+		Width="2976"
+		Height="284"
+		Caption="Sum utgifter totalt"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label20"
+		Left="0"
+		Top="567"
+		Width="2976"
+		Height="283"
+		Caption="Sum inntekter totalt"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label21"
+		Left="0"
+		Top="850"
+		Width="2976"
+		Height="284"
+		Caption="Sum finansutgifter totalt"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label22"
+		Left="0"
+		Top="1134"
+		Width="2976"
+		Height="283"
+		Caption="Sum finansinntekter totalt"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label23"
+		Left="0"
+		Top="1417"
+		Width="2976"
+		Height="284"
+		Caption="Sum netto totalt"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field89"
+		DataField="SumRegn"
+		Left="4961"
+		Top="1417"
+		Width="1275"
+		Height="284"
+		Text="SumRegn"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; font-weight: bold; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field90"
+		DataField="Sumbud"
+		Left="6236"
+		Top="1417"
+		Width="1276"
+		Height="284"
+		Text="Sumbud"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8pt; font-weight: bold; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line7"
+		X1="0"
+		Y1="1417"
+		X2="10063"
+		Y2="1417"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line8"
+		X1="0"
+		Y1="1701"
+		X2="10063"
+		Y2="1701"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field93"
+		DataField="SumUtgifter"
+		Left="4961"
+		Top="283"
+		Width="1275"
+		Height="284"
+		Text="SumUtgifter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field94"
+		DataField="SumInntekter"
+		Left="4961"
+		Top="567"
+		Width="1275"
+		Height="283"
+		Text="SumInntekter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field95"
+		DataField="SumFinansInn"
+		Left="4961"
+		Top="1134"
+		Width="1275"
+		Height="283"
+		Text="SumFinansInn"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field96"
+		DataField="SumFinansUt"
+		Left="4961"
+		Top="850"
+		Width="1275"
+		Height="284"
+		Text="SumFinansUt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field97"
+		DataField="SumBudUtgifter"
+		Left="6236"
+		Top="283"
+		Width="1276"
+		Height="284"
+		Text="SumBudUtgifter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field98"
+		DataField="SumBudInntekter"
+		Left="6236"
+		Top="567"
+		Width="1276"
+		Height="283"
+		Text="SumBudInntekter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field99"
+		DataField="SumBudFinansUt"
+		Left="6236"
+		Top="850"
+		Width="1276"
+		Height="284"
+		Text="SumBudFinansUt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field100"
+		DataField="SumBudFinansInn"
+		Left="6236"
+		Top="1134"
+		Width="1276"
+		Height="283"
+		Text="SumBudFinansInn"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field114"
+		DataField="Avvik"
+		Left="8232"
+		Top="1417"
+		Width="1275"
+		Height="284"
+		Text="Avvik"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; text-align: right; vertical-align: middle; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field131"
+		DataField="AvvikUtgifter"
+		Left="8232"
+		Top="283"
+		Width="1275"
+		Height="284"
+		Text="AvvikUtgifter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field132"
+		DataField="AvvikInntekter"
+		Left="8232"
+		Top="567"
+		Width="1275"
+		Height="283"
+		Text="AvvikInntekter"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field133"
+		DataField="AvvikFinUt"
+		Left="8232"
+		Top="850"
+		Width="1275"
+		Height="284"
+		Text="AvvikFinUt"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field134"
+		DataField="AvvikFinInn"
+		Left="8232"
+		Top="1134"
+		Width="1275"
+		Height="283"
+		Text="AvvikFinInn"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		SummaryType="1"
+		SummaryFunc="0"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-weight: bold; text-align: right; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line9"
+		X1="0"
+		Y1="283"
+		X2="10063"
+		Y2="283"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field145"
+		DataField="pro3"
+		Left="8787"
+		Top="1417"
+		Width="1276"
+		Height="284"
+		Visible="0"
+		Text="pro3"
+		OutputFormat="0.00%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; background-color: rgb(255,255,255); font-weight: bold; vertical-align: middle; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field150"
+		DataField="Pro"
+		Left="8787"
+		Top="283"
+		Width="1276"
+		Height="284"
+		Visible="0"
+		Text="Pro"
+		OutputFormat="0.00%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field151"
+		DataField="Pro"
+		Left="8787"
+		Top="567"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="Pro"
+		OutputFormat="0.00%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field152"
+		DataField="Pro"
+		Left="8787"
+		Top="850"
+		Width="1276"
+		Height="284"
+		Visible="0"
+		Text="Pro"
+		OutputFormat="0.00%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field153"
+		DataField="Pro"
+		Left="8787"
+		Top="1134"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="Pro"
+		OutputFormat="0.00%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-weight: bold; font-size: 8pt; vertical-align: middle; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+Sub OnBeforePrint
+	if m_data.Sfcurr(rpt.Sections("ReportFooter").Controls("Field90").DataValue) <> 0 Then
+		rpt.Sections("ReportFooter").Controls("Field145").DataValue = rpt.Sections("ReportFooter").Controls("Field89").DataValue / rpt.Sections("ReportFooter").Controls("Field90").DataValue
+	End if
+
+	if m_data.Sfcurr(rpt.Sections("ReportFooter").Controls("Field97").DataValue) <> 0 Then
+		rpt.Sections("ReportFooter").Controls("Field150").DataValue = rpt.Sections("ReportFooter").Controls("Field93").DataValue / rpt.Sections("ReportFooter").Controls("Field97").DataValue
+	End if
+
+	if m_data.Sfcurr(rpt.Sections("ReportFooter").Controls("Field98").DataValue) <> 0 Then
+		rpt.Sections("ReportFooter").Controls("Field151").DataValue = rpt.Sections("ReportFooter").Controls("Field94").DataValue / rpt.Sections("ReportFooter").Controls("Field98").DataValue
+	End if
+
+	if m_data.Sfcurr(rpt.Sections("ReportFooter").Controls("Field99").DataValue) <> 0 Then
+		rpt.Sections("ReportFooter").Controls("Field152").DataValue = rpt.Sections("ReportFooter").Controls("Field96").DataValue / rpt.Sections("ReportFooter").Controls("Field99").DataValue
+	End if
+
+	if m_data.Sfcurr(rpt.Sections("ReportFooter").Controls("Field100").DataValue) <> 0 Then
+		rpt.Sections("ReportFooter").Controls("Field153").DataValue = rpt.Sections("ReportFooter").Controls("Field95").DataValue / rpt.Sections("ReportFooter").Controls("Field100").DataValue
+	End if
+
+	if ABS(m_data.Sfcurr(rpt.Sections("ReportFooter").Controls("Field145").DataValue)) > 1000 Then
+		rpt.Sections("ReportFooter").Controls("Field145").Visible = False
+	End if
+
+	if sfcurr(m_data.GetMacroValue("{Visning}")) > 1 then 
+		rpt.Sections("ReportFooter").Controls("Label19").Top = 0
+		rpt.Sections("ReportFooter").Controls("Field93").Top = 0
+		rpt.Sections("ReportFooter").Controls("Field97").Top = 0
+		rpt.Sections("ReportFooter").Controls("Field131").Top = 0
+		rpt.Sections("ReportFooter").Controls("Field150").Top = 0
+
+		rpt.Sections("ReportFooter").Controls("Label20").Top = 284
+		rpt.Sections("ReportFooter").Controls("Field94").Top = 284
+		rpt.Sections("ReportFooter").Controls("Field98").Top = 284
+		rpt.Sections("ReportFooter").Controls("Field132").Top = 284
+		rpt.Sections("ReportFooter").Controls("Field151").Top = 284
+
+		rpt.Sections("ReportFooter").Controls("Label21").Top = 567
+		rpt.Sections("ReportFooter").Controls("Field96").Top = 657
+		rpt.Sections("ReportFooter").Controls("Field99").Top = 657
+		rpt.Sections("ReportFooter").Controls("Field133").Top = 657
+		rpt.Sections("ReportFooter").Controls("Field152").Top = 657
+
+		rpt.Sections("ReportFooter").Controls("Label22").Top = 850
+		rpt.Sections("ReportFooter").Controls("Field95").Top = 850
+		rpt.Sections("ReportFooter").Controls("Field100").Top = 850
+		rpt.Sections("ReportFooter").Controls("Field134").Top = 850
+		rpt.Sections("ReportFooter").Controls("Field153").Top = 850
+
+		rpt.Sections("ReportFooter").Controls("Label23").Top = 1134
+		rpt.Sections("ReportFooter").Controls("Field89").Top = 1134
+		rpt.Sections("ReportFooter").Controls("Field90").Top = 1134
+		rpt.Sections("ReportFooter").Controls("Field114").Top = 1134
+		rpt.Sections("ReportFooter").Controls("Field145").Top = 1134
+
+		rpt.Sections("ReportFooter").Controls("Line7").y1 = 0
+		rpt.Sections("ReportFooter").Controls("Line7").y2 = 0
+		rpt.Sections("ReportFooter").Controls("Line8").y1 = 1134
+		rpt.Sections("ReportFooter").Controls("Line8").y2 = 1134
+		rpt.Sections("ReportFooter").Controls("Line9").y1 = 1417
+		rpt.Sections("ReportFooter").Controls("Line9").y2 = 1417
+	end if
+End Sub
+
+Function sfcurr(v)
+    Dim rv
+    On Error Resume Next
+    rv = CCur(v)
+    If Err Then rv = 0
+    sfcurr = rv
+End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

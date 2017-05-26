@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{8E244D52-5662-499E-A395-0E681B995DCC}" GUIDREP="{8CFEC0E2-EAEE-4B4D-814B-788C1ECE8C62}" 
+	GUIDLIB="{D435BD40-15F2-45EB-A643-3FF6FA82D9B9}" GUIDREP="{E464F74A-BBFE-4333-89AA-05728FE88A93}" 
 	LICENSE="10000000"
 	PrintWidth="27480"
 	DocumentName="ActiveReports Document"
@@ -13,7 +13,7 @@
 <![CDATA[sub onDatainitialize
   	dim sql
 	'm_data.debugg=true
-	sql = sql & " select bygg.navn byggnavn, objekt_id,omrade,boligtype,replace(replace(objekt_adresse,char(10),''),char(13),' ')as objekt_adresse, objekt_postnummer, "
+	sql = sql & " select objekt_id,omrade,boligtype,replace(replace(objekt_adresse,char(10),''),char(13),' ')as objekt_adresse, objekt_postnummer, "
 	sqladd sql, " objekt_poststed,rom_nummer, obj.areal,isnull(bv.møblert,0)moblert,isnull(bv.inklstroem,0)inklstrom,isnull(bv.parkering,0)parkering,isnull(bv.vaskeri,0)vaskeri, antall_rom antrom, "
 	sqladd sql, " (select(sum(b.antall*b.pris)) "
 	sqladd sql, " from c..tarifflinje b,c..tariff a where a.tariffnr=b.tariffnr "
@@ -23,8 +23,7 @@
 	sqladd sql, " from e..t_boligobjekt obj"
 	sqladd sql, " inner join e..t_boligtype ty on obj.boligtype_id=ty.boligtype_id"
 	sqladd sql, " inner join e..t_boligomraade om on obj.boligomrade_id=om.boligomrade_id"
-	sqladd sql, " inner join e..t_boligvalgtyper bv on bv.boligtypeid=obj.boligtype_id and bv.omraadeid=obj.boligomrade_id"
-	sqladd sql, " join e..t_bygg bygg on bygg.ID=obj.Bygg_id "
+	sqladd sql, " inner join e..t_boligvalgtyper bv on bv.boligtypeid=obj.boligtype_id and bv.omraadeid=obj.boligomrade_id and isnull(bv.kampanje,0)=0"
 	sqladd sql, " order by omrade,boligtype,objekt_id"
 	sqladd sql, " "
 
@@ -91,7 +90,7 @@ End Sub]]></Script>
 		<Control 
 		Type="AR.Label"
 		Name="Label3"
-		Left="4591"
+		Left="5386"
 		Top="142"
 		Width="1275"
 		Height="283"
@@ -103,7 +102,7 @@ End Sub]]></Script>
 		<Control 
 		Type="AR.Label"
 		Name="Label4"
-		Left="6433"
+		Left="7228"
 		Top="142"
 		Width="1701"
 		Height="283"
@@ -253,18 +252,6 @@ End Sub]]></Script>
 		Style="font-weight: bold; "
 		>
 		</Control>
-		<Control 
-		Type="AR.Label"
-		Name="Label20"
-		Left="9435"
-		Top="135"
-		Width="1701"
-		Height="283"
-		Caption="Byggnavn"
-		ClassName="Normal"
-		Style="font-weight: bold; "
-		>
-		</Control>
 <Script>
 <![CDATA[
 Sub OnFormat
@@ -295,10 +282,10 @@ End Sub
 		Type="AR.Field"
 		Name="Field2"
 		DataField="Omrade"
-		Left="1560"
+		Left="1559"
 		Top="0"
-		Width="3045"
-		Height="285"
+		Width="3827"
+		Height="283"
 		Text="Omrade"
 		ClassName="Normal"
 		>
@@ -307,7 +294,7 @@ End Sub
 		Type="AR.Field"
 		Name="Field3"
 		DataField="Boligtype"
-		Left="4591"
+		Left="5386"
 		Top="0"
 		Width="1842"
 		Height="283"
@@ -319,10 +306,10 @@ End Sub
 		Type="AR.Field"
 		Name="Field4"
 		DataField="objekt_adresse"
-		Left="6435"
+		Left="7228"
 		Top="0"
-		Width="2850"
-		Height="285"
+		Width="5670"
+		Height="283"
 		Text="objekt_adresse"
 		ClassName="Normal"
 		>
@@ -462,18 +449,6 @@ End Sub
 		Text="antallrom"
 		ClassName="Normal"
 		Style="text-align: center; "
-		>
-		</Control>
-		<Control 
-		Type="AR.Field"
-		Name="Field16"
-		DataField="byggnavn"
-		Left="9435"
-		Top="0"
-		Width="3420"
-		Height="285"
-		Text="byggnavn"
-		ClassName="Normal"
 		>
 		</Control>
 	</Section>

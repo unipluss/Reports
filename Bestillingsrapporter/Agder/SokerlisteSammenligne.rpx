@@ -1,0 +1,700 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{53A56E9B-CD08-40F3-8394-41184939D315}" GUIDREP="{79BC6E81-7723-485E-A4A5-D9DDA74E9416}" 
+	LICENSE="10000000"
+	PrintWidth="10365"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[sub onDatainitialize
+  	dim sql
+
+	m_data.AddInputMacro "{dato1}", "Dato 1",now(),"date"
+	m_data.AddInputMacro "","",""
+	m_data.AddInputMacro "{dato2}", "Dato 2",now()-365,"date"
+	m_data.AddInputMacro "","",""
+	m_data.AddInputMacro "{dato3}", "Dato 3",now()-731,"date"
+	m_data.AddInputMacro "","",""
+	m_data.AddInputMacro "{dato4}", "Dato 4",now()-1096,"date"
+	m_data.AddInputMacro "","",""
+		
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+
+	sql = sql & " Select top 1 "
+
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato1}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato1}' )) >= '{dato1}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato1}' )) >= '{dato1}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato1}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     ) and omr.omrade like 'Kr.sand%' ) as antallKrsDato1, "
+	
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato1}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato1}' )) >= '{dato1}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato1}' )) >= '{dato1}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato1}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     ) and omr.omrade like 'Grimstad%' ) as antallGrmDato1, "
+
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato1}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato1}' )) >= '{dato1}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato1}' )) >= '{dato1}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato1}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     )  ) as total1, "
+
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato2}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato2}' )) >= '{dato2}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato2}' )) >= '{dato2}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato2}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     ) and omr.omrade like 'Kr.sand%' ) as antallKrsDato2, "
+	
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato2}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato2}' )) >= '{dato2}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato2}' )) >= '{dato2}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato2}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     ) and omr.omrade like 'Grimstad%' ) as antallGrmDato2, "
+	
+		sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato2}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato2}' )) >= '{dato2}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato2}' )) >= '{dato2}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato2}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     )  ) as total2, "
+
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato3}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato3}' )) >= '{dato3}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato3}' )) >= '{dato3}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato3}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     ) and omr.omrade like 'Kr.sand%' ) as antallKrsDato3, "
+	
+	
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato3}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato3}' )) >= '{dato3}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato3}' )) >= '{dato3}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato3}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     ) and omr.omrade like 'Grimstad%' ) as antallGrmDato3, "
+
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato3}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato3}' )) >= '{dato3}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato3}' )) >= '{dato3}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato3}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     )  ) as total3, "
+
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato4}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato4}' )) >= '{dato4}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato4}' )) >= '{dato4}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato4}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     ) and omr.omrade like 'Kr.sand%' ) as antallKrsDato4, "
+	
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato4}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato4}' )) >= '{dato4}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato4}' )) >= '{dato4}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato4}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     ) and omr.omrade like 'Grimstad%' ) as antallGrmDato4, "
+	
+	sql = sql & " (Select count(distinct s.kundenummer) "
+	sql = sql & " from e..t_soeknad s "
+	sql = sql & " inner join e..t_boligonske onske on s.id = onske.SoknadsNummer and abs(onske.OnskeNr)=1 "
+	sql = sql & " inner join e..t_boligomraade omr on onske.boligomrade_id=omr.boligomrade_id "
+	sql = sql & " where isnull(s.Soeknadsdato,getdate()+365) <= '{dato4}' "              'Hvor søknadsdato finnes og er mindre enn oppgitt dato.
+	'sql = sql & " and isnull(s.SoeknadAktivTil, dateadd(dd,5, '{dato4}' )) >= '{dato4}' " 'Hvor aktivTil er etter oppgitt dato.
+	sql = sql & " and not s.id in (select sok.id from e..t_soeknad sok where abs(isnull(sok.slettet,0))=1 and (sok.slettet_dato is null or sok.slettet_dato='01.01.1900')  ) "
+	sql = sql & " and isnull(s.slettet_dato, dateadd(dd,5,'{dato4}' )) >= '{dato4}'  "    'Hvor slettet dato er etter oppgitt dato
+	sql = sql & " and (isnull(s.Tildelt_kontrakt ,0)=0 "   						     'Hvor søknaden ikke har tildelt kontrakt
+	'Eller hvor søknadens tildelte kontrakt, finnes i kontrakter med kontraktens lagetdato større enn oppgitt dato:
+	sql = sql & " or s.tildelt_kontrakt in (Select k.kontrakts_id from e..t_kontraktsdata k  "    	
+	sql = sql & " 						  where not isNull(k.SvarFrist,'01.01.1900')='01.01.1900' " 'svarfristen finnes ikke i hauggamle søknader, taes hensyn til her og skjuler dem.
+	sql = sql & " 						  and isnull(k.lagetdato, dateadd(day,-(Select top 1 Tildel_svarfrist_kontrakt from e..t_klientParametre),k.SvarFrist)) >= '{dato4}' "
+	sql = sql & "                         ) " 
+	sql = sql & "     ) ) as total4 "
+
+	sql = sql & " from e..t_soeknad soknad "
+
+	
+    m_data.SqlString = sql 
+	
+	m_data.setupfields rpt
+
+
+  end sub
+
+Sub OnReportStart
+
+End Sub
+
+Sub OnFetchData(eof)
+	
+End Sub
+
+
+]]></Script>
+<PageSettings	LeftMargin="720"
+	RightMargin="720"
+	TopMargin="720"
+	BottomMargin="720"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="2265"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="0"
+		Top="0"
+		Width="6945"
+		Height="425"
+		Caption="Søkerliste sammenligning (antall søkere)"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 16pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		DataField="*y..Bedrift.navn"
+		Left="0"
+		Top="567"
+		Width="6236"
+		Height="360"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="*y..Bedrift.arstall"
+		Left="8079"
+		Top="0"
+		Width="1984"
+		Height="360"
+		Text="*y..Bedrift.arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="= &quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="8362"
+		Top="283"
+		Width="1701"
+		Height="360"
+		Text="Sidenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= Now"
+		Left="8362"
+		Top="567"
+		Width="1701"
+		Height="360"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="User_name"
+		Left="8362"
+		Top="850"
+		Width="1701"
+		Height="360"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.RTF"
+		Name="RichEdit1"
+		Left="15"
+		Top="1215"
+		Width="6225"
+		Height="870"
+		BackColor="16777215"
+		>
+		<Data><![CDATA[81010000000000007B5C727466315C616E73695C616E7369637067313235325C64656666305C6465666C616E67313034347B5C666F6E7474626C7B5C66305C66
+			6E696C5C6663686172736574302054696D6573204E657720526F6D616E3B7D7D0D0A5C766965776B696E64345C7563315C706172645C66305C66733230204E42
+			3A20456E206B756E6465206B616E20686120696E6E6520746F20735C2766386B6E616465722E20536C696B206174206B756E64656E2074656C6C657320625C27
+			6535646520705C276535204772696D73746164206F67204B7269737469616E73616E642E204D616E206B616E20646572666F7220696B6B652073756D6D657265
+			204772696D73746164206F67204B7269737469616E73616E642C20666F72205C27653520665C27653520746F74616C7420616E74616C6C20735C2766386B6572
+			652E2053756D6D656E20705C2765352022416C6C65206F6D725C2765356465722220657220646572696D6F74207265676E65742075742072696B7469672E205C
+			7061720D0A7D0D0A00]]>
+		</Data>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="2235"
+		DataField="omrade"
+		RepeatStyle="1"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="0"
+		Y1="570"
+		X2="10200"
+		Y2="570"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label4"
+		Left="195"
+		Top="315"
+		Width="1200"
+		Height="285"
+		Caption="Avdeling"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		DataField="{dato2}"
+		Left="4110"
+		Top="283"
+		Width="1559"
+		Height="284"
+		Text="dato2"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: left; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field20"
+		DataField="{dato1}"
+		Left="1843"
+		Top="283"
+		Width="1700"
+		Height="284"
+		Text="dato1"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: left; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field16"
+		DataField="antallGrmDato1"
+		Left="2130"
+		Top="705"
+		Width="1680"
+		Height="285"
+		Text="antallGrmDato1"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field17"
+		DataField="antallKrsDato1"
+		Left="2126"
+		Top="1276"
+		Width="1701"
+		Height="283"
+		Text="antallKrsDato1"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field18"
+		DataField="antallGrmDato2"
+		Left="4535"
+		Top="709"
+		Width="1559"
+		Height="283"
+		Text="antallGrmDato2"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field19"
+		DataField="antallKrsDato2"
+		Left="4535"
+		Top="1276"
+		Width="1559"
+		Height="283"
+		Text="antallKrsDato2"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="195"
+		Top="765"
+		Width="1305"
+		Height="255"
+		Caption="Grimstad"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="195"
+		Top="1230"
+		Width="1305"
+		Height="255"
+		Caption="Kristiansand"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="{dato3}"
+		Left="6094"
+		Top="283"
+		Width="1560"
+		Height="284"
+		Text="dato3"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: left; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field22"
+		DataField="antallGrmDato3"
+		Left="6520"
+		Top="709"
+		Width="1559"
+		Height="283"
+		Text="antallGrmDato3"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field23"
+		DataField="antallKrsDato3"
+		Left="6520"
+		Top="1276"
+		Width="1559"
+		Height="283"
+		Text="antallKrsDato3"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		DataField="{dato4}"
+		Left="8220"
+		Top="283"
+		Width="1560"
+		Height="284"
+		Text="dato4"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; text-align: left; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field25"
+		DataField="antallGrmDato4"
+		Left="8646"
+		Top="709"
+		Width="1559"
+		Height="283"
+		Text="antallGrmDato4"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="antallKrsDato4"
+		Left="8646"
+		Top="1276"
+		Width="1559"
+		Height="283"
+		Text="antallKrsDato4"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line3"
+		X1="0"
+		Y1="1701"
+		X2="10205"
+		Y2="1701"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="195"
+		Top="1843"
+		Width="1275"
+		Height="255"
+		Caption="Alle områder"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="total1"
+		Left="2126"
+		Top="1843"
+		Width="1701"
+		Height="255"
+		Text="total1"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="total2"
+		Left="4535"
+		Top="1843"
+		Width="1701"
+		Height="255"
+		Text="total2"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="total3"
+		Left="6520"
+		Top="1843"
+		Width="1701"
+		Height="255"
+		Text="total3"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="total4"
+		Left="8646"
+		Top="1843"
+		Width="1701"
+		Height="255"
+		Text="total4"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="0"
+	>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="0"
+	>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="1200"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="567"
+		Top="283"
+		Width="3260"
+		Height="284"
+		Visible="0"
+		Caption="Laget av Øystein V. 24.04.2013"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

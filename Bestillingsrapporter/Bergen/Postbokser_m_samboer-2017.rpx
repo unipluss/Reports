@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{C60CC7CF-7FFD-4C56-A031-1ADD134736E2}" GUIDREP="{7572FF23-1DBE-415B-B795-610F60B85428}" 
+	GUIDLIB="{9A11CF4F-006C-4F59-AFC1-0B5A76A75600}" GUIDREP="{DC9B00D0-A730-48F5-A80E-D7B46A29C98E}" 
 	LICENSE="10000000"
 	PrintWidth="15345"
 	DocumentName="ActiveReports Document"
@@ -42,7 +42,7 @@ sql = sql & " ,k.samb_navn samboer "
 sql = sql & " ,k.kundenummer  kundenr"
 sql = sql & " , (select top 1 name from c..c_Contacts where id=(select f.fremleietaker_id from e..t_fremleieSoknad f "
 sql = sql & " where f.kontrakt_id=(select top 1 kd.kontrakts_id from e..t_kontraktsdata kd where kd.tildeltOmrade_id=pb.omraade and kd.Kundenummer=k.Kundenummer "
-sql = sql & " and getdate() between kd.Kontrakt_fra and kd.Kontrakt_til) and getdate() between f.aktivfra and f.aktivtil and f.statusid=21002 ) ) fremleietaker "
+sql = sql & " and getdate() between kd.Kontrakt_fra and kd.Kontrakt_til  and kd.statusid in (1003, 1004, 1006, 1007) order by kd.statusid) and getdate() between f.aktivfra and f.aktivtil and f.statusid=21002 ) ) fremleietaker "
 ' sib har fått beskjed om unøyaktigheten i uthenting av fremleietaker
 sql = sql & " ,1 cnt"
 sql = sql & " from e..t_postbox pb "
