@@ -117,19 +117,21 @@
 	,(select count(*) from e..t_forvaltningsAvtaleHarBolig harbo where harbo.forvaltingsAvtaleId = fa.id and GETDATE() between isnull(harbo.fradato, fa.forvaltningsavtalestart ) and isnull(harbo.tildato, isnull(fa.nySluttDato, fa.forvaltningsavtaleslutt))
 	and harbo.boligId in
 	(
-select distinct bo.Objekt_id from e..t_boligobjekt  bo
+		select distinct bo.Objekt_id from e..t_boligobjekt  bo
 		inner join e..t_kontraktsdata kd on bo.Objekt_id = kd.Objekt
 		where kd.statusId in (1003,1006)
 		and isnull(kd.Planlagt_utflytting , getdate() +100) &gt; getdate()
+		and bo.Status &lt;&gt; 23001
 		)
 ) aktiveBoliger
 ,(select count(*) from e..t_forvaltningsAvtaleHarBolig harbo inner join e..t_forvaltningsAvtale fa2 on harbo.forvaltingsAvtaleId = fa2.Id where harbo.forvaltingsAvtaleId = fa2.id and GETDATE() between isnull(harbo.fradato, fa2.forvaltningsavtalestart ) and isnull(harbo.tildato, isnull(fa2.nySluttDato, fa2.forvaltningsavtaleslutt)) and fa2.ansvarligUtleieKonsulentId = fa.ansvarligUtleieKonsulentId
 	and harbo.boligId in
 	(
-select distinct bo.Objekt_id from e..t_boligobjekt  bo
+		select distinct bo.Objekt_id from e..t_boligobjekt  bo
 		inner join e..t_kontraktsdata kd on bo.Objekt_id = kd.Objekt
 		where kd.statusId in (1003,1006)
 		and isnull(kd.Planlagt_utflytting , getdate() +100) &gt; getdate()
+		and bo.Status &lt;&gt; 23001
 		)
 ) antallBoliger
 ,an.Navn
@@ -139,7 +141,7 @@ from e..t_forvaltningsAvtale  fa
 inner join e..t_kunde ei on fa.kreditorId = ei.Kundenummer
 left join c..c_name na on ei.NameID = na.ID
 left join e..t_ansatte an on an.Ansatte_id = fa.ansvarligUtleieKonsulentId
-where fa.statusid in (19003,19004,19005,19006)
+where fa.statusid in (19003,19004,19005)
 and GETDATE() between fa.forvaltningsavtalestart and isnull(fa.nySluttDato, fa.forvaltningsavtaleslutt)
 and isnull(fa.ansvarligUtleieKonsulentId,0) in ({Ansatt})
 order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
@@ -673,10 +675,10 @@ order by navn, fa.ansvarligUtleieKonsulentId, ei.kundenummer, fa.id
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/17/2017 8:31:34 AM</ReportChanged>
+  <ReportChanged>11/20/2017 10:15:18 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AntallBoligerKundeAnsvarUtleiemegler.mrt</ReportFile>
-  <ReportGuid>db1636b3d4994cc58288a555b440ae5d</ReportGuid>
+  <ReportGuid>d2afcc3887cb46dbbbf4f956ec27d7e7</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
