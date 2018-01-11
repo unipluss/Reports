@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Klient_x0020_87 Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Klient 87</Alias>
-        <ConnectionStringEncrypted>9DppoURfQzXpR5z4dgSkf9FawY9WV0nxRnu5CGHcsQ/98pFsRnsBKfJ4sPB5TKivwnBpz0sIS7xpRKw4YwDrRt9w9YxFXdNtaxh9eHcBd2bT</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Cj5oURxQ5zpR5xEyUzhF4tw+yzYX1ntRlu5CHw94+fDVrnPRlEBBfFchPBjSaiv3BLNj+9oc91qdKxYygDrL/Fw2QJNCGlt7Fqc+GMZ</ConnectionStringEncrypted>
         <Name>Klient 87</Name>
       </Klient_x0020_87>
     </Databases>
@@ -45,10 +45,10 @@ order by aar
     <Variables isList="true" count="7">
       <value>,aarfra,Fra_x0020_år,int_x007C_sql_x003D_Select_x0020_year_x0028_GetDate_x0028__x0029__x0029_-5,System.Int32,_x0032_013,False,False,False</value>
       <value>,aartil,Til_x0020_år,int_x007C_sql_x003D_Select_x0020_year_x0028_GetDate_x0028__x0029__x0029_-1,System.Int32,_x0032_017,False,False,False</value>
-      <value>System,UserName,UserName,System.String,Erik_x0020_Faugstad,True,False</value>
+      <value>System,UserName,UserName,System.String,sylvi-ann_x0020_birkaas,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0033_,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0035_,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_017,True,False</value>
     </Variables>
   </Dictionary>
@@ -153,9 +153,12 @@ order by aar
           <Components isList="true" count="6">
             <Text2 Ref="13" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.47,0.07,0.67,0.51</ClientRectangle>
+              <ClientRectangle>1.4,0,0.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
+              <Interaction Ref="14" type="Stimulsoft.Report.Components.StiInteraction" isKey="true">
+                <SortingColumn>DataBand1.aar</SortingColumn>
+              </Interaction>
               <Margins>0,0,0,0</Margins>
               <Name>Text2</Name>
               <Page isRef="4" />
@@ -164,14 +167,11 @@ order by aar
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text2>
-            <Text4 Ref="14" type="Text" isKey="true">
+            <Text4 Ref="15" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>3.8,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
-              <Interaction Ref="15" type="Stimulsoft.Report.Components.StiInteraction" isKey="true">
-                <SortingColumn>DataBand1.antmnd1</SortingColumn>
-              </Interaction>
               <Margins>0,0,0,0</Margins>
               <Name>Text4</Name>
               <Page isRef="4" />
@@ -195,7 +195,7 @@ order by aar
             </Text6>
             <Text9 Ref="17" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>8.67,0,1.6,0.51</ClientRectangle>
+              <ClientRectangle>8.2,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -208,7 +208,7 @@ order by aar
             </Text9>
             <Text11 Ref="18" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>11.23,0.01,1.6,0.51</ClientRectangle>
+              <ClientRectangle>10.4,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -246,7 +246,7 @@ order by aar
           <Components isList="true" count="5">
             <Text1 Ref="23" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.13,-0.01,1.52,0.51</ClientRectangle>
+              <ClientRectangle>1.2,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -282,7 +282,7 @@ order by aar
             </Text5>
             <Text8 Ref="26" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>8.67,0.02,1.52,0.51</ClientRectangle>
+              <ClientRectangle>8.2,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -294,7 +294,7 @@ order by aar
             </Text8>
             <Text10 Ref="27" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>11.16,0.02,1.52,0.51</ClientRectangle>
+              <ClientRectangle>10.4,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -350,10 +350,10 @@ order by aar
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/11/2018 2:53:42 PM</ReportChanged>
+  <ReportChanged>1/11/2018 3:06:14 PM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
-  <ReportFile>C:\Users\erik\AppData\Local\Temp\Testrapport.mrt</ReportFile>
-  <ReportGuid>76499b9dba824da4bdf9005fdf01b080</ReportGuid>
+  <ReportFile>C:\Users\SYLVI-~1.BIR\AppData\Local\Temp\soeknadsstatistikk.mrt</ReportFile>
+  <ReportGuid>cd16d0a5a4e7402a96c682b6a596ec17</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
