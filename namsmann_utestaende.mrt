@@ -74,6 +74,7 @@ and abs(isnull(ad.delivery, 0)) = 1</SqlCommand>
 , (select max(renterTilDato) from c..Purring where Fakturanr = fa.Fakturanr) as RenterTilDato
 from c..FAKTURA fa
 where  fa.Fakturanr in (select distinct Fakturanr from c..VARELNFAKT where ab_id = {kontraktsId})
+and isnull(fa.Status,0) in (0,110110)
 UNION
 SELECT
 'TVFBL'
@@ -1128,10 +1129,10 @@ Sum(faktura.FakturaRest)
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>9/25/2017 8:09:20 AM</ReportChanged>
+  <ReportChanged>9/25/2017 12:10:33 PM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\namsmann_utestaende.mrt</ReportFile>
-  <ReportGuid>93ed56c87db74a1fa1aa290094d7e3e7</ReportGuid>
+  <ReportGuid>3bf6251d364845ff901d54be15fe7379</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
