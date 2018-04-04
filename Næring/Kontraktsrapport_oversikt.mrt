@@ -79,9 +79,9 @@ select distinct
  left join e..t_boligomraade o on by1.Omrade_id = o.Boligomrade_id 
 
  WHERE st.status is NOT NULL 
-and o.Boligomrade_id in (2,2)
-and by1.id in (1,10,11,13,14,15,16,17,18,19,2,20,21,22,23,24,25,26,27,28,29,3,30,31,32,33,34,35,36,37,5,6,7,8,9,2,6,5,24,25,26,27,13,22,36,23,21,7,8,33,34,28,32,30,31,29,20,19,1,18,3,14,15,16,17,11,10,9,35,37)
-and st.status_id in (1011,1012,1013,1011,1012,1013)
+and o.Boligomrade_id in ({Omrade})
+and by1.id in ({Bygg})
+and st.status_id in ({StatusId})
 
  group by d.Kontonr, n.Name, by1.Navn,  ak.kontrakts_id, ak.kontrakt_fra,ak.kontrakt_til,st.Status
  , ak.justeringsdato, ak.startdatokpi, ak.fakturerhusleietil
@@ -896,10 +896,10 @@ exec sp_executesql @query;</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>4/4/2018 10:50:58 AM</ReportChanged>
+  <ReportChanged>4/4/2018 10:54:19 AM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\Kontraktsrapport_oversikt.mrt</ReportFile>
-  <ReportGuid>04a1faca4b36460f80b34f05bceecaeb</ReportGuid>
+  <ReportGuid>c7624f7673384609b5b0b767f38c453d</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
