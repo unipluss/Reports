@@ -5,12 +5,12 @@
     <Databases isList="true" count="2">
       <Klient_x0020_87 Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Klient 87</Alias>
-        <ConnectionStringEncrypted>9FbNoU1U2fFhfKHs+gAiF4s0gS5NTFKka0y57Gk960/XdNnPUF+TnHpEoJxjAW17xHB/w8gKc8Xif4SJej31L/xwwQlhWdmI4Vz93Pc=</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9CjBoUhWQ6TpbKGYc0yxF4ts0Y3YBQHtRlu5vXxcsRvRcLnPRnHSmEV4TZ1hXGSP8RLVKFYFS4FhHL3U/QQie/Jw0c1Le/plcUk=</ConnectionStringEncrypted>
         <Name>Klient 87</Name>
       </Klient_x0020_87>
       <Connection2 Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection2</Alias>
-        <ConnectionStringEncrypted>9FbNoU1U2fFhfKHs+gAiF4s0gS5NTFKka0y57Gk960/XdNnPUF+TnHpEoJxjAW17xHB/w8gKc8Xif4SJej31L/xwwQlhWdmI4Vz93Pc=</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9CjBoUhWQ6TpbKGYc0yxF4ts0Y3YBQHtRlu5vXxcsRvRcLnPRnHSmEV4TZ1hXGSP8RLVKFYFS4FhHL3U/QQie/Jw0c1Le/plcUk=</ConnectionStringEncrypted>
         <Name>Connection2</Name>
       </Connection2>
     </Databases>
@@ -53,13 +53,13 @@ where m.id between {(From)} and {(To)}
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="7">
-      <value>,From,From,text_x007C_,System.String,_x0031_060,False,False,False</value>
-      <value>,To,To,text_x007C_,System.String,_x0031_070,False,False,False</value>
+      <value>,From,Fra,text_x007C_,System.String,_x0039_,False,False,False</value>
+      <value>,To,Til,text_x007C_,System.String,_x0039_,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
-      <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0032_,True,False</value>
-      <value>System,ClientYear,ClientYear,System.Int32,_x0032_017,True,False</value>
+      <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0035_,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_018,True,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -165,7 +165,7 @@ where m.id between {(From)} and {(To)}
             </Text1>
             <Text2 Ref="14" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>14.4,0,4.6,0.8</ClientRectangle>
+              <ClientRectangle>13.4,0,5.6,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -178,7 +178,7 @@ where m.id between {(From)} and {(To)}
             </Text2>
             <Text3 Ref="15" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>12.2,0,2.2,0.8</ClientRectangle>
+              <ClientRectangle>11.2,0,2.2,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Guid>13712883410645a08963c8c267d1816a</Guid>
@@ -192,7 +192,7 @@ where m.id between {(From)} and {(To)}
             </Text3>
             <Text4 Ref="16" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>14.4,0.8,4.6,0.6</ClientRectangle>
+              <ClientRectangle>13.4,0.8,5.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
@@ -205,7 +205,7 @@ where m.id between {(From)} and {(To)}
             </Text4>
             <Text8 Ref="17" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>12.2,0.8,2.2,0.6</ClientRectangle>
+              <ClientRectangle>11.2,0.8,2.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -372,10 +372,10 @@ where m.id between {(From)} and {(To)}
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>8/22/2017 1:47:29 PM</ReportChanged>
+  <ReportChanged>4/25/2018 12:02:11 PM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
-  <ReportFile>C:\Users\CHRIST~1.AND\AppData\Local\Temp\Sjekklister-copy.mrt</ReportFile>
-  <ReportGuid>588e9a307f7c4c018aaefd4177f24da4</ReportGuid>
+  <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\MvaRapport.mrt</ReportFile>
+  <ReportGuid>f5fe802030f44534bf88d602ba1db6a1</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
