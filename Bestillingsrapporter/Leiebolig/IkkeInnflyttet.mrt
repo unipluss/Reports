@@ -1,0 +1,506 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="0" />
+    <Databases isList="true" count="1">
+      <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
+        <Alias>Connection</Alias>
+        <ConnectionStringEncrypted>9Dr5oUQFQ4zpR5zJdATjf9Fw+yxWX1ntRnu5CHzosS/9NJFsRlkBOXt4hOx5TKivwmppj017S7xpR7AE5QBrj99w9YzIXdPx4RlRgXeId2rT</ConnectionStringEncrypted>
+        <Name>Connection</Name>
+      </Connection>
+    </Databases>
+    <DataSources isList="true" count="2">
+      <Kontraktsdata Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>Kontraktsdata</Alias>
+        <Columns isList="true" count="8">
+          <value>BoligNummer,System.String</value>
+          <value>Objekt_adresse,System.String</value>
+          <value>Omrade,System.String</value>
+          <value>Kontrakt_fra,System.DateTime</value>
+          <value>Kontrakt_til,System.DateTime</value>
+          <value>Ansvarlig_utleiekonsulent,System.String</value>
+          <value>Kundenummer,System.Int32</value>
+          <value>Kundenavn,System.String</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Name>Kontraktsdata</Name>
+        <NameInSource>Connection</NameInSource>
+        <Parameters isList="true" count="0" />
+        <SqlCommand>SELECT bo.BoligNummer, bo.Objekt_adresse, bom.Omrade, kd.Kontrakt_fra, kd.Kontrakt_til, an.Navn AS Ansvarlig_utleiekonsulent, ku.Kundenummer, na.Name AS Kundenavn FROM e..t_kontraktsdata kd
+LEFT JOIN e..t_boligobjekt bo ON kd.Objekt = bo.Objekt_id
+LEFT JOIN e..t_ansatte an ON bo.ansvarligUtleieKonsulentId = an.Ansatte_id
+LEFT JOIN e..t_kunde ku ON kd.Kundenummer = ku.Kundenummer
+LEFT JOIN c..c_Name na ON ku.NameID = na.ID
+LEFT JOIN e..t_boligomraade bom ON bo.Boligomrade_id = bom.Boligomrade_id
+LEFT JOIN e..t_forvaltningsAvtaleHarBolig fahb ON bo.Objekt_id = fahb.boligId
+LEFT JOIN e..t_forvaltningsAvtale fa ON fahb.Id = fa.Id
+WHERE kd.statusId = 1002
+AND kd.Kontrakt_fra &lt; GETDATE()
+AND ISNULL(Innflytting_dato, 0) = 0
+and ((coalesce(bo.ansvarligUtleieKonsulentId, fa.ansvarligutleiekonsulentId) in ({Ansatt})) or (isnull(nullif(bo.ansvarligUtleieKonsulentId,-1), 0) = 0 and isnull(nullif(fa.ansvarligutleiekonsulentId,-1),0) = 0  ))
+ORDER BY an.Navn</SqlCommand>
+      </Kontraktsdata>
+      <Bedrift Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>Bedrift</Alias>
+        <Columns isList="true" count="52">
+          <value>DirRemFilnavn,System.Int32</value>
+          <value>UseInterimRetFil,System.Int32</value>
+          <value>mainClientNr,System.Int32</value>
+          <value>DiremBetAccount,System.Int32</value>
+          <value>useModulus11,System.Int32</value>
+          <value>dcAgencyAccountNumber,System.Int32</value>
+          <value>dcAccountPayments,System.Int32</value>
+          <value>dcAgencyFactoringActive,System.Int32</value>
+          <value>dcRemindersBeforeDebtCollection,System.Int32</value>
+          <value>dcAgency,System.Int32</value>
+          <value>Versjon,System.Decimal</value>
+          <value>Klientnr,System.Int16</value>
+          <value>Arstall,System.Int16</value>
+          <value>RoundRef,System.Int16</value>
+          <value>Foretaksregister,System.Int16</value>
+          <value>Navn,System.String</value>
+          <value>Adresse,System.String</value>
+          <value>Adresse2,System.String</value>
+          <value>Postnr,System.String</value>
+          <value>Poststed,System.String</value>
+          <value>Landkode,System.String</value>
+          <value>EORInr,System.String</value>
+          <value>Banklandkode,System.String</value>
+          <value>Bankkode,System.String</value>
+          <value>SWIFTkode,System.String</value>
+          <value>SWIFTkodeRembBank,System.String</value>
+          <value>IBANnr,System.String</value>
+          <value>RemitBankgiro,System.String</value>
+          <value>Url,System.String</value>
+          <value>NKLCustNo,System.String</value>
+          <value>Banknavn,System.String</value>
+          <value>Bankadresse,System.String</value>
+          <value>Bankadresse2,System.String</value>
+          <value>Bankadresse3,System.String</value>
+          <value>TPForetak,System.String</value>
+          <value>TPDivisjon,System.String</value>
+          <value>TPBrukerID,System.String</value>
+          <value>Katalog,System.String</value>
+          <value>MainClientID,System.String</value>
+          <value>Mailadr,System.String</value>
+          <value>Mobil,System.String</value>
+          <value>MVAnr,System.String</value>
+          <value>DirAvtaleID,System.String</value>
+          <value>DirKundeID,System.String</value>
+          <value>OCRAvtaleID,System.String</value>
+          <value>OCRKundeID,System.String</value>
+          <value>Land,System.String</value>
+          <value>TeleFax,System.String</value>
+          <value>Telefon,System.String</value>
+          <value>Bankgiro,System.String</value>
+          <value>Postgiro,System.String</value>
+          <value>Kontaktpers,System.String</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Name>Bedrift</Name>
+        <NameInSource>Connection</NameInSource>
+        <Parameters isList="true" count="0" />
+        <SqlCommand>select * from y..BEDRIFT</SqlCommand>
+      </Bedrift>
+    </DataSources>
+    <Relations isList="true" count="0" />
+    <Report isRef="0" />
+    <Variables isList="true" count="6">
+      <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_where_x002F__x002A__x002A__x002F__x0028__x002F__x002A__x002A__x002F_Ansatte_id_x0020_in_x0020__x0028_select_x0020_ansvarligUtleieKonsulentId_x0020_from_x0020_e..t_boligobjekt_x0020__x0029__x002F__x002A__x002A__x002F_or_x0020__x002F__x002A__x002A__x002F_Ansatte_id_x0020_in_x0020__x0028_select_x0020_ansvarligUtleieKonsulentId_x0020_from_x0020_e..t_forvaltningsAvtale_x0029__x002F__x002A__x002A__x002F__x0029__x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_where_x0020_isnull_x0028_deaktivert_x002C_0_x0029__x0020__x003D__x0020_0_x0020_and_x0020__x002F__x002A__x002A__x002F__x0028__x002F__x002A__x002A__x002F_Ansatte_id_x0020_in_x0020__x0028_select_x0020_ansvarligUtleieKonsulentId_x0020_from_x0020_e..t_boligobjekt_x0020__x0029__x002F__x002A__x002A__x002F_or_x0020__x002F__x002A__x002A__x002F_Ansatte_id_x0020_in_x0020__x0028_select_x0020_ansvarligUtleieKonsulentId_x0020_from_x0020_e..t_forvaltningsAvtale_x0029__x002F__x002A__x002A__x002F__x0029__x002F__x002A__x002A__x002F_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031_0_x002C_11_x002C_12_x002C_13_x002C_14_x002C_15_x002C_16_x002C_17_x002C_19_x002C_21_x002C_24_x002C_25_x002C_30_x002C_33_x002C_34_x002C_35_x002C_36_x002C_38_x002C_39_x002C_4_x002C_40_x002C_41_x002C_42_x002C_43_x002C_44_x002C_46_x002C_47_x002C_48_x002C_49_x002C_5_x002C_50_x002C_54_x002C_57_x002C_6_x002C_8_x002C_9,False,False,False</value>
+      <value>System,UserName,UserName,System.String,Administrator,True,False</value>
+      <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
+      <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0031_0,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_018,True,False</value>
+    </Variables>
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="0" />
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="5" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="3">
+        <PageHeaderBand1 Ref="6" type="PageHeaderBand" isKey="true">
+          <Brush>ActiveCaption</Brush>
+          <ClientRectangle>0,0.4,27.7,1.6</ClientRectangle>
+          <Components isList="true" count="8">
+            <Text5 Ref="7" type="Text" isKey="true">
+              <Brush>ActiveCaption</Brush>
+              <ClientRectangle>0.3,0.2,9.3,0.8</ClientRectangle>
+              <ComponentStyle>Style2</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,12,Bold,Point,False,0</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text5</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Aksepterte kontrakter, uten registrert innflytting</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text5>
+            <Text6 Ref="8" type="Text" isKey="true">
+              <Brush>ActiveCaption</Brush>
+              <ClientRectangle>20.4,0.2,7,0.4</ClientRectangle>
+              <ComponentStyle>Style1</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8.25,Bold,Point,False,0</Font>
+              <Guid>321fe5d25b2c4cef89e52e0f76354f98</Guid>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text6</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{Bedrift.Navn}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text6>
+            <Text15 Ref="9" type="Text" isKey="true">
+              <Brush>ActiveCaption</Brush>
+              <ClientRectangle>20.4,0.6,7,0.4</ClientRectangle>
+              <ComponentStyle>Style1</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8.25,Bold,Point,False,0</Font>
+              <Guid>c410365974ff4846b4979a8f31225626</Guid>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text15</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{Bedrift.Arstall}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text15>
+            <Text3 Ref="10" type="Text" isKey="true">
+              <Brush>ActiveCaption</Brush>
+              <ClientRectangle>0.3,1,8.7,0.6</ClientRectangle>
+              <ComponentStyle>Style1</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8.25,Bold,Point,False,0</Font>
+              <Guid>2aa7f6f5fbe240f584828b78dcdc439f</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text3</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Bolig</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text3>
+            <Text13 Ref="11" type="Text" isKey="true">
+              <Brush>ActiveCaption</Brush>
+              <ClientRectangle>9,1,5.8,0.6</ClientRectangle>
+              <ComponentStyle>Style1</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8.25,Bold,Point,False,0</Font>
+              <Guid>f0cc83012def49e5a9910bdad8978113</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text13</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Kunde</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text13>
+            <Text11 Ref="12" type="Text" isKey="true">
+              <Brush>ActiveCaption</Brush>
+              <ClientRectangle>14.8,1,5.6,0.6</ClientRectangle>
+              <ComponentStyle>Style1</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8.25,Bold,Point,False,0</Font>
+              <Guid>7a5a09ed20154619b1af62fafd5ef2a2</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text11</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Ansvarlig utleiekonsulent</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text11>
+            <Text2 Ref="13" type="Text" isKey="true">
+              <Brush>ActiveCaption</Brush>
+              <ClientRectangle>24.1,1.01,3.48,0.6</ClientRectangle>
+              <ComponentStyle>Style1</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8.25,Bold,Point,False,0</Font>
+              <Guid>55d1b5cb24e54135a24d770dc14ea645</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text2</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Kontrakt til</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text2>
+            <Text1 Ref="14" type="Text" isKey="true">
+              <Brush>ActiveCaption</Brush>
+              <ClientRectangle>20.5,1,3.6,0.6</ClientRectangle>
+              <ComponentStyle>Style1</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8.25,Bold,Point,False,0</Font>
+              <Guid>ba2e8bad0ae148cf99514796c8311ad4</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text1</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Kontrakt fra</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text1>
+          </Components>
+          <ComponentStyle>Style2</ComponentStyle>
+          <Conditions isList="true" count="0" />
+          <Name>PageHeaderBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+        </PageHeaderBand1>
+        <PageFooterBand1 Ref="15" type="PageFooterBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,17.6,27.7,1.4</ClientRectangle>
+          <Components isList="true" count="2">
+            <Text16 Ref="16" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.4,0.8,7,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8,Italic</Font>
+              <Guid>ca3e43a2756c487dadf82c82c151a9e0</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text16</Name>
+              <Page isRef="5" />
+              <Parent isRef="15" />
+              <Text>Utskriftstidspunkt: {Time}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text16>
+            <Text17 Ref="17" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>20.4,0.8,7,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8,Italic</Font>
+              <Guid>c5998281b505416e88ab8718ec7d802f</Guid>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text17</Name>
+              <Page isRef="5" />
+              <Parent isRef="15" />
+              <Text>Side {PageNumber} av {TotalPageCount}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text17>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Name>PageFooterBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+        </PageFooterBand1>
+        <DataBand1 Ref="18" type="DataBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
+          <ClientRectangle>0,2.8,27.7,0.8</ClientRectangle>
+          <Components isList="true" count="5">
+            <Text4 Ref="19" type="Text" isKey="true">
+              <Brush>EmptyBrush</Brush>
+              <ClientRectangle>0.3,0,8.7,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Guid>a04605d00213448295ec72d7eee21465</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text4</Name>
+              <Page isRef="5" />
+              <Parent isRef="18" />
+              <Text>{Kontraktsdata.BoligNummer}, {Kontraktsdata.Objekt_adresse}, {Kontraktsdata.Omrade}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text4>
+            <Text14 Ref="20" type="Text" isKey="true">
+              <Brush>EmptyBrush</Brush>
+              <ClientRectangle>9,0,5.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Guid>efc6d6f93dd743c4970fbfc62e3d2f46</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text14</Name>
+              <Page isRef="5" />
+              <Parent isRef="18" />
+              <Text>{Kontraktsdata.Kundenummer}, {Kontraktsdata.Kundenavn}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text14>
+            <Text12 Ref="21" type="Text" isKey="true">
+              <Brush>EmptyBrush</Brush>
+              <ClientRectangle>14.8,0,5.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Guid>7055177f1ab14a38998a8246a59ada2d</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text12</Name>
+              <Page isRef="5" />
+              <Parent isRef="18" />
+              <Text>{Kontraktsdata.Ansvarlig_utleiekonsulent}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text12>
+            <Text8 Ref="22" type="Text" isKey="true">
+              <Brush>EmptyBrush</Brush>
+              <ClientRectangle>20.49,-0.01,3.6,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Guid>53a1f1c5f98447a38f266d076d1ca8a9</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text8</Name>
+              <Page isRef="5" />
+              <Parent isRef="18" />
+              <Text>{Kontraktsdata.Kontrakt_fra}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="23" type="DateFormat" isKey="true">
+                <StringFormat>dd/MM/yyyy</StringFormat>
+              </TextFormat>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text8>
+            <Text10 Ref="24" type="Text" isKey="true">
+              <Brush>EmptyBrush</Brush>
+              <ClientRectangle>24.09,-0.01,3.49,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Guid>23c69bdf786943e490f854188de1b68d</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text10</Name>
+              <Page isRef="5" />
+              <Parent isRef="18" />
+              <Text>{Kontraktsdata.Kontrakt_til}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="25" type="DateFormat" isKey="true">
+                <StringFormat>dd/MM/yyyy</StringFormat>
+              </TextFormat>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text10>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <DataRelationName isNull="true" />
+          <DataSourceName>Kontraktsdata</DataSourceName>
+          <Filters isList="true" count="0" />
+          <Name>DataBand1</Name>
+          <OddStyle>lightBlue</OddStyle>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Sort isList="true" count="0" />
+        </DataBand1>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Guid>161755a740e24b7f94244106f8c41b15</Guid>
+      <Margins>1,1,1,1</Margins>
+      <Name>Page1</Name>
+      <Orientation>Landscape</Orientation>
+      <PageHeight>21</PageHeight>
+      <PageWidth>29.7</PageWidth>
+      <PaperSize>A4</PaperSize>
+      <Report isRef="0" />
+      <Watermark Ref="26" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+        <Font>Arial,100</Font>
+        <TextBrush>[50:0:0:0]</TextBrush>
+      </Watermark>
+    </Page1>
+  </Pages>
+  <PrinterSettings Ref="27" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>9/28/2018 9:39:44 AM</ReportChanged>
+  <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
+  <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\IkkeInnflyttet.mrt</ReportFile>
+  <ReportGuid>27547e7516e1417e8297443d09f3ef7d</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Centimeters</ReportUnit>
+  <ReportVersion>2013.1.1600</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="5">
+    <lightBlue Ref="28" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Brush>[222:233:244]</Brush>
+      <Conditions isList="true" count="0" />
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>lightBlue</Name>
+      <TextBrush>Black</TextBrush>
+    </lightBlue>
+    <Style1 Ref="29" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Brush>ActiveCaption</Brush>
+      <Conditions isList="true" count="0" />
+      <Description />
+      <Font>Arial,8.25,Bold,Point,False,0</Font>
+      <Name>Style1</Name>
+      <TextBrush>Black</TextBrush>
+    </Style1>
+    <LightGrey Ref="30" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Brush>WhiteSmoke</Brush>
+      <Conditions isList="true" count="0" />
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>LightGrey</Name>
+      <TextBrush>Black</TextBrush>
+    </LightGrey>
+    <Tekst Ref="31" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Brush>Transparent</Brush>
+      <Conditions isList="true" count="0" />
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Tekst</Name>
+      <TextBrush>White</TextBrush>
+    </Tekst>
+    <Style2 Ref="32" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Brush>ActiveCaption</Brush>
+      <Conditions isList="true" count="0" />
+      <Description />
+      <Font>Arial,12,Bold,Point,False,0</Font>
+      <Name>Style2</Name>
+      <TextBrush>Black</TextBrush>
+    </Style2>
+  </Styles>
+</StiSerializer>
