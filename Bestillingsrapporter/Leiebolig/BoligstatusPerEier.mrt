@@ -317,7 +317,7 @@ ORDER BY ei.Kundenummer</SqlCommand>
             </Text1>
             <Text3 Ref="17" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.4,0.8,3.8,0.4</ClientRectangle>
+              <ClientRectangle>6.4,0.8,4,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9,Bold</Font>
               <Guid>8e1065ba054844a9af2279fd402744c1</Guid>
@@ -684,223 +684,231 @@ ORDER BY ei.Kundenummer</SqlCommand>
           <Sort isList="true" count="0" />
         </DataBand1>
         <GroupFooterBand1 Ref="45" type="GroupFooterBand" isKey="true">
-          <Border>None;White;1;Solid;False;4;Black</Border>
-          <Brush>[225:238:223]</Brush>
-          <ClientRectangle>0,6.6,27.7,1.4</ClientRectangle>
-          <Components isList="true" count="14">
-            <Text28 Ref="46" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>24.8,0.6,2.4,0.6</ClientRectangle>
+          <Brush>White</Brush>
+          <ClientRectangle>0,6.6,27.7,2.34</ClientRectangle>
+          <Components isList="true" count="1">
+            <Panel1 Ref="46" type="Stimulsoft.Report.Components.StiPanel" isKey="true">
+              <Brush>[225:238:223]</Brush>
+              <ClientRectangle>0,-0.03,27.7,1.42</ClientRectangle>
+              <Components isList="true" count="14">
+                <Text29 Ref="47" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.38,0.18,0.6,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>6b4ee5ef225642f3acc3cf45321017bb</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text29</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Utleid")}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Totals</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text29>
+                <Text31 Ref="48" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>4.78,0.58,0.6,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>061e4a2146cf4f428b15c36c70b6cb38</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text31</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Mangler oppdragsavtale")}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Totals</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text31>
+                <Text32 Ref="49" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.38,0.58,0.6,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>ddd0adb982024860af89478034e7d2be</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text32</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Utleieprosess pågår")}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Totals</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text32>
+                <Text33 Ref="50" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>4.78,0.18,0.6,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>ac293bb393e54d3aa23e037c6ab628c6</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text33</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Ukjent status")}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Totals</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text33>
+                <Text35 Ref="51" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.98,0.58,3.4,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>cc2a5567fccc411faf31a993e25198d0</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text35</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>utleieprosess pågår</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text35>
+                <Text37 Ref="52" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.98,0.18,1.4,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>2045d5ac48b2403bb9455438b10981cf</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text37</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>utleid</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text37>
+                <Text28 Ref="53" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>24.78,0.58,2.4,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text28</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>Antall boliger: </Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text28>
+                <Text2 Ref="54" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>26.78,0.58,0.8,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>513e3da40e4f4c2abe78b9558f0bc44a</Guid>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text2</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>{Count(DataBand1)}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Totals</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text2>
+                <Text30 Ref="55" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>9.98,0.58,0.6,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>910ee32c0d184f2483263377ce2e434c</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text30</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Ikke utleid")}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Totals</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text30>
+                <Text38 Ref="56" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>5.38,0.58,4.2,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>f8d2d1392f6d4051aae7e695f26c9eb7</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text38</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>mangler oppdragsavtale</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text38>
+                <Text36 Ref="57" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>10.58,0.58,2,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>c39da80faeb64a6b891e32d135ee0195</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text36</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>ikke utleid</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text36>
+                <Text34 Ref="58" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>5.38,0.18,2.2,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text34</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>ukjent status</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text34>
+                <Text42 Ref="59" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>9.98,0.18,0.6,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>8452fe849ad04390b52a12de7ed2087b</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text42</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Utgående kontrakt")}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Totals</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text42>
+                <Text43 Ref="60" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>10.58,0.18,3.2,0.6</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Font>Arial,10,Bold</Font>
+                  <Guid>66deb11aa4ae4333b24aaab83c1ee443</Guid>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text43</Name>
+                  <Page isRef="5" />
+                  <Parent isRef="46" />
+                  <Text>utgående kontrakt</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text43>
+              </Components>
               <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text28</Name>
+              <Name>Panel1</Name>
               <Page isRef="5" />
               <Parent isRef="45" />
-              <Text>Antall boliger: </Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text28>
-            <Text2 Ref="47" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>26.8,0.6,0.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>513e3da40e4f4c2abe78b9558f0bc44a</Guid>
-              <HorAlignment>Right</HorAlignment>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text2</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>{Count(DataBand1)}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Totals</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text2>
-            <Text29 Ref="48" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>0.4,0.2,0.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>6b4ee5ef225642f3acc3cf45321017bb</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text29</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Utleid")}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Totals</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text29>
-            <Text30 Ref="49" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>10,0.6,0.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>910ee32c0d184f2483263377ce2e434c</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text30</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Ikke utleid")}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Totals</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text30>
-            <Text31 Ref="50" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>4.8,0.6,0.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>061e4a2146cf4f428b15c36c70b6cb38</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text31</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Mangler oppdragsavtale")}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Totals</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text31>
-            <Text32 Ref="51" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>0.4,0.6,0.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>ddd0adb982024860af89478034e7d2be</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text32</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Utleieprosess pågår")}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Totals</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text32>
-            <Text33 Ref="52" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>4.8,0.2,0.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>ac293bb393e54d3aa23e037c6ab628c6</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text33</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Ukjent status")}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Totals</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text33>
-            <Text38 Ref="53" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>5.4,0.6,4.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>f8d2d1392f6d4051aae7e695f26c9eb7</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text38</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>mangler oppdragsavtale</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text38>
-            <Text36 Ref="54" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>10.6,0.6,2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>c39da80faeb64a6b891e32d135ee0195</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text36</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>ikke utleid</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text36>
-            <Text34 Ref="55" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>5.4,0.2,2.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text34</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>ukjent status</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text34>
-            <Text35 Ref="56" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>1,0.6,3.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>cc2a5567fccc411faf31a993e25198d0</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text35</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>utleieprosess pågår</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text35>
-            <Text37 Ref="57" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>1,0.2,1.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>2045d5ac48b2403bb9455438b10981cf</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text37</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>utleid</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text37>
-            <Text42 Ref="58" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>10,0.2,0.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>8452fe849ad04390b52a12de7ed2087b</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text42</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>{CountIf(DataBand1,Boligdata.boligstatus == "Utgående kontrakt")}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Totals</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text42>
-            <Text43 Ref="59" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>10.6,0.2,3.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>66deb11aa4ae4333b24aaab83c1ee443</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text43</Name>
-              <Page isRef="5" />
-              <Parent isRef="45" />
-              <Text>utgående kontrakt</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text43>
+            </Panel1>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>GroupFooterBand1</Name>
-          <NewPageAfter>True</NewPageAfter>
           <Page isRef="5" />
           <Parent isRef="5" />
         </GroupFooterBand1>
@@ -913,13 +921,13 @@ ORDER BY ei.Kundenummer</SqlCommand>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="60" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="61" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
   </Pages>
-  <PrinterSettings Ref="61" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="62" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -931,10 +939,10 @@ ORDER BY ei.Kundenummer</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>10/2/2018 2:46:21 PM</ReportChanged>
+  <ReportChanged>11/7/2018 2:42:50 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\BoligstatusPerEier.mrt</ReportFile>
-  <ReportGuid>fb8134952cc94158857299ccffb27027</ReportGuid>
+  <ReportGuid>c5c71e7c651d4e9abe79d3a44f7735a0</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -962,8 +970,8 @@ namespace Reports
 }
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
-  <Styles isList="true" count="3">
-    <lightBlue Ref="62" type="Stimulsoft.Report.StiStyle" isKey="true">
+  <Styles isList="true" count="4">
+    <lightBlue Ref="63" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[222:233:244]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -971,7 +979,7 @@ namespace Reports
       <Name>lightBlue</Name>
       <TextBrush>Black</TextBrush>
     </lightBlue>
-    <Style1 Ref="63" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="64" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[146:187:205]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -979,7 +987,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <LightGrey Ref="64" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <LightGrey Ref="65" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -987,5 +995,13 @@ namespace Reports
       <Name>LightGrey</Name>
       <TextBrush>Black</TextBrush>
     </LightGrey>
+    <RectangleSpace Ref="66" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Brush>[225:238:223]</Brush>
+      <Conditions isList="true" count="0" />
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>RectangleSpace</Name>
+      <TextBrush>DarkSeaGreen</TextBrush>
+    </RectangleSpace>
   </Styles>
 </StiSerializer>
