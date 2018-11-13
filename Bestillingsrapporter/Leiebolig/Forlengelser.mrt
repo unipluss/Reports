@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9Fb5oU1NQjVhfOVEekzhF4twwQ9NV5KZ7Hu5XORE60/R8vtJZFTzXWkVuexNAa4T2Vr37VsFAZ3pCP3s9FQqL8J40cLJSns=</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Fb5oU1NQjVhfOVEekzhF4twwQ9NV5KZ7Hu5XORE60/R8vtJY1TzXWkVuexNCa4T2Vr37VsFAZ3pCP3s9FQqL8J40cLJSns=</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -101,7 +101,7 @@ set @fraDato = '{fraDato}'
 set @tilDato = case '{FireMnd}' when 'True' then  DATEADD(month, 4, @fraDato)
 				else '{TilDato}'
 				end
-select kd.Kontrakt_fra, kd.Kontrakt_til,  kd.Kundenummer, na.Name, kd.kontrakts_id
+select distinct kd.Kontrakt_fra, kd.Kontrakt_til,  kd.Kundenummer, na.Name, kd.kontrakts_id
 	, (select Navn from e..t_ansatte where Ansatte_id = coalesce(bo.ansvarligUtleieKonsulentId, fa.ansvarligutleiekonsulentId)) as ansvarligUtleiekonsulent
 , bo.Objekt_adresse
 , bo.Objekt_postnummer
@@ -132,12 +132,12 @@ order by kd.Kontrakt_til asc</SqlCommand>
       <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_where_x002F__x002A__x002A__x002F__x0028__x002F__x002A__x002A__x002F_Ansatte_id_x0020_in_x0020__x0028_select_x0020_ansvarligUtleieKonsulentId_x0020_from_x0020_e..t_boligobjekt_x0020__x0029__x002F__x002A__x002A__x002F_or_x0020__x002F__x002A__x002A__x002F_Ansatte_id_x0020_in_x0020__x0028_select_x0020_ansvarligUtleieKonsulentId_x0020_from_x0020_e..t_forvaltningsAvtale_x0029__x002F__x002A__x002A__x002F__x0029__x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_where_x0020_isnull_x0028_deaktivert_x002C_0_x0029__x0020__x003D__x0020_0_x0020_and_x0020__x002F__x002A__x002A__x002F__x0028__x002F__x002A__x002A__x002F_Ansatte_id_x0020_in_x0020__x0028_select_x0020_ansvarligUtleieKonsulentId_x0020_from_x0020_e..t_boligobjekt_x0020__x0029__x002F__x002A__x002A__x002F_or_x0020__x002F__x002A__x002A__x002F_Ansatte_id_x0020_in_x0020__x0028_select_x0020_ansvarligUtleieKonsulentId_x0020_from_x0020_e..t_forvaltningsAvtale_x0029__x002F__x002A__x002A__x002F__x0029__x002F__x002A__x002A__x002F_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031_0_x002C_11_x002C_12_x002C_13_x002C_14_x002C_15_x002C_16_x002C_17_x002C_19_x002C_21_x002C_24_x002C_25_x002C_30_x002C_33_x002C_34_x002C_35_x002C_36_x002C_38_x002C_39_x002C_4_x002C_40_x002C_41_x002C_42_x002C_43_x002C_44_x002C_46_x002C_47_x002C_48_x002C_49_x002C_5_x002C_50_x002C_54_x002C_57_x002C_6_x002C_8_x002C_9,False,False,False</value>
       <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0180905,False,False,False</value>
       <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0190926,False,False,False</value>
+      <value>,FireMnd,Vis_x0020_fire_x0020_md._x0020_frem,check,System.String,True,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0037_2,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0039_0,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_018,True,False</value>
-      <value>,FireMnd,Vis_x0020_fire_x0020_md._x0020_frem,check,System.String,True,False,False,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -509,10 +509,10 @@ order by kd.Kontrakt_til asc</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>9/5/2018 12:29:24 PM</ReportChanged>
+  <ReportChanged>11/13/2018 1:53:07 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\Forlengelser.mrt</ReportFile>
-  <ReportGuid>54eaddcdcc56472cb4d3c4d26356a8dd</ReportGuid>
+  <ReportGuid>947b55989b404bfc9756116f26d0512d</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
