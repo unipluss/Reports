@@ -9,7 +9,7 @@
         <Name>Connection</Name>
       </Connection>
     </Databases>
-    <DataSources isList="true" count="4">
+    <DataSources isList="true" count="3">
       <Bedrift Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Bedrift</Alias>
         <Columns isList="true" count="52">
@@ -94,78 +94,7 @@
         <Parameters isList="true" count="0" />
         <SqlCommand>SELECT * FROM e..t_ansatte</SqlCommand>
       </Ansatte>
-      <Kontrakter Ref="5" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
-        <Alias>Kontrakter</Alias>
-        <Columns isList="true" count="24">
-          <value>FormidlingsNr,System.Int32</value>
-          <value>godkjentInnflyttingsmappe,System.Boolean</value>
-          <value>oppdragsNr,System.Int32</value>
-          <value>antallVisninger,System.Int32</value>
-          <value>kostnad1,System.Decimal</value>
-          <value>kostnad2,System.Int32</value>
-          <value>kostnad3,System.Decimal</value>
-          <value>kostand4,System.Int32</value>
-          <value>kostnad5,System.Decimal</value>
-          <value>kostnad6,System.Decimal</value>
-          <value>kostnad7,System.Decimal</value>
-          <value>kostnad8,System.Decimal</value>
-          <value>kostnad9,System.Decimal</value>
-          <value>kostnad10,System.Decimal</value>
-          <value>Objekt_adresse,System.String</value>
-          <value>Objekt_poststed,System.String</value>
-          <value>Objekt_postnummer,System.String</value>
-          <value>Rom_nummer,System.String</value>
-          <value>totalt,System.Decimal</value>
-          <value>prisPrVisning,System.Decimal</value>
-          <value>Navn,System.String</value>
-          <value>fraDatoAsDato,System.DateTime</value>
-          <value>tilDatoAsDato,System.DateTime</value>
-          <value>antallKostnader,System.Int32</value>
-        </Columns>
-        <CommandTimeout>30</CommandTimeout>
-        <Dictionary isRef="1" />
-        <Name>Kontrakter</Name>
-        <NameInSource>Connection</NameInSource>
-        <Parameters isList="true" count="0" />
-        <SqlCommand>set dateformat dmy
-
-select  dateadd(yy,0,'{fraDato}') as fraDatoAsDato,dateadd(yy,0,'{TilDato}') as tilDatoAsDato , an.Navn, kd.FormidlingsNr, CAST(CASE godkjentInnflyttingsmappe WHEN 1 THEN 1 ELSE 0 END AS BIT)  as godkjentInnflyttingsmappe
-	, oa.oppdragsNr 
-	, kd.antallVisninger
-	, oa.utleieHonorar as kostnad1, oa.sikkerhetsStillelsesHonorar as kostnad2, oa.annonseHonorar as kostnad3, oa.grunnbokGebyr as kostand4, oa.gebyrInnFlytning as kostnad5,   oa.kostnad6, oa.kostnad7, oa.kostnad8, oa.kostnad9, oa.kostnad10
-	, bo.Objekt_adresse, bo.Objekt_poststed, bo.Objekt_postnummer, bo.Rom_nummer
-	, oa.utleieHonorar + oa.sikkerhetsStillelsesHonorar + oa.annonseHonorar + oa.grunnbokGebyr + oa.gebyrInnFlytning + oa.kostnad6 + oa.kostnad7 + oa.kostnad8 + oa.kostnad9 + oa.kostnad10  + (isnull(oa.prisPrVisning,0) * isnull(kd.antallVisninger,0)) as totalt
-	, oa.prisPrVisning, kd.antallVisninger
-	, ((select case when oa.utleieHonorar &gt;0 then 1 else 0 end) + 
-	   (select case when oa.sikkerhetsStillelsesHonorar &gt;0 then 1 else 0 end) +
-	   (select case when oa.annonseHonorar &gt;0 then 1 else 0 end) +
-	   (select case when oa.grunnbokGebyr &gt;0 then 1 else 0 end) +
-	   (select case when oa.gebyrInnFlytning &gt;0 then 1 else 0 end) +
-	   (select case when oa.kostnad6 &gt;0 then 1 else 0 end)+
-	   (select case when oa.kostnad7 &gt;0 then 1 else 0 end)+ 
-	   (select case when oa.kostnad8 &gt;0 then 1 else 0 end)+ 
-	   (select case when oa.kostnad9 &gt;0 then 1 else 0 end)+ 
-	   (select case when oa.kostnad10 &gt;0 then 1 else 0 end) + 
-	   (select case when oa.prisPrVisning &gt;0 and kd.antallvisninger &gt;0 then 1 else 0 end)) as antallKostnader
-	from e..t_kontraktsdata kd
-inner join e..t_forvaltningsAvtale fa on fa.id = kd.ForvaltningsavtaleId
-inner join e..t_boligobjekt bo on bo.objekt_id = kd.Objekt
-left join e..t_oppdragsAvtale oa on kd.OppdragsavtaleId = oa.id
-left join e..t_ansatte an on isnull(kd.ansvarligMeglerGodkjentSaksmappe, isnull(bo.ansvarligUtleieKonsulentId, fa.ansvarligUtleieKonsulentId)) = an.Ansatte_id
-
-where isnull(kd.ansvarligMeglerGodkjentSaksmappe, isnull(bo.ansvarligUtleieKonsulentId, fa.ansvarligUtleieKonsulentId)) in ({Ansatt})
-and '{fraDato}' &lt;= kd.godkjentInnflyttingsmappeDato
-and '{TilDato}' &gt; = kd.godkjentInnflyttingsmappeDato
-and kd.statusid in (1003,1004,1006)
-and isnull(kd.godkjentInnflyttingsmappe,0) = 1
-
-order by oa.Oppdragsnr,kd.FormidlingsNr
-
-
-
-</SqlCommand>
-      </Kontrakter>
-      <OppsigelseFjernet Ref="6" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+      <OppsigelseFjernet Ref="5" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>OppsigelseFjernet</Alias>
         <Columns isList="true" count="12">
           <value>fraDatoAsDato,System.DateTime</value>
@@ -209,8 +138,8 @@ LEFT JOIN e..t_bygg bg ON bg.ID = bo.Bygg_id
 LEFT JOIN e..t_status st ON st.Status_id = kd.statusId
 LEFT JOIN e..t_forvaltningsAvtale fa on fa.Id = kd.ForvaltningsavtaleId
 LEFT JOIN e..t_ansatte an ON an.Ansatte_id = fa.ansvarligUtleieKonsulentId
-AND isnull(nullif(fa.ansvarligUtleieKonsulentId,0), bo.ansvarligUtleieKonsulentId) in ({Ansatt})
-AND opf.oppsigelsesdato between '{fraDato}' AND '{TilDato}'
+WHERE isnull(nullif(fa.ansvarligUtleieKonsulentId,0), bo.ansvarligUtleieKonsulentId) in ({Ansatt})
+AND opf.oppsigelsesdato between '{fraDato}' AND DATEADD(day, 1, '{TilDato}')
 ORDER BY an.Navn</SqlCommand>
       </OppsigelseFjernet>
     </DataSources>
@@ -218,8 +147,8 @@ ORDER BY an.Navn</SqlCommand>
     <Report isRef="0" />
     <Variables isList="true" count="8">
       <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031__x002C_10_x002C_11_x002C_12_x002C_13_x002C_14_x002C_15_x002C_16_x002C_17_x002C_18_x002C_19_x002C_2_x002C_21_x002C_24_x002C_25_x002C_29_x002C_3_x002C_30_x002C_32_x002C_33_x002C_34_x002C_35_x002C_36_x002C_37_x002C_38_x002C_39_x002C_4_x002C_40_x002C_41_x002C_42_x002C_43_x002C_44_x002C_45_x002C_46_x002C_47_x002C_48_x002C_49_x002C_5_x002C_50_x002C_51_x002C_52_x002C_53_x002C_54_x002C_55_x002C_56_x002C_57_x002C_58_x002C_6_x002C_8_x002C_9,False,False,False</value>
-      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0180517,False,False,False</value>
-      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0191101,False,False,False</value>
+      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0181101,False,False,False</value>
+      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0181103,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
@@ -231,29 +160,29 @@ ORDER BY an.Navn</SqlCommand>
   <GlobalizationStrings isList="true" count="0" />
   <MetaTags isList="true" count="0" />
   <Pages isList="true" count="1">
-    <Page1 Ref="7" type="Page" isKey="true">
+    <Page1 Ref="6" type="Page" isKey="true">
       <Border>None;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Components isList="true" count="7">
-        <PageHeaderBand1 Ref="8" type="PageHeaderBand" isKey="true">
+        <PageHeaderBand1 Ref="7" type="PageHeaderBand" isKey="true">
           <Brush>[183:209:226]</Brush>
           <ClientRectangle>0,0.4,27.7,1.08</ClientRectangle>
           <Components isList="true" count="6">
-            <Text22 Ref="9" type="Text" isKey="true">
+            <Text22 Ref="8" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.26,4.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,12,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text22</Name>
-              <Page isRef="7" />
-              <Parent isRef="8" />
+              <Page isRef="6" />
+              <Parent isRef="7" />
               <Text>Oppsigelser, fjernet</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text22>
-            <Text26 Ref="10" type="Text" isKey="true">
+            <Text26 Ref="9" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>23,0.26,4.6,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -261,14 +190,14 @@ ORDER BY an.Navn</SqlCommand>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text26</Name>
-              <Page isRef="7" />
-              <Parent isRef="8" />
+              <Page isRef="6" />
+              <Parent isRef="7" />
               <ShrinkFontToFit>True</ShrinkFontToFit>
               <ShrinkFontToFitMinimumSize>5</ShrinkFontToFitMinimumSize>
               <Text>{Bedrift.Navn}</Text>
               <TextBrush>Black</TextBrush>
             </Text26>
-            <Text27 Ref="11" type="Text" isKey="true">
+            <Text27 Ref="10" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>25.6,0.66,2,0.39</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -276,12 +205,12 @@ ORDER BY an.Navn</SqlCommand>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text27</Name>
-              <Page isRef="7" />
-              <Parent isRef="8" />
+              <Page isRef="6" />
+              <Parent isRef="7" />
               <Text>{Bedrift.Arstall}</Text>
               <TextBrush>Black</TextBrush>
             </Text27>
-            <Text43 Ref="12" type="Text" isKey="true">
+            <Text43 Ref="11" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>5,0.26,2.2,0.6</ClientRectangle>
@@ -289,17 +218,17 @@ ORDER BY an.Navn</SqlCommand>
               <Font>Arial,12,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text43</Name>
-              <Page isRef="7" />
-              <Parent isRef="8" />
+              <Page isRef="6" />
+              <Parent isRef="7" />
               <Text>{OppsigelseFjernet.fraDatoAsDato}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="13" type="DateFormat" isKey="true">
+              <TextFormat Ref="12" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text43>
-            <Text44 Ref="14" type="Text" isKey="true">
+            <Text44 Ref="13" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>7.4,0.26,4.8,0.6</ClientRectangle>
@@ -308,17 +237,17 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>02faf5f9eb734d509f8c8a32218c4e01</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text44</Name>
-              <Page isRef="7" />
-              <Parent isRef="8" />
+              <Page isRef="6" />
+              <Parent isRef="7" />
               <Text>{OppsigelseFjernet.tilDatoasDato}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="15" type="DateFormat" isKey="true">
+              <TextFormat Ref="14" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text44>
-            <Text45 Ref="16" type="Text" isKey="true">
+            <Text45 Ref="15" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>7.2,0.26,0.2,0.6</ClientRectangle>
@@ -326,8 +255,8 @@ ORDER BY an.Navn</SqlCommand>
               <Font>Arial,12,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text45</Name>
-              <Page isRef="7" />
-              <Parent isRef="8" />
+              <Page isRef="6" />
+              <Parent isRef="7" />
               <Text>-</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -336,15 +265,15 @@ ORDER BY an.Navn</SqlCommand>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>PageHeaderBand1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="6" />
+          <Parent isRef="6" />
         </PageHeaderBand1>
-        <PageFooterBand1 Ref="17" type="PageFooterBand" isKey="true">
+        <PageFooterBand1 Ref="16" type="PageFooterBand" isKey="true">
           <Border>None;Black;1;Solid;False;4;Black;True</Border>
           <Brush>EmptyBrush</Brush>
           <ClientRectangle>0,18.4,27.7,0.6</ClientRectangle>
           <Components isList="true" count="3">
-            <Text3 Ref="18" type="Text" isKey="true">
+            <Text3 Ref="17" type="Text" isKey="true">
               <AllowHtmlTags>True</AllowHtmlTags>
               <Brush>Transparent</Brush>
               <ClientRectangle>24,0.1,3.6,0.45</ClientRectangle>
@@ -352,14 +281,14 @@ ORDER BY an.Navn</SqlCommand>
               <Font>Arial,8</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text3</Name>
-              <Page isRef="7" />
-              <Parent isRef="17" />
+              <Page isRef="6" />
+              <Parent isRef="16" />
               <Text>Side &lt;b&gt;{PageNumber}&lt;/b&gt; av &lt;b&gt;{TotalPageCount}&lt;/b&gt;</Text>
               <TextBrush>Black</TextBrush>
               <TextQuality>Wysiwyg</TextQuality>
               <Type>Expression</Type>
             </Text3>
-            <Text28 Ref="19" type="Text" isKey="true">
+            <Text28 Ref="18" type="Text" isKey="true">
               <AllowHtmlTags>True</AllowHtmlTags>
               <Brush>Transparent</Brush>
               <ClientRectangle>2.4,0.1,3.8,0.47</ClientRectangle>
@@ -368,14 +297,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>ba927a26a2f241168b584bca48e2c073</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text28</Name>
-              <Page isRef="7" />
-              <Parent isRef="17" />
+              <Page isRef="6" />
+              <Parent isRef="16" />
               <Text>&lt;b&gt;{Time}&lt;/b&gt;</Text>
               <TextBrush>Black</TextBrush>
               <TextQuality>Wysiwyg</TextQuality>
               <Type>Expression</Type>
             </Text28>
-            <Text29 Ref="20" type="Text" isKey="true">
+            <Text29 Ref="19" type="Text" isKey="true">
               <AllowHtmlTags>True</AllowHtmlTags>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.1,2.4,0.47</ClientRectangle>
@@ -384,8 +313,8 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>fd67c8a5c5bb44679a43b01a9fa1d8ad</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text29</Name>
-              <Page isRef="7" />
-              <Parent isRef="17" />
+              <Page isRef="6" />
+              <Parent isRef="16" />
               <Text>Utskriftstidspunkt</Text>
               <TextBrush>Black</TextBrush>
               <TextQuality>Wysiwyg</TextQuality>
@@ -394,14 +323,14 @@ ORDER BY an.Navn</SqlCommand>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>PageFooterBand1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="6" />
+          <Parent isRef="6" />
         </PageFooterBand1>
-        <GroupHeaderBand1 Ref="21" type="GroupHeaderBand" isKey="true">
+        <GroupHeaderBand1 Ref="20" type="GroupHeaderBand" isKey="true">
           <Brush>LightSteelBlue</Brush>
           <ClientRectangle>0,2.28,27.7,1.4</ClientRectangle>
           <Components isList="true" count="8">
-            <Text16 Ref="22" type="Text" isKey="true">
+            <Text16 Ref="21" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.72,1.4,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -409,14 +338,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>e954f7bc87a94accacd4802b75e48837</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text16</Name>
-              <Page isRef="7" />
-              <Parent isRef="21" />
+              <Page isRef="6" />
+              <Parent isRef="20" />
               <Text>Kunde</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text16>
-            <Text4 Ref="23" type="Text" isKey="true">
+            <Text4 Ref="22" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>5.2,0.72,2.2,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -424,14 +353,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>8b1fc9a25d71474092bb4b37d94ec032</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text4</Name>
-              <Page isRef="7" />
-              <Parent isRef="21" />
+              <Page isRef="6" />
+              <Parent isRef="20" />
               <Text>Bolig</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text4>
-            <Text2 Ref="24" type="Text" isKey="true">
+            <Text2 Ref="23" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>19.8,0.72,1.8,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -439,14 +368,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>a6c4555cd4d4468b9af4e9541aaea25f</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text2</Name>
-              <Page isRef="7" />
-              <Parent isRef="21" />
+              <Page isRef="6" />
+              <Parent isRef="20" />
               <Text>Kontrakt fra</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text2>
-            <Text18 Ref="25" type="Text" isKey="true">
+            <Text18 Ref="24" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>22.4,0.72,2.2,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -454,14 +383,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>f32281c8b4994ebc975815b451d0aaf7</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text18</Name>
-              <Page isRef="7" />
-              <Parent isRef="21" />
+              <Page isRef="6" />
+              <Parent isRef="20" />
               <Text>Kontrakt utgår</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text18>
-            <Text19 Ref="26" type="Text" isKey="true">
+            <Text19 Ref="25" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>15.4,0.72,3.4,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -469,14 +398,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>dd4577a9071643599eb8cfef1c111871</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text19</Name>
-              <Page isRef="7" />
-              <Parent isRef="21" />
+              <Page isRef="6" />
+              <Parent isRef="20" />
               <Text>Planlagt utflyttningsdato</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text19>
-            <Text20 Ref="27" type="Text" isKey="true">
+            <Text20 Ref="26" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>12,0.72,2.4,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -484,14 +413,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>8e155bd1d4aa41ce8a7abd71178cd875</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text20</Name>
-              <Page isRef="7" />
-              <Parent isRef="21" />
+              <Page isRef="6" />
+              <Parent isRef="20" />
               <Text>Oppsigelsesdato</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text20>
-            <Text21 Ref="28" type="Text" isKey="true">
+            <Text21 Ref="27" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>25.4,0.72,1.2,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -499,14 +428,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>a2d23eead2564d2590b5be74fc0e55ba</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text21</Name>
-              <Page isRef="7" />
-              <Parent isRef="21" />
+              <Page isRef="6" />
+              <Parent isRef="20" />
               <Text>Status</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text21>
-            <Text15 Ref="29" type="Text" isKey="true">
+            <Text15 Ref="28" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.12,4.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -514,8 +443,8 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>8e52cd448fbb40308aeec87e04ad00a9</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text15</Name>
-              <Page isRef="7" />
-              <Parent isRef="21" />
+              <Page isRef="6" />
+              <Parent isRef="20" />
               <Text>{OppsigelseFjernet.Ansvarlig}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
@@ -525,28 +454,28 @@ ORDER BY an.Navn</SqlCommand>
           <Condition>{OppsigelseFjernet.Ansvarlig}</Condition>
           <Conditions isList="true" count="0" />
           <Name>GroupHeaderBand1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="6" />
+          <Parent isRef="6" />
         </GroupHeaderBand1>
-        <DataBand1 Ref="30" type="DataBand" isKey="true">
+        <DataBand1 Ref="29" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <ClientRectangle>0,4.48,27.7,0.8</ClientRectangle>
           <Components isList="true" count="9">
-            <Text1 Ref="31" type="Text" isKey="true">
+            <Text1 Ref="30" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.12,1.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text1</Name>
-              <Page isRef="7" />
-              <Parent isRef="30" />
+              <Page isRef="6" />
+              <Parent isRef="29" />
               <Text>{OppsigelseFjernet.Kundenummer}</Text>
               <TextBrush>Black</TextBrush>
               <VertAlignment>Center</VertAlignment>
             </Text1>
-            <Text5 Ref="32" type="Text" isKey="true">
+            <Text5 Ref="31" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>1.6,0.12,3.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -554,14 +483,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>4a61332691574e78a246b198323f5d02</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text5</Name>
-              <Page isRef="7" />
-              <Parent isRef="30" />
+              <Page isRef="6" />
+              <Parent isRef="29" />
               <Text>{OppsigelseFjernet.Name}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text5>
-            <Text6 Ref="33" type="Text" isKey="true">
+            <Text6 Ref="32" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>5.2,0.12,1.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -569,14 +498,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>452c98246ab8456aace1a5862f49034e</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text6</Name>
-              <Page isRef="7" />
-              <Parent isRef="30" />
+              <Page isRef="6" />
+              <Parent isRef="29" />
               <Text>{OppsigelseFjernet.Rom_nummer}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text6>
-            <Text7 Ref="34" type="Text" isKey="true">
+            <Text7 Ref="33" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>6.4,0.12,5.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -584,14 +513,14 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>b3ddba067f0a4332aadc0aa0a03fb543</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text7</Name>
-              <Page isRef="7" />
-              <Parent isRef="30" />
+              <Page isRef="6" />
+              <Parent isRef="29" />
               <Text>{OppsigelseFjernet.Bygg}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text7>
-            <Text10 Ref="35" type="Text" isKey="true">
+            <Text10 Ref="34" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>22.4,0.12,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -599,17 +528,17 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>afced6939cc74b559c0f511ba8398756</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text10</Name>
-              <Page isRef="7" />
-              <Parent isRef="30" />
+              <Page isRef="6" />
+              <Parent isRef="29" />
               <Text>{OppsigelseFjernet.Kontrakt_utgaar}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="36" type="DateFormat" isKey="true">
+              <TextFormat Ref="35" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text10>
-            <Text11 Ref="37" type="Text" isKey="true">
+            <Text11 Ref="36" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>15.4,0.12,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -617,17 +546,17 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>a1e6c1fa89a146fb93c7b55364540d6e</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text11</Name>
-              <Page isRef="7" />
-              <Parent isRef="30" />
+              <Page isRef="6" />
+              <Parent isRef="29" />
               <Text>{OppsigelseFjernet.planlagt_utflyttingsdato}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="38" type="DateFormat" isKey="true">
+              <TextFormat Ref="37" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text11>
-            <Text12 Ref="39" type="Text" isKey="true">
+            <Text12 Ref="38" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>12,0.12,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -635,17 +564,17 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>afa898c78fb443c794aae154a616bc14</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text12</Name>
-              <Page isRef="7" />
-              <Parent isRef="30" />
+              <Page isRef="6" />
+              <Parent isRef="29" />
               <Text>{OppsigelseFjernet.oppsigelsesdato}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="40" type="DateFormat" isKey="true">
+              <TextFormat Ref="39" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text12>
-            <Text13 Ref="41" type="Text" isKey="true">
+            <Text13 Ref="40" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>25.4,0.12,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -653,17 +582,17 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>316e0eb2aba4435f9298574306520c65</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text13</Name>
-              <Page isRef="7" />
-              <Parent isRef="30" />
+              <Page isRef="6" />
+              <Parent isRef="29" />
               <Text>{OppsigelseFjernet.Status}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="42" type="DateFormat" isKey="true">
+              <TextFormat Ref="41" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text13>
-            <Text8 Ref="43" type="Text" isKey="true">
+            <Text8 Ref="42" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>19.8,0.12,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -671,11 +600,11 @@ ORDER BY an.Navn</SqlCommand>
               <Guid>2bab5ef889594d87b32dc5064475549f</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text8</Name>
-              <Page isRef="7" />
-              <Parent isRef="30" />
+              <Page isRef="6" />
+              <Parent isRef="29" />
               <Text>{OppsigelseFjernet.Kontrakt_fra}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="44" type="DateFormat" isKey="true">
+              <TextFormat Ref="43" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>DataColumn</Type>
@@ -688,39 +617,42 @@ ORDER BY an.Navn</SqlCommand>
           <Filters isList="true" count="0" />
           <Name>DataBand1</Name>
           <OddStyle>lightBlue</OddStyle>
-          <Page isRef="7" />
-          <Parent isRef="7" />
-          <Sort isList="true" count="0" />
+          <Page isRef="6" />
+          <Parent isRef="6" />
+          <Sort isList="true" count="2">
+            <value>DESC</value>
+            <value>oppsigelsesdato</value>
+          </Sort>
         </DataBand1>
-        <GroupFooterBand1 Ref="45" type="GroupFooterBand" isKey="true">
+        <GroupFooterBand1 Ref="44" type="GroupFooterBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,6.08,27.7,0.8</ClientRectangle>
           <Components isList="true" count="2">
-            <StartPointPrimitive1 Ref="46" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive1 Ref="45" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>0.6,0.32,0,0</ClientRectangle>
               <Name>StartPointPrimitive1</Name>
-              <Page isRef="7" />
-              <Parent isRef="45" />
+              <Page isRef="6" />
+              <Parent isRef="44" />
               <ReferenceToGuid>e0c4866618e44954a30f6c5ba7dbe4e4</ReferenceToGuid>
             </StartPointPrimitive1>
-            <EndPointPrimitive1 Ref="47" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive1 Ref="46" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>27.6,0.52,0,0</ClientRectangle>
               <Name>EndPointPrimitive1</Name>
-              <Page isRef="7" />
-              <Parent isRef="45" />
+              <Page isRef="6" />
+              <Parent isRef="44" />
               <ReferenceToGuid>e0c4866618e44954a30f6c5ba7dbe4e4</ReferenceToGuid>
             </EndPointPrimitive1>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>GroupFooterBand1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="6" />
+          <Parent isRef="6" />
         </GroupFooterBand1>
-        <FooterBand1 Ref="48" type="FooterBand" isKey="true">
+        <FooterBand1 Ref="47" type="FooterBand" isKey="true">
           <Brush>[183:209:226]</Brush>
           <ClientRectangle>0,7.68,27.7,1.4</ClientRectangle>
           <Components isList="true" count="2">
-            <Text9 Ref="49" type="Text" isKey="true">
+            <Text9 Ref="48" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>26.4,0.52,0.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -729,14 +661,14 @@ ORDER BY an.Navn</SqlCommand>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text9</Name>
-              <Page isRef="7" />
-              <Parent isRef="48" />
+              <Page isRef="6" />
+              <Parent isRef="47" />
               <Text>{Count(DataBand1)}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Totals</Type>
               <VertAlignment>Center</VertAlignment>
             </Text9>
-            <Text14 Ref="50" type="Text" isKey="true">
+            <Text14 Ref="49" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>23,0.52,3.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -745,8 +677,8 @@ ORDER BY an.Navn</SqlCommand>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text14</Name>
-              <Page isRef="7" />
-              <Parent isRef="48" />
+              <Page isRef="6" />
+              <Parent isRef="47" />
               <Text>Totalt antall oppsigelser:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -755,17 +687,17 @@ ORDER BY an.Navn</SqlCommand>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>FooterBand1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="6" />
+          <Parent isRef="6" />
         </FooterBand1>
-        <RectanglePrimitive1 Ref="51" type="RectanglePrimitive" isKey="true">
+        <RectanglePrimitive1 Ref="50" type="RectanglePrimitive" isKey="true">
           <ClientRectangle>0.6,6.4,27,0.2</ClientRectangle>
           <Color>Transparent</Color>
           <ComponentStyle>Style2</ComponentStyle>
           <Guid>e0c4866618e44954a30f6c5ba7dbe4e4</Guid>
           <Name>RectanglePrimitive1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="6" />
+          <Parent isRef="6" />
         </RectanglePrimitive1>
       </Components>
       <Conditions isList="true" count="0" />
@@ -776,13 +708,13 @@ ORDER BY an.Navn</SqlCommand>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="52" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="51" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
   </Pages>
-  <PrinterSettings Ref="53" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="52" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -794,10 +726,10 @@ ORDER BY an.Navn</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/14/2018 1:39:40 PM</ReportChanged>
+  <ReportChanged>11/16/2018 9:52:09 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\OppsigelseFjernetRapport.mrt</ReportFile>
-  <ReportGuid>12187549a9d74f1699aafa75068dfdf0</ReportGuid>
+  <ReportGuid>4c354aa8e70d40c2bd7667720cc8a429</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -826,7 +758,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="5">
-    <lightBlue Ref="54" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <lightBlue Ref="53" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[222:233:244]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -834,7 +766,7 @@ namespace Reports
       <Name>lightBlue</Name>
       <TextBrush>Black</TextBrush>
     </lightBlue>
-    <Style1 Ref="55" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="54" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[146:187:205]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -842,7 +774,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <LightGrey Ref="56" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <LightGrey Ref="55" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -850,7 +782,7 @@ namespace Reports
       <Name>LightGrey</Name>
       <TextBrush>Black</TextBrush>
     </LightGrey>
-    <EvenStyle Ref="57" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <EvenStyle Ref="56" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -858,7 +790,7 @@ namespace Reports
       <Name>EvenStyle</Name>
       <TextBrush>Black</TextBrush>
     </EvenStyle>
-    <Style2 Ref="58" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style2 Ref="57" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;Transparent;1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Conditions isList="true" count="0" />

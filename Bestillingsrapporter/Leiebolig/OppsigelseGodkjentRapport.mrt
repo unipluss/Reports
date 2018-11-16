@@ -141,9 +141,9 @@ LEFT JOIN e..t_status st ON st.Status_id = kd.statusId
 LEFT JOIN e..t_forvaltningsAvtale fa on fa.Id = kd.ForvaltningsavtaleId
 LEFT JOIN e..t_ansatte an ON an.Ansatte_id = fa.ansvarligUtleieKonsulentId
 WHERE Isnull(o.Ferdigbehandlet, 0) = 1
---AND isnull(nullif(fa.ansvarligUtleieKonsulentId,0), bo.ansvarligUtleieKonsulentId) in ({Ansatt})
-AND o.oppsigelsesdato between '{fraDato}' AND '{TilDato}'
-ORDER BY an.Navn, o.oppsigelsesdato</SqlCommand>
+AND isnull(nullif(fa.ansvarligUtleieKonsulentId,0), bo.ansvarligUtleieKonsulentId) in ({Ansatt})
+AND o.oppsigelsesdato between '{fraDato}' AND DATEADD(day, 1, '{TilDato}')
+ORDER BY an.Navn, o.oppsigelsesdato asc</SqlCommand>
       </OppsigelseGodkjent>
       <ManuelleOppsigelser Ref="6" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>ManuelleOppsigelser</Alias>
@@ -199,15 +199,15 @@ SELECT op.kontraktsid
 	AND ISNULL(kd.Oppsigelse_dato, '01.01.1900') &lt;&gt; '01.01.1900'
 	AND kd.Oppsigelse_dato between '{fraDato}' AND '{TilDato}'
 	and GETDATE() between coalesce(fahb.fradato, fa.forvaltningsavtalestart) and coalesce(fahb.tildato, fa.nysluttdato, fa.forvaltningsavtaleslutt)
-	ORDER BY an.Navn, kd.Oppsigelse_dato</SqlCommand>
+	ORDER BY kd.Oppsigelse_dato asc</SqlCommand>
       </ManuelleOppsigelser>
     </DataSources>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="8">
       <value>,Ansatt,Ansatt,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031__x002C_10_x002C_11_x002C_12_x002C_13_x002C_14_x002C_15_x002C_16_x002C_17_x002C_18_x002C_19_x002C_2_x002C_21_x002C_24_x002C_25_x002C_29_x002C_3_x002C_30_x002C_32_x002C_33_x002C_34_x002C_35_x002C_36_x002C_37_x002C_38_x002C_39_x002C_4_x002C_40_x002C_41_x002C_42_x002C_43_x002C_44_x002C_45_x002C_46_x002C_47_x002C_48_x002C_49_x002C_5_x002C_50_x002C_51_x002C_52_x002C_53_x002C_54_x002C_55_x002C_56_x002C_57_x002C_58_x002C_6_x002C_8_x002C_9,False,False,False</value>
-      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0180614,False,False,False</value>
-      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0181221,False,False,False</value>
+      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0180801,False,False,False</value>
+      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0180825,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
@@ -407,7 +407,7 @@ SELECT op.kontraktsid
             </Text33>
             <Text34 Ref="23" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.2,0.72,2.2,0.4</ClientRectangle>
+              <ClientRectangle>6,0.72,2.2,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8,Bold</Font>
               <Guid>5c775380bd4047b385594596c83fa6f8</Guid>
@@ -524,7 +524,7 @@ SELECT op.kontraktsid
             </Text9>
             <Text14 Ref="31" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.6,0.12,3.4,0.6</ClientRectangle>
+              <ClientRectangle>1.6,0.12,4.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Guid>da9169a82e0248adbc91051577d20eae</Guid>
@@ -539,7 +539,7 @@ SELECT op.kontraktsid
             </Text14>
             <Text17 Ref="32" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.2,0.12,1.2,0.6</ClientRectangle>
+              <ClientRectangle>6,0.12,1.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Guid>86ef509e79a44913ab5d973c37a10c62</Guid>
@@ -554,7 +554,7 @@ SELECT op.kontraktsid
             </Text17>
             <Text23 Ref="33" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.4,0.12,7.2,0.6</ClientRectangle>
+              <ClientRectangle>7.2,0.12,7.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Guid>c6efdb1064054683bae9f38fde486221</Guid>
@@ -647,7 +647,10 @@ SELECT op.kontraktsid
           <Name>DataBand2</Name>
           <Page isRef="7" />
           <Parent isRef="7" />
-          <Sort isList="true" count="0" />
+          <Sort isList="true" count="2">
+            <value>DESC</value>
+            <value>oppsigelsesdato</value>
+          </Sort>
         </DataBand2>
         <GroupFooterBand2 Ref="42" type="GroupFooterBand" isKey="true">
           <Brush>Transparent</Brush>
@@ -816,7 +819,7 @@ SELECT op.kontraktsid
             </Text5>
             <Text6 Ref="57" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.2,0.72,2.2,0.4</ClientRectangle>
+              <ClientRectangle>6,0.72,2.2,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8,Bold</Font>
               <Guid>bf3d54bf61de42ff945d718c620f7e7c</Guid>
@@ -933,7 +936,7 @@ SELECT op.kontraktsid
             </Text13>
             <Text15 Ref="65" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.6,0.12,3.4,0.6</ClientRectangle>
+              <ClientRectangle>1.6,0.12,4.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Guid>1b692aec82ac4c22a0423f16c9fd2a9a</Guid>
@@ -948,7 +951,7 @@ SELECT op.kontraktsid
             </Text15>
             <Text16 Ref="66" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.2,0.12,1.2,0.6</ClientRectangle>
+              <ClientRectangle>6,0.12,1.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Guid>e70001b898b1465baeaab20234b6e21d</Guid>
@@ -963,7 +966,7 @@ SELECT op.kontraktsid
             </Text16>
             <Text18 Ref="67" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.4,0.12,7.2,0.6</ClientRectangle>
+              <ClientRectangle>7.2,0.12,7.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Guid>9b09ec6900d94f439bc82b142656ecd1</Guid>
@@ -1056,7 +1059,10 @@ SELECT op.kontraktsid
           <Name>DataBand1</Name>
           <Page isRef="7" />
           <Parent isRef="7" />
-          <Sort isList="true" count="0" />
+          <Sort isList="true" count="2">
+            <value>DESC</value>
+            <value>oppsigelsesdato</value>
+          </Sort>
         </DataBand1>
         <GroupFooterBand1 Ref="76" type="GroupFooterBand" isKey="true">
           <Brush>Transparent</Brush>
@@ -1169,10 +1175,10 @@ SELECT op.kontraktsid
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/15/2018 9:40:56 AM</ReportChanged>
+  <ReportChanged>11/16/2018 8:36:25 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\OppsigelseGodkjentRapport.mrt</ReportFile>
-  <ReportGuid>6a755d43eae044f98e0be02bc86e654d</ReportGuid>
+  <ReportGuid>b7ee0868d9fa4d2d91411bd7ee599dd9</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
