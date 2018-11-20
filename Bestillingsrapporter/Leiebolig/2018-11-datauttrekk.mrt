@@ -59,7 +59,6 @@ om.Omrade as sted
 	select ','+ f.fasilitetsType from e..t_harFasiliteter harfas 
 	inner join e..t_fasiliteter f on f.id = harfas.FasilitetId
 	where harfas.BoligObjektId = kd.Objekt
-	and isnull(f.VisIKontrakt, 0) = 1
 	order by f.fasilitetsType
 	for XML PATH ('')) ,1 ,1,'')
 ) as inkludert
@@ -737,10 +736,10 @@ tid</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/20/2018 6:42:53 AM</ReportChanged>
+  <ReportChanged>11/20/2018 11:59:12 AM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\2018-11-datauttrekk.mrt</ReportFile>
-  <ReportGuid>c2dbef5857e64adcb2bcb73fd336997f</ReportGuid>
+  <ReportGuid>4ef2c2fceaee4b47952a7ca56d60ac15</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
