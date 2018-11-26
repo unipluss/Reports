@@ -30,9 +30,6 @@
 	
 set dateformat dmy
 
-declare @fradato datetime = DATEADD(month, DATEDIFF(month, 0,'{FraDato}'), 0)
-declare @tildato datetime = DATEADD(month, DATEDIFF(month, 0,'{TilDato}'), 0)
-
 select *, 100*(convert(float,antallUtleideDager)/antallLeieDager) as belegg from  
 (select
 	tilgj.Omrade as Omrade, tilgj.Bygg as Bygg, tilgj.Boligtype as Boligtype, tilgj.antallLeieDager as antallLeieDager, tilgj.antallBoliger as antallBoliger,
@@ -40,7 +37,7 @@ select *, 100*(convert(float,antallUtleideDager)/antallLeieDager) as belegg from
 	from 	  e..t_boligobjekt bo2
 	left join e..t_boligomraade om2 on om2.Boligomrade_id = bo2.Boligomrade_id
 	left join e..t_boligtype bt2 on bt2.BoligType_id = bo2.Boligtype_id
-	left join e..t_bygg b2 on b2.Navn = tilgj.Bygg
+	left join e..t_bygg b2 on b2.ID = bo2.Bygg_id
 	left join e..t_boligres br on br.BID = bo2.Objekt_id
 	left join e..t_kontraktsdata kd on kd.Kontrakts_ID = br.KID
 	where   om2.Omrade = tilgj.Omrade 
@@ -478,10 +475,10 @@ from
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/26/2018 9:03:39 AM</ReportChanged>
+  <ReportChanged>11/26/2018 10:26:27 AM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
   <ReportFile>F:\rapporter\nord-belegg.mrt</ReportFile>
-  <ReportGuid>b88b1049fc324dbb91a827c99361eda4</ReportGuid>
+  <ReportGuid>a69ba8f9d3314f42ba0cabaf9ec62ee4</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
