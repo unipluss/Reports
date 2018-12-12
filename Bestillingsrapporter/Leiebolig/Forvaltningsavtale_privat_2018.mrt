@@ -228,7 +228,7 @@ where fa.id = {(From)}</SqlCommand>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="7">
-      <value>,From,From,text_x007C_,System.String,_x0034_623,False,False,False</value>
+      <value>,From,From,text_x007C_,System.String,_x0034_622,False,False,False</value>
       <value>,To,To,text_x007C_,System.String,_x0034_622,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
@@ -247,7 +247,7 @@ where fa.id = {(From)}</SqlCommand>
       <Components isList="true" count="13">
         <PageHeaderBand1 Ref="8" type="PageHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,0.4,19,1.04</ClientRectangle>
+          <ClientRectangle>0,0.4,20,1.04</ClientRectangle>
           <Components isList="true" count="2">
             <Image1 Ref="9" type="Image" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
@@ -284,7 +284,7 @@ where fa.id = {(From)}</SqlCommand>
         </PageHeaderBand1>
         <PageFooterBand1 Ref="11" type="PageFooterBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,108.77,19,2.03</ClientRectangle>
+          <ClientRectangle>0,112.77,20,2.03</ClientRectangle>
           <Components isList="true" count="5">
             <Text3 Ref="12" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
@@ -366,7 +366,7 @@ where fa.id = {(From)}</SqlCommand>
           <Border>None;[31:73:125];1;Solid;False;4;Black</Border>
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,2.24,19,1.8</ClientRectangle>
+          <ClientRectangle>0,2.24,20,1.8</ClientRectangle>
           <Components isList="true" count="2">
             <Text42 Ref="22" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
@@ -414,8 +414,8 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
         <DataBand1 Ref="24" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,4.84,19,5.2</ClientRectangle>
-          <Components isList="true" count="21">
+          <ClientRectangle>0,4.84,20,4.6</ClientRectangle>
+          <Components isList="true" count="18">
             <Text7 Ref="25" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
@@ -462,16 +462,16 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
             <Text10 Ref="28" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.6,0.16,3.4,0.6</ClientRectangle>
+              <ClientRectangle>1.6,0.16,7.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text10</Name>
               <Page isRef="7" />
               <Parent isRef="24" />
-              <Text>{Forvaltningsavtale.MedEierPostNr}</Text>
+              <Text>{Forvaltningsavtale.kreditorId}</Text>
               <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
+              <Type>DataColumn</Type>
             </Text10>
             <Text11 Ref="29" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
@@ -522,7 +522,9 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,3.16,1.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Forvaltningsavtale.Personnummer,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Guid>2c2a36d7607c449d955d18165d026164</Guid>
               <Margins>0,0,0,0</Margins>
@@ -551,60 +553,20 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
             <Text16 Ref="34" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.8,1.36,9,0.6</ClientRectangle>
+              <ClientRectangle>9.8,1.36,9,1.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text16</Name>
               <Page isRef="7" />
               <Parent isRef="24" />
-              <Text>{Forvaltningsavtale.EierAdresse}</Text>
+              <Text>{Forvaltningsavtale.EierAdresse}
+{Forvaltningsavtale.EierAdresse2}
+{Forvaltningsavtale.EierPoststed} {Forvaltningsavtale.EierPostNr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text16>
-            <Text18 Ref="35" type="Text" isKey="true">
-              <Border>None;Transparent;1;Solid;False;4;Black</Border>
-              <Brush>Transparent</Brush>
-              <ClientRectangle>9.8,1.96,9,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10</Font>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text18</Name>
-              <Page isRef="7" />
-              <Parent isRef="24" />
-              <Text>{Forvaltningsavtale.EierAdresse2}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-            </Text18>
-            <Text20 Ref="36" type="Text" isKey="true">
-              <Border>None;Transparent;1;Solid;False;4;Black</Border>
-              <Brush>Transparent</Brush>
-              <ClientRectangle>11.2,2.56,7.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10</Font>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text20</Name>
-              <Page isRef="7" />
-              <Parent isRef="24" />
-              <Text>{Forvaltningsavtale.EierPoststed}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-            </Text20>
-            <Text22 Ref="37" type="Text" isKey="true">
-              <Border>None;Transparent;1;Solid;False;4;Black</Border>
-              <Brush>Transparent</Brush>
-              <ClientRectangle>9.8,2.56,1.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10</Font>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text22</Name>
-              <Page isRef="7" />
-              <Parent isRef="24" />
-              <Text>{Forvaltningsavtale.EierPostNr}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-            </Text22>
-            <Text17 Ref="38" type="Text" isKey="true">
+            <Text17 Ref="35" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.6,1.36,8,0.6</ClientRectangle>
@@ -618,7 +580,7 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text17>
-            <Text19 Ref="39" type="Text" isKey="true">
+            <Text19 Ref="36" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.6,1.96,6.4,0.6</ClientRectangle>
@@ -632,7 +594,7 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text19>
-            <Text21 Ref="40" type="Text" isKey="true">
+            <Text21 Ref="37" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.6,2.56,6.4,0.6</ClientRectangle>
@@ -646,11 +608,13 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text21>
-            <Text23 Ref="41" type="Text" isKey="true">
+            <Text23 Ref="38" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.6,3.16,6.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Forvaltningsavtale.Personnummer,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text23</Name>
@@ -660,7 +624,7 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text23>
-            <Text27 Ref="42" type="Text" isKey="true">
+            <Text27 Ref="39" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,3.96,8.2,0.6</ClientRectangle>
@@ -675,7 +639,7 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text27>
-            <Text41 Ref="43" type="Text" isKey="true">
+            <Text41 Ref="40" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>8.4,3.96,6.8,0.6</ClientRectangle>
@@ -689,11 +653,13 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text41>
-            <Text85 Ref="44" type="Text" isKey="true">
+            <Text85 Ref="41" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>9.8,3.16,1.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Forvaltningsavtale.MVANr,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Guid>14fa69ec300c4962b7130962619c8dc6</Guid>
               <Margins>0,0,0,0</Margins>
@@ -704,11 +670,13 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text85>
-            <Text86 Ref="45" type="Text" isKey="true">
+            <Text86 Ref="42" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>11.4,3.16,6.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Forvaltningsavtale.MVANr,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>7834c5303dbd448fa9bc5a3a90e4b414</Guid>
               <Margins>0,0,0,0</Margins>
@@ -729,12 +697,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
           <Parent isRef="7" />
           <Sort isList="true" count="0" />
         </DataBand1>
-        <DataBand2 Ref="46" type="DataBand" isKey="true">
+        <DataBand2 Ref="43" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,10.84,19,4</ClientRectangle>
-          <Components isList="true" count="16">
-            <Text24 Ref="47" type="Text" isKey="true">
+          <ClientRectangle>0,10.24,20,3.8</ClientRectangle>
+          <Components isList="true" count="13">
+            <Text24 Ref="44" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.6,0.76,7.2,0.6</ClientRectangle>
@@ -744,12 +712,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text24</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>{Forvaltningsavtale.MedEierNavn}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text24>
-            <Text25 Ref="48" type="Text" isKey="true">
+            <Text25 Ref="45" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.16,1.6,0.6</ClientRectangle>
@@ -759,12 +727,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text25</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
-              <Text>Eier2:</Text>
+              <Parent isRef="43" />
+              <Text>Eier 2:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text25>
-            <Text26 Ref="49" type="Text" isKey="true">
+            <Text26 Ref="46" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.76,1.6,0.6</ClientRectangle>
@@ -774,12 +742,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text26</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>Navn:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text26>
-            <Text28 Ref="50" type="Text" isKey="true">
+            <Text28 Ref="47" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,1.36,1.6,0.6</ClientRectangle>
@@ -789,12 +757,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text28</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>E-post:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text28>
-            <Text29 Ref="51" type="Text" isKey="true">
+            <Text29 Ref="48" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,1.96,1.6,0.6</ClientRectangle>
@@ -804,12 +772,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text29</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>Mobil.nr:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text29>
-            <Text30 Ref="52" type="Text" isKey="true">
+            <Text30 Ref="49" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>9.8,0.76,5.2,0.6</ClientRectangle>
@@ -819,12 +787,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text30</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>Postadresse i utleieperioden:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text30>
-            <Text31 Ref="53" type="Text" isKey="true">
+            <Text31 Ref="50" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,3.16,1.6,0.6</ClientRectangle>
@@ -834,12 +802,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text31</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>Personr:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text31>
-            <Text32 Ref="54" type="Text" isKey="true">
+            <Text32 Ref="51" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,2.56,1.6,0.6</ClientRectangle>
@@ -849,72 +817,29 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text32</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>Tlf:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text32>
-            <Text33 Ref="55" type="Text" isKey="true">
+            <Text33 Ref="52" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.8,1.36,9,0.6</ClientRectangle>
+              <ClientRectangle>9.8,1.36,9,1.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Guid>b9f8231b67974a0b8496267130d1de93</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text33</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
-              <Text>{Forvaltningsavtale.MedeierAdresse}</Text>
+              <Parent isRef="43" />
+              <Text>{Forvaltningsavtale.MedeierAdresse}
+{Forvaltningsavtale.MedeierAdresse2}
+{Forvaltningsavtale.MedEierPostNr} {Forvaltningsavtale.MedEierPoststed}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text33>
-            <Text34 Ref="56" type="Text" isKey="true">
-              <Border>None;Transparent;1;Solid;False;4;Black</Border>
-              <Brush>Transparent</Brush>
-              <ClientRectangle>9.8,1.96,9,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10</Font>
-              <Guid>7951dcc93f62417db79cd0da505b6ee0</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text34</Name>
-              <Page isRef="7" />
-              <Parent isRef="46" />
-              <Text>{Forvaltningsavtale.MedeierAdresse2}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-            </Text34>
-            <Text35 Ref="57" type="Text" isKey="true">
-              <Border>None;Transparent;1;Solid;False;4;Black</Border>
-              <Brush>Transparent</Brush>
-              <ClientRectangle>11.2,2.56,7.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10</Font>
-              <Guid>299ea5d63ca7485ca7ea24c02530bb55</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text35</Name>
-              <Page isRef="7" />
-              <Parent isRef="46" />
-              <Text>{Forvaltningsavtale.MedEierPoststed}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-            </Text35>
-            <Text36 Ref="58" type="Text" isKey="true">
-              <Border>None;Transparent;1;Solid;False;4;Black</Border>
-              <Brush>Transparent</Brush>
-              <ClientRectangle>9.8,2.56,1.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10</Font>
-              <Guid>d2ad5e09084542208ffa858de6103977</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text36</Name>
-              <Page isRef="7" />
-              <Parent isRef="46" />
-              <Text>{Forvaltningsavtale.MedEierPostNr}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>DataColumn</Type>
-            </Text36>
-            <Text37 Ref="59" type="Text" isKey="true">
+            <Text37 Ref="53" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.6,1.36,8,0.6</ClientRectangle>
@@ -924,12 +849,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text37</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>{Forvaltningsavtale.MedEierEmail}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text37>
-            <Text38 Ref="60" type="Text" isKey="true">
+            <Text38 Ref="54" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.6,1.96,6.4,0.6</ClientRectangle>
@@ -939,12 +864,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text38</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>{Forvaltningsavtale.MedeierMobil}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text38>
-            <Text39 Ref="61" type="Text" isKey="true">
+            <Text39 Ref="55" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.6,2.56,6.4,0.6</ClientRectangle>
@@ -954,12 +879,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text39</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>{Forvaltningsavtale.MedeierTlf}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text39>
-            <Text40 Ref="62" type="Text" isKey="true">
+            <Text40 Ref="56" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.6,3.16,6.6,0.6</ClientRectangle>
@@ -969,13 +894,15 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text40</Name>
               <Page isRef="7" />
-              <Parent isRef="46" />
+              <Parent isRef="43" />
               <Text>{Forvaltningsavtale.medeierPersonnummer}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text40>
           </Components>
-          <Conditions isList="true" count="0" />
+          <Conditions isList="true" count="1">
+            <value>Forvaltningsavtale.harMedeier,EqualTo,false,,Boolean,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+          </Conditions>
           <DataRelationName isNull="true" />
           <DataSourceName>Forvaltningsavtale</DataSourceName>
           <Filters isList="true" count="0" />
@@ -985,21 +912,21 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
           <Parent isRef="7" />
           <Sort isList="true" count="0" />
         </DataBand2>
-        <GroupHeaderBand1 Ref="63" type="GroupHeaderBand" isKey="true">
+        <GroupHeaderBand1 Ref="57" type="GroupHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,15.64,19,1</ClientRectangle>
+          <ClientRectangle>0,14.84,20,0.8</ClientRectangle>
           <Components isList="true" count="1">
-            <Text53 Ref="64" type="Text" isKey="true">
+            <Text53 Ref="58" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0.16,7.6,0.6</ClientRectangle>
+              <ClientRectangle>0.2,0.16,17,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Guid>5ae51a3b630c4f1ca66a166cccffcc17</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text53</Name>
               <Page isRef="7" />
-              <Parent isRef="63" />
+              <Parent isRef="57" />
               <Text>Oppdraget gjelder forvaltning av oppdragsgivers eiendom:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -1010,12 +937,13 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
           <Page isRef="7" />
           <Parent isRef="7" />
         </GroupHeaderBand1>
-        <DataBand8 Ref="65" type="DataBand" isKey="true">
+        <DataBand8 Ref="59" type="DataBand" isKey="true">
+          <Border>All;Black;1;Solid;False;4;Black</Border>
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,17.44,19,4</ClientRectangle>
-          <Components isList="true" count="27">
-            <Text55 Ref="66" type="Text" isKey="true">
+          <ClientRectangle>0,16.44,20,3.2</ClientRectangle>
+          <Components isList="true" count="28">
+            <Text55 Ref="60" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>2.8,0.16,14.8,0.6</ClientRectangle>
@@ -1024,25 +952,25 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text55</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.adresse}</Text>
               <TextBrush>Black</TextBrush>
             </Text55>
-            <Text56 Ref="67" type="Text" isKey="true">
+            <Text56 Ref="61" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0.16,1.4,0.6</ClientRectangle>
+              <ClientRectangle>0.2,0.16,2.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text56</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>Adresse:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text56>
-            <Text57 Ref="68" type="Text" isKey="true">
+            <Text57 Ref="62" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.76,2.4,0.6</ClientRectangle>
@@ -1052,38 +980,38 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text57</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>Postnr./ sted:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text57>
-            <Text58 Ref="69" type="Text" isKey="true">
+            <Text58 Ref="63" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.8,0.76,0.8,0.6</ClientRectangle>
+              <ClientRectangle>2.8,0.76,1.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text58</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.postnr}</Text>
               <TextBrush>Black</TextBrush>
             </Text58>
-            <Text59 Ref="70" type="Text" isKey="true">
+            <Text59 Ref="64" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>3.6,0.76,1.6,0.6</ClientRectangle>
+              <ClientRectangle>3.8,0.76,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text59</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.poststed}</Text>
               <TextBrush>Black</TextBrush>
             </Text59>
-            <Text60 Ref="71" type="Text" isKey="true">
+            <Text60 Ref="65" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1,1.36,2.2,0.6</ClientRectangle>
@@ -1092,11 +1020,11 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text60</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.gnr}</Text>
               <TextBrush>Black</TextBrush>
             </Text60>
-            <Text61 Ref="72" type="Text" isKey="true">
+            <Text61 Ref="66" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,1.36,0.8,0.6</ClientRectangle>
@@ -1105,12 +1033,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text61</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>Gnr:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text61>
-            <Text62 Ref="73" type="Text" isKey="true">
+            <Text62 Ref="67" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1,1.96,2.2,0.6</ClientRectangle>
@@ -1119,11 +1047,11 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text62</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.bnr}</Text>
               <TextBrush>Black</TextBrush>
             </Text62>
-            <Text63 Ref="74" type="Text" isKey="true">
+            <Text63 Ref="68" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,1.96,0.8,0.6</ClientRectangle>
@@ -1132,12 +1060,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text63</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>Bnr:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text63>
-            <Text64 Ref="75" type="Text" isKey="true">
+            <Text64 Ref="69" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1,2.56,2.2,0.6</ClientRectangle>
@@ -1146,11 +1074,11 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text64</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.seksjonsnr}</Text>
               <TextBrush>Black</TextBrush>
             </Text64>
-            <Text65 Ref="76" type="Text" isKey="true">
+            <Text65 Ref="70" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,2.56,0.8,0.6</ClientRectangle>
@@ -1159,39 +1087,39 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text65</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>Snr:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text65>
-            <Text66 Ref="77" type="Text" isKey="true">
+            <Text66 Ref="71" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>1,3.16,1.6,0.6</ClientRectangle>
+              <ClientRectangle>7,2.56,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text66</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.Rom_nummer}</Text>
               <TextBrush>Black</TextBrush>
             </Text66>
-            <Text67 Ref="78" type="Text" isKey="true">
+            <Text67 Ref="72" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,3.16,0.8,0.6</ClientRectangle>
+              <ClientRectangle>6.2,2.56,0.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text67</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>Hnr:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text67>
-            <Text68 Ref="79" type="Text" isKey="true">
+            <Text68 Ref="73" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>4.2,1.36,1.6,0.6</ClientRectangle>
@@ -1200,11 +1128,11 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text68</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.bta}</Text>
               <TextBrush>Black</TextBrush>
             </Text68>
-            <Text69 Ref="80" type="Text" isKey="true">
+            <Text69 Ref="74" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3.4,1.36,0.8,0.6</ClientRectangle>
@@ -1213,12 +1141,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text69</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>BTA:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text69>
-            <Text70 Ref="81" type="Text" isKey="true">
+            <Text70 Ref="75" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>4.2,1.96,1.6,0.6</ClientRectangle>
@@ -1227,11 +1155,11 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text70</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.bra}</Text>
               <TextBrush>Black</TextBrush>
             </Text70>
-            <Text71 Ref="82" type="Text" isKey="true">
+            <Text71 Ref="76" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3.4,1.96,0.8,0.6</ClientRectangle>
@@ -1240,12 +1168,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text71</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>BRA:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text71>
-            <Text72 Ref="83" type="Text" isKey="true">
+            <Text72 Ref="77" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>4.4,2.56,1.6,0.6</ClientRectangle>
@@ -1254,11 +1182,11 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text72</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.prom}</Text>
               <TextBrush>Black</TextBrush>
             </Text72>
-            <Text73 Ref="84" type="Text" isKey="true">
+            <Text73 Ref="78" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3.4,2.56,1,0.6</ClientRectangle>
@@ -1267,119 +1195,151 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text73</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>P-rom:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text73>
-            <Text74 Ref="85" type="Text" isKey="true">
+            <Text74 Ref="79" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>9.6,1.36,5.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Boliger.borettslagNavn,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text74</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.borettslagNavn}</Text>
               <TextBrush>Black</TextBrush>
             </Text74>
-            <Text75 Ref="86" type="Text" isKey="true">
+            <Text75 Ref="80" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>6,1.36,3.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Boliger.borettslagNavn,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text75</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>Borettslagsetsnavn:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text75>
-            <Text76 Ref="87" type="Text" isKey="true">
+            <Text76 Ref="81" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.6,1.96,5.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <ClientRectangle>9.6,1.96,6,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Boliger.borettslagNavn,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text76</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.akskjeselskapNavn}</Text>
               <TextBrush>Black</TextBrush>
             </Text76>
-            <Text77 Ref="88" type="Text" isKey="true">
+            <Text77 Ref="82" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>6,1.96,3.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Boliger.akskjeselskapNavn,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text77</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>Aksjeselskapetsnavn:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text77>
-            <Text78 Ref="89" type="Text" isKey="true">
+            <Text78 Ref="83" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>17.2,1.96,1.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <ClientRectangle>17.2,1.36,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Boliger.AndelsNr,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text78</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.AndelsNr}</Text>
               <TextBrush>Black</TextBrush>
             </Text78>
-            <Text79 Ref="90" type="Text" isKey="true">
+            <Text79 Ref="84" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>15.4,1.96,1.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <ClientRectangle>15.4,1.36,1.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Boliger.AndelsNr,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text79</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>Andels nr.:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text79>
-            <Text80 Ref="91" type="Text" isKey="true">
+            <Text80 Ref="85" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>17.2,1.36,1.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <ClientRectangle>17.2,1.96,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Boliger.aksjenummer,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text80</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>{Boliger.aksjenummer}</Text>
               <TextBrush>Black</TextBrush>
             </Text80>
-            <Text81 Ref="92" type="Text" isKey="true">
+            <Text81 Ref="86" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>15.4,1.36,1.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <ClientRectangle>15.4,1.96,1.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Boliger.aksjenummer,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text81</Name>
               <Page isRef="7" />
-              <Parent isRef="65" />
+              <Parent isRef="59" />
               <Text>Aksjenr.:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text81>
+            <Text18 Ref="87" type="Text" isKey="true">
+              <Border>All;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>9.6,1.96,6,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Boliger.akskjeselskapNavn,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
+              <Font>Arial,10</Font>
+              <Guid>d1f9013739f649a0bbf321608bca0c72</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text18</Name>
+              <Page isRef="7" />
+              <Parent isRef="59" />
+              <Text>{Boliger.akskjeselskapNavn}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text18>
           </Components>
           <Conditions isList="true" count="0" />
           <DataRelationName isNull="true" />
@@ -1390,12 +1350,12 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
           <Parent isRef="7" />
           <Sort isList="true" count="0" />
         </DataBand8>
-        <DataBand3 Ref="93" type="DataBand" isKey="true">
+        <DataBand3 Ref="88" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,22.24,19,2</ClientRectangle>
+          <ClientRectangle>0,20.44,20,1.8</ClientRectangle>
           <Components isList="true" count="2">
-            <Text5 Ref="94" type="Text" isKey="true">
+            <Text5 Ref="89" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.76,18.6,1</ClientRectangle>
@@ -1405,14 +1365,14 @@ Tlf 23 00 61 20 /e-post: eier@leie-bolig.no
               <Margins>0,0,0,0</Margins>
               <Name>Text5</Name>
               <Page isRef="7" />
-              <Parent isRef="93" />
+              <Parent isRef="88" />
               <Text>Forvaltningsavtalen løper i 3 år fra den er signert, deretter med 3 måneders gjensidig oppsigelse.
 Mulighet for oppsigelse ved salg eller egenbruk, ref. § 1.
 </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text5>
-            <Text6 Ref="95" type="Text" isKey="true">
+            <Text6 Ref="90" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.16,7.6,0.6</ClientRectangle>
@@ -1422,7 +1382,7 @@ Mulighet for oppsigelse ved salg eller egenbruk, ref. § 1.
               <Margins>0,0,0,0</Margins>
               <Name>Text6</Name>
               <Page isRef="7" />
-              <Parent isRef="93" />
+              <Parent isRef="88" />
               <Text>Avtalens varighet:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -1437,12 +1397,12 @@ Mulighet for oppsigelse ved salg eller egenbruk, ref. § 1.
           <Parent isRef="7" />
           <Sort isList="true" count="0" />
         </DataBand3>
-        <DataBand5 Ref="96" type="DataBand" isKey="true">
+        <DataBand5 Ref="91" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,25.04,19,2.2</ClientRectangle>
+          <ClientRectangle>0,23.04,20,2</ClientRectangle>
           <Components isList="true" count="2">
-            <Text44 Ref="97" type="Text" isKey="true">
+            <Text44 Ref="92" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.76,18.6,1.2</ClientRectangle>
@@ -1452,14 +1412,14 @@ Mulighet for oppsigelse ved salg eller egenbruk, ref. § 1.
               <Margins>0,0,0,0</Margins>
               <Name>Text44</Name>
               <Page isRef="7" />
-              <Parent isRef="96" />
+              <Parent isRef="91" />
               <Text>Boligforvaltningshonorar er {Format("{0:N2}", Forvaltningsavtale.forvaltningsHonorarProsent)}% inkl. mva. og trekkes månedlig fra leieinntekten før utbetaling.
 Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsikring_pris_bolig)}  pr. år. 
 </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text44>
-            <Text45 Ref="98" type="Text" isKey="true">
+            <Text45 Ref="93" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.16,7.6,0.6</ClientRectangle>
@@ -1469,7 +1429,7 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text45</Name>
               <Page isRef="7" />
-              <Parent isRef="96" />
+              <Parent isRef="91" />
               <Text>Forvalterenes godtgjørelse:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -1484,12 +1444,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
           <Parent isRef="7" />
           <Sort isList="true" count="0" />
         </DataBand5>
-        <DataBand6 Ref="99" type="DataBand" isKey="true">
+        <DataBand6 Ref="94" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,28.04,19,6.2</ClientRectangle>
-          <Components isList="true" count="13">
-            <Text46 Ref="100" type="Text" isKey="true">
+          <ClientRectangle>0,25.84,20,6.2</ClientRectangle>
+          <Components isList="true" count="11">
+            <Text46 Ref="95" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,2.2,6.2,0.6</ClientRectangle>
@@ -1498,12 +1458,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text46</Name>
               <Page isRef="7" />
-              <Parent isRef="99" />
-              <Text>{Forvaltningsavtale.EierNavn}</Text>
+              <Parent isRef="94" />
+              <Text>{Forvaltningsavtale.EierNavn}                   </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text46>
-            <Text48 Ref="101" type="Text" isKey="true">
+            <Text48 Ref="96" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.16,8.8,0.6</ClientRectangle>
@@ -1513,12 +1473,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text48</Name>
               <Page isRef="7" />
-              <Parent isRef="99" />
+              <Parent isRef="94" />
               <Text>Signatur: (Signatur omfatter også avtalevilkårene)</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text48>
-            <Text47 Ref="102" type="Text" isKey="true">
+            <Text47 Ref="97" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>9.8,2.2,6.2,0.6</ClientRectangle>
@@ -1528,42 +1488,29 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text47</Name>
               <Page isRef="7" />
-              <Parent isRef="99" />
+              <Parent isRef="94" />
               <Text>Sted og dato</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text47>
-            <Text49 Ref="103" type="Text" isKey="true">
-              <Border>All;Transparent;1;Solid;False;4;Black</Border>
+            <Text50 Ref="98" type="Text" isKey="true">
+              <Border>Top;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.4,3.76,6.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10</Font>
-              <Guid>e7930d1a3fcc4b1f981ae181d5799065</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text49</Name>
-              <Page isRef="7" />
-              <Parent isRef="99" />
-              <Text>{Forvaltningsavtale.MedEierNavn}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-            </Text49>
-            <Text50 Ref="104" type="Text" isKey="true">
-              <Border>All;Transparent;1;Solid;False;4;Black</Border>
-              <Brush>Transparent</Brush>
-              <ClientRectangle>9.8,3.76,6.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <ClientRectangle>9.8,3.6,6.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Forvaltningsavtale.harMedeier,EqualTo,false,,Boolean,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>e5f879b0aaa94befacd745f7e3e04d43</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text50</Name>
               <Page isRef="7" />
-              <Parent isRef="99" />
-              <Text>Sted og dato</Text>
+              <Parent isRef="94" />
+              <Text>Sted og dato                                                          </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text50>
-            <Text51 Ref="105" type="Text" isKey="true">
+            <Text51 Ref="99" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,5.36,6.2,0.6</ClientRectangle>
@@ -1573,12 +1520,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text51</Name>
               <Page isRef="7" />
-              <Parent isRef="99" />
+              <Parent isRef="94" />
               <Text>{Bedrift.Navn}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text51>
-            <Text52 Ref="106" type="Text" isKey="true">
+            <Text52 Ref="100" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>9.8,5.36,6.2,0.6</ClientRectangle>
@@ -1588,91 +1535,80 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text52</Name>
               <Page isRef="7" />
-              <Parent isRef="99" />
+              <Parent isRef="94" />
               <Text>Sted og dato</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text52>
-            <HorizontalLinePrimitive3 Ref="107" type="HorizontalLinePrimitive" isKey="true">
+            <Text20 Ref="101" type="Text" isKey="true">
+              <Border>Top;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.4,3.56,8.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Forvaltningsavtale.harMedeier,EqualTo,false,,Boolean,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
+              <Font>Arial,10</Font>
+              <Guid>3b2e8a3f0515450aa02c1e86790c6d22</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text20</Name>
+              <Page isRef="7" />
+              <Parent isRef="94" />
+              <Text>{Forvaltningsavtale.MedEierNavn}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+            </Text20>
+            <HorizontalLinePrimitive3 Ref="102" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0.4,1.96,8.8,0.0254</ClientRectangle>
               <Color>Black</Color>
-              <EndCap Ref="108" type="Cap" isKey="true">
+              <EndCap Ref="103" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Name>HorizontalLinePrimitive3</Name>
               <Page isRef="7" />
-              <Parent isRef="99" />
-              <StartCap Ref="109" type="Cap" isKey="true">
+              <Parent isRef="94" />
+              <StartCap Ref="104" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive3>
-            <HorizontalLinePrimitive4 Ref="110" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive4 Ref="105" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>9.8,1.96,6,0.0254</ClientRectangle>
               <Color>Black</Color>
-              <EndCap Ref="111" type="Cap" isKey="true">
+              <EndCap Ref="106" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Guid>bb0029148359440e898644c61a60580b</Guid>
               <Name>HorizontalLinePrimitive4</Name>
               <Page isRef="7" />
-              <Parent isRef="99" />
-              <StartCap Ref="112" type="Cap" isKey="true">
+              <Parent isRef="94" />
+              <StartCap Ref="107" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive4>
-            <HorizontalLinePrimitive5 Ref="113" type="HorizontalLinePrimitive" isKey="true">
-              <ClientRectangle>0.4,3.56,8.8,0.0254</ClientRectangle>
-              <Color>Black</Color>
-              <EndCap Ref="114" type="Cap" isKey="true">
-                <Color>Black</Color>
-              </EndCap>
-              <Guid>b902684835e143c68aceef6ca3afca67</Guid>
-              <Name>HorizontalLinePrimitive5</Name>
-              <Page isRef="7" />
-              <Parent isRef="99" />
-              <StartCap Ref="115" type="Cap" isKey="true">
-                <Color>Black</Color>
-              </StartCap>
-            </HorizontalLinePrimitive5>
-            <HorizontalLinePrimitive6 Ref="116" type="HorizontalLinePrimitive" isKey="true">
-              <ClientRectangle>9.8,3.56,6,0.0254</ClientRectangle>
-              <Color>Black</Color>
-              <EndCap Ref="117" type="Cap" isKey="true">
-                <Color>Black</Color>
-              </EndCap>
-              <Guid>c71b11a269f44c699e1410fcaf11cc77</Guid>
-              <Name>HorizontalLinePrimitive6</Name>
-              <Page isRef="7" />
-              <Parent isRef="99" />
-              <StartCap Ref="118" type="Cap" isKey="true">
-                <Color>Black</Color>
-              </StartCap>
-            </HorizontalLinePrimitive6>
-            <HorizontalLinePrimitive7 Ref="119" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive7 Ref="108" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0.4,5.16,8.8,0.0254</ClientRectangle>
               <Color>Black</Color>
-              <EndCap Ref="120" type="Cap" isKey="true">
+              <EndCap Ref="109" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Guid>29de0ed11ac54fa797535e08a8ec4493</Guid>
               <Name>HorizontalLinePrimitive7</Name>
               <Page isRef="7" />
-              <Parent isRef="99" />
-              <StartCap Ref="121" type="Cap" isKey="true">
+              <Parent isRef="94" />
+              <StartCap Ref="110" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive7>
-            <HorizontalLinePrimitive8 Ref="122" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive8 Ref="111" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>9.8,5.16,6,0.0254</ClientRectangle>
               <Color>Black</Color>
-              <EndCap Ref="123" type="Cap" isKey="true">
+              <EndCap Ref="112" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Guid>ac75f77cd56d4ff5a7abc80b1a0db166</Guid>
               <Name>HorizontalLinePrimitive8</Name>
               <Page isRef="7" />
-              <Parent isRef="99" />
-              <StartCap Ref="124" type="Cap" isKey="true">
+              <Parent isRef="94" />
+              <StartCap Ref="113" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive8>
@@ -1687,13 +1623,13 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
           <Parent isRef="7" />
           <Sort isList="true" count="0" />
         </DataBand6>
-        <DataBand7 Ref="125" type="DataBand" isKey="true">
+        <DataBand7 Ref="114" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanBreak>True</CanBreak>
-          <ClientRectangle>0,35.04,19,3.6</ClientRectangle>
+          <ClientRectangle>0,32.84,20,3.4</ClientRectangle>
           <Components isList="true" count="2">
-            <Text54 Ref="126" type="Text" isKey="true">
+            <Text54 Ref="115" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.16,8.8,0.6</ClientRectangle>
@@ -1703,23 +1639,23 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text54</Name>
               <Page isRef="7" />
-              <Parent isRef="125" />
+              <Parent isRef="114" />
               <Text>VILKÅR FORVALTNINGSAVTALE PRIVATE KUNDER</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text54>
-            <RichText1 Ref="127" type="Stimulsoft.Report.Components.StiRichText" isKey="true">
+            <RichText1 Ref="116" type="Stimulsoft.Report.Components.StiRichText" isKey="true">
               <BackColor>Transparent</BackColor>
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <CanBreak>True</CanBreak>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>0.2,0.96,18.6,2.4</ClientRectangle>
+              <ClientRectangle>0.2,0.96,19.6,2.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <DataColumn />
               <Margins>0,0,0,0</Margins>
               <Name>RichText1</Name>
               <Page isRef="7" />
-              <Parent isRef="125" />
+              <Parent isRef="114" />
               <Text>__LP___x005C_rtf1_x005C_ansi_x005C_ansicpg1252_x005C_deff0_x005C_deflang1044__LP___x005C_fonttbl__LP___x005C_f0_x005C_fswiss_x005C_fprq2_x005C_fcharset0_x0020_Arial_x003B___RP____LP___x005C_f1_x005C_fnil_x005C_fcharset0_x0020_Microsoft_x0020_Sans_x0020_Serif_x003B___RP____RP___x000D__x000A__x005C_viewkind4_x005C_uc1_x005C_pard_x005C_f0_x005C_fs18_x005C__x0027_a7_x0020_1_x005C_b_x0020__x0020_Ordin_x005C__x0027_e6r_x0020_oppsigelsesadgang_x005C_par_x000D__x000A__x005C_b0_x0020_Forvaltningsavtalen_x0020_kan_x0020_sies_x0020_opp_x0020_med_x0020_3_x0020_m_x005C__x0027_e5neders_x0020_skriftlig_x0020_varsel_x0020_for_x0020_salg_x0020_eller_x0020_egenbruk_x002C__x0020_s_x005C__x0027_e5_x0020_fremt_x0020_leieavtalen_x0020_ikke_x0020_er_x0020_i_x0020_bindingstid._x0020_For_x0020_kunder_x0020_med_x0020_portef_x005C__x0027_f8ljer_x0020__x0028_flere_x0020_boliger_x0029__x0020_vil_x0020_oppsigelsesadgang_x0020_kun_x0020_gjelde_x0020_enkelboliger_x0020_i_x0020_portef_x005C__x0027_f8ljen_x002C__x0020_ikke_x0020_hele_x0020_portef_x005C__x0027_f8ljen_x0020_automatisk._x0020__x005C_par_x000D__x000A_Dersom_x0020_leieforholdet_x0020_opph_x005C__x0027_f8rer_x0020_og_x0020_utleier_x0020__x005C__x0027_f8nsker_x0020_at_x0020_forvalter_x0020_skal_x0020_reutleie_x0020_boligen_x0020_skal_x0020_ny_x0020_oppdragsavtale_x0020_signeres_x002C__x0020_jfr._x0020_lov_x0020_om_x0020_eiendomsmegling._x005C_par_x000D__x000A__x005C_par_x000D__x000A__x005C__x0027_a7_x0020_2_x005C_b_x0020__x0020_Avregning_x0020_av_x0020_forvalterens_x0020_godtgj_x005C__x0027_f8relse._x0020__x005C_par_x000D__x000A__x005C_b0_x0020_Forvaltningshonorar_x0020_beregnes_x0020_av_x0020_brutto_x0020_m_x005C__x0027_e5nedlig_x0020_leieinntekter_x0020_og_x0020_trekkes_x0020_ifb._x0020_avregning_x0020_m_x005C__x0027_e5nedlig_x0020_til_x0020_utleier._x005C_par_x000D__x000A__x005C_pard_x005C_sa200_x0020_Tilleggstjenester_x0020_og_x0020_engangshonorar_x0020_avregnes_x0020_mot_x0020_m_x005C__x0027_e5nedlige_x0020_husleieinntekter_x0020_ifb._x0020_avregning_x0020_til_x0020_utleier._x0020__x005C_par_x000D__x000A__x005C_pard_x005C__x0027_a7_x0020_3_x0020__x005C_b_x0020_Forvalterens_x0020_plikter_x0020_og_x0020_rettigheter_x005C_par_x000D__x000A__x005C_pard_x005C_fi708_x005C_sl276_x005C_slmult1_x005C_par_x000D__x000A_3.1._x0020__x005C_tab_x0020_Kundekontakt._x005C_par_x000D__x000A__x005C_b0_x005C_tab_x0020_-_x0020_Fast_x0020_kundekontakt_x002C__x0020_forvalter_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_pard_x005C_fi-708_x005C_li1416_x005C_sl276_x005C_slmult1_x0020_-_x0020_Kundesenter_x002C__x0020_min_x0020_side_x0020_tilgang_x0020_for_x0020_utleier_x0020_og_x0020_leietaker_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_par_x000D__x000A_-_x0020_R_x005C__x0027_e5dgivning_x0020__x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_pard_x005C_fi708_x005C_sl276_x005C_slmult1_x005C_par_x000D__x000A__x005C_b_x0020_3.2._x005C_tab_x005C__x0027_d8konomisk_x0020_forvaltning._x005C_par_x000D__x000A__x005C_b0_x005C_tab_x0020_-_x0020_Fakturering_x0020_av_x0020_leie_x002C__x0020_trekk_x0020_i_x0020_leien_x002C__x0020_indeksregulering_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Forskuttere_x0020_inntil_x0020_2_x0020_mnd._x0020_Ved_x0020_leiers_x0020_manglende_x0020_betaling_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Markedsregulering_x0020_og_x002F_eller_x0020_gjengs_x0020_leie_x0020_regulering_x0020_etter_x0020_avtale_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Deponering_x0020_av_x0020_leie_x0020_ved_x0020_mangler_x0020_i_x0020_boligen_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Inndrivelse_x0020_av_x0020_utst_x005C__x0027_e5ende_x0020_leie_x002C__x0020_oppf_x005C__x0027_f8lging_x0020_av_x0020_inkassosaker_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Oppgj_x005C__x0027_f8r_x0020_av_x0020_sikkerhetsstillelse_x002C__x0020_avregning_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A_-_x0020_Eieravregning_x0020_og_x0020_utbetaling_x0020_av_x0020_leie_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_M_x005C__x0027_e5nedsrapport_x0020_og_x0020__x005C__x0027_e5rsrapport_x0020_til_x0020_min_x0020_side_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_par_x000D__x000A__x005C_b_x0020_3.3._x0020__x005C_tab_x0020_Boligforvaltning._x005C_par_x000D__x000A__x005C_b0_x005C_tab_x0020_-_x0020_Tilgang_x0020_til_x0020_d_x005C__x0027_f8gnbemannet_x0020_vakttelefon_x002C__x0020_24_x002F_7_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A_-_x0020_Dokumenth_x005C__x0027_e5ndtering_x0020_ifb._x0020_med_x0020_leieforholdet_x0020_og_x0020_forvaltning_x0020_av_x0020_boligen_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Formidle_x0020_oppsigelser_x0020_fra_x0020_leietaker_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Varsle_x0020_utleier_x0020_om_x0020_vesentlige_x0020_forhold_x0020_i_x0020_boligen_x0020_iht._x0020_HL_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x0020__x005C_par_x000D__x000A_-_x0020_Saksbehandling_x0020_i_x0020_leietiden_x0020_mellom_x0020_partene_x0020__x0028_utleier_x0020_og_x0020_leier_x0029__x005C_tab_x005C_tab_x005C_tab_x0020__x0028_I_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Registrere_x0020_boliger_x0020_rett_x0020_til_x0020_forvaltning_x0020__x0028_RIF_x0029__x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_T_x0029__x005C_par_x000D__x000A_-_x0020_Boligbefaring_x0020_og_x0020_tilsyn_x0020_i_x0020_boligen_x0020_iht._x0020_HL_x0020_etter_x0020_avtale_x0020_med_x0020_eier_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_T_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Oppf_x005C__x0027_f8lging_x0020_garantitid_x0020_nybygg_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_T_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Saksbehandle_x0020_tvister_x0020_for_x0020_utleier_x002C__x0020_evt._x0020_f_x005C__x0027_f8re_x0020_saker_x0020_for_x0020_HTU_x0020_og_x0020_Tingretten_x005C_tab_x005C_tab_x0020__x0028_T_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Tvangsfravikelse_x002C__x0020_rettslig_x0020_inndrivelse_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_T_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Etterarbeid_x0020_protokoller_x002C__x0020_innflytt_x002C__x0020_utflytt_x002C__x0020_prebefaring_x002C__x0020_tilsyn_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_T_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Rekvirere_x0020_bestillinger_x002C__x0020_opprette_x0020_ordre_x002C__x0020_reklamasjon_x002C__x0020_fakturering_x005C_tab_x005C_tab_x0020__x0028_T_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_N_x005C__x0027_f8kkelh_x005C__x0027_e5ndtering_x0020__x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_T_x0029__x005C_par_x000D__x000A__x005C_tab_x0020_-_x0020_Tilbakelevering_x0020_av_x0020_boliger_x0020_til_x0020_eier_x0020_med_x0020_protokoll_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x0020__x0028_T_x0029__x005C_par_x000D__x000A__x005C_tab_x005C_par_x000D__x000A__x005C_pard_x005C_fi-720_x005C_li1425_x005C_sl252_x005C_slmult1_x005C_fs16_x0020__x0028_I_x0029__x005C_tab_x0020_Inkludert_x0020_i_x0020_forvaltningshonorar_x0020_oppgitt_x0020_p_x005C__x0027_e5_x0020_forsiden._x005C_par_x000D__x000A__x005C_pard_x005C_li705_x005C_sl276_x005C_slmult1_x0020__x0028_T_x0029__x005C_tab_x0020_Tillegg_x002C__x0020_timehonorar_x0020_juridisk_x0020_bistand_x0020_1250_x002C_-_x0020_pr._x0020_time_x0020_og_x0020_forvaltning_x0020_950_x002C_-_x0020_pr._x0020_time._x005C_par_x000D__x000A__x005C_tab_x005C_tab_x0020_For_x0020_saker_x0020_til_x0020_HTU_x0020_og_x0020_Tingretten_x0020_tilkommer_x0020_offentlige_x0020_gebyrer_x002C__x0020_for_x0020_tiden_x0020_1130_x002C_-._x005C_par_x000D__x000A__x005C_fs18_x005C_tab_x005C_tab_x0020_Timepriser_x0020_indeksreguleres_x0020_iht._x0020_offentlige_x0020_satser._x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_b_x005C_par_x000D__x000A__x005C_pard_x005C_ri-113_x005C_sb5_x005C_b0_x005C_par_x000D__x000A__x005C__x0027_a7_x0020_4_x0020__x005C_b_x0020_Utleiers_x0020_plikter_x005C_b0_x0020__x0020__x005C_par_x000D__x000A__x005C_pard_x005C_ri-113_x0020_S_x005C__x0027_f8rge_x0020_for_x0020_at_x0020_eiendommen_x0020_er_x0020_i_x0020_henhold_x0020_til_x0020_gjeldende_x0020_lover_x0020_og_x0020_regler_x002C__x0020_og_x0020_at_x0020_den_x0020_er_x0020_godkjent_x0020_for_x0020_utleie._x0020__x005C_par_x000D__x000A_Oppfylle_x0020_forpliktelser_x0020_etter_x0020_husleieloven_x0020_med_x0020_mindre_x0020_forpliktelsen_x0020_er_x0020_avtalt_x0020_overtatt_x0020_av_x0020_forvalter_x0020_eller_x0020_leietaker._x0020__x005C_par_x000D__x000A__x005C_pard_x0020_Gi_x0020_forvalter_x0020_all_x0020_n_x005C__x0027_f8dvendig_x0020_informasjon_x0020_om_x0020_eiendommen_x002C__x0020_herunder_x0020_fremlegge_x0020_oppdatert_x0020_hjemmelsdokumentasjon_x0020__x0028_ogs_x005C__x0027_e5_x0020_ved_x0020_re-utleie_x0029__x002C__x0020_husordensregler_x002C__x0020_vedtekter_x0020_og_x0020_fremvise_x0020_eiendommen_x0020_for_x0020__x005C__x0027_f8vrig_x0020_og_x0020_inkl._x0020_bod_x002C__x0020_postkasse_x002C__x0020_sikringsskap_x0020_etc._x0020__x005C_par_x000D__x000A_Utleier_x0020_kan_x0020_ikke_x0020_gi_x0020_leier_x0020_utsettelse_x0020_p_x005C__x0027_e5_x0020_betaling_x0020_av_x0020_husleie._x005C_par_x000D__x000A_Betale_x0020_felleskostnader_x0020_for_x0020_boligen_x0028_e_x0029__x002C__x0020_herunder_x0020_fellesutgifter_x002C__x0020_kommunale_x0020_avgifter_x002C__x0020_husleie_x0020_m.m._x005C_par_x000D__x000A_Utleier_x0020_skal_x0020_tegne_x0020_boligskadeforsikring_x0020_hos_x0020_forvalter_x0020_for_x0020_toppdekning_x0020_i_x0020_henhold_x0020_til_x0020_betingelser_x0020_fra_x0020_forsikringsleverand_x005C__x0027_f8r._x005C_par_x000D__x000A__x005C_pard_x005C_li720_x005C_par_x000D__x000A__x005C_pard_x005C__x0027_a7_x0020_5_x005C_b_x0020__x0020_Utleiers_x0020_deltakelse_x0020_p_x005C__x0027_e5_x0020_inn-_x0020_og_x0020_utflyttingsfullmakt_x0020__x005C_par_x000D__x000A__x005C_b0_x0020_Utleier_x0020_oppfordres_x0020_til_x0020__x005C__x0027_e5_x0020_delta_x0020_p_x005C__x0027_e5_x0020_inn_x0020_og_x0020_utflytt_x002C__x0020_men_x0020_gir_x0020_ved_x0020_denne_x0020_avtale_x0020_forvalter_x0020_fullmakt_x0020_til_x0020_bl.a._x0020__x005C__x0027_e5_x0020_inng_x005C__x0027_e5_x0020_avtaler_x0020_med_x0020_leier_x0020_p_x005C__x0027_e5_x0020_utleiers_x0020_vegne_x002C__x0020_herunder_x0020_avtaler_x0020_som_x0020_omhandler_x0020_boligens_x0020_tilstand_x0020_ved_x0020_start_x0020_og_x0020_avslutning_x0020_av_x0020_leieforhold._x0020__x005C_par_x000D__x000A_Dersom_x0020_utleier_x0020_ikke_x0020__x005C__x0027_f8nsker_x0020_at_x0020_forvalter_x0020_skal_x0020_benytte_x0020_fullmakten_x0020_i_x0020_forbindelse_x0020_med_x0020_start_x0020_og_x0020_avslutning_x0020_av_x0020_leieforhold_x0020_m_x005C__x0027_e5_x0020_utleier_x0020_selv_x0020_delta_x0020_ved_x0020_inn-_x0020_og_x0020_utflytt_x002C__x0020_og_x0020_m_x005C__x0027_e5_x0020_i_x0020_tilfellet_x0020_selv_x0020_inng_x005C__x0027_e5_x0020_enhver_x0020_avtale_x0020_om_x0020_opph_x005C__x0027_f8r_x0020_og_x0020__x005C__x0027_f8konomiske_x0020_forhold_x0020_med_x0020_leietaker._x0020__x005C_par_x000D__x000A_N_x005C__x0027_e5r_x0020_utleier_x0020_personlig_x0020__x005C__x0027_f8nsker_x0020__x005C__x0027_e5_x0020_delta_x0020_p_x005C__x0027_e5_x0020_inn_x0020_eller_x0020_utflytt_x0020_skal_x0020_dette_x0020_varsle_x0020_selskapet_x0020_ifb._x0020_med_x0020_mottak_x0020_av_x0020_varsel_x0020_om_x0020_oppsigelse_x0020_fra_x0020_leietaker._x0020_Utleier_x0020_tar_x0020_ved_x0020_konflikt_x0020_endelig_x0020_beslutning_x0020_om_x0020_alle_x0020_krav_x0020_etter_x0020_utflytt._x005C_par_x000D__x000A__x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_par_x000D__x000A__x005C__x0027_a7_x0020_6_x0020_Fullmakt_x0020_og_x0020_a_x005C_b_x0020_rbeid_x0020_p_x005C__x0027_e5_x0020_leieobjektet_x005C_par_x000D__x000A__x005C_pard_x005C_ri-24_x005C_b0_x0020_Utleieren_x0020_gir_x0020_med_x0020_hjemmel_x0020_i_x0020_denne_x0020_avtale_x0020_forvalteren_x0020_de_x0020_fullmakter_x0020_som_x0020_er_x0020_n_x005C__x0027_f8dvendige_x0020_for_x0020__x005C__x0027_e5_x0020_ut_x005C__x0027_f8ve_x0020_de_x0020_plikter_x0020_som_x0020_er_x0020_p_x005C__x0027_e5lagt_x0020_forvalteren_x0020_i_x0020_henhold_x0020_til_x0020_denne_x0020_avtale_x002C__x0020_herunder_x0020_inng_x005C__x0027_e5_x0020_og_x0020_fornying_x0020_av_x0020_leiekontrakter_x002C__x0020_opprette_x0020_garanti_x0020_og_x002F_eller_x0020_depositum_x002C__x0020_begj_x005C__x0027_e6re_x0020_fravikelse_x0020_og_x0020_innkreving_x0020_av_x0020_husleie_x002C__x0020_samt_x0020_begj_x005C__x0027_e6re_x0020_utlegg_x002C__x0020_inng_x005C__x0027_e5_x0020_forlik_x0020_og_x0020_g_x005C__x0027_e5_x0020_til_x0020_s_x005C__x0027_f8ksm_x005C__x0027_e5l_x0020__x0028_avtales_x0020_i_x0020_hvert_x0020_enkelt_x0020_tilfelle_x0020_med_x0020_utleier_x0029_._x0020_Arbeidet_x0020_honoreres_x0020_i_x0020_henhold_x0020_til_x0020_gjeldende_x0020_satser._x0020_Utleier_x0020_gir_x0020_forvaltningsselskapet_x0020_fullmakt_x0020_til_x0020__x005C__x0027_e5_x0020_gi_x0020_Leiebolig_x0020_Utleiemegling_x0020_fullmakt_x0020_til_x0020__x005C__x0027_e5_x0020_inng_x005C__x0027_e5_x0020_leieavtale_x002C__x0020_forlenge_x0020_og_x0020_transportere_x0020_leieavtale_x0020_etter_x0020_n_x005C__x0027_e6rv_x005C__x0027_e6rende_x0020_avtale._x005C_par_x000D__x000A__x005C_par_x000D__x000A_Leieavtaler_x0020_inng_x005C__x0027_e5s_x0020_etter_x0020_forvalters_x0020_formular._x0020_Leieavtalene_x0020_som_x0020_inng_x005C__x0027_e5s_x0020_med_x0020_leietaker_x0020_er_x0020_tidsbestemt_x0020_kontrakt_x0020_p_x005C__x0027_e5_x0020_3_x0020__x005C__x0027_e5r_x002C__x0020_med_x0020_9_x0020_m_x005C__x0027_e5neders_x0020_binding_x0020__x002B__x0020_3_x0020_m_x005C__x0027_e5neders_x0020_oppsigelsestid_x002C__x0020_hvis_x0020_ikke_x0020_annet_x0020_er_x0020_avtalt._x005C_par_x000D__x000A__x005C_par_x000D__x000A_Dersom_x0020_det_x0020_ved_x0020_opph_x005C__x0027_f8r_x0020_av_x0020_avtalen_x0020_gjenst_x005C__x0027_e5r_x0020_ubetalte_x0020_omkostninger_x0020_p_x005C__x0027_e5f_x005C__x0027_f8rt_x0020_leieforholdet_x0020_ved_x0020_inndrivelse_x002F_fravikelse_x0020_blir_x0020_disse_x0020_krav_x0020_overf_x005C__x0027_f8rt_x0020_til_x0020_Leiebolig_x0020_Forvaltning_x0020_AS_x002C__x0020_og_x0020_inneb_x005C__x0027_e6rer_x0020_at_x0020_utleier_x0020_gir_x0020_fullmakt_x0020_til_x0020_forvalter_x0020_om_x0020__x005C__x0027_e5_x0020_inndrive_x0020_alle_x0020_eventuelle_x0020_krav_x0020_p_x005C__x0027_e5_x0020_husleie_x0020_og_x0020_omkostninger_x0020_som_x0020_f_x005C__x0027_f8lger_x0020_av_x0020_leieforhold_x0020_som_x0020_er_x0020_forvaltet_x0020_under_x0020_denne_x0020_avtalen_x002C__x0020_selv_x0020_etter_x0020_opph_x005C__x0027_f8r_x0020_av_x0020_forvaltningsavtalen._x0020_Dette_x0020_inneb_x005C__x0027_e6rer_x0020_at_x0020_utleier_x0020_er_x0020_forpliktet_x0020_til_x0020__x005C__x0027_e5_x0020_betale_x0020_eventuelle_x0020_omkostninger_x0020_fra_x0020_inndrivelse_x0020_som_x0020_ikke_x0020_har_x0020_dekning_x0020_i_x0020_utest_x005C__x0027_e5ende_x0020_leie._x005C_par_x000D__x000A__x005C_par_x000D__x000A_Forvalter_x0020_vil_x0020_iverksette_x0020_n_x005C__x0027_f8dvendige_x0020_tiltak_x0020_for_x0020__x005C__x0027_e5_x0020_avverge_x0020_skade_x0020_p_x005C__x0027_e5_x0020_eiendommen_x0020_og_x0020__x005C__x0027_f8konomisk_x0020_tap_x0020_for_x0020_utleier_x0020_uten_x0020_n_x005C__x0027_e6rmere_x0020_varsel_x002C__x0020_der_x0020_det_x0020_er_x0020_p_x005C__x0027_e5krevet._x0020_All_x0020_vesentlig_x0020_skade_x0020_p_x005C__x0027_e5_x0020_eiendommen_x0020_skal_x0020_uansett_x0020_meddeles_x0020_utleier_x0020_uten_x0020_ugrunnet_x0020_opphold_x0020_og_x0020_utleier_x0020_skal_x0020_normalt_x0020_selv_x0020_gis_x0020_anledning_x0020_til_x0020__x005C__x0027_e5_x0020_beslutte_x0020_og_x0020_forest_x005C__x0027_e5_x0020_utbedringer_x0020_p_x005C__x0027_e5_x0020_eiendommen_x0028_e_x0029_._x005C_par_x000D__x000A__x005C_par_x000D__x000A_Forvalter_x0020_vil_x0020_uten_x0020_n_x005C__x0027_e6rmere_x0020_varsel_x0020_ivareta_x0020_utleiers_x0020_kontraktsforpliktelser_x0020_ifb._x0020_med_x0020_overlevering_x0020__x0028_inn-_x0020_og_x0020_utflytt_x0029__x0020_mht._x0020_brann-_x0020_sikkerhet_x002C__x0020_tilstrekkelig_x0020_antall_x0020_n_x005C__x0027_f8kler_x002C__x0020_VVS_x0020_og_x0020_elektrisk_x0020_anlegg._x0020_Godtgj_x005C__x0027_f8relse_x0020_for_x0020_utlegg_x0020_avregnes_x0020_iht._x0020_avtalens_x0020_punkt._x0020_2_x0020_over._x0020__x005C_i_x0020_Utleier_x0020_aksepterer_x0020_ved_x0020_undertegnelse_x0020_av_x0020_denne_x0020_avtalen_x0020_sikkerhetsstillelse_x0020_fra_x0020_leier_x0020_i_x0020_form_x0020_av_x0020_depositum_x002C__x0020_leiegaranti_x0020_eller_x0020_annen_x0020_sikkerhetsstillelse_x0020_som_x0020_dekker_x0020_minimum_x0020_3_x0020_m_x005C__x0027_e5neders_x0020_leie._x0020_Endring_x0020_av_x0020_type_x0020_sikkerhetsstillelse_x0020_kan_x0020_skje_x0020_uten_x0020_n_x005C__x0027_e6rmere_x0020_varsel._x0020_Sikkerhetsstillelse_x0020_m_x005C__x0027_e5_x0020_tilfredsstille_x0020_relevante_x0020_krav_x0020_i_x0020_husleieloven_x005C_par_x000D__x000A__x005C_i0_x005C_par_x000D__x000A__x005C_pard_x005C_sl276_x005C_slmult1_x0020_A_x0020_konto_x0020_til_x0020_leietaker_x0020_vil_x0020_kun_x0020_avtales_x0020_der_x0020_det_x0020_er_x0020_egne_x0020_m_x005C__x0027_e5lere._x0020_N_x005C__x0027_e5r_x0020_det_x0020_ikke_x0020_er_x0020_egne_x0020_m_x005C__x0027_e5lere_x0020_skal_x0020_kostnaden_x0020_beregnes_x0020_inn_x0020_som_x0020_en_x0020_fast_x0020_andel_x0020_av_x0020_den_x0020_ordin_x005C__x0027_e6re_x0020_husleien_x0020_uspesifisert._x0020__x005C_par_x000D__x000A__x005C_pard_x005C_ri-24_x005C_par_x000D__x000A_Leie_x0020_fra_x0020_leieforholdet_x0020_innbetales_x0020_til_x0020_forvalters_x0020_husleiekonto._x0020_Kontoen_x0020_er_x0020_ikke_x0020_regulert_x0020_som_x0020_klientkonto_x002C__x0020_men_x0020_midlene_x0020_er_x0020_dekket_x0020_av_x0020_selskapets_x0020_ansvarsforsikring._x005C_par_x000D__x000A__x005C_par_x000D__x000A__x005C_pard_x005C__x0027_a7_x0020_7_x0020__x005C_b_x0020_Utbetaling_x0020_til_x0020_Utleier_x005C_par_x000D__x000A__x005C_b0_x0020_Forvalteren_x0020_utbetaler_x0020_nettobel_x005C__x0027_f8pet_x0020_av_x0020_innbetalt_x0020_husleie_x0020_til_x0020_utleieren_x0020_etterskuddsvis_x0020_den_x0020_30._x0020_hver_x0020_m_x005C__x0027_e5ned._x0020_Med_x0020_nettobel_x005C__x0027_f8pet_x0020_av_x0020_husleieinntektene_x0020_menes_x0020_det_x0020_bel_x005C__x0027_f8p_x0020_som_x0020_gjenst_x005C__x0027_e5r_x0020_etter_x0020_at_x0020_forvalterens_x0020_godtgj_x005C__x0027_f8relse_x0020_og_x0020_eventuelt_x0020_andre_x0020_utgifter_x0020_som_x0020_forvalteren_x0020_har_x0020_krav_x0020_p_x005C__x0027_e5_x0020__x005C__x0027_e5_x0020_f_x005C__x0027_e5_x0020_dekket_x0020_i_x0020_henhold_x0020_til_x0020_denne_x0020_avtale_x0020_er_x0020_fratrukket._x0020__x005C_par_x000D__x000A__x005C_par_x000D__x000A_Dersom_x0020_leietakers_x0020_sikkerhetsstillelse_x0020_overfor_x0020_utleieren_x0020_ikke_x0020_er_x0020_tilstrekkelig_x0020_til_x0020__x005C__x0027_e5_x0020_dekke_x0020_b_x005C__x0027_e5de_x0020_forfalt_x0020_ubetalt_x0020_husleie_x0020_og_x0020_forvalterens_x0020_godtgj_x005C__x0027_f8relse_x0020_og_x0020_de_x0020_andre_x0020_ovennevnte_x0020_utgifter_x002C__x0020_skal_x0020_forvalterens_x0020_godtgj_x005C__x0027_f8relse_x0020_og_x0020_utlegg_x0020_prioriteres_x0020_fremfor_x0020_utleierens_x0020_krav_x002C__x0020_ved_x0020_dekning_x0020_i_x0020_leiebetaling_x002C__x0020_garanti_x0020_og_x0020__x002F__x0020_eller_x0020_depositum._x0020_Ved_x0020_for_x0020_mye_x0020_utbetalt_x0020_husleie_x0020_til_x0020_utleieren_x0020_kan_x0020_forvalteren_x0020_kreve_x0020_bel_x005C__x0027_f8pet_x0020_tilbakebetalt_x002C__x0020_eventuelt_x0020_foreta_x0020_motregning_x0020_i_x0020_senere_x0020_utbetalinger._x0020__x005C_par_x000D__x000A__x005C_par_x000D__x000A_Uavhengig_x0020_av_x0020_om_x0020_leietaker_x0020_betaler_x002C__x0020_forskutterer_x0020_forvalter_x0020_den_x0020_utbetaling_x0020_av_x0020_husleie_x0020_til_x0020_utleier_x0020_som_x0020_er_x0020_dekket_x0020_under_x0020_sikkerhetsstillelse_x0020_i_x0020_inntil_x0020_to_x0020_mnd._x0020_Ved_x0020_mottak_x0020_av_x0020_oppsigelse_x0020_p_x005C__x0027_e5_x0020_leieforholdet_x0020_opph_x005C__x0027_f8rer_x0020_leieforskuddsordningen_x002C__x0020_uavhengig_x0020_av_x0020_om_x0020_oppsigelsen_x0020_kommer_x0020_fra_x0020_utleier_x0020_eller_x0020_leietaker._x0020_Utleier_x0020_tilkommer_x0020_ikke_x0020_rente_x0020_for_x0020_husleie_x0020_som_x0020_er_x0020_innbetalt_x0020_forvalterens_x0020_konto_x0020_i_x0020_tiden_x0020_f_x005C__x0027_f8r_x0020_utbetalingstidspunktet._x0020_Dersom_x0020_forvalteren_x0020_utbetaler_x0020_leie_x0020_for_x0020_sent_x0020_tilkommer_x0020_utleieren_x0020_rente_x0020_iht._x0020_gjeldende_x0020_lovgiving._x0020__x005C_par_x000D__x000A__x005C_pard_x005C_ri-113_x005C_sb5_x005C_par_x000D__x000A__x005C_pard_x005C__x0027_a7_x0020_8_x0020__x005C_b_x0020_Forvalters_x0020_ansvarsbegrensning_x005C_b0_x0020__x0020__x005C_par_x000D__x000A_Forvalteren_x0020_kan_x0020_ikke_x0020_gj_x005C__x0027_f8res_x0020_ansvarlig_x0020_for_x0020_avtaler_x0020_han_x0020_ikke_x0020_har_x0020_medvirket_x0020_til_x002C__x0020_herunder_x0020_inng_x005C__x0027_e5tte_x0020_leiekontrakter_x0020_eller_x0020_andre_x0020_avtaler_x0020_utleier_x0020_direkte_x0020_har_x0020_inng_x005C__x0027_e5tt_x0020_med_x0020_leietaker_x0020_eller_x0020_andre._x0020_Forvalteren_x0020_er_x0020_uten_x0020_ansvar_x0020_for_x0020_mulige_x0020_skader_x0020_som_x0020_m_x005C__x0027_e5tte_x0020_oppst_x005C__x0027_e5_x0020_p_x005C__x0027_e5_x0020_eiendommen_x0020_n_x005C__x0027_e5r_x0020_disse_x0020_ikke_x0020_skyldes_x0020_forvalteren._x0020_Forvalterens_x0020_ansvar_x0020_er_x0020_uansett_x0020_avgrenset_x0020_mot_x0020_indirekte_x0020_tap._x005C_par_x000D__x000A__x005C_pard_x005C_ri-24_x005C_par_x000D__x000A__x005C__x0027_a7_x0020_9_x0020__x005C_b_x0020_Mislighold_x0020_av_x0020_avtalen_x005C_b0_x005C_par_x000D__x000A_Ved_x0020_mislighold_x0020_av_x0020_hele_x0020_eller_x0020_deler_x0020_av_x0020_forpliktelsene_x0020_etter_x0020_denne_x0020_avtale_x0020_har_x0020_den_x0020_andre_x0020_parten_x0020_krav_x0020_p_x005C__x0027_e5_x0020_misligholdsbef_x005C__x0027_f8yelser_x002C__x0020_i_x0020_form_x0020_av_x0020_retting_x002C__x0020_prisavslag_x0020_eller_x0020_erstatning_x002C__x0020_avhengig_x0020_av_x0020_misligholdets_x0020_art_x0020_og_x0020_omfang._x0020_Dersom_x0020_en_x0020_av_x0020_partene_x0020_vesentlig_x0020_misligholder_x0020_sine_x0020_plikter_x0020_iht._x0020_denne_x0020_avtale_x002C__x0020_kan_x0020_den_x0020_andre_x0020_parten_x0020_heve_x0020_avtalen_x0020_ved_x0020_skriftlig_x0020_varsel._x0020_I_x0020_erkl_x005C__x0027_e6ringen_x0020_m_x005C__x0027_e5_x0020_hevingsgrunnen_x0020_oppgis_x0020_og_x0020_det_x0020_skal_x0020_gis_x0020_en_x0020_kort_x0020_frist_x0020_til_x0020_retting_x0020_av_x0020_misligholdet._x0020_Dersom_x0020_forholdet_x0020_ikke_x0020_rettes_x0020_eller_x0020_bestrides_x0020_innen_x0020_fristen_x002C__x0020_anses_x0020_avtalen_x0020_hevet_x0020_etter_x0020_14_x0020_dager_x0020_fra_x0020_erkl_x005C__x0027_e6ringen_x0020_er_x0020_mottatt._x0020__x005C_par_x000D__x000A__x005C_par_x000D__x000A__x005C__x0027_a7_x0020_10_x0020__x005C_b_x0020_Verneting_x0020_ved_x0020_tvist_x005C_b0_x005C_par_x000D__x000A_Oslo_x0020_tingrett_x0020_avtales_x0020_som_x0020_verneting_x0020_for_x0020_enhver_x0020_tvist_x0020_som_x0020_m_x005C__x0027_e5tte_x0020_oppst_x005C__x0027_e5_x0020_i_x0020_forbindelse_x0020_med_x0020_denne_x0020_avtale._x0020__x005C_par_x000D__x000A__x005C_pard_x005C_ri-24_x005C_sl276_x005C_slmult1_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_tab_x005C_par_x000D__x000A__x005C_pard_x005C_par_x000D__x000A__x005C_f1_x005C_fs17_x005C_par_x000D__x000A___RP___x000D__x000A_</Text>
             </RichText1>
           </Components>
@@ -1733,11 +1669,11 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
           <Parent isRef="7" />
           <Sort isList="true" count="0" />
         </DataBand7>
-        <GroupHeaderBand2 Ref="128" type="GroupHeaderBand" isKey="true">
+        <GroupHeaderBand2 Ref="117" type="GroupHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,39.44,19,1</ClientRectangle>
+          <ClientRectangle>0,37.04,20,1</ClientRectangle>
           <Components isList="true" count="1">
-            <Text82 Ref="129" type="Text" isKey="true">
+            <Text82 Ref="118" type="Text" isKey="true">
               <Border>None;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.16,8.8,0.6</ClientRectangle>
@@ -1747,7 +1683,7 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text82</Name>
               <Page isRef="7" />
-              <Parent isRef="128" />
+              <Parent isRef="117" />
               <Text>FULLMAKT - BESTILLING AV NØKLER</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -1758,12 +1694,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
           <Page isRef="7" />
           <Parent isRef="7" />
         </GroupHeaderBand2>
-        <DataBand9 Ref="130" type="DataBand" isKey="true">
+        <DataBand9 Ref="119" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,41.24,19,11.6</ClientRectangle>
+          <ClientRectangle>0,38.84,20,11.6</ClientRectangle>
           <Components isList="true" count="32">
-            <Text83 Ref="131" type="Text" isKey="true">
+            <Text83 Ref="120" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>2.2,0.36,14,0.6</ClientRectangle>
@@ -1772,11 +1708,11 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text83</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Forvaltningsavtale.EierNavn}</Text>
               <TextBrush>Black</TextBrush>
             </Text83>
-            <Text84 Ref="132" type="Text" isKey="true">
+            <Text84 Ref="121" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,0.36,1.8,0.6</ClientRectangle>
@@ -1785,72 +1721,80 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text84</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Navn:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text84>
-            <Text87 Ref="133" type="Text" isKey="true">
+            <Text87 Ref="122" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>2.2,1,7.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Forvaltningsavtale.Personnummer,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>baae165eff114c6db1e968666cee6406</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text87</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Forvaltningsavtale.Personnummer}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
             </Text87>
-            <Text88 Ref="134" type="Text" isKey="true">
+            <Text88 Ref="123" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,1,1.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Forvaltningsavtale.Personnummer,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Guid>f9ecd1ddc73a4ac89520c571bb244304</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text88</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Personnr.:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text88>
-            <Text89 Ref="135" type="Text" isKey="true">
+            <Text89 Ref="124" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>2.2,1.6,7.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Forvaltningsavtale.MVANr,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>80b1a27333c84583b6098f149c4c707e</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text89</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Forvaltningsavtale.MVANr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
             </Text89>
-            <Text90 Ref="136" type="Text" isKey="true">
+            <Text90 Ref="125" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,1.6,1.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Forvaltningsavtale.MVANr,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Guid>9d74f98642104a0ab8c3821bd31b1e59</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text90</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
-              <Text>Orgnr.:</Text>
+              <Parent isRef="119" />
+              <Text>Mvanr.:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text90>
-            <Text91 Ref="137" type="Text" isKey="true">
+            <Text91 Ref="126" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,2.36,9.2,0.6</ClientRectangle>
@@ -1860,12 +1804,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text91</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>SOM HJEMMELSHAVER TIL EIENDOMMEN:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text91>
-            <Text92 Ref="138" type="Text" isKey="true">
+            <Text92 Ref="127" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3,3.16,14.8,0.6</ClientRectangle>
@@ -1875,11 +1819,11 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text92</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Boliger.adresse}</Text>
               <TextBrush>Black</TextBrush>
             </Text92>
-            <Text93 Ref="139" type="Text" isKey="true">
+            <Text93 Ref="128" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,3.16,1.4,0.6</ClientRectangle>
@@ -1889,12 +1833,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text93</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Adresse:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text93>
-            <Text94 Ref="140" type="Text" isKey="true">
+            <Text94 Ref="129" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,3.76,2.4,0.6</ClientRectangle>
@@ -1904,40 +1848,40 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text94</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Postnr./ sted:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text94>
-            <Text95 Ref="141" type="Text" isKey="true">
+            <Text95 Ref="130" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>3,3.76,0.8,0.6</ClientRectangle>
+              <ClientRectangle>3,3.76,1,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Guid>d21f1433f16d4e69beb7405075e6f40f</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text95</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Boliger.postnr}</Text>
               <TextBrush>Black</TextBrush>
             </Text95>
-            <Text96 Ref="142" type="Text" isKey="true">
+            <Text96 Ref="131" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>3.8,3.76,1.6,0.6</ClientRectangle>
+              <ClientRectangle>4,3.76,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Guid>a9bbcfb1f64940d09890419c323fed5d</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text96</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Boliger.poststed}</Text>
               <TextBrush>Black</TextBrush>
             </Text96>
-            <Text97 Ref="143" type="Text" isKey="true">
+            <Text97 Ref="132" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,4.36,0.8,0.6</ClientRectangle>
@@ -1947,12 +1891,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text97</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Gnr:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text97>
-            <Text98 Ref="144" type="Text" isKey="true">
+            <Text98 Ref="133" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.2,4.96,2.2,0.6</ClientRectangle>
@@ -1962,11 +1906,11 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text98</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Boliger.bnr}</Text>
               <TextBrush>Black</TextBrush>
             </Text98>
-            <Text99 Ref="145" type="Text" isKey="true">
+            <Text99 Ref="134" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,4.96,0.8,0.6</ClientRectangle>
@@ -1976,12 +1920,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text99</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Bnr:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text99>
-            <Text100 Ref="146" type="Text" isKey="true">
+            <Text100 Ref="135" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.2,5.56,2.2,0.6</ClientRectangle>
@@ -1991,11 +1935,11 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text100</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Boliger.seksjonsnr}</Text>
               <TextBrush>Black</TextBrush>
             </Text100>
-            <Text101 Ref="147" type="Text" isKey="true">
+            <Text101 Ref="136" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,5.56,0.8,0.6</ClientRectangle>
@@ -2005,12 +1949,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text101</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Snr:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text101>
-            <Text102 Ref="148" type="Text" isKey="true">
+            <Text102 Ref="137" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.2,6.16,1.6,0.6</ClientRectangle>
@@ -2020,11 +1964,11 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text102</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Boliger.Rom_nummer}</Text>
               <TextBrush>Black</TextBrush>
             </Text102>
-            <Text103 Ref="149" type="Text" isKey="true">
+            <Text103 Ref="138" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,6.16,0.8,0.6</ClientRectangle>
@@ -2034,128 +1978,144 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text103</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Hnr:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text103>
-            <Text104 Ref="150" type="Text" isKey="true">
+            <Text104 Ref="139" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>9.8,4.36,5.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Boliger.borettslagNavn,EqualTo,,,String,Red,Transparent,Arial_x002C_8,True,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>f1ee81e597ab443a9a0c70392347269f</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text104</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Boliger.borettslagNavn}</Text>
               <TextBrush>Black</TextBrush>
             </Text104>
-            <Text105 Ref="151" type="Text" isKey="true">
+            <Text105 Ref="140" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>6.2,4.36,3.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Boliger.borettslagNavn,EqualTo,,,String,Red,Transparent,Arial_x002C_8,True,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Guid>ddcfde2ccd494862ba7270daa05a77b8</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text105</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Borettslagsetsnavn:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text105>
-            <Text106 Ref="152" type="Text" isKey="true">
+            <Text106 Ref="141" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>9.8,4.96,5.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Boliger.akskjeselskapNavn,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>aa26cda8b27540d1a85959e990fad3eb</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text106</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Boliger.akskjeselskapNavn}</Text>
               <TextBrush>Black</TextBrush>
             </Text106>
-            <Text107 Ref="153" type="Text" isKey="true">
+            <Text107 Ref="142" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>6.2,4.96,3.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>Boliger.akskjeselskapNavn,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Guid>c41a2522e41341abb27b236339daa876</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text107</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Aksjeselskapetsnavn:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text107>
-            <Text108 Ref="154" type="Text" isKey="true">
+            <Text108 Ref="143" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>17.4,4.96,1.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <ClientRectangle>17.4,4.36,1.6,0.8</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Boliger.AndelsNr,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>0be5a0a780ec40428e70104d3e313220</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text108</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Boliger.AndelsNr}</Text>
               <TextBrush>Black</TextBrush>
             </Text108>
-            <Text109 Ref="155" type="Text" isKey="true">
+            <Text109 Ref="144" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>15.6,4.96,1.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <ClientRectangle>15.6,4.36,1.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Boliger.AndelsNr,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Guid>caff87b0a190429d9ecd3727175e9aeb</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text109</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Andels nr.:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text109>
-            <Text110 Ref="156" type="Text" isKey="true">
+            <Text110 Ref="145" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>17.4,4.36,1.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <ClientRectangle>17.4,4.96,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Boliger.aksjenummer,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>440865f85ab44634a1711068384d2cc9</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text110</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Boliger.aksjenummer}</Text>
               <TextBrush>Black</TextBrush>
             </Text110>
-            <Text111 Ref="157" type="Text" isKey="true">
+            <Text111 Ref="146" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>15.6,4.36,1.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <ClientRectangle>15.6,4.96,1.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>Boliger.aksjenummer,EqualTo,,,String,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Guid>446318db70504503841e5b8db6aedc2a</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text111</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Aksjenr.:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text111>
-            <Text112 Ref="158" type="Text" isKey="true">
+            <Text112 Ref="147" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1,10.36,6.2,0.6</ClientRectangle>
@@ -2165,12 +2125,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text112</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>{Forvaltningsavtale.EierNavn}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text112>
-            <Text113 Ref="159" type="Text" isKey="true">
+            <Text113 Ref="148" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>10.4,10.36,6.2,0.6</ClientRectangle>
@@ -2180,12 +2140,12 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text113</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Sted og dato</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text113>
-            <Text114 Ref="160" type="Text" isKey="true">
+            <Text114 Ref="149" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
@@ -2196,36 +2156,36 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
               <Margins>0,0,0,0</Margins>
               <Name>Text114</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
+              <Parent isRef="119" />
               <Text>Undertegnede gir herved ugjenkallelig fullmakt til {Bedrift.Navn} organisasjonsnummer {Bedrift.orgNr} </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text114>
-            <HorizontalLinePrimitive9 Ref="161" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive9 Ref="150" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>1,10.16,8.8,0.0254</ClientRectangle>
               <Color>Black</Color>
-              <EndCap Ref="162" type="Cap" isKey="true">
+              <EndCap Ref="151" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Guid>fdcc3fe5c0ea489992b83e103e65283a</Guid>
               <Name>HorizontalLinePrimitive9</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
-              <StartCap Ref="163" type="Cap" isKey="true">
+              <Parent isRef="119" />
+              <StartCap Ref="152" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive9>
-            <HorizontalLinePrimitive10 Ref="164" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive10 Ref="153" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>10.4,10.16,6,0.0254</ClientRectangle>
               <Color>Black</Color>
-              <EndCap Ref="165" type="Cap" isKey="true">
+              <EndCap Ref="154" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Guid>eb78bfc34dc94ea9a8016f13d131b97c</Guid>
               <Name>HorizontalLinePrimitive10</Name>
               <Page isRef="7" />
-              <Parent isRef="130" />
-              <StartCap Ref="166" type="Cap" isKey="true">
+              <Parent isRef="119" />
+              <StartCap Ref="155" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive10>
@@ -2243,19 +2203,19 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
       <Conditions isList="true" count="0" />
       <Guid>6e877421f0374a11835ad0ca4c992975</Guid>
       <LargeHeight>True</LargeHeight>
-      <Margins>1,1,1,1</Margins>
+      <Margins>0.5,0.5,0.5,0.5</Margins>
       <Name>Page1</Name>
       <PageHeight>29.7</PageHeight>
       <PageWidth>21</PageWidth>
       <PaperSize>A4</PaperSize>
       <Report isRef="0" />
-      <Watermark Ref="167" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="156" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
   </Pages>
-  <PrinterSettings Ref="168" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="157" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -2267,10 +2227,10 @@ Toppdekningsforsikring utleiers bolig {Format("{0:C2}", Forvaltningsavtale.forsi
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/7/2018 10:29:50 AM</ReportChanged>
+  <ReportChanged>12/12/2018 12:57:45 PM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\Forvaltningsavtale_privat_2018.mrt</ReportFile>
-  <ReportGuid>c5de93e3c7324fd68eeadfd2759f00cf</ReportGuid>
+  <ReportGuid>9ef6658dd6fb4dd4afef9518ec76d319</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -2301,601 +2261,601 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="35">
-    <Collection_Report_Title1 Ref="169" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Report_Title1 Ref="158" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item147 Ref="170" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item140 Ref="159" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>ReportTitle</Placement>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item147>
+        </Item140>
       </Conditions>
       <Description />
       <Font>Arial,14,Bold</Font>
       <Name>Collection_Report_Title1</Name>
       <TextBrush>LimeGreen</TextBrush>
     </Collection_Report_Title1>
-    <Collection_Report_Title2 Ref="171" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Report_Title2 Ref="160" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item149 Ref="172" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item142 Ref="161" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
           <Placement>ReportTitle</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item149>
+        </Item142>
       </Conditions>
       <Description />
       <Font>Arial,10,Bold</Font>
       <Name>Collection_Report_Title2</Name>
       <TextBrush>LimeGreen</TextBrush>
     </Collection_Report_Title2>
-    <Collection_Report_Summary1 Ref="173" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Report_Summary1 Ref="162" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item151 Ref="174" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item144 Ref="163" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>ReportSummary</Placement>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item151>
+        </Item144>
       </Conditions>
       <Description />
       <Font>Arial,12,Bold</Font>
       <Name>Collection_Report_Summary1</Name>
       <TextBrush>[0:114:188]</TextBrush>
     </Collection_Report_Summary1>
-    <Collection_Report_Summary2 Ref="175" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Report_Summary2 Ref="164" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item153 Ref="176" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item146 Ref="165" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
           <Placement>ReportSummary</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item153>
+        </Item146>
       </Conditions>
       <Description />
       <Font>Arial,10,Bold</Font>
       <Name>Collection_Report_Summary2</Name>
       <TextBrush>[0:114:188]</TextBrush>
     </Collection_Report_Summary2>
-    <Collection_Page_Header Ref="177" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Page_Header Ref="166" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item155 Ref="178" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item148 Ref="167" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>PageHeader</Placement>
           <Type>ComponentType, Placement</Type>
-        </Item155>
+        </Item148>
       </Conditions>
       <Description />
       <Font>Arial,10</Font>
       <Name>Collection_Page_Header</Name>
       <TextBrush>[0:114:188]</TextBrush>
     </Collection_Page_Header>
-    <Collection_Page_Footer Ref="179" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Page_Footer Ref="168" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item157 Ref="180" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item150 Ref="169" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>PageFooter</Placement>
           <Type>ComponentType, Placement</Type>
-        </Item157>
+        </Item150>
       </Conditions>
       <Description />
       <Font>Arial,10</Font>
       <Name>Collection_Page_Footer</Name>
       <TextBrush>[0:114:188]</TextBrush>
     </Collection_Page_Footer>
-    <Collection_Group_Header1 Ref="181" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Group_Header1 Ref="170" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>GlassBrush,LightBlue,True,0.2</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item159 Ref="182" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item152 Ref="171" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>GroupHeader</Placement>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item159>
+        </Item152>
       </Conditions>
       <Description />
       <Font>Arial,14,Bold</Font>
       <Name>Collection_Group_Header1</Name>
       <TextBrush>Black</TextBrush>
     </Collection_Group_Header1>
-    <Collection_Group_Header2 Ref="183" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Group_Header2 Ref="172" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item161 Ref="184" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item154 Ref="173" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>GroupHeader</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item161>
+        </Item154>
       </Conditions>
       <Description />
       <Font>Arial,12,Bold</Font>
       <Name>Collection_Group_Header2</Name>
       <TextBrush>White</TextBrush>
     </Collection_Group_Header2>
-    <Collection_Group_Header3 Ref="185" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Group_Header3 Ref="174" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item163 Ref="186" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item156 Ref="175" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>GroupHeader</Placement>
           <PlacementNestedLevel>3</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item163>
+        </Item156>
       </Conditions>
       <Description />
       <Font>Arial,11,Bold</Font>
       <Name>Collection_Group_Header3</Name>
       <TextBrush>White</TextBrush>
     </Collection_Group_Header3>
-    <Collection_Group_Header4 Ref="187" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Group_Header4 Ref="176" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item165 Ref="188" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item158 Ref="177" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
           <Placement>GroupHeader</Placement>
           <PlacementNestedLevel>4</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item165>
+        </Item158>
       </Conditions>
       <Description />
       <Font>Arial,10,Bold</Font>
       <Name>Collection_Group_Header4</Name>
       <TextBrush>White</TextBrush>
     </Collection_Group_Header4>
-    <Collection_Group_Footer1 Ref="189" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Group_Footer1 Ref="178" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item167 Ref="190" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item160 Ref="179" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>GroupFooter</Placement>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item167>
+        </Item160>
       </Conditions>
       <Description />
       <Font>Arial,13,Bold</Font>
       <Name>Collection_Group_Footer1</Name>
       <TextBrush>[0:114:188]</TextBrush>
     </Collection_Group_Footer1>
-    <Collection_Group_Footer2 Ref="191" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Group_Footer2 Ref="180" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item169 Ref="192" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item162 Ref="181" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>GroupFooter</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item169>
+        </Item162>
       </Conditions>
       <Description />
       <Font>Arial,12,Bold</Font>
       <Name>Collection_Group_Footer2</Name>
       <TextBrush>[0:114:188]</TextBrush>
     </Collection_Group_Footer2>
-    <Collection_Group_Footer3 Ref="193" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Group_Footer3 Ref="182" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item171 Ref="194" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item164 Ref="183" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>GroupFooter</Placement>
           <PlacementNestedLevel>3</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item171>
+        </Item164>
       </Conditions>
       <Description />
       <Font>Arial,11,Bold</Font>
       <Name>Collection_Group_Footer3</Name>
       <TextBrush>[0:114:188]</TextBrush>
     </Collection_Group_Footer3>
-    <Collection_Group_Footer4 Ref="195" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Group_Footer4 Ref="184" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item173 Ref="196" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item166 Ref="185" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>GroupFooter</Placement>
           <PlacementNestedLevel>4</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item173>
+        </Item166>
       </Conditions>
       <Description />
       <Font>Arial,10,Bold</Font>
       <Name>Collection_Group_Footer4</Name>
       <TextBrush>[0:114:188]</TextBrush>
     </Collection_Group_Footer4>
-    <Collection_Header1 Ref="197" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Header1 Ref="186" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[0:114:188]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item175 Ref="198" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item168 Ref="187" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Header</Placement>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item175>
+        </Item168>
       </Conditions>
       <Description />
       <Font>Arial,8,Bold</Font>
       <Name>Collection_Header1</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Header1>
-    <Collection_Header2 Ref="199" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Header2 Ref="188" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[25:139:213]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item177 Ref="200" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item170 Ref="189" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Header</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item177>
+        </Item170>
       </Conditions>
       <Description />
       <Font>Arial,8,Bold</Font>
       <Name>Collection_Header2</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Header2>
-    <Collection_Header3 Ref="201" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Header3 Ref="190" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[50:164:238]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item179 Ref="202" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item172 Ref="191" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Header</Placement>
           <PlacementNestedLevel>3</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item179>
+        </Item172>
       </Conditions>
       <Description />
       <Font>Arial,8,Bold</Font>
       <Name>Collection_Header3</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Header3>
-    <Collection_Header4 Ref="203" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Header4 Ref="192" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[75:189:255]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item181 Ref="204" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item174 Ref="193" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
           <Placement>Header</Placement>
           <PlacementNestedLevel>4</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item181>
+        </Item174>
       </Conditions>
       <Description />
       <Font>Arial,8,Bold</Font>
       <Name>Collection_Header4</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Header4>
-    <Collection_Data1 Ref="205" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data1 Ref="194" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item183 Ref="206" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item176 Ref="195" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Data</Placement>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item183>
+        </Item176>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data1</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data1>
-    <Collection_Data1_Odd_x0020_Style Ref="207" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data1_Odd_x0020_Style Ref="196" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>Gainsboro</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item185 Ref="208" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item178 Ref="197" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataOddStyle</Placement>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item185>
+        </Item178>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data1_Odd Style</Name>
       <TextBrush>Black</TextBrush>
     </Collection_Data1_Odd_x0020_Style>
-    <Collection_Data1_Even_x0020_Style Ref="209" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data1_Even_x0020_Style Ref="198" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[75:189:255]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item187 Ref="210" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item180 Ref="199" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataEvenStyle</Placement>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item187>
+        </Item180>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data1_Even Style</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data1_Even_x0020_Style>
-    <Collection_Data2 Ref="211" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data2 Ref="200" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item189 Ref="212" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item182 Ref="201" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Data</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item189>
+        </Item182>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data2</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data2>
-    <Collection_Data2_Odd_x0020_Style Ref="213" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data2_Odd_x0020_Style Ref="202" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[165:255:255]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item191 Ref="214" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item184 Ref="203" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataOddStyle</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item191>
+        </Item184>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data2_Odd Style</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data2_Odd_x0020_Style>
-    <Collection_Data2_Even_x0020_Style Ref="215" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data2_Even_x0020_Style Ref="204" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[82:196:255]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item193 Ref="216" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item186 Ref="205" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataEvenStyle</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item193>
+        </Item186>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data2_Even Style</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data2_Even_x0020_Style>
-    <Collection_Data3 Ref="217" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data3 Ref="206" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item195 Ref="218" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item188 Ref="207" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Data</Placement>
           <PlacementNestedLevel>3</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item195>
+        </Item188>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data3</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data3>
-    <Collection_Data3_Odd_x0020_Style Ref="219" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data3_Odd_x0020_Style Ref="208" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[180:255:255]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item197 Ref="220" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item190 Ref="209" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataOddStyle</Placement>
           <PlacementNestedLevel>3</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item197>
+        </Item190>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data3_Odd Style</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data3_Odd_x0020_Style>
-    <Collection_Data3_Even_x0020_Style Ref="221" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data3_Even_x0020_Style Ref="210" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[90:204:255]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item199 Ref="222" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item192 Ref="211" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataEvenStyle</Placement>
           <PlacementNestedLevel>3</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item199>
+        </Item192>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data3_Even Style</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data3_Even_x0020_Style>
-    <Collection_Data4 Ref="223" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data4 Ref="212" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item201 Ref="224" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item194 Ref="213" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
           <Placement>Data</Placement>
           <PlacementNestedLevel>4</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item201>
+        </Item194>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data4</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data4>
-    <Collection_Data4_Odd_x0020_Style Ref="225" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data4_Odd_x0020_Style Ref="214" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[195:255:255]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item203 Ref="226" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item196 Ref="215" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
           <Placement>DataOddStyle</Placement>
           <PlacementNestedLevel>4</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item203>
+        </Item196>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data4_Odd Style</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data4_Odd_x0020_Style>
-    <Collection_Data4_Even_x0020_Style Ref="227" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Data4_Even_x0020_Style Ref="216" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[97:211:255]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item205 Ref="228" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item198 Ref="217" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
           <Placement>DataEvenStyle</Placement>
           <PlacementNestedLevel>4</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item205>
+        </Item198>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Data4_Even Style</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Data4_Even_x0020_Style>
-    <Collection_Footer1 Ref="229" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Footer1 Ref="218" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[20:134:208]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item207 Ref="230" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item200 Ref="219" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Footer</Placement>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item207>
+        </Item200>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Footer1</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Footer1>
-    <Collection_Footer2 Ref="231" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Footer2 Ref="220" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[45:159:233]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item209 Ref="232" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item202 Ref="221" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Footer</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item209>
+        </Item202>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Footer2</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Footer2>
-    <Collection_Footer3 Ref="233" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Footer3 Ref="222" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[70:184:255]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item211 Ref="234" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item204 Ref="223" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Footer</Placement>
           <PlacementNestedLevel>3</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item211>
+        </Item204>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Footer3</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Footer3>
-    <Collection_Footer4 Ref="235" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Collection_Footer4 Ref="224" type="Stimulsoft.Report.StiStyle" isKey="true">
       <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
       <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
       <Brush>[95:209:255]</Brush>
       <CollectionName>Collection</CollectionName>
       <Conditions isList="true" count="1">
-        <Item213 Ref="236" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item206 Ref="225" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Footer</Placement>
           <PlacementNestedLevel>4</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item213>
+        </Item206>
       </Conditions>
       <Description />
       <Font>Arial,8</Font>
       <Name>Collection_Footer4</Name>
       <TextBrush>[0:0:0]</TextBrush>
     </Collection_Footer4>
-    <Style1 Ref="237" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="226" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>Transparent</Brush>
       <Conditions isList="true" count="0" />
       <Description />
