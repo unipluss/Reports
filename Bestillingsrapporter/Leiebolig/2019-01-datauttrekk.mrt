@@ -1,0 +1,1383 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="0" />
+    <Databases isList="true" count="1">
+      <Klient_x0020_87 Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
+        <Alias>Klient 87</Alias>
+        <ConnectionStringEncrypted>9Fb5oU1NQjVhfOVEekzhF4twwQ9NV5KZ7Hu5XORE60/R8vtJY1TzXWkVuexNAa4T2Vr37VsFAZ3pCP3s9FQqL8J40cLJSns=</ConnectionStringEncrypted>
+        <Name>Klient 87</Name>
+      </Klient_x0020_87>
+    </Databases>
+    <DataSources isList="true" count="2">
+      <datauttrekk Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>datauttrekk</Alias>
+        <Columns isList="true" count="16">
+          <value>pris,System.Decimal</value>
+          <value>Antall_rom,System.Int32</value>
+          <value>Areal,System.Double</value>
+          <value>Objekt_id,System.Int32</value>
+          <value>startÅr,System.Int32</value>
+          <value>postnr,System.String</value>
+          <value>sted,System.String</value>
+          <value>adr,System.String</value>
+          <value>oppdragsnr,System.Int32</value>
+          <value>Prisantydning,System.Decimal</value>
+          <value>AntallSoverom,System.Int32</value>
+          <value>startMnd,System.String</value>
+          <value>LeieFra,System.DateTime</value>
+          <value>Kontrakt_Akseptert_Dato,System.DateTime</value>
+          <value>lopeTid,System.String</value>
+          <value>inkludert,System.String</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Name>datauttrekk</Name>
+        <NameInSource>Klient 87</NameInSource>
+        <Parameters isList="true" count="0" />
+        <SqlCommand>set dateformat dmy
+
+select
+	convert(decimal(12,2),(select sum(tl.pris) from c..tarifflinje tl where tl.tariffnr=a.Tariff 
+and ( (select top 1 fra_dato from c..tarifflinje where tariffnr=a.tariff and varenr='1' and til_dato&gt;fra_dato order by fra_dato asc) 
+	between tl.Fra_dato and tl.til_dato and tl.Til_dato&gt;=kd.kontrakt_fra) and tl.Til_dato&gt;tl.Fra_dato )) pris,
+-- alle varer, pr første gyldige tarifflinje (godkjent av hilde)
+b.Antall_rom, b.Areal, b.Objekt_id, year(kd.kontrakt_fra) startÅr, b.Objekt_postnummer postnr,
+--case when substring(b.Objekt_postnummer,1,2) in ('01', '02', '03', '07', '08') then 'Oslo vest og sentrum'
+--when substring(b.Objekt_postnummer,1,2) in ('06', '11', '12') then 'Oslo øst og syd'
+--when substring(b.Objekt_postnummer,1,2) in ('04', '05', '09', '10') then 'Oslo nord'
+--when substring(b.Objekt_postnummer,1,2) not in ('01', '02', '03', '04', '05', '06', '07', '08', '09', '10') then 'Akershus' end sted
+om.Omrade as sted
+,b.objekt_adresse adr, (select top 1 o.Oppdragsnr from e..t_oppdragsAvtale o where o.Id = kd.oppdragsavtaleid) oppdragsnr
+, fbfl.Manedsleie as Prisantydning
+, ISNULL(b.antallsoverom,(isnull(nullif(b.Antall_rom,0),1) -1)) as AntallSoverom -- antallsoverom er ikke implement enda. Trekker fra 1 på antall rom
+,(select navn from m..maaneder where id = month(kd.kontrakt_fra)) as startMnd
+, kd.formidlingsdato as Kontrakt_Akseptert_Dato
+, fbfl.FraDato as LeieFra
+, '3' as lopeTid
+,(select stuff((
+	select ','+ f.fasilitetsType + ' kr: ' + convert(varchar,convert(decimal(8,0),harfas.pris)) from e..t_harFasiliteter harfas 
+	inner join e..t_fasiliteter f on f.id = harfas.FasilitetId
+	where harfas.BoligObjektId = kd.Objekt
+	and harfas.pris &gt; 0
+	order by f.fasilitetsType
+	for XML PATH ('')) ,1 ,1,'')
+) as inkludert
+from e..t_kontraktsdata kd
+join c..abonnement a on a.id=kd.Kontrakts_ID
+join e..t_boligobjekt b on b.Objekt_id=kd.Objekt
+left join e..t_finnBoligForLeie fbfl on fbfl.ID = (select top 1 l.id from e..t_finnBoligForLeie l where  l.ObjektID = kd.objekt order by id desc)
+left join e..t_boligOmradePostNummerKobling postnr on convert(int, b.Objekt_postnummer) = postnr.postNummer
+left join e..t_boligomraade om on postnr.boligOmradeId = om.Boligomrade_id 
+
+where month(kd.kontrakt_fra) between '{framnd}' and '{tilmnd}' and year(kd.kontrakt_fra)='{aar}' and kd.statusId not in (1001,1002,1005)
+and isnull(kd.Virkelig_utflyttet ,kd.kontrakt_til) &gt; kd.kontrakt_fra + 1
+and isnull(kd.oppdragsavtaleid,0) &gt; 0
+order  by sted, antall_rom, pris desc, objekt_id desc
+</SqlCommand>
+      </datauttrekk>
+      <utoolMnd Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>utoolMnd</Alias>
+        <Columns isList="true" count="1">
+          <value>utvalg,System.String</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Name>utoolMnd</Name>
+        <NameInSource>Klient 87</NameInSource>
+        <Parameters isList="true" count="0" />
+        <SqlCommand>select stuff((	select '-'+ kortnavn from m..maaneder
+where id in ({framnd},{tilmnd}) 
+order by id
+for XML PATH ('')) ,1 ,1,'') as utvalg
+</SqlCommand>
+      </utoolMnd>
+    </DataSources>
+    <Relations isList="true" count="0" />
+    <Report isRef="0" />
+    <Variables isList="true" count="8">
+      <value>,framnd,Fra_x0020_måned,int_x007C_sql_x003D_Select_x0020_1,System.Int32,_x0031_,False,False,False</value>
+      <value>,tilmnd,Til_x0020_måned,int_x007C_sql_x003D_Select_x0020_month_x0028_getdate_x0028__x0029__x0029_,System.Int32,_x0031_2,False,False,False</value>
+      <value>,aar,År,int_x007C_sql_x003D_Select_x0020_year_x0028_getdate_x0028__x0029__x0029_,System.Int32,_x0032_018,False,False,False</value>
+      <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
+      <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
+      <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0039_2,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_019,True,False</value>
+    </Variables>
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="0" />
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="5" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="3">
+        <PageHeaderBand1 Ref="6" type="PageHeaderBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,0.4,28.7,2.72</ClientRectangle>
+          <Components isList="true" count="17">
+            <Text14 Ref="7" type="Text" isKey="true">
+              <Brush>LightBlue</Brush>
+              <ClientRectangle>0,0,28.67,1</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text14</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text14>
+            <Text3 Ref="8" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0.22,17.88,0.78</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,12,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text3</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>  Leiepriser ved inngått kontrakt i perioden {utoolMnd.utvalg}  {aar}</Text>
+              <TextBrush>[114:114:114]</TextBrush>
+              <Type>Expression</Type>
+            </Text3>
+            <Text2 Ref="9" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.24,1.78,0.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Interaction Ref="10" type="Stimulsoft.Report.Components.StiInteraction" isKey="true">
+                <SortingColumn>DataBand1.Antall_rom</SortingColumn>
+              </Interaction>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text2</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Ant.
+rom</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text2>
+            <Text7 Ref="11" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.49,2.12,1.95,0.45</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text7</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Område</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text7>
+            <Text9 Ref="12" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.2,2.18,1,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Interaction Ref="13" type="Stimulsoft.Report.Components.StiInteraction" isKey="true">
+                <SortingColumn>DataBand1.Areal</SortingColumn>
+              </Interaction>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text9</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Areal</Text>
+              <TextBrush>Black</TextBrush>
+            </Text9>
+            <Text11 Ref="14" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4.28,1.78,0.92,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Interaction Ref="15" type="Stimulsoft.Report.Components.StiInteraction" isKey="true">
+                <SortingColumn>DataBand1.startMnd</SortingColumn>
+              </Interaction>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text11</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Start 
+mnd</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text11>
+            <Text13 Ref="16" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>5.51,1.8,0.93,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text13</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Post-
+nr</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text13>
+            <Text19 Ref="17" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>10.2,2.2,2.21,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text19</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Adresse</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text19>
+            <Text21 Ref="18" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>12.74,2.26,2.15,0.51</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text21</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Oppdragsnr        </Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text21>
+            <Text22 Ref="19" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>14.91,2.28,1.16,0.51</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Guid>fd1f259171714afe9be9af5a45121bf7</Guid>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text22</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Obj.id  </Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text22>
+            <Text25 Ref="20" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>16.17,1.84,1.81,0.88</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Guid>8da7ecd4ea2548b4b4b649588e15ddc1</Guid>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text25</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Pris-
+antydning</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text25>
+            <Text26 Ref="21" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.12,1.44,1.02,1.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Guid>41d1e1ffd2694e0cae929ceb6ff76f64</Guid>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text26</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Ant.
+Sove-
+rom</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text26>
+            <Text30 Ref="22" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>19.89,1.96,1.61,0.75</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Guid>0508c9f3437a4be09c0d04318549d795</Guid>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text30</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Ledig for
+leie
+</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text30>
+            <Text32 Ref="23" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>8.8,1.8,1.32,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Guid>836d13fc72c7477a9f767401253dac92</Guid>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text32</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Løpe-
+tid</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text32>
+            <Text34 Ref="24" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>22.62,2.25,2.97,0.47</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Guid>c4d84027a01543c8b8a7efe12e7f9bc1</Guid>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text34</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Inkludert i leien</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text34>
+            <Text5 Ref="25" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.05,2.13,1.2,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Interaction Ref="26" type="Stimulsoft.Report.Components.StiInteraction" isKey="true">
+                <SortingColumn>DataBand1.pris</SortingColumn>
+              </Interaction>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text5</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Pris</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text5>
+            <Text28 Ref="27" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>17.99,1.88,1.91,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Bold</Font>
+              <Guid>4a7f8fd906b74ed3b2b2f0178b7c7fed</Guid>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text28</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>Akseptert-
+dato</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text28>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Name>PageHeaderBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+        </PageHeaderBand1>
+        <PageFooterBand1 Ref="28" type="PageFooterBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,19.2,28.7,0.8</ClientRectangle>
+          <Components isList="true" count="3">
+            <Text15 Ref="29" type="Text" isKey="true">
+              <Border>All;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>8.2,0.1,1,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Italic</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text15</Name>
+              <Page isRef="5" />
+              <Parent isRef="28" />
+              <Text>{PageNumber} /</Text>
+              <TextBrush>Black</TextBrush>
+            </Text15>
+            <Text35 Ref="30" type="Text" isKey="true">
+              <Border>All;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>7.2,0.1,1,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Italic</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text35</Name>
+              <Page isRef="5" />
+              <Parent isRef="28" />
+              <Text>Side</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text35>
+            <Text36 Ref="31" type="Text" isKey="true">
+              <Border>All;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>9.2,0.1,1.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10,Italic</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text36</Name>
+              <Page isRef="5" />
+              <Parent isRef="28" />
+              <Text>{TotalPageCount}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text36>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Enabled>False</Enabled>
+          <Name>PageFooterBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+        </PageFooterBand1>
+        <DataBand1 Ref="32" type="DataBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
+          <ClientRectangle>0,3.92,28.7,0.42</ClientRectangle>
+          <Components isList="true" count="16">
+            <Text1 Ref="33" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.4,0,0.8,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text1</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.Antall_rom}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="34" type="NumberFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>1</NegativePattern>
+                <UseGroupSeparator>False</UseGroupSeparator>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text1>
+            <Text6 Ref="35" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.68,0,2.45,0.35</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text6</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.sted}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
+            </Text6>
+            <Text8 Ref="36" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.2,0,1,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text8</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.Areal}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="37" type="NumberFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>1</NegativePattern>
+                <UseGroupSeparator>False</UseGroupSeparator>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+            </Text8>
+            <Text10 Ref="38" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4.21,0,1.3,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text10</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.startMnd}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text10>
+            <Text12 Ref="39" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>5.51,0,1.09,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text12</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.postnr}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text12>
+            <Text18 Ref="40" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>10.04,0,2.68,0.35</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text18</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.adr}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
+            </Text18>
+            <Text20 Ref="41" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>12.8,0,1.7,0.35</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text20</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.oppdragsnr}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text20>
+            <Text23 Ref="42" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>14.6,0,1.25,0.35</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>b7a82d8347a7488390d36c1862764582</Guid>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text23</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.Objekt_id}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+            </Text23>
+            <Text24 Ref="43" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>16.07,0,1.79,0.35</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>8b1fe9c331754a74907188668dbb5f0e</Guid>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text24</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.Prisantydning}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="44" type="NumberFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>1</NegativePattern>
+                <UseGroupSeparator>False</UseGroupSeparator>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>DataColumn</Type>
+            </Text24>
+            <Text27 Ref="45" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.2,0,1,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>00834da054ea44368469d39605c90164</Guid>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text27</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.AntallSoverom}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="46" type="NumberFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>1</NegativePattern>
+                <UseGroupSeparator>False</UseGroupSeparator>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>DataColumn</Type>
+            </Text27>
+            <Text29 Ref="47" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>18.02,0,1.38,0.35</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>9a7ec5b33840446198aeef65f6cca796</Guid>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text29</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.Kontrakt_Akseptert_Dato}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="48" type="DateFormat" isKey="true">
+                <StringFormat>dd/MM/yyyy</StringFormat>
+              </TextFormat>
+              <Type>DataColumn</Type>
+            </Text29>
+            <Text31 Ref="49" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>19.93,0,1.38,0.35</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>60db155f5269480da83c9838e716ddf8</Guid>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text31</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.LeieFra}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="50" type="DateFormat" isKey="true">
+                <StringFormat>dd/MM/yyyy</StringFormat>
+              </TextFormat>
+              <Type>DataColumn</Type>
+            </Text31>
+            <Text33 Ref="51" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>9.17,0,0.36,0.35</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>c261d243b43949a2b02ea58c1dee66ab</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text33</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.lopeTid}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+            </Text33>
+            <Text37 Ref="52" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>21.41,0,7.11,0.35</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>4a88c630f53942beae1e5da4ee8e7b10</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text37</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.inkludert}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
+              <Type>DataColumn</Type>
+            </Text37>
+            <Text4 Ref="53" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0,1.4,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text4</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>{datauttrekk.pris}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="54" type="NumberFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>1</NegativePattern>
+                <UseGroupSeparator>False</UseGroupSeparator>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+            </Text4>
+            <Text16 Ref="55" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>9.59,0,0.36,0.35</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,7</Font>
+              <Guid>8742f93c87a04635a65e7643282d556e</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text16</Name>
+              <Page isRef="5" />
+              <Parent isRef="32" />
+              <Text>år</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text16>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <DataRelationName isNull="true" />
+          <DataSourceName>datauttrekk</DataSourceName>
+          <Filters isList="true" count="0" />
+          <Name>DataBand1</Name>
+          <OddStyle>Collection_Data1_Odd Style</OddStyle>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Sort isList="true" count="0" />
+        </DataBand1>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Guid>6e877421f0374a11835ad0ca4c992975</Guid>
+      <Margins>0.5,0.5,0.5,0.5</Margins>
+      <Name>Page1</Name>
+      <Orientation>Landscape</Orientation>
+      <PageHeight>21</PageHeight>
+      <PageWidth>29.7</PageWidth>
+      <Report isRef="0" />
+      <Watermark Ref="56" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+        <Font>Arial,100</Font>
+        <TextBrush>[50:0:0:0]</TextBrush>
+      </Watermark>
+    </Page1>
+  </Pages>
+  <PrinterSettings Ref="57" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>1/3/2019 1:37:10 PM</ReportChanged>
+  <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
+  <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\2018-11-datauttrekk.mrt</ReportFile>
+  <ReportGuid>71dd956df26b4a46b171c524455bbb6c</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Centimeters</ReportUnit>
+  <ReportVersion>2013.1.1600</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="34">
+    <Collection_Report_Title1 Ref="58" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item45 Ref="59" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>ReportTitle</Placement>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item45>
+      </Conditions>
+      <Description />
+      <Font>Arial,14,Bold</Font>
+      <Name>Collection_Report_Title1</Name>
+      <TextBrush>LimeGreen</TextBrush>
+    </Collection_Report_Title1>
+    <Collection_Report_Title2 Ref="60" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item47 Ref="61" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
+          <Placement>ReportTitle</Placement>
+          <PlacementNestedLevel>2</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item47>
+      </Conditions>
+      <Description />
+      <Font>Arial,10,Bold</Font>
+      <Name>Collection_Report_Title2</Name>
+      <TextBrush>LimeGreen</TextBrush>
+    </Collection_Report_Title2>
+    <Collection_Report_Summary1 Ref="62" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item49 Ref="63" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>ReportSummary</Placement>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item49>
+      </Conditions>
+      <Description />
+      <Font>Arial,12,Bold</Font>
+      <Name>Collection_Report_Summary1</Name>
+      <TextBrush>[0:114:188]</TextBrush>
+    </Collection_Report_Summary1>
+    <Collection_Report_Summary2 Ref="64" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item51 Ref="65" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
+          <Placement>ReportSummary</Placement>
+          <PlacementNestedLevel>2</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item51>
+      </Conditions>
+      <Description />
+      <Font>Arial,10,Bold</Font>
+      <Name>Collection_Report_Summary2</Name>
+      <TextBrush>[0:114:188]</TextBrush>
+    </Collection_Report_Summary2>
+    <Collection_Page_Header Ref="66" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item53 Ref="67" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>PageHeader</Placement>
+          <Type>ComponentType, Placement</Type>
+        </Item53>
+      </Conditions>
+      <Description />
+      <Font>Arial,10</Font>
+      <Name>Collection_Page_Header</Name>
+      <TextBrush>[0:114:188]</TextBrush>
+    </Collection_Page_Header>
+    <Collection_Page_Footer Ref="68" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item55 Ref="69" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>PageFooter</Placement>
+          <Type>ComponentType, Placement</Type>
+        </Item55>
+      </Conditions>
+      <Description />
+      <Font>Arial,10</Font>
+      <Name>Collection_Page_Footer</Name>
+      <TextBrush>[0:114:188]</TextBrush>
+    </Collection_Page_Footer>
+    <Collection_Group_Header1 Ref="70" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>GlassBrush,LightBlue,True,0.2</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item57 Ref="71" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>GroupHeader</Placement>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item57>
+      </Conditions>
+      <Description />
+      <Font>Arial,14,Bold</Font>
+      <Name>Collection_Group_Header1</Name>
+      <TextBrush>Black</TextBrush>
+    </Collection_Group_Header1>
+    <Collection_Group_Header2 Ref="72" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item59 Ref="73" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>GroupHeader</Placement>
+          <PlacementNestedLevel>2</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item59>
+      </Conditions>
+      <Description />
+      <Font>Arial,12,Bold</Font>
+      <Name>Collection_Group_Header2</Name>
+      <TextBrush>White</TextBrush>
+    </Collection_Group_Header2>
+    <Collection_Group_Header3 Ref="74" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item61 Ref="75" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>GroupHeader</Placement>
+          <PlacementNestedLevel>3</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item61>
+      </Conditions>
+      <Description />
+      <Font>Arial,11,Bold</Font>
+      <Name>Collection_Group_Header3</Name>
+      <TextBrush>White</TextBrush>
+    </Collection_Group_Header3>
+    <Collection_Group_Header4 Ref="76" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item63 Ref="77" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
+          <Placement>GroupHeader</Placement>
+          <PlacementNestedLevel>4</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item63>
+      </Conditions>
+      <Description />
+      <Font>Arial,10,Bold</Font>
+      <Name>Collection_Group_Header4</Name>
+      <TextBrush>White</TextBrush>
+    </Collection_Group_Header4>
+    <Collection_Group_Footer1 Ref="78" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item65 Ref="79" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>GroupFooter</Placement>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item65>
+      </Conditions>
+      <Description />
+      <Font>Arial,13,Bold</Font>
+      <Name>Collection_Group_Footer1</Name>
+      <TextBrush>[0:114:188]</TextBrush>
+    </Collection_Group_Footer1>
+    <Collection_Group_Footer2 Ref="80" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item67 Ref="81" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>GroupFooter</Placement>
+          <PlacementNestedLevel>2</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item67>
+      </Conditions>
+      <Description />
+      <Font>Arial,12,Bold</Font>
+      <Name>Collection_Group_Footer2</Name>
+      <TextBrush>[0:114:188]</TextBrush>
+    </Collection_Group_Footer2>
+    <Collection_Group_Footer3 Ref="82" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item69 Ref="83" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>GroupFooter</Placement>
+          <PlacementNestedLevel>3</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item69>
+      </Conditions>
+      <Description />
+      <Font>Arial,11,Bold</Font>
+      <Name>Collection_Group_Footer3</Name>
+      <TextBrush>[0:114:188]</TextBrush>
+    </Collection_Group_Footer3>
+    <Collection_Group_Footer4 Ref="84" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item71 Ref="85" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>GroupFooter</Placement>
+          <PlacementNestedLevel>4</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item71>
+      </Conditions>
+      <Description />
+      <Font>Arial,10,Bold</Font>
+      <Name>Collection_Group_Footer4</Name>
+      <TextBrush>[0:114:188]</TextBrush>
+    </Collection_Group_Footer4>
+    <Collection_Header1 Ref="86" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[0:114:188]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item73 Ref="87" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>Header</Placement>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item73>
+      </Conditions>
+      <Description />
+      <Font>Arial,8,Bold</Font>
+      <Name>Collection_Header1</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Header1>
+    <Collection_Header2 Ref="88" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[25:139:213]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item75 Ref="89" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>Header</Placement>
+          <PlacementNestedLevel>2</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item75>
+      </Conditions>
+      <Description />
+      <Font>Arial,8,Bold</Font>
+      <Name>Collection_Header2</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Header2>
+    <Collection_Header3 Ref="90" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[50:164:238]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item77 Ref="91" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>Header</Placement>
+          <PlacementNestedLevel>3</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item77>
+      </Conditions>
+      <Description />
+      <Font>Arial,8,Bold</Font>
+      <Name>Collection_Header3</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Header3>
+    <Collection_Header4 Ref="92" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[75:189:255]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item79 Ref="93" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
+          <Placement>Header</Placement>
+          <PlacementNestedLevel>4</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item79>
+      </Conditions>
+      <Description />
+      <Font>Arial,8,Bold</Font>
+      <Name>Collection_Header4</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Header4>
+    <Collection_Data1 Ref="94" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item81 Ref="95" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>Data</Placement>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item81>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data1</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data1>
+    <Collection_Data1_Odd_x0020_Style Ref="96" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>Gainsboro</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item83 Ref="97" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <Placement>DataOddStyle</Placement>
+          <Type>Placement, PlacementNestedLevel</Type>
+        </Item83>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data1_Odd Style</Name>
+      <TextBrush>Black</TextBrush>
+    </Collection_Data1_Odd_x0020_Style>
+    <Collection_Data1_Even_x0020_Style Ref="98" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[75:189:255]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item85 Ref="99" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <Placement>DataEvenStyle</Placement>
+          <Type>Placement, PlacementNestedLevel</Type>
+        </Item85>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data1_Even Style</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data1_Even_x0020_Style>
+    <Collection_Data2 Ref="100" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item87 Ref="101" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>Data</Placement>
+          <PlacementNestedLevel>2</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item87>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data2</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data2>
+    <Collection_Data2_Odd_x0020_Style Ref="102" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[165:255:255]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item89 Ref="103" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <Placement>DataOddStyle</Placement>
+          <PlacementNestedLevel>2</PlacementNestedLevel>
+          <Type>Placement, PlacementNestedLevel</Type>
+        </Item89>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data2_Odd Style</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data2_Odd_x0020_Style>
+    <Collection_Data2_Even_x0020_Style Ref="104" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[82:196:255]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item91 Ref="105" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <Placement>DataEvenStyle</Placement>
+          <PlacementNestedLevel>2</PlacementNestedLevel>
+          <Type>Placement, PlacementNestedLevel</Type>
+        </Item91>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data2_Even Style</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data2_Even_x0020_Style>
+    <Collection_Data3 Ref="106" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item93 Ref="107" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>Data</Placement>
+          <PlacementNestedLevel>3</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item93>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data3</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data3>
+    <Collection_Data3_Odd_x0020_Style Ref="108" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[180:255:255]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item95 Ref="109" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <Placement>DataOddStyle</Placement>
+          <PlacementNestedLevel>3</PlacementNestedLevel>
+          <Type>Placement, PlacementNestedLevel</Type>
+        </Item95>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data3_Odd Style</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data3_Odd_x0020_Style>
+    <Collection_Data3_Even_x0020_Style Ref="110" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[90:204:255]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item97 Ref="111" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <Placement>DataEvenStyle</Placement>
+          <PlacementNestedLevel>3</PlacementNestedLevel>
+          <Type>Placement, PlacementNestedLevel</Type>
+        </Item97>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data3_Even Style</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data3_Even_x0020_Style>
+    <Collection_Data4 Ref="112" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>Transparent</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item99 Ref="113" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
+          <Placement>Data</Placement>
+          <PlacementNestedLevel>4</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item99>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data4</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data4>
+    <Collection_Data4_Odd_x0020_Style Ref="114" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[195:255:255]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item101 Ref="115" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
+          <Placement>DataOddStyle</Placement>
+          <PlacementNestedLevel>4</PlacementNestedLevel>
+          <Type>Placement, PlacementNestedLevel</Type>
+        </Item101>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data4_Odd Style</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data4_Odd_x0020_Style>
+    <Collection_Data4_Even_x0020_Style Ref="116" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[97:211:255]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item103 Ref="117" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
+          <Placement>DataEvenStyle</Placement>
+          <PlacementNestedLevel>4</PlacementNestedLevel>
+          <Type>Placement, PlacementNestedLevel</Type>
+        </Item103>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Data4_Even Style</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Data4_Even_x0020_Style>
+    <Collection_Footer1 Ref="118" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[20:134:208]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item105 Ref="119" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>Footer</Placement>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item105>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Footer1</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Footer1>
+    <Collection_Footer2 Ref="120" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[45:159:233]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item107 Ref="121" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>Footer</Placement>
+          <PlacementNestedLevel>2</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item107>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Footer2</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Footer2>
+    <Collection_Footer3 Ref="122" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[70:184:255]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item109 Ref="123" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>Footer</Placement>
+          <PlacementNestedLevel>3</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item109>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Footer3</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Footer3>
+    <Collection_Footer4 Ref="124" type="Stimulsoft.Report.StiStyle" isKey="true">
+      <AllowUseBorderSidesFromLocation>True</AllowUseBorderSidesFromLocation>
+      <Border>None;[0:14:88];1;Solid;False;4;Black;True</Border>
+      <Brush>[95:209:255]</Brush>
+      <CollectionName>Collection</CollectionName>
+      <Conditions isList="true" count="1">
+        <Item111 Ref="125" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+          <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
+          <Placement>Footer</Placement>
+          <PlacementNestedLevel>4</PlacementNestedLevel>
+          <Type>ComponentType, Placement, PlacementNestedLevel</Type>
+        </Item111>
+      </Conditions>
+      <Description />
+      <Font>Arial,8</Font>
+      <Name>Collection_Footer4</Name>
+      <TextBrush>[0:0:0]</TextBrush>
+    </Collection_Footer4>
+  </Styles>
+</StiSerializer>
