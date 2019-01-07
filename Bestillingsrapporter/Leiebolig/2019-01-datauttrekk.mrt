@@ -55,7 +55,7 @@ isnull((select stuff((
 	select ','+ f.fasilitetsType + ' ' + convert(varchar, convert(decimal(8,0),harfas.pris)) from e..t_harFasiliteter harfas 
 	inner join e..t_fasiliteter f on f.id = harfas.FasilitetId
 	where harfas.BoligObjektId = kd.Objekt
-	and harfas.Pris &gt; 0
+	and harfas.Pris &gt; 0	
 	order by f.fasilitetsType
 	for XML PATH ('')) ,1 ,1,'')
 ),'')
@@ -64,12 +64,13 @@ as Prisantydning
 , ISNULL(b.antallsoverom,(isnull(nullif(b.Antall_rom,0),1) -1)) as AntallSoverom -- antallsoverom er ikke implement enda. Trekker fra 1 på antall rom
 ,(select navn from m..maaneder where id = month(kd.kontrakt_fra)) as startMnd
 , kd.formidlingsdato as Kontrakt_Akseptert_Dato
-, fbfl.FraDato as LeieFra
+, fbfl.GodkjentOppdatertUni as LeieFra
 , '3' as lopeTid
 ,(select stuff((
 	select ','+ f.fasilitetsType from e..t_harFasiliteter harfas 
 	inner join e..t_fasiliteter f on f.id = harfas.FasilitetId
 	where harfas.BoligObjektId = kd.Objekt
+	and isnull(harfas.inkludertILeien,0) = 1
 	order by f.fasilitetsType
 	for XML PATH ('')) ,1 ,1,'')
 ) as inkludert
@@ -684,6 +685,7 @@ dato</Text>
             </Text37>
             <Text4 Ref="52" type="Text" isKey="true">
               <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
               <ClientRectangle>0,0,1.4,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7</Font>
@@ -702,6 +704,7 @@ dato</Text>
                 <UseGroupSeparator>False</UseGroupSeparator>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
+              <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
               <Type>Expression</Type>
             </Text4>
             <Text16 Ref="54" type="Text" isKey="true">
@@ -756,10 +759,10 @@ dato</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/4/2019 9:35:39 AM</ReportChanged>
+  <ReportChanged>1/7/2019 8:26:31 AM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\2019-01-datauttrekk.mrt</ReportFile>
-  <ReportGuid>e186de4495464722a7ee5decce85df5c</ReportGuid>
+  <ReportGuid>1a2b4e50de944fecb26c0fee60b7041a</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
