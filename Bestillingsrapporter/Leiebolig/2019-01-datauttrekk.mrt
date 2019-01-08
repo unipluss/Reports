@@ -72,7 +72,7 @@ and isnull(f.Varenr,'') = (select  top 1 Varenr_inkludertIHusleie from e..t_klie
 , ISNULL(b.antallsoverom,(isnull(nullif(b.Antall_rom,0),1) -1)) as AntallSoverom -- antallsoverom er ikke implement enda. Trekker fra 1 på antall rom
 ,(select navn from m..maaneder where id = month(kd.kontrakt_fra)) as startMnd
 , kd.formidlingsdato as Kontrakt_Akseptert_Dato
-, fbfl.GodkjentOppdatertUni as LeieFra
+, isnull(fbfl.GodkjentOppdatertUni,fbfl.FraDato) as LeieFra
 , '3' as lopeTid
 ,(select stuff((
 	select ','+ f.fasilitetsType from e..t_harFasiliteter harfas 
@@ -771,10 +771,10 @@ kostnader</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/8/2019 12:47:42 PM</ReportChanged>
+  <ReportChanged>1/8/2019 12:58:23 PM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\2019-01-datauttrekk.mrt</ReportFile>
-  <ReportGuid>db47122fad764c2e892216097bb2815e</ReportGuid>
+  <ReportGuid>9587540e85cd48439c98ccb1d4401903</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
