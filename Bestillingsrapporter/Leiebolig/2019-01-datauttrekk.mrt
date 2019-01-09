@@ -75,7 +75,7 @@ and isnull(f.Varenr,'') = (select  top 1 Varenr_inkludertIHusleie from e..t_klie
 , isnull(fbfl.GodkjentOppdatertUni,fbfl.FraDato) as LeieFra
 , '3' as lopeTid
 ,(select stuff((
-	select ','+ f.fasilitetsType from e..t_harFasiliteter harfas 
+	select ', '+ f.fasilitetsType from e..t_harFasiliteter harfas 
 	inner join e..t_fasiliteter f on f.id = harfas.FasilitetId
 	where harfas.BoligObjektId = kd.Objekt
 	and isnull(harfas.inkludertILeien,0) = 1
@@ -114,9 +114,9 @@ for XML PATH ('')) ,1 ,1,'') as utvalg
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="8">
-      <value>,framnd,Fra_x0020_måned,int_x007C_sql_x003D_Select_x0020_1,System.Int32,_x0031_,False,False,False</value>
-      <value>,tilmnd,Til_x0020_måned,int_x007C_sql_x003D_Select_x0020_month_x0028_getdate_x0028__x0029__x0029_,System.Int32,_x0031_,False,False,False</value>
-      <value>,aar,År,int_x007C_sql_x003D_Select_x0020_year_x0028_getdate_x0028__x0029__x0029_,System.Int32,_x0032_019,False,False,False</value>
+      <value>,framnd,Fra_x0020_måned,int_x007C_sql_x003D_Select_x0020_1,System.Int32,_x0031_1,False,False,False</value>
+      <value>,tilmnd,Til_x0020_måned,int_x007C_sql_x003D_Select_x0020_month_x0028_getdate_x0028__x0029__x0029_,System.Int32,_x0031_1,False,False,False</value>
+      <value>,aar,År,int_x007C_sql_x003D_Select_x0020_year_x0028_getdate_x0028__x0029__x0029_,System.Int32,_x0032_018,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
@@ -486,7 +486,7 @@ kostnader</Text>
             <Text6 Ref="34" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>4.68,0,2.45,0.35</ClientRectangle>
+              <ClientRectangle>4.68,0,2.65,0.35</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,6</Font>
               <Margins>0,0,0,0</Margins>
@@ -534,7 +534,7 @@ kostnader</Text>
             <Text18 Ref="38" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>7.44,0,2.68,0.35</ClientRectangle>
+              <ClientRectangle>7.44,0,2.88,0.35</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,6</Font>
               <Margins>0,0,0,0</Margins>
@@ -771,10 +771,10 @@ kostnader</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/8/2019 12:58:23 PM</ReportChanged>
+  <ReportChanged>1/9/2019 7:00:20 AM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\2019-01-datauttrekk.mrt</ReportFile>
-  <ReportGuid>9587540e85cd48439c98ccb1d4401903</ReportGuid>
+  <ReportGuid>57f0702e186742cc87527f7f353e3740</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
