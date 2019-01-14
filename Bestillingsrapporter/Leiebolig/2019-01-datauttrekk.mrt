@@ -114,9 +114,9 @@ for XML PATH ('')) ,1 ,1,'') as utvalg
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="8">
-      <value>,framnd,Fra_x0020_måned,int_x007C_sql_x003D_Select_x0020_1,System.Int32,_x0031_1,False,False,False</value>
-      <value>,tilmnd,Til_x0020_måned,int_x007C_sql_x003D_Select_x0020_month_x0028_getdate_x0028__x0029__x0029_,System.Int32,_x0031_1,False,False,False</value>
-      <value>,aar,År,int_x007C_sql_x003D_Select_x0020_year_x0028_getdate_x0028__x0029__x0029_,System.Int32,_x0032_018,False,False,False</value>
+      <value>,framnd,Fra_x0020_måned,int_x007C_sql_x003D_Select_x0020_1,System.Int32,_x0031_,False,False,False</value>
+      <value>,tilmnd,Til_x0020_måned,int_x007C_sql_x003D_Select_x0020_month_x0028_getdate_x0028__x0029__x0029_,System.Int32,_x0031_,False,False,False</value>
+      <value>,aar,År,int_x007C_sql_x003D_Select_x0020_year_x0028_getdate_x0028__x0029__x0029_,System.Int32,_x0032_019,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
@@ -353,7 +353,7 @@ tid</Text>
             </Pris>
             <Text28 Ref="24" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>20.79,1.68,1.51,1</ClientRectangle>
+              <ClientRectangle>20.99,1.48,1.31,1.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8,Bold</Font>
               <Guid>4a7f8fd906b74ed3b2b2f0178b7c7fed</Guid>
@@ -361,7 +361,8 @@ tid</Text>
               <Name>Text28</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
-              <Text>Akseptert-
+              <Text>Aksep-
+tert-
 dato</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -498,14 +499,14 @@ kostnader</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>HotkeyPrefix=None, LineLimit=False, RightToLeft=False, Trimming=None, WordWrap=True, Angle=0, FirstTabOffset=40, DistanceBetweenTabs=20,</TextOptions>
             </Område>
-            <Text8 Ref="35" type="Text" isKey="true">
+            <Areal Ref="35" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>3.2,0,1,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,6</Font>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
-              <Name>Text8</Name>
+              <Name>Areal</Name>
               <Page isRef="5" />
               <Parent isRef="31" />
               <Text>{datauttrekk.Areal}</Text>
@@ -518,7 +519,7 @@ kostnader</Text>
                 <UseGroupSeparator>False</UseGroupSeparator>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
-            </Text8>
+            </Areal>
             <Postnr Ref="37" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>10.51,0,1.09,0.4</ClientRectangle>
@@ -616,15 +617,15 @@ kostnader</Text>
               </TextFormat>
               <Type>DataColumn</Type>
             </Akseptertdato>
-            <Ledig_x0020_for_x0020_leie Ref="45" type="Text" isKey="true">
+            <LedigForLeie Ref="45" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>22.33,0,1.38,0.35</ClientRectangle>
+              <ClientRectangle>22.53,0,1.38,0.35</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,6</Font>
               <Guid>60db155f5269480da83c9838e716ddf8</Guid>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
-              <Name>Ledig for leie</Name>
+              <Name>LedigForLeie</Name>
               <Page isRef="5" />
               <Parent isRef="31" />
               <Text>{datauttrekk.LeieFra}</Text>
@@ -633,7 +634,7 @@ kostnader</Text>
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>DataColumn</Type>
-            </Ledig_x0020_for_x0020_leie>
+            </LedigForLeie>
             <Lopetid Ref="47" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>12.17,0,0.36,0.4</ClientRectangle>
@@ -772,10 +773,10 @@ kostnader</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/14/2019 10:10:51 AM</ReportChanged>
+  <ReportChanged>1/14/2019 10:41:54 AM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\2019-01-datauttrekk.mrt</ReportFile>
-  <ReportGuid>2eb98a0aa19944d9b8f1096eec41b282</ReportGuid>
+  <ReportGuid>bd4183452a2c464e9fbbdf87025210f9</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
