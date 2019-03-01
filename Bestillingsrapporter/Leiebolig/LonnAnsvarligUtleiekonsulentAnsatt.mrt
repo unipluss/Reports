@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9Dr5oUQFQ4zpR5zJdATjf9Fw+yxWX1ntRnu5CHzosS/9NJFsRlkBOXt4hOx5TKivwmppj017S7xpR7AE5QBrj99w9YzIXdPx4RlRgXeId2rT</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9FZpoU1f2d1hfOXJ9ADjF4tawQ1NVFnxa0y5gORc63vRaq3PZ017KUVBqOxpGW0TjVrViUNdAYFhBdXM8VQ1j+B40YliFXsFwGs=</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -313,7 +313,12 @@ WHERE ISNULL(vlf.dim6, 0) &lt;&gt; 0 AND ISNULL(vlf.dim7, 0) = 0
         <Name>VlfAuK</Name>
         <NameInSource>Connection</NameInSource>
         <Parameters isList="true" count="0" />
-        <SqlCommand>SET DATEFORMAT ymd
+        <SqlCommand>DECLARE @fradato as varchar(1000)
+DECLARE @tildato as varchar(1000)
+set @fradato = '{fraDato}'
+set @tildato = '{TilDato}'
+SET DATEFORMAT ymd
+
 SELECT an.navn, an.Ansatte_id, 
 	fak.Fakturadato,	
 	vlf.ID,		
@@ -322,14 +327,15 @@ SELECT an.navn, an.Ansatte_id,
 	vlf.Fakturanr,		
 	vlf.Netto,		
 	vlf.Varetekst
-FROM c..Activity ac
+	FROM c..Activity ac
+	LEFT JOIN c..ORDRE ord ON ord.dim8 = ac.ID
 	LEFT JOIN c..VARELNFAKT vlf ON vlf.dim8 = ac.ID
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
-	LEFT JOIN e..t_ansatte an ON an.uniBrukerId = ac.Responsible
+	LEFT JOIN e..t_ansatte an ON an.Navn = ord.Vaar_Ref
 WHERE ISNULL(an.ansatte_id, 0) &lt;&gt; 0
-	AND an.ansatte_id IN (56,57,32,16,30,19,13,14,3,49,44,29,55,43,50,33,54,48,12,1,2,9,6,42,37,34,15,10,40,36,18,35,39,5,24,45,25,46,58,8,52,51,11,17,38,4,21,41,53,47)
+	AND an.ansatte_id IN ({Ansatt})
 	AND ISNULL(fak.fakturadato, '') &lt;&gt; ''
-	AND fak.fakturadato between '20151219' and '20181219'
+	AND fak.fakturadato between @fradato and @tildato
 	AND vlf.Varenr in ('3035', '3032', '3036', '3135', '3120', '3125')
 ORDER BY vlf.Fakturanr</SqlCommand>
       </VlfAuK>
@@ -374,23 +380,16 @@ GROUP by fa.ansvarligUtleieKonsulentId, navn</SqlCommand>
       </AktiveBoliger>
       <AuGs Ref="11" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>AuGs</Alias>
-        <Columns isList="true" count="16">
-          <value>Ansatte_id,System.Int32</value>
-          <value>Navn,System.String</value>
-          <value>ID,System.Int32</value>
-          <value>oppdragsnummer,System.Int32</value>
-          <value>formidlingsnummer,System.Int32</value>
-          <value>Fakturanr,System.Int32</value>
-          <value>Kundenr,System.Int32</value>
-          <value>Varetekst,System.String</value>
+        <Columns isList="true" count="9">
           <value>Varenr,System.String</value>
-          <value>Netto,System.Decimal</value>
+          <value>Fakturanr,System.Int32</value>
           <value>Fakturadato,System.DateTime</value>
-          <value>kontrakts_id,System.Int32</value>
-          <value>godkjentInnflyttingsmappe,System.Int16</value>
+          <value>Varetekst,System.String</value>
+          <value>Navn,System.String</value>
+          <value>Ansatte_id,System.Int32</value>
+          <value>FormidlingsNr,System.Int32</value>
+          <value>Netto,System.Decimal</value>
           <value>godkjentInnflyttingsmappeDato,System.DateTime</value>
-          <value>BoligNummer,System.String</value>
-          <value>Objekt_adresse,System.String</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -401,33 +400,27 @@ GROUP by fa.ansvarligUtleieKonsulentId, navn</SqlCommand>
 DECLARE @tildato as varchar(50)
 Set @fradato = '{fraDato}'
 Set @tildato = '{TilDato}'
-
 SET DATEFORMAT ymd
-SELECT
-	an.Ansatte_id,
-	an.Navn,
-	ID,
-	vlf.dim7 as oppdragsnummer,
-	vlf.dim6 as formidlingsnummer,
-	vlf.Fakturanr,
-	vlf.Kundenr,
-	vlf.Varetekst,
+
+SELECT 
 	vlf.Varenr,
-	CASE WHEN (ISNULL(vlf.Netto, 0) = 0) THEN 0 ELSE vlf.Netto END as Netto,
+	fak.Fakturanr,
 	fak.Fakturadato,
-	kd.kontrakts_id,
-	kd.godkjentInnflyttingsmappe,
-	kd.godkjentInnflyttingsmappeDato,
-	bo.BoligNummer,
-	bo.Objekt_adresse
-FROM c..VARELNFAKT vlf
+	vlf.Varetekst,
+	an.Navn,
+	an.Ansatte_id,
+	kd.FormidlingsNr,
+	vlf.Netto,
+	kd.godkjentInnflyttingsmappeDato
+	FROM e..t_kontraktsdata kd
+	LEFT JOIN c..VARELNFAKT vlf ON kd.FormidlingsNr = vlf.dim6
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
-	LEFT JOIN e..t_kontraktsdata kd ON kd.FormidlingsNr = vlf.dim6
-	LEFT JOIN e..t_boligobjekt bo ON bo.Objekt_id = kd.Objekt
-	INNER JOIN e..t_ansatte an ON an.Ansatte_id = kd.ansvarligMeglerGodkjentSaksmappe
+	LEFT JOIN e..t_forvaltningsAvtale fa ON fa.Id = kd.ForvaltningsavtaleId
+	LEFT JOIN e..t_ansatte an ON an.Ansatte_id = fa.ansvarligUtleieKonsulentId
 WHERE vlf.Varenr IN ('3035', '3032', '3036', '3135', '3120', '3125')
 	AND fak.Fakturadato between @fradato and DATEADD(y, 1, @tildato)
-	AND (ISNULL(kd.godkjentInnflyttingsmappeDato, '') = '' OR kd.godkjentInnflyttingsmappeDato NOT BETWEEN @fradato AND @tildato)</SqlCommand>
+	AND (kd.godkjentInnflyttingsmappeDato NOT BETWEEN @fradato AND @tildato OR ISNULL(kd.godkjentInnflyttingsmappeDato, '') = '')
+	AND ISNULL(kd.FormidlingsNr, 0) &lt;&gt; 0</SqlCommand>
       </AuGs>
     </DataSources>
     <Relations isList="true" count="6">
@@ -518,14 +511,14 @@ WHERE vlf.Varenr IN ('3035', '3032', '3036', '3135', '3120', '3125')
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="8">
-      <value>,Ansatt,Ansatt,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0035_6_x002C_57_x002C_32_x002C_16_x002C_30_x002C_19_x002C_13_x002C_14_x002C_3_x002C_49_x002C_44_x002C_29_x002C_55_x002C_43_x002C_50_x002C_33_x002C_54_x002C_48_x002C_12_x002C_1_x002C_2_x002C_9_x002C_6_x002C_42_x002C_37_x002C_34_x002C_15_x002C_10_x002C_40_x002C_36_x002C_18_x002C_35_x002C_39_x002C_5_x002C_24_x002C_45_x002C_25_x002C_46_x002C_58_x002C_8_x002C_52_x002C_51_x002C_11_x002C_17_x002C_38_x002C_4_x002C_21_x002C_41_x002C_53_x002C_47,False,False,False</value>
-      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0151219,False,False,False</value>
-      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0181219,False,False,False</value>
-      <value>System,UserName,UserName,System.String,Administrator,True,False</value>
-      <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
-      <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0031_0,True,False</value>
-      <value>System,ClientYear,ClientYear,System.Int32,_x0032_018,True,False</value>
+      <value>,Ansatt,Ansatt,checklist_x007C_sql_x003D__x002F__x002A__x002A__x002F_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x0020__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020_FOR_x0020__x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F__x0020_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_ans_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_ans_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020__x002F__x002A__x002A__x002F_from_x0020_e..t_ansatte_x0020_an_x0020_where_x0020_isnull_x0028_an.ErMegler_x002C__x0020_0_x0029__x0020__x003C__x003E__x0020_0_x002F__x002A__x002A__x002F_order_x0020_by_x0020_navn_x0020_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0035_7_x002C_30_x002C_49_x002C_44_x002C_29_x002C_43_x002C_54_x002C_48_x002C_9_x002C_42_x002C_40_x002C_36_x002C_39_x002C_46_x002C_58,False,False,False</value>
+      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0181101,False,False,False</value>
+      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0191221,False,False,False</value>
+      <value>System,UserName,UserName,System.String,unipluss,True,False</value>
+      <value>System,UserId,UserId,System.String,_x0035_7,True,False</value>
+      <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0031_4,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_019,True,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -766,7 +759,7 @@ WHERE vlf.Varenr IN ('3035', '3032', '3036', '3135', '3120', '3125')
             </Oa>
             <AuK Ref="38" type="SubReport" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.32,27.7,0.2</ClientRectangle>
+              <ClientRectangle>0,0.12,27.7,0.2</ClientRectangle>
               <Components isList="true" count="0" />
               <Guid>69ae77ed7026452f92542a309f909d69</Guid>
               <KeepSubReportTogether>True</KeepSubReportTogether>
@@ -786,7 +779,7 @@ WHERE vlf.Varenr IN ('3035', '3032', '3036', '3135', '3120', '3125')
             </AntallBoliger>
             <AuGsSub Ref="40" type="SubReport" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.12,27.9,0.2</ClientRectangle>
+              <ClientRectangle>0,0.32,27.7,0.2</ClientRectangle>
               <Components isList="true" count="0" />
               <Guid>246c4197014a4f2089dbb642d1240dd9</Guid>
               <Name>AuGsSub</Name>
@@ -1019,6 +1012,8 @@ Sum(DbAmkOa,VlfOa.Netto)
 Sum(DbAmkKd,VlfKd.Netto)
 +
 Sum(DataBand1,VlfAuK.Netto)
++
+Sum(DbAugs,AuGs.Netto)
 }</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="58" type="CurrencyFormat" isKey="true">
@@ -2418,13 +2413,13 @@ Sum(DbOppdrag,OaKost.totalsum)
       <Brush>Transparent</Brush>
       <Components isList="true" count="3">
         <HbAuGs Ref="164" type="HeaderBand" isKey="true">
-          <Brush>LightCoral</Brush>
+          <Brush>Transparent</Brush>
           <CanShrink>True</CanShrink>
-          <ClientRectangle>0,0.4,27.9,1.4</ClientRectangle>
-          <Components isList="true" count="7">
+          <ClientRectangle>0,0.4,27.7,1.4</ClientRectangle>
+          <Components isList="true" count="6">
             <Text84 Ref="165" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0,8.4,0.6</ClientRectangle>
+              <ClientRectangle>0.2,0,16.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8,Bold</Font>
               <Guid>1a49449679ce42c8ba4dc4a513ae12cd</Guid>
@@ -2432,14 +2427,14 @@ Sum(DbOppdrag,OaKost.totalsum)
               <Name>Text84</Name>
               <Page isRef="163" />
               <Parent isRef="164" />
-              <Text>Fakturerte aktiviteter for oppdrag uten godkjent saksmappe</Text>
+              <Text>Fakturerte aktiviteter for oppdrag uten godkjent saksmappe, eller hvor saksmappe er godkjent utenfor angitt periode</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text84>
             <Text85 Ref="166" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.2,0.6,1.6,0.6</ClientRectangle>
+              <ClientRectangle>2.2,0.6,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8,Italic</Font>
               <Guid>54ec7ceac0384e7ebedb78dd756ed571</Guid>
@@ -2454,7 +2449,7 @@ Sum(DbOppdrag,OaKost.totalsum)
             </Text85>
             <Text87 Ref="167" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>7.4,0.6,1.6,0.6</ClientRectangle>
+              <ClientRectangle>4.4,0.6,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8,Italic</Font>
               <Guid>0d58667f6037479a9145ed84d63f2f61</Guid>
@@ -2469,7 +2464,7 @@ Sum(DbOppdrag,OaKost.totalsum)
             </Text87>
             <Text88 Ref="168" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.6,0.6,1.2,0.6</ClientRectangle>
+              <ClientRectangle>6.6,0.6,1.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8,Italic</Font>
               <Guid>eeb667a8ee7040658062f129082b1964</Guid>
@@ -2484,7 +2479,7 @@ Sum(DbOppdrag,OaKost.totalsum)
             </Text88>
             <Text89 Ref="169" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>11.4,0.6,2.2,0.6</ClientRectangle>
+              <ClientRectangle>8.4,0.6,2.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8,Italic</Font>
               <Guid>9847a9a09041404f8358df304d3cf36a</Guid>
@@ -2497,24 +2492,9 @@ Sum(DbOppdrag,OaKost.totalsum)
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text89>
-            <Text95 Ref="170" type="Text" isKey="true">
+            <Text96 Ref="170" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0.6,1.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,8,Italic</Font>
-              <Guid>96b23e8bc4194d98b66a3067fd91fea2</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text95</Name>
-              <Page isRef="163" />
-              <Parent isRef="164" />
-              <Text>Oppdragsnr.</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text95>
-            <Text96 Ref="171" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>2.6,0.6,2,0.6</ClientRectangle>
+              <ClientRectangle>0.2,0.6,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8,Italic</Font>
               <Guid>ae2cb178aa6e4d86bf70d8b78b1bb9ab</Guid>
@@ -2529,80 +2509,81 @@ Sum(DbOppdrag,OaKost.totalsum)
             </Text96>
           </Components>
           <Conditions isList="true" count="0" />
+          <Enabled>False</Enabled>
           <Name>HbAuGs</Name>
           <Page isRef="163" />
           <Parent isRef="163" />
         </HbAuGs>
-        <DbAugs Ref="172" type="DataBand" isKey="true">
-          <Brush>LightCoral</Brush>
+        <DbAugs Ref="171" type="DataBand" isKey="true">
+          <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanShrink>True</CanShrink>
-          <ClientRectangle>0,2.6,27.9,0.8</ClientRectangle>
-          <Components isList="true" count="7">
-            <Text90 Ref="173" type="Text" isKey="true">
+          <ClientRectangle>0,2.6,27.7,0.8</ClientRectangle>
+          <Components isList="true" count="6">
+            <Text90 Ref="172" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.2,0,1.6,0.6</ClientRectangle>
+              <ClientRectangle>2.2,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Guid>b49408dda060437dba6cd397032257d3</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text90</Name>
               <Page isRef="163" />
-              <Parent isRef="172" />
+              <Parent isRef="171" />
               <Text>{AuGs.Fakturanr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text90>
-            <Text91 Ref="174" type="Text" isKey="true">
+            <Text91 Ref="173" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>7.4,0,1.6,0.6</ClientRectangle>
+              <ClientRectangle>4.4,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Guid>6c1b31c59f0c4b5e85c2d6bd9c85d621</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text91</Name>
               <Page isRef="163" />
-              <Parent isRef="172" />
+              <Parent isRef="171" />
               <Text>{AuGs.Fakturadato}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="175" type="DateFormat" isKey="true">
+              <TextFormat Ref="174" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text91>
-            <Text92 Ref="176" type="Text" isKey="true">
+            <Text92 Ref="175" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.6,0,1.2,0.6</ClientRectangle>
+              <ClientRectangle>6.6,0,1.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Guid>157668fc9302431f8e99fc60ec5e0869</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text92</Name>
               <Page isRef="163" />
-              <Parent isRef="172" />
+              <Parent isRef="171" />
               <Text>{AuGs.Varenr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text92>
-            <Text93 Ref="177" type="Text" isKey="true">
+            <Text93 Ref="176" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>11.4,0,6.4,0.6</ClientRectangle>
+              <ClientRectangle>8.4,0,6.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,8</Font>
               <Guid>748c32870b0a4168b93eddaba11fe2f6</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text93</Name>
               <Page isRef="163" />
-              <Parent isRef="172" />
+              <Parent isRef="171" />
               <Text>{AuGs.Varetekst}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text93>
-            <Text94 Ref="178" type="Text" isKey="true">
+            <Text94 Ref="177" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>20.6,0,2.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -2611,10 +2592,10 @@ Sum(DbOppdrag,OaKost.totalsum)
               <Margins>0,0,0,0</Margins>
               <Name>Text94</Name>
               <Page isRef="163" />
-              <Parent isRef="172" />
+              <Parent isRef="171" />
               <Text>{AuGs.Netto}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="179" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="178" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
                 <NegativePattern>12</NegativePattern>
@@ -2625,34 +2606,20 @@ Sum(DbOppdrag,OaKost.totalsum)
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text94>
-            <Text97 Ref="180" type="Text" isKey="true">
+            <Text98 Ref="179" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0,1.8,0.6</ClientRectangle>
+              <ClientRectangle>0.2,0,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
-              <Font>Arial,8</Font>
-              <Guid>f8f097a451ba48eea727db969f7ef7c0</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text97</Name>
-              <Page isRef="163" />
-              <Parent isRef="172" />
-              <Text>{AuGs.oppdragsnummer}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>DataColumn</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text97>
-            <Text98 Ref="181" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>2.6,0,2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
               <Font>Arial,8</Font>
               <Guid>25083597b8124527a33c3a37465076ee</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text98</Name>
               <Page isRef="163" />
-              <Parent isRef="172" />
-              <Text>{AuGs.formidlingsnummer}</Text>
+              <Parent isRef="171" />
+              <Text>{AuGs.FormidlingsNr}</Text>
               <TextBrush>Black</TextBrush>
-              <Type>DataColumn</Type>
+              <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text98>
           </Components>
@@ -2666,10 +2633,34 @@ Sum(DbOppdrag,OaKost.totalsum)
           <Parent isRef="163" />
           <Sort isList="true" count="0" />
         </DbAugs>
-        <FbAugs Ref="182" type="FooterBand" isKey="true">
+        <FbAugs Ref="180" type="FooterBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,4.2,27.9,0.8</ClientRectangle>
-          <Components isList="true" count="0" />
+          <ClientRectangle>0,4.2,27.7,0.8</ClientRectangle>
+          <Components isList="true" count="1">
+            <Text95 Ref="181" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>20.6,0.2,2.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Guid>5e810bb0339c438bac89e0d685d77b5a</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text95</Name>
+              <Page isRef="163" />
+              <Parent isRef="180" />
+              <Text>{Sum(DbAugs,AuGs.Netto)}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="182" type="CurrencyFormat" isKey="true">
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text95>
+          </Components>
           <Conditions isList="true" count="0" />
           <Enabled>False</Enabled>
           <Name>FbAugs</Name>
@@ -2683,7 +2674,7 @@ Sum(DbOppdrag,OaKost.totalsum)
       <Name>subAuGs</Name>
       <Orientation>Landscape</Orientation>
       <PageHeight>21</PageHeight>
-      <PageWidth>29.9</PageWidth>
+      <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
       <Watermark Ref="183" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
@@ -2703,10 +2694,10 @@ Sum(DbOppdrag,OaKost.totalsum)
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/20/2018 10:32:20 AM</ReportChanged>
+  <ReportChanged>3/1/2019 12:30:22 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\LonnAnsvarligUtleiekonsulentAnsatt7.mrt</ReportFile>
-  <ReportGuid>df39c22acde84b6b9da8176bcbeccddb</ReportGuid>
+  <ReportFile>C:\Users\PN-3PU~1\AppData\Local\Temp\2\v_2LonnAnsvarligUtleiekonsulentAnsatt.mrt</ReportFile>
+  <ReportGuid>037d013f84344856b7037f714b7fa70c</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>

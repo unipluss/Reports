@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9Dr5oUQFQ4zpR5zJdATjf9Fw+yxWX1ntRnu5CHzosS/9NJFsRlkBOXt4hOx5TKivwmppj017S7xpR7AE5QBrj99w9YzIXdPx4RlRgXeId2rT</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9FZpoU1f2d1hfOXJ9ADjF4tawQ1NVFnxa0y5gORc63vRaq3PZ017KUVBqOxpGW0TjVrViUNdAYFhBdXM8VQ1j+B40YliFXsFwGs=</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -114,11 +114,11 @@
 	an.Navn
 	FROM e..t_ansatte an
 WHERE an.Ansatte_id in ({Ansatt})
---AND ISNULL(an.ErForvalter, 0) &lt;&gt; 0</SqlCommand>
+AND ISNULL(an.ErForvalter, 0) &lt;&gt; 0</SqlCommand>
       </Forvaltere>
       <VlfDim5 Ref="6" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>VlfDim5</Alias>
-        <Columns isList="true" count="7">
+        <Columns isList="true" count="8">
           <value>vareNr,System.String</value>
           <value>Varetekst,System.String</value>
           <value>Netto,System.Decimal</value>
@@ -126,6 +126,7 @@ WHERE an.Ansatte_id in ({Ansatt})
           <value>Fakturanr,System.Int32</value>
           <value>Navn,System.String</value>
           <value>Ansatte_id,System.Int32</value>
+          <value>aktivitetsid,System.Int32</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -139,7 +140,7 @@ set @fradato = '{fraDato}'
 set @tildato = '{TilDato}'
 SET DATEFORMAT ymd
 
--- 1
+-- 1 
 SELECT 
 	vlf.vareNr,
 	vlf.Varetekst,
@@ -147,14 +148,17 @@ SELECT
 	fak.Fakturadato,
 	fak.Fakturanr,
 	an.Navn,
-	an.Ansatte_id
+	an.Ansatte_id,
+	ac.ID as aktivitetsid
 	FROM c..Activity ac
+	LEFT JOIN c..ORDRE ord on ord.dim8 = ac.ID
 	LEFT JOIN c..VARELNFAKT vlf ON vlf.dim8 = ac.ID
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
-	LEFT JOIN e..t_ansatte an ON an.Ansatte_id = ac.Responsible
-WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
+	LEFT JOIN e..t_ansatte an ON an.Navn = ord.Vaar_Ref
+WHERE vlf.Varenr IN ('3181', '3183', '3185', '3186', '3188')
 	AND fak.Fakturadato BETWEEN @fradato AND @tildato
 	AND ISNULL(vlf.dim8, 0) &lt;&gt; 0
+	AND an.Ansatte_id in ({Ansatt})
 UNION
 --2
 SELECT 
@@ -164,17 +168,19 @@ SELECT
 	fak.Fakturadato,
 	fak.Fakturanr,
 	an.Navn,
-	an.Ansatte_id
+	an.Ansatte_id,
+	'' as aktivitetsid
 	FROM e..t_forvaltningsAvtale fa
 	LEFT JOIN c..VARELNFAKT vlf ON fa.Id = vlf.dim5
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
 	LEFT JOIN e..t_ansatte an ON an.Ansatte_id = fa.forvalterAnsattId
-WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
+WHERE vlf.Varenr IN ('3181', '3183', '3185', '3186', '3188')
 	AND fak.Fakturadato BETWEEN @fradato AND @tildato
 	AND ISNULL(vlf.dim5, 0) &lt;&gt; 0
 	AND ISNULL(vlf.dim8, 0) = 0
+	AND an.Ansatte_id in ({Ansatt})
 UNION
--- 3
+-- 3 
 SELECT 
 	vlf.vareNr,
 	vlf.Varetekst,
@@ -182,19 +188,21 @@ SELECT
 	fak.Fakturadato,
 	fak.Fakturanr,
 	an.Navn,
-	an.Ansatte_id
+	an.Ansatte_id,
+	'' as aktivitetsid
 	FROM e..t_kontraktsdata kd
 	LEFT JOIN c..VARELNFAKT vlf ON vlf.dim6 = kd.FormidlingsNr
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
 	LEFT JOIN e..t_forvaltningsAvtale fa ON fa.Id = kd.ForvaltningsavtaleId
 	LEFT JOIN e..t_ansatte an ON an.Ansatte_id = fa.forvalterAnsattId
-WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
+WHERE vlf.Varenr IN ('3181', '3183', '3185', '3186', '3188')
 	AND fak.Fakturadato BETWEEN @fradato AND @tildato
 	AND ISNULL(vlf.dim5, 0) = 0
 	AND ISNULL(vlf.dim6, 0) &lt;&gt; 0
 	AND ISNULL(vlf.dim8, 0) = 0
+	AND an.Ansatte_id in ({Ansatt})
 UNION
--- 4
+-- 4 
 SELECT 
 	vlf.vareNr,
 	vlf.Varetekst,
@@ -202,18 +210,20 @@ SELECT
 	fak.Fakturadato,
 	fak.Fakturanr,
 	an.Navn,
-	an.Ansatte_id
+	an.Ansatte_id,
+	'' as aktivitetsid
 	FROM e..t_oppdragsAvtale oa
 	LEFT JOIN c..VARELNFAKT vlf ON vlf.dim7 = oa.Oppdragsnr
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
 	LEFT JOIN e..t_forvaltningsAvtale fa ON fa.Id = oa.forvaltningsAvtaleId
 	LEFT JOIN e..t_ansatte an ON an.Ansatte_id = fa.forvalterAnsattId
-WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
+WHERE vlf.Varenr IN ('3181', '3183', '3185', '3186', '3188')
 	AND fak.Fakturadato BETWEEN @fradato AND @tildato
 	AND ISNULL(vlf.dim5, 0) = 0
 	AND ISNULL(vlf.dim6, 0) = 0
 	AND ISNULL(vlf.dim7, 0) &lt;&gt; 0
-	AND ISNULL(vlf.dim8, 0) = 0</SqlCommand>
+	AND ISNULL(vlf.dim8, 0) = 0
+	AND an.Ansatte_id in ({Ansatt})</SqlCommand>
       </VlfDim5>
     </DataSources>
     <Relations isList="true" count="1">
@@ -234,14 +244,14 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="8">
-      <value>,Ansatt,Ansatt,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0035_6_x002C_57_x002C_32_x002C_16_x002C_30_x002C_19_x002C_13_x002C_14_x002C_3_x002C_49_x002C_44_x002C_29_x002C_55_x002C_43_x002C_50_x002C_33_x002C_54_x002C_48_x002C_12_x002C_1_x002C_2_x002C_9_x002C_6_x002C_42_x002C_37_x002C_34_x002C_15_x002C_10_x002C_40_x002C_36_x002C_18_x002C_35_x002C_39_x002C_5_x002C_24_x002C_45_x002C_25_x002C_46_x002C_58_x002C_8_x002C_52_x002C_51_x002C_11_x002C_17_x002C_38_x002C_4_x002C_21_x002C_41_x002C_53_x002C_47,False,False,False</value>
-      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0180412,False,False,False</value>
-      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0181219,False,False,False</value>
-      <value>System,UserName,UserName,System.String,Administrator,True,False</value>
-      <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
-      <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0031_0,True,False</value>
-      <value>System,ClientYear,ClientYear,System.Int32,_x0032_018,True,False</value>
+      <value>,Ansatt,Ansatt,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_ans_x002F__x002A__x002A__x002F_else_x002F__x002A__x002A__x002F_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_ans_x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_END_x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020_from_x0020_e..t_ansatte_x0020_an_x0020_where_x0020_isnull_x0028_an.ErForvalter_x002C__x0020_0_x0029__x0020__x003C__x003E__x0020_0_x0020_order_x0020_by_x0020_navn_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0035_,False,False,False</value>
+      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0190101,False,False,False</value>
+      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0190131,False,False,False</value>
+      <value>System,UserName,UserName,System.String,unipluss,True,False</value>
+      <value>System,UserId,UserId,System.String,_x0035_7,True,False</value>
+      <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0031_4,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_019,True,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -570,7 +580,7 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
           <Brush>LightSteelBlue</Brush>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,0.4,27.7,0.8</ClientRectangle>
-          <Components isList="true" count="6">
+          <Components isList="true" count="7">
             <Text12 Ref="36" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>1.4,0,1.8,0.6</ClientRectangle>
@@ -661,13 +671,28 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text17>
+            <Text19 Ref="42" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>17.4,0,1.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Guid>9387e359db684e0481aae4ee7b3bd744</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text19</Name>
+              <Page isRef="34" />
+              <Parent isRef="35" />
+              <Text>Aktivitetsid</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text19>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>HbFaktura</Name>
           <Page isRef="34" />
           <Parent isRef="34" />
         </HbFaktura>
-        <GhVarenr Ref="42" type="GroupHeaderBand" isKey="true">
+        <GhVarenr Ref="43" type="GroupHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,2,27.7,1</ClientRectangle>
@@ -678,14 +703,14 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
           <Page isRef="34" />
           <Parent isRef="34" />
         </GhVarenr>
-        <DbVlf Ref="43" type="DataBand" isKey="true">
+        <DbVlf Ref="44" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanBreak>True</CanBreak>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,3.8,27.7,1</ClientRectangle>
-          <Components isList="true" count="5">
-            <Text7 Ref="44" type="Text" isKey="true">
+          <Components isList="true" count="6">
+            <Text7 Ref="45" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>1.4,0,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -694,13 +719,13 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
               <Margins>0,0,0,0</Margins>
               <Name>Text7</Name>
               <Page isRef="34" />
-              <Parent isRef="43" />
+              <Parent isRef="44" />
               <Text>{VlfDim5.Fakturanr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text7>
-            <Text8 Ref="45" type="Text" isKey="true">
+            <Text8 Ref="46" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>6,0,1.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -709,13 +734,13 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
               <Margins>0,0,0,0</Margins>
               <Name>Text8</Name>
               <Page isRef="34" />
-              <Parent isRef="43" />
+              <Parent isRef="44" />
               <Text>{VlfDim5.vareNr}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text8>
-            <Text9 Ref="46" type="Text" isKey="true">
+            <Text9 Ref="47" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>3.4,0,2.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -724,16 +749,16 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
               <Margins>0,0,0,0</Margins>
               <Name>Text9</Name>
               <Page isRef="34" />
-              <Parent isRef="43" />
+              <Parent isRef="44" />
               <Text>{VlfDim5.Fakturadato}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="47" type="DateFormat" isKey="true">
+              <TextFormat Ref="48" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text9>
-            <Text10 Ref="48" type="Text" isKey="true">
+            <Text10 Ref="49" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>8.2,0,8.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -742,13 +767,13 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
               <Margins>0,0,0,0</Margins>
               <Name>Text10</Name>
               <Page isRef="34" />
-              <Parent isRef="43" />
+              <Parent isRef="44" />
               <Text>{VlfDim5.Varetekst}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text10>
-            <Text11 Ref="49" type="Text" isKey="true">
+            <Text11 Ref="50" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>21,0,2.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -757,10 +782,10 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
               <Margins>0,0,0,0</Margins>
               <Name>Text11</Name>
               <Page isRef="34" />
-              <Parent isRef="43" />
+              <Parent isRef="44" />
               <Text>{VlfDim5.Netto}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="50" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="51" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
                 <NegativePattern>12</NegativePattern>
@@ -771,6 +796,21 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text11>
+            <Text18 Ref="52" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>17.4,0,2.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Guid>50bb1b4128784e3d938e0de5c729f445</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text18</Name>
+              <Page isRef="34" />
+              <Parent isRef="44" />
+              <Text>{VlfDim5.aktivitetsid}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text18>
           </Components>
           <Conditions isList="true" count="0" />
           <DataRelationName>ForvTilDim5</DataRelationName>
@@ -782,14 +822,17 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
           <OddStyle>odd</OddStyle>
           <Page isRef="34" />
           <Parent isRef="34" />
-          <Sort isList="true" count="0" />
+          <Sort isList="true" count="2">
+            <value>ASC</value>
+            <value>Fakturadato</value>
+          </Sort>
         </DbVlf>
-        <GfVarenr Ref="51" type="GroupFooterBand" isKey="true">
+        <GfVarenr Ref="53" type="GroupFooterBand" isKey="true">
           <Brush>Gainsboro</Brush>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,5.6,27.7,1</ClientRectangle>
           <Components isList="true" count="1">
-            <Text6 Ref="52" type="Text" isKey="true">
+            <Text6 Ref="54" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>24.6,0,3,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -798,10 +841,10 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
               <Margins>0,0,0,0</Margins>
               <Name>Text6</Name>
               <Page isRef="34" />
-              <Parent isRef="51" />
+              <Parent isRef="53" />
               <Text>{Sum(GhVarenr,VlfDim5.Netto)}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="53" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="55" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
                 <NegativePattern>12</NegativePattern>
@@ -818,7 +861,7 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
           <Page isRef="34" />
           <Parent isRef="34" />
         </GfVarenr>
-        <FbFaktura Ref="54" type="FooterBand" isKey="true">
+        <FbFaktura Ref="56" type="FooterBand" isKey="true">
           <Brush>Transparent</Brush>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,7.4,27.7,0.8</ClientRectangle>
@@ -837,13 +880,13 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="55" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="57" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </subFaktura>
   </Pages>
-  <PrinterSettings Ref="56" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="58" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -855,10 +898,10 @@ WHERE vlf.Varenr IN ('3180', '3181', '3183', '3185', '3186', '3188')
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/19/2018 12:56:02 PM</ReportChanged>
+  <ReportChanged>3/1/2019 12:22:58 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\OmsetningPrForvalter2.mrt</ReportFile>
-  <ReportGuid>e54becb0a38a4ed78127ae0be085471b</ReportGuid>
+  <ReportFile>C:\Users\PN-3PU~1\AppData\Local\Temp\2\v3_OmsetningPrForvalter1.mrt</ReportFile>
+  <ReportGuid>7676312d24384be2b10f2827fbb38294</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -887,7 +930,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="7">
-    <lightBlue Ref="57" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <lightBlue Ref="59" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[222:233:244]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -895,7 +938,7 @@ namespace Reports
       <Name>lightBlue</Name>
       <TextBrush>Black</TextBrush>
     </lightBlue>
-    <Style1 Ref="58" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="60" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[146:187:205]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -903,7 +946,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <LightGrey Ref="59" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <LightGrey Ref="61" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -911,7 +954,7 @@ namespace Reports
       <Name>LightGrey</Name>
       <TextBrush>Black</TextBrush>
     </LightGrey>
-    <EvenStyle Ref="60" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <EvenStyle Ref="62" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -919,7 +962,7 @@ namespace Reports
       <Name>EvenStyle</Name>
       <TextBrush>Black</TextBrush>
     </EvenStyle>
-    <Style2 Ref="61" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style2 Ref="63" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;Transparent;1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Conditions isList="true" count="0" />
@@ -928,7 +971,7 @@ namespace Reports
       <Name>Style2</Name>
       <TextBrush>Black</TextBrush>
     </Style2>
-    <odd Ref="62" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <odd Ref="64" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[239:239:239]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -936,7 +979,7 @@ namespace Reports
       <Name>odd</Name>
       <TextBrush>Black</TextBrush>
     </odd>
-    <even Ref="63" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <even Ref="65" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[247:247:247]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
