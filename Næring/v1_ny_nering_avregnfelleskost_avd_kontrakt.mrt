@@ -26,7 +26,7 @@ SELECT ak.kontrakts_id as id FROM e..t_arealkontrakt ak where ak.kontrakts_id be
       </Kontrakter>
       <DataKilde1 Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>DataKilde1</Alias>
-        <Columns isList="true" count="27">
+        <Columns isList="true" count="28">
           <value>id,System.Int32</value>
           <value>jobbnr,System.Int32</value>
           <value>kontrakts_id,System.Int32</value>
@@ -54,6 +54,7 @@ SELECT ak.kontrakts_id as id FROM e..t_arealkontrakt ak where ak.kontrakts_id be
           <value>momsind,System.Int32</value>
           <value>antallkvm,System.Decimal</value>
           <value>prisprkvm,System.Decimal</value>
+          <value>tidsfaktor,System.Decimal</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -74,8 +75,12 @@ round((isNull(l.differanse,0)+isNull(l.differanseavd,0)),2) as diff_tot ,
 1 as momsprct, 
 ('1'+(Select UtgMvaPSats from y..SYSTEM)/100) as momsprctOld,va.varenr, va.momsind,
 (Select sum(antall+tillegg) as antallkvm from e..t_arealres where kontrakts_id=k.kontrakts_id) as antallkvm,
+
 (Select sum(Case when va2.momsind=8 then kostnad else l2.kostnad * 0.8 end) from e..t_ak_felleskostavregning_linje l2 left join e..t_arealvaredim av2 on av2.dimrecordid=l2.felleskostid 
-left join c..VARER va2 on va2.varenr=(case when isNull(l2.momsind ,0)=0 then av2.vareavgiftsfri else av2.vareavgiftspliktig end) where kontrakts_id=k.kontrakts_id  and jobbnr=j.jobbnr) as prisprkvm 
+left join c..VARER va2 on va2.varenr=(case when isNull(l2.momsind ,0)=0 then av2.vareavgiftsfri else av2.vareavgiftspliktig end) where kontrakts_id=k.kontrakts_id  and jobbnr=j.jobbnr) as prisprkvm,
+(datediff(day,( ( case when ak.kontrakt_fra&lt;=j.klientAar then j.klientAar else ak.kontrakt_fra end ) ), 
+    (Case when isNull(ak.fakturerfktil,ak.kontrakt_til)&gt;@dato then @dato else isNull(ak.fakturerfktil,ak.kontrakt_til) end)) +1)/365.0 tidsfaktor
+
 from e..t_ak_felleskostavregning_jobb j 
 left join e..t_ak_felleskostavregning_kontrakt k on k.jobbnr=j.jobbnr 
 left join e..t_ak_felleskostavregning_linje l on k.jobbnr=l.jobbnr and l.kontrakts_id=k.kontrakts_id 
@@ -169,13 +174,13 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="12">
-      <value>,ContractFrom,ContractFrom,text_x007C_,System.String,_x0032_,False,False,False</value>
+      <value>,ContractFrom,ContractFrom,text_x007C_,System.String,_x0035_,False,False,False</value>
       <value>,ContractTo,ContractTo,System.String,,False,False</value>
-      <value>,Felleskostnad,Felleskostnad_x0020_tekst:,text_x007C__x0020_,System.String,_x0020_,False,False,False</value>
-      <value>,SkjulFelleskostnad,Felleskostnader_x0020_uten_x0020_sum,text_x007C_,System.String,,False,False,False</value>
-      <value>,SamleFelleskost,Samle_x0020_felleskostnader:,checklist_x007C_sql_x003D_SELECT_x0020_nk.kontrakts_id_x0020_as_x0020_id_x0020_FROM_x0020_e..vneringskontrakter_x0020_nk_x0020_WHERE_x0020_nk.kontrakts_id_x0020_between_x0020_2_x0020_and_x0020_2,System.String,_x0032_,False,False,False</value>
+      <value>,Felleskostnad,Felleskostnad_x0020_tekst:,System.String,_x0020_,False,False</value>
+      <value>,SkjulFelleskostnad,Felleskostnader_x0020_uten_x0020_sum,System.String,True,False,False</value>
+      <value>,SamleFelleskost,Samle_x0020_felleskostnader:,System.String,_x0032_,False,False</value>
       <value>,EksMva,EksMva,System.Decimal,_x0031_.25,False,False</value>
-      <value>,Year,Year,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0170313,False,False,False</value>
+      <value>,Year,Year,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0190314,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
@@ -198,9 +203,9 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
           <Components isList="true" count="5">
             <Text22 Ref="9" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0.26,5.8,0.6</ClientRectangle>
+              <ClientRectangle>0.2,0.06,7,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
-              <Font>Arial,12,Bold</Font>
+              <Font>Arial,14,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text22</Name>
               <Page isRef="7" />
@@ -599,7 +604,7 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
               <Name>Text48</Name>
               <Page isRef="7" />
               <Parent isRef="25" />
-              <Text>{DataKilde1.prisprkvm}</Text>
+              <Text>{(DataKilde1.prisprkvm/DataKilde1.antallkvm)/DataKilde1.tidsfaktor}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="43" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
@@ -609,7 +614,7 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
                 <Symbol>kr</Symbol>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
-              <Type>DataColumn</Type>
+              <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text48>
           </Components>
@@ -878,10 +883,13 @@ avdeling</Text>
               <Parent isRef="61" />
               <Text>{DataKilde1.kostnad}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="65" type="NumberFormat" isKey="true">
+              <TextFormat Ref="65" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
-                <NegativePattern>1</NegativePattern>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
@@ -967,10 +975,13 @@ avdeling</Text>
               <Parent isRef="61" />
               <Text>{DataKilde1.fakturert}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="73" type="NumberFormat" isKey="true">
+              <TextFormat Ref="73" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
-                <NegativePattern>1</NegativePattern>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
@@ -987,10 +998,13 @@ avdeling</Text>
               <Parent isRef="61" />
               <Text>{DataKilde1.differanse}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="75" type="NumberFormat" isKey="true">
+              <TextFormat Ref="75" type="CurrencyFormat" isKey="true">
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
-                <NegativePattern>1</NegativePattern>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
@@ -1009,7 +1023,7 @@ avdeling</Text>
           <Brush>Transparent</Brush>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,8,27.7,3</ClientRectangle>
-          <Components isList="true" count="10">
+          <Components isList="true" count="16">
             <Text5 Ref="77" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.4,3.2,0.6</ClientRectangle>
@@ -1027,7 +1041,7 @@ avdeling</Text>
             </Text5>
             <Text8 Ref="78" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>14.6,0.4,1.8,0.6</ClientRectangle>
+              <ClientRectangle>3.6,0.4,1.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Guid>5a02bae317874a3e8d7138cc250083be</Guid>
@@ -1042,7 +1056,7 @@ avdeling</Text>
             </Text8>
             <Text9 Ref="79" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>14.6,1,1.8,0.6</ClientRectangle>
+              <ClientRectangle>3.6,1,1.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Guid>14a530595548473c8d90769fbeaac163</Guid>
@@ -1193,17 +1207,155 @@ avdeling</Text>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text43>
-            <HorizontalLinePrimitive2 Ref="92" type="HorizontalLinePrimitive" isKey="true">
+            <Text49 Ref="92" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>14.6,0.4,2.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Guid>5784520dd562416dbed46b910f8f0a4d</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text49</Name>
+              <Page isRef="46" />
+              <Parent isRef="76" />
+              <Text>{Sum(dbCosts,DataKilde1.differanse)}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="93" type="CurrencyFormat" isKey="true">
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Totals</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text49>
+            <Text50 Ref="94" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>14.6,1,2.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Guid>c1d073862b474bf8bc2e9f70cb1bf305</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text50</Name>
+              <Page isRef="46" />
+              <Parent isRef="76" />
+              <Text>{Sum(dbCosts,DataKilde1.differanse)/EksMva}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="95" type="CurrencyFormat" isKey="true">
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text50>
+            <Text51 Ref="96" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>11,0.4,2.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Guid>9f41fd7ddc6b43d9abe89cccf55b8bab</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text51</Name>
+              <Page isRef="46" />
+              <Parent isRef="76" />
+              <Text>{Sum(dbCosts,DataKilde1.fakturert)}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="97" type="CurrencyFormat" isKey="true">
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text51>
+            <Text52 Ref="98" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>11,1,2.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Guid>c6954d283238400e844b5d6f9e053868</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text52</Name>
+              <Page isRef="46" />
+              <Parent isRef="76" />
+              <Text>{Sum(dbCosts,DataKilde1.fakturert)/EksMva}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="99" type="CurrencyFormat" isKey="true">
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text52>
+            <Text53 Ref="100" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>8,0.4,2.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Guid>5861f78078df48fcaad046d266586dd9</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text53</Name>
+              <Page isRef="46" />
+              <Parent isRef="76" />
+              <Text>{Sum(dbCosts,DataKilde1.kostnad)}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="101" type="CurrencyFormat" isKey="true">
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text53>
+            <Text54 Ref="102" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>8,1,2.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,10</Font>
+              <Guid>711e094c15f441f3951019adb8ef44cc</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text54</Name>
+              <Page isRef="46" />
+              <Parent isRef="76" />
+              <Text>{Sum(dbCosts,DataKilde1.kostnad)/EksMva}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="103" type="CurrencyFormat" isKey="true">
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text54>
+            <HorizontalLinePrimitive2 Ref="104" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0.2,0.2,27.2,0.0254</ClientRectangle>
               <Color>Black</Color>
-              <EndCap Ref="93" type="Cap" isKey="true">
+              <EndCap Ref="105" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Guid>d98a9cfd3be648ae97d6125747fb7fa8</Guid>
               <Name>HorizontalLinePrimitive2</Name>
               <Page isRef="46" />
               <Parent isRef="76" />
-              <StartCap Ref="94" type="Cap" isKey="true">
+              <StartCap Ref="106" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive2>
@@ -1222,13 +1374,13 @@ avdeling</Text>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="95" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="107" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </subCosts>
   </Pages>
-  <PrinterSettings Ref="96" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="108" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -1240,10 +1392,10 @@ avdeling</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>3/13/2019 2:47:20 PM</ReportChanged>
+  <ReportChanged>3/15/2019 9:15:30 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\v3_ny_nering_avregnfelleskost_avd_kontrakt2.mrt</ReportFile>
-  <ReportGuid>73031d1f20d44dd6a2de16b4cfe168bf</ReportGuid>
+  <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\v4_ny_nering_avregnfelleskost_avd_kontrakt3.mrt</ReportFile>
+  <ReportGuid>69ed5fb1604d4add902a2022ac6fd196</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -1272,7 +1424,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="6">
-    <lightBlue Ref="97" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <lightBlue Ref="109" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[222:233:244]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -1280,7 +1432,7 @@ namespace Reports
       <Name>lightBlue</Name>
       <TextBrush>Black</TextBrush>
     </lightBlue>
-    <Style1 Ref="98" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="110" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[146:187:205]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -1288,7 +1440,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <LightGrey Ref="99" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <LightGrey Ref="111" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -1296,7 +1448,7 @@ namespace Reports
       <Name>LightGrey</Name>
       <TextBrush>Black</TextBrush>
     </LightGrey>
-    <EvenStyle Ref="100" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <EvenStyle Ref="112" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[234:234:234]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -1304,7 +1456,7 @@ namespace Reports
       <Name>EvenStyle</Name>
       <TextBrush>Black</TextBrush>
     </EvenStyle>
-    <Style2 Ref="101" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style2 Ref="113" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;Transparent;1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Conditions isList="true" count="0" />
@@ -1313,7 +1465,7 @@ namespace Reports
       <Name>Style2</Name>
       <TextBrush>Black</TextBrush>
     </Style2>
-    <OddStyle Ref="102" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <OddStyle Ref="114" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[252:252:252]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
