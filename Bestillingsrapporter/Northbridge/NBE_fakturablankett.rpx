@@ -1,0 +1,2728 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{E2143BAC-8CD1-4F19-B841-85993CE17498}" GUIDREP="{85A66A4F-7542-437F-8703-18D566BDDEBC}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10275"
+	DocumentName="Faktura"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[Option Explicit
+dim fakturanr, bankgiro, postgiro, BankPostGiro, hoymvasats, lavmvasats, factbankgiro,IBAN,SWIFT
+dim bednavn, bedadr1, bedadr2, bedpostnr, bedpoststed, OcrAvtale, MVAnr, Landkode, Url, MailAdr
+dim factnavn, factadr1, factadr2, factpostnr, factpoststed, factgiro, factkidtype, factoringnr, factfritxt
+dim klib, Sfelt, tot, innrykk, init, Antlinje, Antlinje2, VKurs, ViseMvafelt, ViseUtenAvg,personmvasats
+dim valutakode
+ViseMvafelt = false 'Sett til true hvis mvafelt skal vise på blanketten
+ViseUtenAvg = false 'Sett til true hvis avgiftsfrie linjer skal vises med 0%
+
+Sub OnDataInitialize
+	Dim sql
+	'm_data.Debugg = True
+	m_data.Trace "/// report start /// : " & now
+
+'	Create a groupcounter
+	Antlinje = 14 
+	Antlinje2 = 35 
+	m_data.AddGroupCounter "fakturanr",Clng(Antlinje)
+	m_data.fieldchooser = true
+
+	'Input dialog 
+	m_data.AddInputMacro "{fra}","Fra fakturanr.","getsql(select max(fakturanr) as it from c..faktura)"
+	m_data.AddInputMacro "{til}","Til fakturanr.","getsql(select max(fakturanr) as it from c..faktura)"
+	if not m_data.ShowInputDialog("Oppgi fakturaserie") then exit sub
+	
+	'Create query string
+ 	sql="object:urap_blankettdataLib.faktura:{fra}|{til}"
+
+	m_data.SqlString = sql
+	m_data.SetupFields rpt
+
+      if m_data.RunSubQuery("SELECT valutakode FROM c..faktura where fakturanr = {F.Fakturanr}","sys")>0 then  
+  	            'Hent ut prosjektnr:  
+  
+            valutakode = m_data.SubQueryValue("valutakode","sys") 
+		msgbox valutakode 
+	else
+		'valutakode = "NOK"
+  
+      end if  
+
+End Sub
+
+
+
+Sub OnReportStart
+	dim dettop
+	dettop = 0
+
+	m_data.GetControl("fldFritekstlinje").top = dettop 
+	m_data.GetControl("fldKomplinje").top = dettop 
+	m_data.GetControl("fldPrisInkMva").top = dettop 
+	m_data.GetControl("fldPrisExMva").top = dettop 
+	m_data.GetControl("fldSumInkMva").top = dettop 
+	m_data.GetControl("fldSumExMva").top = dettop 
+	m_data.GetControl("fldMvaPsnt").top = dettop 
+	m_data.GetControl("fldMvakr").top = dettop
+
+	dim lbltop
+	lbltop =  m_data.GetControl("lblvarenr").top
+	'm_data.GetControl("lblprisinkmva").top = lbltop
+	'm_data.GetControl("lblSumLinjeInkmva").top = lbltop
+End Sub
+
+Sub OnFetchData(eof)
+	
+'// Watermark for e2b or ap
+	If m_data.SFCurr(m_data.GetValue("e2bStatus")) > 0 Then
+		m_data.SetWatermark rpt, "e2bWatermark"
+	Elseif m_data.SFCurr(m_data.GetValue("APStatus")) > 0 Then
+		m_data.SetWatermark rpt, "APWatermark"
+	Else
+		rpt.Watermark = Nothing
+	End If
+	'rpt.fields("lblSumNetto").value = "Total ex. mva"
+	'rpt.fields("lblbetalsum").value = "Total amount"
+	rpt.fields("lbltotalsum").value = rpt.fields("lbltotalsum").value & " " & valutakode
+	rpt.fields("lblbetalsum").value = rpt.fields("lblbetalsum").value & " " & valutakode
+
+	rpt.fields("mvabelop").value = rpt.fields("Antallfelt").value * (rpt.fields("PrisExMva").value * (rpt.fields("momsprosent").value / 100))
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="720"
+	RightMargin="720"
+	TopMargin="450"
+	BottomMargin="720"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: top; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="PageHeader" Name="PageHeader"
+		Visible="0"
+		Height="0"
+		BackColor="12640511"
+		CanShrink="1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="5190"
+		DataField="Fakturanr"
+		RepeatStyle="4"
+		NewPage="1"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape2"
+		Left="0"
+		Top="3285"
+		Width="5100"
+		Height="1020"
+		BackStyle="1"
+		BackColor="12632256"
+		LineStyle="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape1"
+		Left="0"
+		Top="4695"
+		Width="10200"
+		Height="375"
+		BackStyle="1"
+		BackColor="12632256"
+		LineStyle="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftnavn"
+		DataField="*y..bedrift.navn"
+		Left="4000"
+		Top="425"
+		Width="3100"
+		Height="213"
+		Text="*y..bedrift.navn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; font-weight: bold; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftadresse"
+		DataField="*y..bedrift.adresse"
+		Left="4000"
+		Top="640"
+		Width="1984"
+		Height="213"
+		Text="*y..bedrift.adresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftpostnr"
+		DataField="*y..bedrift.postnr"
+		Left="4009"
+		Top="835"
+		Width="530"
+		Height="213"
+		Text="postnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftpoststed"
+		DataField="*y..bedrift.poststed"
+		Left="4539"
+		Top="835"
+		Width="1700"
+		Height="213"
+		Text="poststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field8"
+		Left="7100"
+		Top="425"
+		Width="1400"
+		Height="213"
+		Text="Foretaksregisteret"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvanr"
+		DataField="fldmvanr"
+		Left="8500"
+		Top="425"
+		Width="1700"
+		Height="213"
+		Text="fldmvanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblBankgiro"
+		DataField="lblbankgiro"
+		Left="1620"
+		Top="3045"
+		Width="1560"
+		Height="225"
+		Visible="0"
+		Text="lblbankgiro"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBankgiro"
+		DataField="bankgirotext"
+		Left="3180"
+		Top="3045"
+		Width="2130"
+		Height="225"
+		Visible="0"
+		Text="bankgirotext"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblIban"
+		DataField="lbliban"
+		Left="5953"
+		Top="3264"
+		Width="1559"
+		Height="213"
+		Text="lbliban"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldIban"
+		DataField="ibanvalue"
+		Left="7512"
+		Top="3264"
+		Width="2126"
+		Height="213"
+		Text="fldiban"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblswift"
+		DataField="lblswift"
+		Left="5953"
+		Top="3537"
+		Width="1559"
+		Height="213"
+		Text="swifttxt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldswift"
+		DataField="fldswift"
+		Left="7512"
+		Top="3537"
+		Width="2126"
+		Height="213"
+		Text="fldswift"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedrifttelefon"
+		DataField="*y..bedrift.telefon"
+		Left="7445"
+		Top="645"
+		Width="1185"
+		Height="210"
+		Text="*y..bedrift.telefon"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedrifttelefax"
+		DataField="*y..bedrift.telefax"
+		Left="7445"
+		Top="855"
+		Width="1150"
+		Height="213"
+		Text="*y..bedrift.telefax"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftemail"
+		DataField="*y..bedrift.mailadr"
+		Left="4005"
+		Top="1065"
+		Width="3090"
+		Height="225"
+		Text="*y..bedrift.mailadr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedrifturl"
+		DataField="*y..bedrift.url"
+		Left="7095"
+		Top="1065"
+		Width="3090"
+		Height="210"
+		Text="*y..bedrift.url"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblKundenrTop"
+		DataField="lblKundenr"
+		Left="2126"
+		Top="1450"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="lblKundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundenrTop"
+		DataField="fldKundenr"
+		Left="71"
+		Top="1450"
+		Width="2020"
+		Height="283"
+		Text="fldKundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 12pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundenavnTop"
+		DataField="fldKundenavn"
+		Left="75"
+		Top="1755"
+		Width="5595"
+		Height="210"
+		Text="fldKundenavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 9pt; white-space: nowrap; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldkundeadresseTop"
+		DataField="fldkundeadresse"
+		Left="75"
+		Top="2010"
+		Width="5565"
+		Height="210"
+		Text="fldKundeadresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundeadresse2"
+		DataField="fldkundeadresse2"
+		Left="75"
+		Top="2235"
+		Width="5520"
+		Height="225"
+		Text="fldKundeadresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundepostnr"
+		DataField="fldkundepostnr"
+		Left="71"
+		Top="2489"
+		Width="921"
+		Height="213"
+		Text="fldKundepostnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundepoststed"
+		DataField="fldkundepoststed"
+		Left="990"
+		Top="2490"
+		Width="4560"
+		Height="210"
+		Text="fldkundepoststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundeland"
+		DataField="fldkundeland"
+		Left="75"
+		Top="2730"
+		Width="5430"
+		Height="225"
+		Text="fldKundeland"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblDeresRef"
+		DataField="lblDeres_ref"
+		Left="5353"
+		Top="4410"
+		Width="989"
+		Height="213"
+		Visible="0"
+		Text="lblDeres_ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldDeresRef"
+		DataField="deres_ref"
+		Left="6912"
+		Top="4410"
+		Width="1556"
+		Height="213"
+		Visible="0"
+		Text="deres_ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblFakturadato"
+		DataField="lblFakturadato"
+		Left="5953"
+		Top="1883"
+		Width="1559"
+		Height="213"
+		Text="lblfakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldfakturadato"
+		DataField="fakturadato"
+		Left="7512"
+		Top="1883"
+		Width="2126"
+		Height="213"
+		Text="fakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblforfallsdato"
+		DataField="lblForfallsdato"
+		Left="5953"
+		Top="2159"
+		Width="1559"
+		Height="213"
+		Text="lblforfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldLeveringsdato"
+		DataField="leveringsdato"
+		Left="6912"
+		Top="4211"
+		Width="1556"
+		Height="213"
+		Visible="0"
+		Text="leveringsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblLeveringsdato"
+		DataField="lblLeveringsdato"
+		Left="5353"
+		Top="4211"
+		Width="989"
+		Height="213"
+		Visible="0"
+		Text="lblleveringsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldForfallsdato"
+		DataField="forfallsdato"
+		Left="7512"
+		Top="2159"
+		Width="2126"
+		Height="213"
+		Text="forfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblvaar_ref"
+		DataField="lblVar_ref"
+		Left="5953"
+		Top="2727"
+		Width="1559"
+		Height="213"
+		Text="lblvar_ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBilagsnr"
+		DataField="bilagsnr_regnskap"
+		Left="7512"
+		Top="3003"
+		Width="1680"
+		Height="213"
+		Text="fldBilagsnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; text-align: left; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field10"
+		Left="5953"
+		Top="3003"
+		Width="1559"
+		Height="213"
+		Text="Bilagsnummer:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldVaar_ref"
+		DataField="vaar_ref"
+		Left="7512"
+		Top="2727"
+		Width="2126"
+		Height="213"
+		Text="referanse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; text-align: left; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblVarenr"
+		DataField="lblVarenr"
+		Left="0"
+		Top="4755"
+		Width="1035"
+		Height="255"
+		Tag="Varenr"
+		Text="lblVarenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblVaretekst"
+		DataField="lblVaretekst"
+		Left="1110"
+		Top="4755"
+		Width="4410"
+		Height="255"
+		Tag="Varetekst"
+		Text="lblVaretekst"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblAntall"
+		DataField="lblAntall"
+		Left="5608"
+		Top="4760"
+		Width="990"
+		Height="255"
+		Tag="antall"
+		Text="lblAntall"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblPrisExMva"
+		DataField="lblPrisexmva"
+		Left="7230"
+		Top="4760"
+		Width="1050"
+		Height="255"
+		Tag="prisexmva"
+		Text="lblPrisexmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblRabatt"
+		DataField="lblRabatt"
+		Left="8305"
+		Top="4760"
+		Width="620"
+		Height="255"
+		Tag="rabatt"
+		Text="lbl%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblMva"
+		DataField="lblMvalinje"
+		Left="8640"
+		Top="4755"
+		Width="720"
+		Height="255"
+		Visible="0"
+		Text="lblMvalinje"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumLinje"
+		DataField="lblSumLinjeexmva"
+		Left="5102"
+		Top="4760"
+		Width="1134"
+		Height="283"
+		Visible="0"
+		Tag="sum"
+		Text="lblSumLinjeexmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSideCount"
+		Left="9496"
+		Top="142"
+		Width="284"
+		Height="283"
+		Text="1"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSdeCountTot"
+		Left="9921"
+		Top="142"
+		Width="284"
+		Height="283"
+		Text="1"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="0"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lblSideSlash"
+		Left="9780"
+		Top="142"
+		Width="141"
+		Height="283"
+		Caption="/"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldLevering"
+		DataField="leveringfelt"
+		Left="3402"
+		Top="2246"
+		Width="2409"
+		Height="992"
+		Text="fldlevering"
+		OutputFormat="m/d"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lbllevering"
+		DataField="lbllevering"
+		Left="3405"
+		Top="2003"
+		Width="1845"
+		Height="210"
+		Text="lbllevering"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKommentar"
+		DataField="kommentarer"
+		Left="0"
+		Top="4405"
+		Width="10205"
+		Height="255"
+		Text="fldKommentar"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldbankgiro2"
+		DataField="tilkonto"
+		Left="1770"
+		Top="3675"
+		Width="3261"
+		Height="285"
+		Text="bankgirotext"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; text-align: right; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblbankgiro2"
+		Left="71"
+		Top="3675"
+		Width="1695"
+		Height="285"
+		Text="Til konto:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldkid"
+		DataField="kid"
+		Left="780"
+		Top="3952"
+		Width="4252"
+		Height="284"
+		Text="fldkid"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; text-align: right; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblkid"
+		DataField="lblKID"
+		Left="71"
+		Top="3952"
+		Width="709"
+		Height="284"
+		Text="lblKID"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblfakturanr"
+		DataField="lblfakturanr"
+		Left="5953"
+		Top="1450"
+		Width="2267"
+		Height="425"
+		Text="lblfakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 18pt; background-color: rgb(255,255,255); white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldfakturanr"
+		DataField="fakturanr"
+		Left="8220"
+		Top="1450"
+		Width="1985"
+		Height="425"
+		Text="fakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 18pt; text-align: left; background-color: rgb(255,255,255); white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldbetalsum"
+		DataField="tot"
+		Left="1871"
+		Top="3385"
+		Width="3161"
+		Height="284"
+		Text="tot"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; text-align: right; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblbetalsum"
+		DataField="lblbetalsum"
+		Left="71"
+		Top="3385"
+		Width="1800"
+		Height="284"
+		Text="lblbetalsum"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="imgLogo"
+		Left="60"
+		Top="285"
+		Width="3540"
+		Height="1035"
+		SizeMode="1"
+		PictureAlignment="0"
+		>
+		<Data><![CDATA[010000006C740000F16F0000FFD8FFE000104A46494600010101012C012C0000FFDB0043000302020302020303030304030304050805050404050A070706080C
+			0A0C0C0B0A0B0B0D0E12100D0E110E0B0B1016101113141515150C0F171816141812141514FFDB00430103040405040509050509140D0B0D1414141414141414
+			141414141414141414141414141414141414141414141414141414141414141414141414141414141414FFC000110800F8029403012200021101031101FFC400
+			1F0000010501010101010100000000000000000102030405060708090A0BFFC400B5100002010303020403050504040000017D01020300041105122131410613
+			516107227114328191A1082342B1C11552D1F02433627282090A161718191A25262728292A3435363738393A434445464748494A535455565758595A63646566
+			6768696A737475767778797A838485868788898A92939495969798999AA2A3A4A5A6A7A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6D7D8D9
+			DAE1E2E3E4E5E6E7E8E9EAF1F2F3F4F5F6F7F8F9FAFFC4001F0100030101010101010101010000000000000102030405060708090A0BFFC400B5110002010204
+			0403040705040400010277000102031104052131061241510761711322328108144291A1B1C109233352F0156272D10A162434E125F11718191A262728292A35
+			363738393A434445464748494A535455565758595A636465666768696A737475767778797A82838485868788898A92939495969798999AA2A3A4A5A6A7A8A9AA
+			B2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6D7D8D9DAE2E3E4E5E6E7E8E9EAF2F3F4F5F6F7F8F9FAFFDA000C03010002110311003F00FD53A28A28
+			00A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A28
+			00A28A2800A28A2800A28AE03C69F1F3E1DFC3DF3175FF0018697653C7F7ED527135C0FF00B651EE7FFC769D9BD84DA5B9DFD15F2578CBFE0A3BE06D1F7C7E1E
+			D1356F114CBD24976D9C0DF466DCFF009A578778BBFE0A2BF1175ADE9A269FA47876239DB22C2D7330FF008139DA7FEF8AD5529BE864EB41753F49AB9FF127C4
+			0F0BF83558EBDE23D2B46C0CE2FEF6384FE019866BF25BC4DFB407C4EF1E48CBA9F8CB5ABA56FBD6F6D70D0447EB1C5B57F4AE3A2F0EEA778C5CDBB82C725A52
+			01CFA9CF35153D951D6B5451F5675E1B0D8CC73B61284A7E916FF247EA2F88FF006D8F83FE1DDEA3C51FDA93AFFCB2D36D25973F47DA13FF001EAF32D7FF00E0
+			A55E0FB5DE346F0A6B5A911C03792456CADEFC190E3F0FC2BE1783C0F72D8F36E238FF00DD058FF4ADCD1FE16CDAB3ECB4B7BFD4A4CE36DA425B9E38C007D47E
+			75E74F34CBE9BB73F33F24CFABA1C17C43885CD2A0A9C7BCA515F85EFF0081F44EB9FF00052EF135C16FEC7F06E93623F87EDD732DCE3AF5DBE5E7B570DAB7FC
+			140BE2DEA5BBECF77A4E959E9F64D3D5B1D7FE7A17F5FD0563695FB33F8BAFB6983C09ADB86E8F71692C6A78C83960062BA6B2FD91FE214DB3CAF033296E8659
+			20423EA59C63F1AC5E714FFE5D509BF97FC39E84781EAC7FDEB30A30FF00B7EFFF00C89C2EA1FB617C63D4C93378E2F13273FE8F6F043D3FDC8C573D79FB447C
+			50BEFF0059F10BC48BCE7F73AA4D17FE82C2BDB97F641F8A11FDDF07C6BF4BFB31FF00B569B37ECA7F14AD5416F09BE09E045796CFFF00A0C86B379CD65B6125
+			F8FF00F22764381F2D97C59CD2BF972BFF00DC88F00B8F8C9E3EBC93CC9FC73E249A4C63749ABDC31FCCBD45FF000B6BC71FF439F887FF000693FF00F175EDF7
+			DFB3E7C47B10DE6F8375470320F930F9DD3FDCCE6B95D5BE1F6BFA283FDA7E1AD4AC02F27ED7612478FF00BE94564F88271F8F0ED7CFFF00B53BA1E1C61EBE98
+			7CCE327E515FA4D9C15AFC6AF88762185BF8F3C4D6FBBEF795AC5C2E7EB87AD3B3FDA37E29588511FC41F1136D6DC3CED46597F3DC4E47B1AB0FA4D9483E6B48
+			0FFDB31FE15525F0C699375B6553EAAC47F5AA8711E19FC74DAFB9FF0091956F0B7338AFDCE2212F5E65FA33A2D3FF006C5F8C7A663C9F1C5DBE3FE7E2DADE6E
+			BFEFC66BABD27FE0A01F16F4EC7DA2F74AD53FEBEF4F55CF4FF9E653D3F5AF259BC1366FFEAE59633EE430FE559D71E07B94C986E23947FB40A9FEB5E853CE32
+			FABA7359F9AFE91F318AE04E22C26AA8F3AFEEC93FC2E9FE07D49A27FC14BBC516FB3FB5FC1DA45F73F37D86E25B6CFD377998EF5E8BE1FF00F8294783AEF68D
+			6BC2BAD6984F56B378AE947D49319C7E1F857C0375A0EA1679325AB951FC48370FD2B3C8C70783D39AF5A1EC2B2E6A6D35E4CF8BC450C66067ECF154E507DA49
+			AFCCFD62F0CFED99F087C504247E2E874E98F58F53824B6C7FC0D9767FE3D5EB3A0F8A346F14DA8BAD1756B1D5EDB19F3AC2E5274E7FDA52457E22F35634FD4A
+			EF49BA4B9B1BA9ACEE53EECD6F218DC7D0839A6E82E8CC1621F547EE3515F92FE0BFDB0BE2CF824A2C1E2CB8D56DD78FB3EB0A2EC1F6DCFF0038FC1857BFF813
+			FE0A587F750F8CBC223B6FBCD0E6FCF10C87FF006A564E8C96C6B1AD17B9F74D15E4DF0FFF006A7F861F121A38B4BF155ADB5F3F02CB52CDACC5BFBA03E039FF
+			00749AF59AC5A6B7374D3D828A28A430A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800
+			A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A2A9EADAC58683632DF6A77B
+			6FA759423325CDDCAB14683D4B310057CFDF117F6F0F863E08F320D36EEE3C5B7EB9023D293F720FBCCF8523DD375528B96C897251DD9F46D53D5357B1D0EC64
+			BCD46F6DF4FB38C65EE2EA558E35FAB310057E717C42FF0082867C41F13F9B07872D2C7C2368D901E25FB55CE0FAC8E36FE2101F7AF9F7C41E28F15FC48BE177
+			ADEABA9EBF7038592F2779427B0DC70A3D860568E9A82E6A8EC854DCEBCD53A107293E895DFDCB53F4ABC7BFB727C2AF04F9915BEAF3789AF1323C9D161F3533
+			DBF7AC56323FDD63F4AF9D7C75FF000522F146A7E643E13F0E5868709381717CED75363D401B554FB10D5F2F5A7826EA5C1B895201FDD5F98FF87EB5EA3E05FD
+			99FC51E31F2DF49F0C6A17F136317572BE4C07E8EFB54FE66BCC9E6782A6F969DEA4BB455FFE01F6387E0ECE6B43DB629470F4FBD4928FE1ABFBD238DF197C78
+			F88FF1319E2D6FC57AAEA1149C359C3279301FAC518543F9572B6BE14D46EB04C4215F594E3F4EB5F6F7833F60BD6668E36D775BB1D1A23C9B7D3E233BFD093B
+			541FA6EAF69F09FEC7BF0EBC3611EEAC6E75FB85E7CCD4672573FEE26D5C7B106B378CC7D6D28D2505DE4EFF00823AD653C3397EB8CC5CEBCBB538D97FE052DD
+			7A347E6AE93F0E26D42E120469EF2E1FEEC16B116627DBA93F957AFF00847F641F1BEBFB1EDFC1F716D19E4CDAB30800F7DB2107F25AFD27D0BC33A3F85ED85B
+			68FA559E9707FCF3B3B75881FA850335A9593C2E26B7FBC576FCA3A2365C43966074CB32D826BED54BD47EBAEDF267C59E17FD827579153FB6BC4961A727530E
+			9F6ED39FA65B6007F035EA7E1EFD89FE1EE93B5B503A9EB6FF00C42E6E7CA4FC0461481FF0235F4051554F2CC2D3D792EFCF538F13C619DE2572FD61C23DA294
+			6DF76BF89C5685F05FC09E1A0BFD9FE12D26175E92BDAAC920FF0081B82DFAD7631429046123458D17A2A8C01F8549457A31A70A6AD0563E56B626BE25F3579B
+			93F36DFE614514559CC145145001451450061EB7E08F0EF89430D5B41D3753CF5377691CA7F3606BCE3C45FB25FC33D7F732E86FA5CCDFF2D34EB878F1F4524A
+			7FE3B5EC74573D4C3D1ABF1C13F91EA61734C7E0BFDDABCA1E926BF03E46F147EC171FCF27873C52CBFDDB7D52007F39131FFA0578C78C3F65DF88DE0EDF249A
+			0BEAB6CBFF002F1A4B7DA01FF800F9C7E2B5FA41457955B26C2D4F8538BF2FF827DBE07C40CE70B655A4AAAFEF2B3FBE36FC6E7E465C5BCB6933C33C4F0CC876
+			B472295653E841E954AEF4DB5BE1FBF82390F4DC473F9D7EAE78BFE1CF867C7D6FE4F88343B3D50630B24D1FEF17FDD71865FC08AF9F3C7BFB0BE937FE65C784
+			759974B94E48B2D433343F40E3E651F50E6BC4A993E270EF9E84AFE9A3FEBE67E8983E3EC9F3387B0CCA9725F7BAE787E57FBE3F33E0ABDF04DBC9936D2B42DF
+			DD6F997FC6B9FBEF0DDFD864B43E6463F8E3F987F8D7D01F103E08F8CFE19B3B6B7A2CC966A702FEDFF7B6E79C03BD7EEE7D1B07DAB85E69D1CEB1D8397256F7
+			BCA5BFDFBFE66F8CE06E1ECF29FD6302F92FF6A9BBC7EED57C958F26E9D6979AF47D4341B2D4B265842C87FE5A270DFF00D7FC6B97D4BC1F756B97B73F698FD0
+			70DF977AFABC267985C4FBB37C92F3DBEFFF003B1F8F673E1FE6F95DEA518FB6A6BAC77F9C77FBAE60735E93F0E3F68EF889F0ADA28F40F135DA58A1FF00907D
+			D9FB45B63D046F90BF55C1F7AF367468D8AB29565E0AB0C114735F41A491F9A7BD176D99F7DFC2FF00F8290695A834367E3CD09F4A94E15B52D2732C19EE5A26
+			3BD47FBA5CFB57D63E0BF885E1AF88DA58D43C33ADD9EB569C6E6B59433213D9D7EF21F6600D7E29F35A5E1CF13EAFE0FD5A1D4F43D4EEB49D421394B9B399A3
+			71ED90791EA3A1AC25453DB4378D792DF53F6F28AFCFAF839FF0512D6745F234EF885A7FF6E5A0C2FF006B582AC774A3D5E3E11FF0DA7EB5F6BFC3BF8B1E12F8
+			AFA5FDBFC2DADDAEAB1000C9146DB66873DA48CE197F11CF6AE594251DCEB8D48CF63AEA28A2A0D028A28A0028A28A0028A28A0028A28A0028A28A0028A28A00
+			28A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A2B97F1D7C4EF0
+			A7C33D3FED9E28D7ACB45858128B7127EF24C75D918CB39F6506816DB9D4535982296620281924F4AF8B3E26FF00C14874BB112DAF80F40935398640D4758CC5
+			083D8AC4A7730FAB21F6AF943E237ED05F117E304D243AE7882F2E2CE43C69767FB9B603B0F29301B1EAD93EF5B2A4ED79688CBDA7349460AEDF63F46BE257ED
+			81F0C3E19F9B0DCEBC9AD6A31F1F61D140B97CFA1604229F66607DABE55F893FF0518F176BA66B6F0769169E19B5390B79738BABAF62010235FA156FAD7CC563
+			E0EBDB9C34C56D93FDAE5BF21FE35EC9F0E3F653F16F8DBCA974EF0EDC3DB3F3F6ED4BF71063D46EC6E1FEE86AF3AA66384A4F929DEA4BB475FF00807D7E1784
+			F36C453F6F8AE5C3D2FE6A8F97F0F8BF0573C97C4DE32F177C4FD43ED7AEEADA96BF700E435D4CCE91E7B283F2A0F61814DD3FC0F7370CBE7CA222C70238C6E6
+			3EDFE735F7C7817F60FD3ED12393C55AEBDCB2F5B3D253CB8C7B798C3247D156BE82F06FC25F07FC3F55FEC1F0FD9D8CCA31F69D9E64E7EB2365BF5AC5D7CC31
+			1A452A4BEF7FE477470DC3195EB5253C5CD76FDDC3EFF8BF467E78FC3DFD90FC65E2CF2E5B5F0DCB696EDFF2FBAC9F2131EA1586E23DD54D7D1BE0AFD83EC2D9
+			6393C53E2096E5875B4D2904683DBCC70491F455AFAC28AC965B4E6F9B112751F9BFD0BA9C5D8CA507472DA70C343B422AFF00393D5BF3D0E13C1FF03FC0BE03
+			F2DB47F0DD945709C8BA9D3CF981F50EF9619F62057774515E9429C29AE582B2F23E3B118AAF8B9FB4C44DCE5DDB6DFE21451456873051451400514514005145
+			1400514514005145140051451400514514005145140051451400C923591191D432B0C1523208F4AF13F895FB24F827C79E6DCD85B9F0CEA8C0913E9E8042CDEA
+			F0FDDFFBE769F7AF6FA2B0AD429D78F2D58DD1E960732C665B53DAE0EAB84BCBAFAAD9FCCFCDAF8A1FB3878CFE16F9D737763FDA7A3A64FF006969E0BC6ABEAE
+			31B93F118F735E5DCD7EBA32865208C83C106BC27E2C7EC8BE14F1F79D7DA32AF8675A6CB17B64FF004695BFDB88703EAB8EA4906BE571791B5EF619DFC9FE8C
+			FDAF24F11A13B51CDA167FCF1DBE71FD55FD0FCF3D4747B5D51313C796ECEBC30FC6B91D57C2773639920FF4987FD91F30FA8FF0AF6EF891F087C51F0A75016D
+			AFE9CD0C2E710DEC397B79BFDD7C75FF0064E1BD4571BCD79D85CCB1796CB93A2FB2FF00AD0FB3CD786325E28A3F5856E696D5216BFCFA4BE7AF9A3C9BA75A5E
+			6BD0357F0D5AEA79751E44FF00F3D1475FA8EF5C5EA5A4DCE9726D9D30A7EEBAF2ADF435F7D81CD70F8E568BB4BB3FD3B9FCE1C43C1F98F0FC9CEA479E9749AD
+			BE6BECBF5D3B3653E6B47C3BE26D5BC23ABC1AA689A95D693A8C2731DD59CAD1B8F51907A1EE3A1ACEE68E6BD93E18FB8FE077FC1439D5ADF49F8996BBD49083
+			5EB08B047BCD0A8E7FDE8C7FC06BED8F0EF8934AF1768F6FAAE8BA8DB6A9A75C2EE8AEAD640E8DED91DC771D457E22735DDFC25F8DFE2FF82BAC7DBBC33AA3DB
+			C4EC0DC584D97B5B91E8F1F4CE06370C30EC4573CE8A7AC4EA8566B491FB2745781FECFDFB607853E36A43A65C95F0F78AB001D36E641B2E1BB981FF008FFDD3
+			86F62066BDF2B8DA7176676464A4AE828A28A4505145140051451400514514005145140051451400514514005145140051451400514514005145140051451400
+			51451400514514005145140051451400514514005154759D6F4FF0EE9B3EA3AADFDB6996100DD2DD5E4CB14483D4B310057CBDF15BFE0A11E0CF09F9F65E10B4
+			9BC5BA828C0B9E60B353FEF11B9F1ECA01ECD5518B96C8994947767D5C4850493815E25F153F6C2F86BF0B7CEB79B581AF6AD1E57FB3B46DB3B861C61DF3B130
+			7A82D9EBC1AFCF9F89FF00B4E7C48F8C924B6BA9EB535BE9B2F1FD93A50305B91E8C14EE907FBE5AB86D2FC137B7D22097F73BC80A8A373B13D0002A6B54A185
+			5CD889A5E5D7FCCEFCBF2DCC3379F265F45CFCFA2F56F45F367BFF00C52FF828078F7C65E75AF86A383C1DA731C06B7C4D76CBEF2B0C2FFC05411EB5F3D4D0EB
+			BE30D424D42FAE2EB50BA9CEE92F6FA667773EA5D892DFAD7D17F0BFF62FF17F8B3CAB87D2868964D83F6DD672AE47AAC58DD9C74C800FAD7D55E01FD8CFC13E
+			15F2A7D64CFE28BE5C126EBF776E0FB44A791ECCCC2B83EBD5EB6984A565FCD2D3F0DCFA6FEC1CAB2D7CD9CE2F9E6BFE5DD2F79FCE6FDD5E6B7EC7C01E03F819
+			ADF8DAF041A56977BADCF9C32DAC64449FEFBF451EE48AFA97E1CFEC17A83C714BE27D52DF4680E0B5969AA2598FB339F954F5E46FAFB3B4FD36D348B38ED2C2
+			D21B2B58C6120B78C468A3D02818156AB17829577CD8BA8E7E5B2FB91B7FACD1C0C7D9E4B868E1D7F37C551FFDBD2FCADA743CE3C09FB3EF80FE1E7952699A0C
+			33DEC7C8BEBE1E7CDBBFBC0B70A7FDD02BD1E8A2BD1A74E14972D3565E47C8E271788C6D4F6B89A8E72EEDB7F98514515A1C8145145001451450014514500145
+			145001451450014514500145145001451450014514500145145001451450014514500145145001451450051D6346B0F1069B3E9FA9D9C37F633AED92DEE103A3
+			0F706BE49F8CFF00B16CB6DE76ADE01669E2E5E4D16E1FE75FFAE2E7EF7FBAC73EE7A57D8945716270747171E5A8BE7D4FA1C9F3EC7E4757DA6127A3DE2F58BF
+			55FAAB3F33F23EFAC6E74DBC9AD2EE096D6EA1731CB0CC851D181C1041E4115527823B989A3951648DB82ADC8AFD2CF8C3FB3FF86BE3059BC97710D3B5C55C43
+			AB5BA0F306070AE3FE5A2FB1E47622BE0DF8A5F07FC47F08F58FB16B76BFE8F213F67BE872D04E07F75BB1F553822BE1B1997D6C14B9D6B1EEBFAD0FE91C878A
+			B01C454FD84972D5B6B07D7BDBF99796FDD58F15D6FC2325AEE9ACB32C5D4C7D597E9EB5CDF4EB5EB3CD60EB9E178B52DD341886E7A9FEEBFD7DFDEBE832DCF9
+			AB52C5BFFB7BFCFF00CCFCF78ABC3A8CD4B1992AB3DDD3E9FF006E76FF000EDDADB1C2F34734FB8B796D2668A6468E45EAA699CD7DD464A494A2EE99FCF5529C
+			E949C26ACD68D3DD0B1C8D0C8AE8C51D4EE56538208E841AFB1BF671FDBCAFFC36D6BE1EF88F24DAA69236C70EB8017B9B71D079A0732AF4F987CE39FBFDBE38
+			E68E694A2A4ACC232717747EE0E8DAD58788B4BB5D4B4BBC8350D3EE904905D5B481E3914F70C383576BF243F67FFDA6BC4FF00F560B66E754F0E4CFBAEF459D
+			C88DBD5E33CF96F8EE060F1907031FA75F0A7E2F7867E3378663D6BC337E2E22E16E2D64C2CF6AE47DC9533C1E0F3C838C824735C33A6E077D3A8A7EA76B4514
+			5646C14514500145145001451450014514500145145001451450014514500145145001451450014514500145145001451450014514500145713F12BE33F833E1
+			1588B9F156BB6FA6B32EE8AD7264B897FDC8972C4678CE303B915F17FC5CFF00828B6B9ACF9F63E00D2D741B5C951AA6A0AB35D30F558F9443F5DFF85691A729
+			6C672A918EE7DC7E37F889E19F86FA51D47C4FADD9E8B6983B5AE6401A423A8441F339F6504D7C81F16BFE0A390C3E758FC3CD17CE6E57FB5B575217EB1C20E4
+			FA82C474E56BE37D4EEBC4BF10F559355D62FEEF54BB98E5AF750999C91E80B76F61C0AF48F85DFB35F897E224C8748D1EE35187761AF261E4DA273CE5CF048F
+			4049F6AE4AD8CC361A5C8DF3CFB2D5FF005EA7D1E0387733CC69FD639551A3FCF51F2C7E57D5FC93F5386F19FC41F1AFC62D58DEF88757BED6E60C4A2CCFB608
+			73D4220C220FF740AD0F04FC1BD63C61A8259E9F6375AB5D9C66DEC622DB41EECD8E07B9C0F7AFBA7E1B7EC33A168AB0CFE2DBF3AC4CB83FD9F63986D97D8B70
+			EE3E9B3E95F47787FC33A4F84F4E4B0D1B4DB5D2ECD7910DAC4235CFA9C753EE79AE5954C762B4D2947CB597DFB23D68C787B27F822F19557597BB4D3F4F8A5F
+			3D19F1C7C31FD833509238A7F14DF43A1DB1C16B1D3B12DC1F6690FCAA7E9BEBEA2F007C15F06FC348D0E85A24115D81837D38F36E0FAFCEDCAE7D1703DABB9A
+			2AE8E0A8D17CE95E5DDEACF3F30E22CC73087B19CF9292DA105CB14BB596FF003B8514515DC7CD05145140051451400514514005145140051451400514514005
+			145140051451400514514005145140051451400514514005145140051451400514514005145140051451400514514005657893C31A578C346B8D2B59B18B50D3
+			E71878665C8F623B823B11C8AD5A2934A4ACF62E13953929C1D9AD9ADD1F01FC7CFD96754F8646E35BD07CCD5BC3192CFC667B31E9201F793FDB1F881D4F82F3
+			5FAE6CAB2295601948C104641AF927F686FD91C482E7C49E04B50ADCC973A1C4300F392D00EDFF005CFF00EF9ECB5F1D98651C97AB865A755FE5FE47EFBC2DC7
+			6ABF2E0B3695A5B29F47E52ECFCF67D6DBBF8CB56D160D621DB20DB20FB9201C8FF115C0EA5A64FA5DC18A75C7A30E8C3D457A7329562AC0AB038208C11ED557
+			50D3E1D4ADCC33AEE53D0F753EA2B972CCDEA605FB39EB4FB76F4FF23E878B38330FC410788C3DA1885D7A4BCA5FA4B75E68F31E68E6AF6B1A34DA3DC6C906E8
+			DBEE480707FF00AF5479AFD3295585682A94DDD33F9471784AF80AF2C36260E338E8D3FEBEE7D439AEB3E18FC52F117C21F155BEBFE1BBE6B4BB8FE59226E62B
+			88F3931C8BFC4A7F31D4104035C9F34735AEFB9CA9DB53F5BFF679FDA4BC3DF1F741DF6A574EF115B2037DA448E0BA740648FF00BF1927AF519C1038CFAFD7E2
+			37857C59ABF81FC4167ADE85A84DA66A968FBE1B981B0C0F707B1047054F04120822BF4FBF65FF00DAA34BF8F5A49D3EF961D2FC63691EEB9B156F92E14759A1
+			CF257D5792B9EE304F154A7CBAAD8EFA7579B47B9EF745145739D014514500145145001451450014514500145145001451450014514500145145001451450014
+			51450014579C7C58FDA0FC0DF05ED59BC49ACC697FB7747A5DAFEF6EE4EE31183F283D998AAFBD7C3BF187F6FBF19F8E4CDA7F8462FF00843F496CA79D0B7997
+			D28FFAE98C47F44191FDE35A469CA4672A918E9D4FB9FE2A7C7AF047C1BB3693C4BADC305DEDDD1E9D6FFBDBA97D3118E403FDE6C2FBD7C47F17BFE0A0FE2DF1
+			70B8B0F065A2F84F4D6CA8BC6C4B7AEBF5FBB1E7D8123B357CE36FE1BD4F5EBA7BABE964F3677DEF2DC3179646279273C927DEBE8FF843FB15F8A7C58D05E5D5
+			97FC23BA6B61BEDBA9AE6761EA90F0DF9ED07D4D7054C7D0A72F67457B49F65B7CDEC8FACC2F0CE36B5258ACC26B0D45FDA9FC4FFC30F89BFBAFDCF9B8E95ACF
+			8AAFA5BFD4AE679E79DB7CB777B23492C84F7258EE27DCD7B9FC23FD90FC55E3C105D5B697F63D3DF0C353D5B31C647AC6B8DCDEC4023DC57DC1F0CFF663F047
+			C35F26E52C7FB6B578FE6FED0D48072ADEA89F753D8E377B9AF5BAC254F158BFF789F2C7F963FAB3BE39864F93699550F6B517FCBCABAFCE30D97937AF73C1FE
+			1BFEC7BE0AF0579573AB46DE28D4979DF7AA16DD4E3B4209047FBE5ABDCE1B78EDA148618D628A301523450AAA074000E82A5A2BAA8E1E961E3CB4A363E6F1F9
+			9E3334A9ED71955CDF9ECBD16CBE4828A28AE83CC0A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A28
+			00A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2803E75FDA37F65FB6F8851DCF88FC3114767E2650
+			649ADC6163BFFAF6593D1BA1EFEA3E19BEB1B9D2EF27B4BCB796D6EA0731CB04C851D181C1560790457EB857857ED15FB35D9FC58B57D6747F2EC7C550A60311
+			84BD5038490F66EC1FF03C60AFCCE6595AAB7AD417BDD577FF0083F99FB170871A4B02E380CCA57A5B464F78F93FEEFE5E9B7E7B5E59C57F6ED0CCA1A361F88F
+			71EF5E7DACE8D2E8F71B1FE689BEE49D8FFF005EBD4B54D2EF343D4AE74FD42DA4B3BDB690C534132ED7461D41159D796715FDBB4332868D87E23DC7BD78B966
+			67532FA9CB2D60F75FAAF33F4AE2AE15C371361954A6D46B457BB2E8D767DD3E8FA6EBAA7E5FCD1CD5DD63499748BA31C9F323728FD987F8D52E6BF51A75215A
+			0AA53774CFE46C5616BE06BCF0D898B8CE2ECD3FEBFE1C39ABDA0EBFA8F85F59B3D5B48BD9B4ED4AD2412C1756EE55E361DC1FF3904FAD51E68E6B4390FD49FD
+			947F6A5B4F8E9A29D2B57315978CEC23067854854BC41C79D10FFD094742411C1E3E85AFC40F0FF88352F0A6B565ABE917B369FA959C82582E606C3C6C3B8FEA
+			3A104835FA95FB2D7ED31A7FC7AF0CFD9AF1A3B4F1858460DFD928DAB2AE71E7C433CA924647F0938E8413C5529F2EAB63BE955E6F75EE7BAD14515CE7485145
+			1400514514005145140051451400514514005145140051451400515C67C4AF8C1E10F847A5FDBBC53ADDBE9AACA4C36E4EF9E7C768E31F337A671819E48AF877
+			E32FFC141BC4BE2DF3B4CF01DA378634F63B7FB426DB25F4A3D872B167DB737A30AD230723394D474EA7DA9F15BE3C7827E0CD9F9BE27D662B7BA64DF0E9D07E
+			F6EA61DB6C639C647DE6C2FBD7C39F197F6FCF1778EBCDD33C1903F8474A73B7ED28C1EFE51FEF8E23FF00807CC3FBD5F3F43E1FD63C57AA3DE6A97171717974
+			FB9E5B87696E2673EA492493EFCD7D37F07BF624F12788961BCD5611E16D35B04C9789BEF241FECC7C6DFF008115F5C1AF3EA63E8D397B3A0BDA4FCB65EAF63E
+			BF0BC338AA94962B33A8B0B45F597C52FF000C3E27F87CCF982CFC2DAA7882F9A7BD9267B8B87DCCD29324D2B93DFB924FAF35F4E7C21FD88FC4DE228E1BCD4A
+			15F0BE9ED8265BE42D76EBFECC5C6DFF008115FA1AFB27E19FC06F077C2A8D1F48D3165D440C36A779896E1BD70D8C20F650057A2573CA857C5EB8B9E9FCB1D1
+			7CDEECED8E719764DEEE4743DFFF009FB52D29FF00DBB1F863F9DB73CD7E1AFECFBE0CF85D1C52E9BA62DE6A6B82753BE0259F3EAA7184FF008081F8D7A55145
+			77D3A70A31E5A6AC8F92C5633118EAAEB6266E727D5BB8514515A9C8145145001451450014514500145145001451450014514500145145001451450014514500
+			14514500145145001451450014514500145145001451450014514500145145001451450014514500145145001451450014514500145145001451450014514500
+			7857ED29FB3AC1F1634DFED8D1923B6F155AC785270AB7A83A46E7B30FE163F43C60AFC097D6371A6DECF69770BDBDD4123452C322956465382A476208AFD70A
+			F9CBF6A6FD9D57C7961378A7C3B6C07892D63CDC5B44BCDF46A3D075900E9FDE031E95F319A65BED53AF457BDD577FF83F99FB1F057173C14A396E3E5FBA7A46
+			4FECBECFFBBF97A6DF05EA5A745AA5ABC128E0F2187553EA2BCEB50D3E5D36E9E0986197A1ECC3D457A8329562AC0AB038208C11ED597AF68C9AC5A6DE1674E6
+			37FE9F435E664F9A3C154F6751FB8FF0F3FF0033EEB8DB84E39F61FEB5855FED105A7F797F2BF3FE57DF4EBA79DF34734B2C4F0C8D1C8A51D4E0A9EC6939AFD3
+			D34D5D1FC9928B837192B341CD6CF833C65ABFC3FF0013586BFA15E4963A9D948248A543F9AB0EEA4641078209158DCD1CD049FAF1FB3BFC7ED23E3E7829352B
+			5F2ED35AB50B16A5A6EEF9A0931F7947531B7254FB11D41AF56AFC64F843F1635BF831E37B2F1268729F3213B2E2D59888EEA13F7A271E87B1EC4023915FADDF
+			0B7E27689F17BC1561E25D067F36D2E46D922623CCB794637C4E3B32E7F10411C106B82A53E4775B1E8D2A9CEACF73ADA28A2B1370A28A2800A28A2800A28A28
+			00A28A2800A2A8EB5ADE9FE1CD32E352D56FADF4DD3EDD77CD75772AC51C63D5998802BE3AF8D9FF00050FD3F4BF3F4BF87166354B9E54EB57E8CB02FBC511C3
+			39F76C0E3A30AB8C5CB622538C773EB3F1B78FBC3BF0E7459356F12EB16BA3D8271E6DCBE0B9FEEA28F99DBFD9504FB57C4BF1ABFE0A217FA9F9FA5FC38B13A7
+			40D943AD6A081A76ED98A2E553D8B6E3CFDD535F30F88755F16FC56D69F59F13EAB75A85D49FF2F178DD07F7510602AFB2802BDCFE0BFEC77E25F1C7D9EF5AD7
+			FB0F487E4EA7A8A7EF1D7D628B827EBF283EA6B86AE3A8D197B3A6BDA4FB2D97ABD91F5582E1BC662A92C5E364B0D43F9A7BBFF0C7793FBAFD19E077563E20F1
+			CEAD26A9AEEA175797970D97B9BD91A59A4FCCE6BE8FF839FB15F893C551C17B7D00F0CE96E01FB4DF26EBA917D522E08CFF00B5B47719AFB0BE16FECEBE0EF8
+			56B1CF6565FDA3ABAF2753BF01E507FD818C27FC0467D49AF50AE6950C46335C5CED1FE58E8BE6F767A71CDF2DC97DDC928DEA7FCFDA89397FDBB1DA3EBBDB73
+			CEBE18FC05F07FC29851F4AD396E353030DAA5E0125C1F5C1C6107B281EF9AF45A28AF429D38528F2535647C862B1788C6D575B1337393EADDC28A28AD0E40A2
+			8A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A2
+			8A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2803CC35EFD9A7E1AF89B58BBD5751F0C4725F
+			5DB9966922BBB889598F53B5240A09EA7039249EF543FE192FE14FFD0ABFF951BBFF00E3B5EBD45723C261E4EEE9C7EE47B71CF335A7150862EA24B65CF2FF00
+			33C46F3F62DF8357F319A7F0687908C16FED3BC19FCA6A87FE1883E0A7FD097FF955BDFF00E3D5EE9457646F08A8C7448F1AAC9D79BAB55F349EADBD5B7DDB7B
+			9E17FF000C41F053FE84BFFCAADEFF00F1EA3FE1883E0A7FD097FF00955BDFFE3D5EE945573CBB997247B1E17FF0C41F053FE84BFF00CAADEFFF001EAEEBE19F
+			C11F067C1D17CBE10D264D212FB69B88FEDD713A395CED3B6491803C9E4006BBAA293949EEC6A315AA4145145494145145001451450014515E3DF1B3F6A6F03F
+			C11864B7D46F7FB535F03E4D1AC183CD9C70643D231D3EF738E4034D26F4426D455D9EBD248B146CEEC11146E66638000EA49AF98FE387EDDDE10F873F69D33C
+			2C13C5FAFA02BBE17C58C0DD3E7947DF23FBA9C1E9B94D7C87F177F69DF885F1FA79AC9A63A3F8758E3FB26C1CAC447FD357EB21F63C7A28A83E11FECDFE22F8
+			9178ABA4E98D7E8AC165BD9FF776901FF698F53EC327DAB9EBE2A8E15F2CDF34FF00956AFF00E01EFE5B9163B3483AF04A9D05BD49FBB15E9DDF92BFC8E7FE20
+			7C4FF1EFC7AD505EF89354927B556DD0DB2FEEAD20FF00AE718E338E371C93DCD7A07C18FD94FC49F11248AE6C6C3C8D3B3F36AFA80D908FFAE6BD5CFF00BA0F
+			B915F60FC28FD8EFC2BE08582F7C4017C4DAAA80764C98B488FF00B319FBDF57C8F615EFD1C6B1A2A228555180A06001E95C52862B19FC77C90FE58EFF0037FE
+			47B91C765190E99653F6F597FCBDA8BDD4FF00B90FC9CB55E878F7C29FD96FC1FF000CFC9BC9A0FEDFD6D39FB7DF202A8DEB1C5CAAFD4E5BDEBD928A2BBA951A
+			7423C94E3647CAE3B30C566555D7C5D473979FE9D12F25A0514515B1E78514514005145140051451400514514005145140051451400514514005145140051451
+			400514514005145140051451400514514005145140051451400514514005145140057867C52FDB13C07F087C6977E18D761D5DF52B548DE43696A8F1E1D03AE0
+			971D88ED5EE75F967FB77FFC9CA7883FEBDAD3FF0049D2B5A715295998D593846E8FBDFE0AFED25E13F8F575AADBF86A3D4637D3523927FB740B18C3960BB70C
+			D9FBA6BD56BE09FF008265FF00C873C7DFF5ED67FF00A1CB5F7B52A9151959154E4E51BB3E37FDAD3F6B4F1BFC13F8A51787BC3D1694F60DA743744DEDB348FB
+			D9A40790E38C28ED5A7FB1EFED45E31F8EBE38D6B49F1245A625AD9E9DF6A8CD8DBB46DBFCD45E4973C618D7827FC144BFE4BE41FF00605B6FFD192D6EFF00C1
+			35FF00E4AA789FFEC0A7FF0047C55BF2C7D9DEC73F34BDADAE7E89D14515C876051451401F20F887F6AAF1A697FB5A45F0DE18B4B3E1E6D5ED6C4B35B319FCB9
+			1232DF36FC672C71C57D7D5F9BDE33FF009488DBFF00D8C761FF00A2E1AFD21ADAA24AD631A6DBBDFB851451589B05145140051451401E2DFB5A7C5ED77E09FC
+			2D8BC43E1E4B47BF6D461B522F623226C65909E030E72A3BD69FECC3F13758F8BDF07B4AF13EBAB6C9A95D4D708E2D23291E125655C024F603BD75BF113E19F8
+			6FE2C787D744F1569BFDA9A5ACCB7020F3E587F78A0856DD1B2B7463C671CD4FE03F00E83F0CBC356FE1FF000D587F66E916ECEF15BF9D24BB4B31663BA46663
+			924F535775CB6EA45A5CD7E87454514541615E79FB4078F352F865F077C4BE27D21606D4B4F8637845CA178F2654439008CF0C7BD7A1D78D7ED89FF26D7E38FF
+			00AF687FF4A22AA8EAD132D22CC8FD8F7E37F88BE3A781F5AD5BC4896497567A8FD9631630B46BB3CA46E4163CE58D7BE57C87FF0004D7FF009257E28FFB0D7F
+			ED08ABEBCAAA89293489A6DB8A6C28A28ACCD028A28A0028A28A0028A28A0028A28A0028A28A002B95F887F143C2FF000AB446D5BC53AC5BE956BD23590E6499
+			BFBB1A0CB39F600E3A9E29BE366F18DD46B63E134D36C65907EF356D559A45807FD33813991BAFDE64038FBDD2BC8ED3F62DF0D6BDAE1D7BE226BDACFC44D71C
+			FCF25FCC6DEDC7701228C828A0E7E50DB7DAAE297DA6449BDA28F9D3E2F7EDC1E33F8ADA83F86FE1A69F7BA3595C131A4D6E864D4AE47B6CCF943D972DFED76A
+			E6BE1EFEC3BF11FC6B32DF6B5623488E66DEF26AD3147249C92CA33213CF7039EF5FA35E13F01F873C0967F65F0EE85A7E8B0630CB636C916EF7620658FB9C9A
+			DEA8AB7A8B960F95796FF7FF0096BE676E0EB53C2CBDACE9AA92E9CDAC57FDBBA5DFADD791F357C35FD87FC2DE15786E3C4376FE21963E56D234FB3DAA9F7009
+			67FCC03DC57D19A7E9F6BA4D9C367656D15A5A42BB2382040888BE814700559A2B9A8E1E961D7EEE36FCFEF3B330CDB1B9A493C5D4724B65B25E91564BE4828A
+			28AE93C90A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800AF847F681FDB5BE20FC31F8
+			C5E25F0C68F0E8CDA6E9F346909B9B47793062473922419E58F6AFBBABF257F6C4FF009395F1C7FD7CC3FF00A222ADE8A5296A73D6938C743E9AF877FF000500
+			B2B5F8577DAC78E05BDEF8AFFB464B7B2D1F4788C66481628995DCB1608BBDDC6E279DBC03835E2DE32FF82817C52F105F3BE8D7161E17B4DDFBB86D6D23B87D
+			BFED3CC1B27DC2AFD2B8DFD9AFF66CD57F685F105DC715E2695A169DB0DF5FB28771BB3B638D3232C42B727818C9EC0FDB967FB00FC23B7D20D9CB61AA5D5CEC
+			DBFDA12EA0E26071F7B0B88F3FF00C71D2B57ECE0F54651F6B5168CF98BE1EFF00C1423E22F87F5480F89FEC7E2AD30B62656B74B69C2E7AA34615411EEA73FA
+			D7E86780FC71A47C48F08E9BE24D0AE7ED5A65FC7E644E46194E486461D99581523D41AFC7CF8B1E0393E17FC48F10F85A598DC7F665DB42931183247F79188E
+			C4A9538F7AFB77FE09ABE20B9BCF87FE2CD1A462D6D61A8C7710E7F87CD8C8603DB3103F52695584797990E94E5CDCB23EAAF1A78D346F87BE19BEF107882F93
+			4ED2ACD37CD3C809C64E00007258920003924D7C1BF13BFE0A31E28D5B509A0F046996BA1E98AC447757F189EEA41D895CEC4FA61BEB553FE0A19F16EE3C45F1
+			12DBC0D6B395D2B41449AE6356F965BA910364FAEC8D940F42EF5E6FFB2AFECE6DFB4178C2F21BDBA9AC3C3BA5C6B2DF5C5B81E6397242448482016DAC7241C0
+			53C7228842318F348275252972C0B967FB737C67B5B84924F15C5768BD619B4BB40ADF5DB129FC8D7D1BF01BFE0A0565E2DD56D742F1FD95AE877770C238757B
+			4622D59CF004AAC498F3FDEC95E79DA39AEC7C49FF0004FEF85BAAE8525A6956D7FA26A3E59116A11DE4931DFD8BA392A46719036FD475AFCE3F1CF83B50F87D
+			E30D5FC39AAA04BFD36E1ADE5DBF75B07865F661861EC455254EA2B244B75296AD9FB640860083915F12FED3BFB6278F3E10FC62D57C31A143A43E9B6B0DBBC6
+			6EED5DE4CBC4AE72438EE4F6AF4DFD85BE2D5CFC49F83C34DD4A733EADE1D94583C8C72F2405730B37BE0327BF9793C9AF907F6EFF00F9394F107FD7B5A7FE93
+			A5654E3EFB8B35A937C8A513E89F847FB6E5CCDF093C51E30F1F259BCF637D15969F63A5C4627BA91E32DB06E63E8496EC01EA700F92E93FB747C4CF1D7C50F0
+			ED95B5CD8E81A3DE6AD6D6EF656968929685E5552AD24A189241E5976FB62BE5AD3AD750D6EE2D349B18AE2F679A6DB6F6702976795F0B8551D58E1471E82BEB
+			BF83FF00B0278E6CF59F0F78935DD4B4DD164B3BEB7BD3A692D34DB524572AC546D0C71D8B75AD9C611BB662A5527648FA07F6C6F8F1E25F813E1AF0F5FF0086
+			D2C5E7BFBB9209BEDD0B48BB55370C00CB839AFCE3F8A5F13358F8BDE33BBF13EBAB6C9A95D2468E2D23291E11022E0127B01DEBF557E397C00F0F7C7ED2B4CD
+			3FC4379A9D9C3A7CED3C4DA64B1C6C5997690DBE37C8C7A015F99DFB4AFC2DD2BE0DFC5DD53C2DA2DC5E5D69F6B14122497EE8F292F12B9C95551D49C715345C
+			76EA55752DFA107C15FDA03C4FF016EB55B8F0D476123EA491A4FF006E85A41842C576E1971F78D7DC7FB1AFED25E2CF8F5A978A6DFC4B1E9D1A69B0DBC907D8
+			6068CE5DA40DBB2CD9FBA2BE59FD8FFF00677F0E7ED03A9789EDFC457BAA59269715BC909D3258E32C5D9C1DDBE37CFDD18C63BD7DD7F033F665F0BFECFF0075
+			ABDC7876FF0057BD7D51238E61A9CD148142162BB764698FBE739CF6A555C755D47454F47D0F8B3FE0A25FF25F20FF00B02DB7FE8C96B27F62FF008B9E1CF82F
+			E2AF15EBFE25BA786DBFB23CA8608577CD71299A322345EE700F248031C915ADFF000512FF0092F907FD816DBFF464B5E49F02FE096B3F1E3C6C9E1FD2658ACE
+			38E2371797B372B6F082016DB9058E480147527A8192348D9D3D4CA4DAA8EDB9EC9F10BFE0A19F107C417F2AF85A1B2F0AE9C09111F256EAE48F5669014CFB04
+			FC4D64F847F6FDF8ADA0EA11CBAB5ED8F89AD37664B7BBB28A0257B857855307D0907E87A57D51E1DFF827EFC29D274C5B7D46DB52D72EF6FCF77737AF11DDEA
+			AB16D007A039FA9AF85FF695F8430FC12F8B5A9F86ECE796E34CD91DD59493F32794E380C40009560CB9EFB73ED531F672D122A7ED23EF367EA27C1BF8BBA2FC
+			6CF035A7897442D1A484C5736B21064B69801BA36C75EA083DC107BE2BB9AF807FE09A3E20B98BC59E32D0B793673D9457BB0F4578E4D991E9912F3F41E95F7F
+			573548F2CAC75D39734533F35FE205F5B699FF000505179793C76B696FAFD94B2CF338448D16288966278000079AF53F883FB70789FC65E2A93C33F05FC3926B
+			722920EA525A3CF24807578E21808A3FBD267E82BC2BF684F08CDE3FFDB335AF0DC13ADB4BAAEAD6966B3C80958F7C512EE23BE339C57E8AFC27F843E1AF835E
+			178744F0E58AC080037174E019EEA40305E46EE7DBA0E80015BCDC524DEAEC6105293925A2B9F1F6ADE2FF00DB13C2B6DFDADA8595C5D5928F31ADE0B0D3EE4E
+			DEB8290032018FC6BD27F671FDB8ACBE26EB56DE16F18D8C3A0788E76115B5CC048B5BA93A79643126373D812413C641C03F56D7C2DFF0504F81965A4C367F13
+			741B716574D72B06AC20F943BB731DC71D1B236B1EE590F5C9311719FBAD58B94654D732773EE9AF907E317ED57E34F027ED3365E02D362D2DB439AEF4F819A7
+			B6669B6CDE5EFF00983819F9CE38AF63FD967E2ACBF183E0BE8BAD5E49E66AD6FBAC2FDBFBD3C781BCFBB29473EED5F0B7EDB9A95CE8DFB536ABA859CA60BBB4
+			4B19E1917AA3AC31B29FC0814A9C7DE7161525EE2923E88FDA4FF6E41E00D7EE7C25E03B4B7D5B5DB77F26EF50B805E0824CE0C51A290647078273804630C738
+			87F65FF885F1F3C5DF12EDBFE13EB6D5A1F09CD6B3499BCD122B48F7E018F0E2256FA73CFBD74DFB1EFECC7A7FC3AF0BD8F8BFC436897BE34D523174B25C0DE6
+			C23719544CF49083966EBCED1C024FD394A528C572C50E31949F3499E2DFB5A7C5ED77E09FC2D8BC43E1E4B47BF6D461B522F623226C65909E030E72A3BD69FE
+			CC3F13758F8BDF07B4AF13EBAB6C9A95D4D708E2D23291E125655C024F603BD79B7FC144BFE4815BFF00D86ADBFF0045CB5B9FB087FC9B5787FF00EBE6EFFF00
+			4A1E8B2F6771F33F696F23DAFC5DE2DD27C0BE1BBFD7B5CBC8EC34AB18FCD9E793A01D000072492400072490057C3DE25FDB77E25FC56F13C9A27C24F0D496F1
+			027CB93EC82EEF19738F31C10638D7EA081FDEA8FF00E0A0BF12B50F1478F344F865A433C90DBF953DCDBC6799AEE5E2243EBB51811EF2FB0AFADFE03FC17D23
+			E07F806CB43D3E18DAFD9164D46F80F9EEA7C7CCC4F5DA32428EC3DC925A4A11E66AED92DCA72714EC91F2A5C78F7F6BEF015A8D6358D1DB59B051BDA06B1B2B
+			8C28192592D712018EBD318ABBE36FDAE342F8E7FB35F8E347BE81740F17C7691B369EEF98EE02CF16E6858F5C724A1F980CF5009AFB92BE3CFDBABF672F0FEA
+			1E0BD4FE23693045A5EBBA79492FC44BB52FA36754CB01D240581DDDC641CF0438CA326AEAC128CA31767727FF00826BFF00C92BF147FD86BFF68455F57EB1AC
+			59787F4ABBD4F52BA8ACB4FB489A69EE266DA91A28C9627D00AF943FE09AFF00F24AFC51FF0061AFFDA11543FF000520F1FDD687E03F0E7856D663126B97324F
+			75B1B968A008421F62F229FAC74A51E6A961C65CB4EE60F8CBF6ECF16F8EFC50FE1DF83BE147D44E484BDB8B67B89E551D5D615C08D7DDF3C750BDA8DC6B1FB6
+			6DBC3F6F7B694DBFDFF223B7D2DDB1D71B14193FAD7BEFEC7FF0A74EF86BF05740B88AD95757D72D63D4AFAE59712319143A464F50110A8DBD33B8F526BDC687
+			28C5DA281425257933E02D33FE0A15E36F07D9EA9A3F8CFC1B0C9E25B74290332C966525F49E1604F7CFCBB73803033B8757F082DFF695F1C7C4AF0D78A3C552
+			5EE9FE116B859A7B2F3E1B58CC0413836EA4391D3EF82DF5ADAFF82887C32D3756F8696BE348EDE38B59D26E63B796E1400D2DBC84AEC63DF0E548F4CB7AD77B
+			FB11F8E2F7C6FF00B3EE8CDA848F3DD69734BA679D21C9748C831E7E88E8BFF01AA6D7273451093E7E5933D9FC4DE25D33C1DA05FEB7ACDE47A7E9763119AE2E
+			253F2A28FD493C00072490075AF89FC4BFB6D7C44F8A9E289742F83DE1691A14395B992D7ED372CA0E3CC65CF97129E3EF67B73DA9BFF0504F889A97897C65E1
+			AF859A233C9E618AE6E608FACF732B148233F41F363A66453D863EAEF81FF07748F827E01B0F0FE9B146D72A81EFAF5570F75391F3393D719C8507A00054A4A1
+			1E67AB65B6E72714EC91F256A1E32FDB0FC176BFDABAA584DA8D922EE7863B1D3EE78E09252DC7983FFD7E95EA5FB36FEDB5A7FC5BD5A0F0C78A6C61F0FF008A
+			263B2DE4809FB2DDB8EA80312D1BFA29241C75CE057D475F01FEDFDF06EDFC17AD68FF0012BC3919D364BDBBF26FFECBF26DBB00C91CEB8E8CDB5B24639507A9
+			269C5C6A7BAD585252A7EF2773EFCA2B80F80BF111BE2B7C21F0C789E5DBF6BBCB50B75B7A79F1B18E538EC0BA3103D08AEFEB07A3B1BA77570A28A290C28A28
+			A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A002BF25
+			7F6C4FF9395F1C7FD7CC3FFA222AFD6AAFC95FDB13FE4E57C71FF5F30FFE888ABA287C4CE6C47C28FA47FE0997FF00203F1F7FD7CD9FFE812D7DB35F137FC132
+			FF00E407E3EFFAF9B3FF00D025AFB66A2AFC6CBA3F023F257F6C4FF9395F1C7FD7CC3FFA222AFA47FE0997FF00203F1F7FD7CD9FFE812D7CDDFB627FC9CAF8E3
+			FEBE61FF00D11157D23FF04CBFF901F8FBFEBE6CFF00F4096BA27FC239A1FC5FBCF917E3E6AADAD7C6EF1EDE33170FAE5E2A13C1D8B332A7FE3A057DBDFF0004
+			DBD292DFE0EF88350F2CACF75AE3C45C8FBC89042571F4677AF8AFF68CD0DFC39F1E3C7B64EBB07F6C5CCE8B8C6125732A7FE3AE2BECAFF826AEB505C7C2FF00
+			14E90A47DA6D759FB5B8CF3B6582355E3EB03FE54EA7F0F40A5FC4D4FAFEBF303FE0A01A5269FF00B44DEDC2050D7FA75ADC3E3A9214C5CFBE231FA57E9FD7E5
+			BFEDE7AFC5AD7ED17AB43148241A6D9DB59B15E81B6798467D8C98FA822B1A3F11BD7F80F41FF8268EA72C3E3CF18E9C09F26E34D8AE18678DD1CBB47E92B7E7
+			5E75FB77FF00C9CA7883FEBDAD3FF49D2BD37FE099FA1C9378B7C6BAC6D3E4DB58C169BBB6E92466C7BF117EBEF5E65FB77FFC9CA7883FEBDAD3FF0049D2B65F
+			C5660FF828F42FF826C786F4DD4BC71E2BD5EEAD639F50D36D214B499C64C3E6B3872BE8484033D7048EE6BF42ABE09FF8265FFC873C7DFF005ED67FFA1CB5F7
+			B573D6F8D9D147E0415F967FB77FFC9CA7883FEBDAD3FF0049D2BF532BF2CFF6EFFF009394F107FD7B5A7FE93A5551F889AFF09EADFF0004CBFF0090E78FBFEB
+			DACFFF004396BEF6AF827FE0997FF21CF1F7FD7B59FF00E872D7DED5357E365D1F811F99FF00F0512FF92F907FD816DBFF00464B5BBFF04D7FF92A9E27FF00B0
+			29FF00D1F15617FC144BFE4BE41FF605B6FF00D192D6EFFC135FFE4AA789FF00EC0A7FF47C55BFFCBA39BFE5F1FA275F99FF00F0512FF92F907FD816DBFF0046
+			4B5FA615F99FFF000512FF0092F907FD816DBFF464B58D1F88DEBFC06EFF00C135FF00E4AA789FFEC0A7FF0047C55FA275F9D9FF0004D7FF0092A9E27FFB029F
+			FD1F157E89D2ADF18E8FC07E6F78CFFE52236FFF00631D87FE8B86BF486BF37BC67FF2911B7FFB18EC3FF45C35FA434EA6D1F40A5BCBD42BCA7F6A9D2A2D63F6
+			77F1E5BCC0144D35EE06467E6888957FF1E415EAD5E4DFB576B30E87FB3BF8EEE27202C9A735AAE4F56959625FD5C5651F891ACBE16784FF00C133F529A5F077
+			8DAC18FEE20BF82751FED3C6CADFA46B5E45FB55E9B06B1FB6AC1A7DCAEFB6BBBBD2A0957D55962523F226BD87FE09A3A4CB0F81FC67A9907C9B8D461B65E38D
+			D1C458F3F4956BCA3F696FF93E9D33FEC23A3FF286BA97F124723FE144FD22A28A2B8CED3E60FF0082897FC902B7FF00B0D5B7FE8B96B73F610FF936AF0FFF00
+			D7CDDFFE943D61FF00C144BFE4815BFF00D86ADBFF0045CB5B9FB087FC9B5787FF00EBE6EFFF004A1EB7FF00975F339FFE5EFC8F976D63FF0084B7FE0A2045EE
+			1FCAF12395DC377FC7B2131FE5E52FD315FA4B5F9B9248BE08FF00828796BCCAACBE23E3771FF1F51FC87E9FBE5AFD23A2AF4F41D1FB5EA15E35FB627FC9B5F8
+			E3FEBDA1FF00D288ABD96BC6BF6C4FF936BF1C7FD7B43FFA5115651F891A4FE167947FC135FF00E495F8A3FEC35FFB422ACAFF0082947826EF50F0CF84BC516F
+			13496DA6CF359DDB2F3B04C10C6C7D0663619F5651DC56AFFC135FFE495F8A3FEC35FF00B422AF64FDA5FE26783BE1B7C31BF3E33B3FED8B1D515ACA2D1D3EFD
+			E3119C03FC20704BFF000F047CDB41D9B6AADD19249D2B32BFECA1F122C3E237C0DF0C4D6D3ABDEE996716997D0E46F8E5850265876DCAA1C7B357B057E5FF00
+			C27F82DF1C34DB36F1F7C31D3EFB42D3EF58BDA5B3EA10F9D3DB64942C926D59540E85946EEAABC8AF53FF008581FB5F6A10AD8C5E1E9209D86D175FD9F6A8DF
+			5CB9D83F2A52A6AFA308D476D533D13FE0A1BE3CB0D13E0EC3E1969637D535BBC88A5BE7E758626DED263D37045F7DC7D0D74FFB0BF84AEFC2BFB3CE90F788F1
+			4BAADC4DA92C6E3911B90B19FA3222B0F6615E41F0EFF621F17F8FBC64BE2CF8D1AD9BC62EAF269AB72679EE31D239241F2C718E3E58C9E3206DEB5F6E5ADB43
+			656F15BDBC490C10A08E38E350AA8A06000074005293518F221C5394B9D9F97DF1C3C7D71E19FDB4B59F139D386B13E91AB42F158972A2430C48A83201C7DD07
+			A76AF5EFF878B789BFE8987FE4ECBFFC6ABCFBE235C0F87BFF0005004BEBB3E5DB7F6F595C34AFF74453247B9BE8BBDBFEF9AFD29AD26E2946EAFA19C2326E56
+			76D4F85FFE1E2DE26FFA261FF93B2FFF001AAE07E38FED75ADFC6EF8757DE15BBF87ADA68B89629A3BC49E495A26470D90A6219C8057A8FBD5FA4D4566A714EE
+			A268E9C9AB391F30FF00C13CE6BBFF008513796D7704B01B5D6EE228D6552A4A98A17C80474CBB57D3D45159C9F33B9AC572A4828A28A92828A28A0028A28A00
+			28A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028A28A002BF257F6C4FF0093
+			95F1C7FD7CC3FF00A222AFD6AAF927E317EC13FF000B67E256B9E2DFF84EBFB2BFB4E4493EC7FD91E7795B6354C6FF003D73F773D075ADA94945DD98568B946C
+			8E73FE0997FF00203F1F7FD7CD9FFE812D7DB35E25FB32FECD9FF0CE763AFDB7FC245FF090FF006AC90C9BBEC3F66F2BCB0E318F31F7677FB74AF6DA9A8D4A4D
+			A2E9A718A4CFC95FDB13FE4E57C71FF5F30FFE888ABE91FF008265FF00C80FC7DFF5F367FF00A04B5D1FC62FD827FE16CFC4AD73C5BFF09D7F657F69C8927D8F
+			FB23CEF2B6C6A98DFE7AE7EEE7A0EB5E93FB32FECD9FF0CE763AFDB7FC245FF090FF006AC90C9BBEC3F66F2BCB0E318F31F7677FB74ADA538BA764F5308D392A
+			9CCD687CEBFF000510F82B750EB567F1234DB732594F12596ABB064C722F114ADECCB84CF40517FBD5F397C03F8EDACFC03F1A7F6DE990ADF5A5C47E45F69F2B
+			954B88F39EA33B581E4360E327820915FAF5A969B69ACE9F73617F6D15ED95CC6D14D6F3A078E442305594F0411DABE3FF0089BFF04E3D0F5AD425BEF056BEFE
+			1F590963A6DF446E205C9E88E08751ECDBBEB442A2E5E59854A72E6E6819BE26FF00829669CDA048BE1FF07DDAEB5221546D4274F2216C70DF2FCCE07A7CB9F5
+			15F0EEB1AB6A5E2EF105DEA57D2CBA86ADA8DC34D2C8465E595DB2781DC93D07D2BEB0B6FF00826AF8C9AE105C78B3428A027E7789267603D94A8CFE62BE8BF8
+			15FB177837E0CDFDBEB3712C9E27F1243CC57D791848A06FEF45102429FF00698B11D88AAE6A74D7BA43854A8FDE35BF645F8353FC19F8436767A8C5E4EBDA9C
+			8750D4236EB13B00122FF80A0507FDA2D5F107EDDFFF002729E20FFAF6B4FF00D274AFD4CAF963E3C7EC3BFF000BB3E256A1E2DFF84D7FB1BED71C31FD8FFB2B
+			CFDBB2354CEFF39739DB9E9DEB2A734A4E5236A906E0A313CC3FE0997FF21CF1F7FD7B59FF00E872D7DED5E09FB32FECB3FF000CE77DAFDCFF00C24FFF00090F
+			F6AC70C7B7FB3FECDE57965CE73E6BEECEFF006E95EF751524A52BA2E9C5C62930AFCBAFDBE6C26B3FDA3B5596542A9756369344707E651184CFFDF48C3F0AFD
+			45AF1BFDA2BF665D03F684D2ED4DD5C3E91AF58AB2DA6A90C61C853C98E44C8DE99E719041CE0F24174E4A32BB0AB1738D91F04FECA1FB4659FECF3E21D6E7D4
+			B49B8D574FD5608E393ECAEAB2C4C8CC5480DC10773646476AFBABF679FDA8AC3F686D63C416BA768371A4DB693143209AEAE15DE5F30B8C6C5185C6CFEF1EB5
+			F2FCDFF04D5F1A2CAC22F15682F1E7E56713A923DC0438FCEBE86FD93FF65ED4FF00679B9F105D6A7AE5A6AB2EAB1C3188ED226558FCB2E49DCDD73BFD074AD6
+			A3A724DADCC69AA91693D8F967FE0A25FF0025F20FFB02DB7FE8C96B77FE09AFFF002553C4FF00F6053FFA3E2AF7AFDA23F631FF0085F9E3E8FC4DFF000987F6
+			16CB28ECFECBFD99F68CEC673BB779C9D77F4C76EB57FF0066BFD913FE19E7C55AA6B5FF00095FF6FF00DBACBEC7E47F66FD9B67EF15F76EF35F3F7718C77EB4
+			73C7D9F2DF50F672F69CD6D0FA2ABF33FF00E0A25FF25F20FF00B02DB7FE8C96BF4C2BE66FDA23F631FF0085F9E3E8FC4DFF000987F616CB28ECFECBFD99F68C
+			EC673BB779C9D77F4C76EB5953928CAECD6AC5CA364782FF00C135FF00E4AA789FFEC0A7FF0047C55FA275F3AFECD7FB227FC33CF8AB54D6BFE12BFEDFFB7597
+			D8FC8FECDFB36CFDE2BEEDDE6BE7EEE318EFD6BE8AA2A494A5743A51718D99F959FB4BEB7AA7867F6BAF13EB3A3165D534DBF82F60654DFB5A3B78DF711DC00A
+			49ED80735F797ECFFF00B4BF867E3B6836E60BA874EF134718FB6E8B23E24561D5A3CFDF8CF623A64038359363FB2CDAC1FB456A9F146F35B8EFE2BE8E48CE89
+			2E9E36A878042D990C8430DBBB20A73BB15E6FF13BFE09DFA16B9ABC9AAF8235D97C2B33BF99F619A3335BA367FE59B021E31DF1F37B60600D25284924CC9467
+			16DA3EBD6608A59880A06493D2BF3FFF006E7FDA1ECBE225C58FC39F07CFFDAD6D0DD2CB7D7367FBC5B8B81F2C704657EFE0B12719CB6D03EE9AD1BAFD857E2E
+			6B56A2C356F89D05D69AD80F04B7B77326074F918006BDABE03FEC5BE11F833A8C3ADDDDC49E28F1243CC37975108E1B73FDE8A2C9C37FB4C491DB1531E486B7
+			B952E7A9EEDAC76BFB347C2B7F83FF0006F42D02E942EA8C86EEFF006FFCFC487732FBED1B533DF657C5FF00B4B7FC9F4E99FF00611D1FF9435FA455F377C4BF
+			D8EFFE1627C74B5F88DFF0977F67F93736771FD99FD9BE6E7C8D9C79BE70FBDB3AEDE33DE9424949B91538BE54A27D2345145626C7CC1FF0512FF92056FF00F6
+			1AB6FF00D172D6E7EC21FF0026D5E1FF00FAF9BBFF00D287AECFF688F827FF000BF3C031F867FB67FB0B65EC779F6AFB2FDA33B15C6DDBBD3AEFEB9EDD2AF7C0
+			7F84FF00F0A4FE1AE9FE12FED5FED9FB249349F6CFB3F91BBCC919F1B37B631BB1D7B56BCCB92DD4C795FB4E6E87C99FF050CF85B7FA3F8AB45F899A4248B0C8
+			B1DA5ECD083982E23398652474DC30B9EC6351DC57D2BFB38FED11A27C76F07DACC9730DBF89EDA255D4B4B2C03AC80006445EA6363C823A6707915EA1AF681A
+			778A346BBD2757B28751D36EE3314F6D708192453D88FF0038201AF8E7C79FF04E587FB61B52F00F8B24D186FDF1D9EA2ACFE49EBF24E877003B6549FF0068D3
+			528CA3CB2D2C2719465CD1D6E7DA534D1DB42F2CD22C5120DCD23901540EA493D057C1DFB687ED5961E33D32E3E1E781A75D5ACE4FDE6ADA9DB8DF1BAC7F3F95
+			11EEA36EE671C617838CD58B8FD83FE29789B6DA788FE28C775A7672CB25C5D5DE391D11CA83F9F6AF71F85BFB1B7833E17F86758B381A4D575DD56C26B09F59
+			BE8C168D258CA308A30708B8273C963D0B629C7920EF7B8A5CF356B58F3FFF00826BFF00C92BF147FD86BFF6845595FF000514F867E25F14DBF85BC45A3D85D6
+			A9A6E9B1DC417715AC6646B72E518485473B4ED209E8368CF5AF72FD9AFF0067FF00F8679F0A6A7A2FF6F7F6FF00DBAF7ED9E7FD8FECDB3F76A9B76F98F9FBB9
+			CE7BD7CFBFB5D7C74F17F883E2DD97C1EF045EC9A534D2DBDA5DDC40E639279E70A550C83958D55D33B7AE5B3C0C538BE6A9788A4B96972C8E7FE1AFFC145AEB
+			C2FE19D3345F1078397507B0B78ED45E58DE7925D5142826364237607386033D8576DFF0F2EF0D7FD099AB7FE04C55E97F0E7F623F865E09D3611A9690BE2BD5
+			B199EFF5525D5DBBED8B3B1467A6413EA4D7A04DFB3E7C309A01137C3DF0C0418E5749815B8FF682E7F5A4E54EFB0E31AB6DCF19F0F7FC1453E1A6AB70B0EA36
+			3AEE8818E0CF3DB24B128F53E5B96F5E8B5F45783BC6FA0FC40D163D5FC39AB5AEB1A7487689ED64DC15B009561D5586465480467A578DF8F3F61DF857E32B19
+			96CB466F0CDFB03E5DE6952B2853DB31312847B601F715F277ECE77BAEFECF3FB58AF822E6F3CDB5BABE3A3DF471E44770181304A14F4396461DC06619E4D1CB
+			0926E3B8734E0D296C7A6FFC1457E0EDDDD49A4FC46D32069628225D3F54F2D798C0626194E3B659909EDF27AD7B07ECA7FB4FE91F187C23A7E91AB6A115AF8D
+			ECE2586E6DA770AD7BB4604D1E7EF16032C0720E78C609F7CBEB1B6D4ECE7B3BC823BAB49E368A682640E92230C15607820838C1AF907E25FF00C139F43D6353
+			9751F04F8825F0D966DE34FBB88CF0A367811B860E807BEFFAD2528CA3CB21B8CA32E689F6357C83FB687ED5B6BE15D16EBC0BE0ED444DE23BC061BFBDB37CFD
+			8633C346181E256E9C72A33D0E2B8F7FD87FE325DDAFD8AEBE29C725838D8F09D42F5D0AFA6C23047B57AAFC0DFD85FC29F0A757B7D7359BD7F16EB96E4496ED
+			34022B6B771C8758F2DB98766627A640071869422EEDDC1B9CB44AC773FB2BE97E3CD3FE1269F27C41D56E750D5EE8F9D0C378019ED6DC81B1247C6E673CB1DC
+			491B803C835EC145158B7777364ACAC1451452185145140051451400514514005145140051451400514514005145140051451400514514005145140051451400
+			51451400514514005145140051451400514514005145140051451400515F2AFC29F157C61BEF8E96B65E21835E5F09B5CDE2BB5D69662B7D82294C5993CB1C6E
+			09839E78F5AFAAAB970F885898B928B5676D4F6F36CAE794D68519D48CF9A2A578BBAD5B567A2D740A28A2BA8F1028A28A0028A28A0028A2BE35FD977E3778DF
+			C77F15ADF4AD7B5F9B51B06B49A4303C51A82CA060E5541AE3AD8A850A94E9C96B3D17E1FE67D065D92D7CCB0B89C5D29251A09377BDDDEFB68FB75B1F655145
+			15D87CF851451400514514005145140051451400515E11FB587C67D5BE13F86B49B5D05D6DF55D5E49556ED903F931C613795078DC4BA819078CF7C579E7ECD6
+			DF18BC45E30D0BC45ACDEEA97BE0AB9F3DA692EEF2328E3CA90211116DD8F336E085C7E15E64F1D18E2161A316DE97B74B9F6187E1AAD5B2A966D56AC29D3F7B
+			9549D9C9C6FA2F36D3496ED9F5D514515E99F1E145145001451450014514500145145001457CFDFB5F7C46F11FC3AF0DF87EE7C39AA49A5CF73772472BC688DB
+			942640F981EF5DBFECE7E28D53C67F06BC3DAC6B376D7FA9DCFDA3CDB875552DB6E2545E1401C2A81D3B5714715096225864B54AFE5D3FCCFA0AB92D7A39553C
+			DE525C93972A5ADEFAF95ADEEBEA7A557E757EDA9F0F7C49F0C7E3B41F14749B776D36EAE2D6F61BD442F1DB5DC2A8A124F4DC635619E1B7301D0D7BDF82FF00
+			6A4F107893E382F8267D274D8AC0EA37367F688C49E6ED8FCCC1E5B193B0678EF5F4A5DDA417F6B2DB5D431DC5B4AA52486640C8EA782083C115BE17174EB5E5
+			4F549D99C99B64F8ACAE50A58B56724A4ACEFA3BFF0091F357C38FDBF3E1BF8A74A83FE123B99FC27AB6D0268678249A02F8E76491AB7CBFEF05FF001F4293F6
+			AEF8471C6CE7C79A590A093B59C9FC005C9ACBF137EC67F083C5133CD278461D3A77CFCFA64F2DB28FA468C107FDF3DAB9BFF877FF00C24FF9F3D5BFF060DFE1
+			5D9FBBF33C4FDEAEC53F883FF0502F86DE18B19C787A4BCF166A582228EDE07820DDFEDC920076FBAAB57877EC9FF0E7C53F1BFE3C49F16BC476AD06956F7725
+			F9B931948EE6E482B1C50E7AAA1C1CF38D8013935F4B59FEC7FF000B3C17A4DF5DE95E0F86FF00548ADA4681F50792F099021DB88E42509CFF00B3D6B98FD977
+			5EF8A77DE35BBB1F1A5A6B169A143A5BFD9D2FB4BFB242B289620AAA7CB519DA5F0BE99E38AE5AB8B8519C69462DB975EC7B583CA2AE3B0B5B18EAC62A959F2B
+			7ABBF6D353E9FA28A2B43CB0A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800
+			A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800AF9E7E3F7ED4DFF0AD75AFF8467C35630EABE21017CF927DCD15BB3005536A905DC820E3200C8EBC
+			81F4357E67E8BF1166D0FE375D78C65D2BFB7AE9350B9BB5B3918A82EC5F69C80D8D84823D368AF1334C54B0F18420F9799EFD9753F45E0CC968E6B5ABD6AF4F
+			DA2A51BA85ECA5277B26FB68FCBBE87B049FB507C5FF0001CB6D7BE2EF0A2AE9770C005BBD3E5B4DDDF6A3F40D8ECC0FD2BEAAF877E3ED2FE26784AC7C41A43B
+			1B6B9043452637C2E0E19180E841FCC608E08AF903E26FED49AAFC4DF04EA7E1CBBF027D9E2BC550B389DDCC4CAC19580F2C7208F5AEEFF60EB9BE8B46F17E9B
+			730CB0DBC3716D7118914A82D22C8AD8047A449FA57160F16FEB4A8C6A39C5AEAB54CFA0E20C8A1FD8D3CC2AE16387AD4E4B48493528B696C9BB3BBFC3CF4B1F
+			0B7F6A1F1578DFE375B783AFB4FD1E2D324B9BB84CD6F0CA26C451CACA72652324A0CFCBDCF4AF55F8E9F1C74DF82BE1F86E2683FB4356BC2CB67621F6EFC637
+			3B360E146476C9240F523E4AFD9EFF00E4EC2C3FEBFB52FF00D1171537ED9FAC49A87C6D7B59773C3A7D95BC09183818606438F73BFAFB0AC618FAD4F053AADD
+			E5CD65E5A23D1C470CE0315C4587C1C29F2D2F62A724B4BBE692FC74BF91D347FB4C7C6BB8D35BC4B1786226F0FAE64322E9331B6D83A9DFBB3B7FDADD8AF7DF
+			807F1F2C3E35693721ADC69BAE5905FB55987DCACA7A4919EA573C11D41C0EE09F15B7FDB4B56B5B18ECA2F8711C7691C6214816E1F62A0180B8F2BA638C5707
+			FB26DC5F69DF1FB4E31584D6567A847750BC65582A47E534AAB9239C3469F952A38C74EBD38C2AB9A968EEB6F40CC320862B2DC555AF828E1A7497341C649DD2
+			BB6A567BD96FDDE9E7EC3F18BF6A6D7FE197C607F0E2596972683035B34D3CB04AF702375569082240B9009C7CBE9D6B95F157ED71F1075E86EB54F07F84E4B3
+			F0C5B64B6A13D8C973800F59241FBB4FA738F535C1FED5D1ACDFB45DF46EBB91859AB29EE0C49C57DDBA86976767E18BBB0B7B5860B14B47896DA38C2C6A9B08
+			DA1470063B56F4FEB38AAB5E0AAB8A8BFF0033CEC64728C9703976227828D49D582BDDB4B68DDDBAB77EBB1E3DFB34FED1971F191B50D2B59B4B7B4D72CA2170
+			1AD72239E2C852DB49254AB15CF383B874AD2FDA1BF688B6F82F676B67676B1EA5E22BC432456F2B111C31E71E63E392090405046707918E7E6FFD8849FF0085
+			C93F6FF8954FFF00A1C7543E33A1F1EFED5B369578C7ECD71AB59E961727E58F31C671E99258FD58D651C7D7FA84649FBEDF2DCEEA9C2F977FACD568CA16A10A
+			7ED1C7F0B77B5F5FC363B6F0BFED6FF12ACD535CD7BC2BFDA3E1479312DDDAD84B0AA2E71F24D92991E8D9CF4C8EB5C67EC5FF00F25C2DBFEBC6E3FF004115F7
+			CC7A7DAC3A7AD825BC4B64910816DC20F2C4606DD9B7A631C63D2BE06FD8BFFE4B85B7FD78DC7FE8228AF46AD1C4E1D54A9CFAF5F95C32DCC70798E519ACF098
+			5546D057B3D1AB4EDA6C9AD6ED6F7F23EA7F8F9FB40587C15D36DA24B61A96BD7AA5ADACCB6D5541C19243D42E780072483D3048F9C87ED7DF15A18575A9348B
+			13A3B3603369B28B62738C0937673FF02AC5FDA259FC65FB4FCFA55CBB7D9BED765A6A0CF291B2C7BB1FF02773F8D7DDD7DE1BD3352F0ECDA0CD6709D265B736
+			86D5500411EDDBB40E8001D3D315D0A588C756AAA9D4E4507656EAFCCF2A54F29E1ACBF072C561557A95E3CD26DEC9D9D979EBF86FDB86F819F1C34DF8D5E1F9
+			AE2083FB3F56B32AB79625B76CCE76BA3775383EE0823D09F2DF8C5FB537883E18FC6093C391D8E972685035B34D34B04AF702375569082240B9009C71E9D6BC
+			93F638D427D17E3A7F672B931DD5A5CDB4A0743B06F071F58FF5AABFB56C6B2FED177C8E03230B3054F71E52715CD531F5A7818D54ED252B33D7C2F0C65F87E2
+			5AB829C39A8BA4E714FA5DA5F86B6F23B3F137ED79F11B568EE358F0DF86069FE18824E2F26B192718CE07992E760CFA0C63A64D6F693FB7289BC183CFF0F9BA
+			F1934BE4C56B6BB85B4991C49C92C39E360C938EA33C7D0DF10B4EB5B5F859E25B286DA286CE3D1EE624B78D02A2A8858050A380057C8DFB0BD8DBDC7C4CD626
+			9608E59ADF4C668647405A3264452549E84824647626B5ABF5BA18985255AFCFE5B7A238B07FD879965388C6CB00A2B0ED59293BC9745296FEBF813DF7ED7DF1
+			4BC27AE447C41E1EB4B38A50251A7DDD84D6CCD193D50B36EF5C31C8E3A1AFADF45F889A4EB1F0F20F19994DB690F626FA46939312AA92E0E3A95208E3B8AF9D
+			7F6FA8D7FB33C18FB46F135D0DD8E71B62E33F80FCABBBF84FE157F1C7EC9761A0C530826D434CB882391B3B55CCB26D271DB38CFB66B6C354AF4B13570EE7CF
+			65757EFA7F99E7E6F85CB31993E0B348515439EA72CB976E5BC937EBEEDFFCCF2DBCFDAC3E24FC40D5EF22F0078577D85BF3FBBB392EE70BD8C841DAB9C1E31E
+			A326BB8F80BFB4D7883C79E2F6F09F89FC37243A9A86CDD58C0E8202A3913C6E494F4DD9EA40C739AF06F007C4CF1A7ECB1AF6A3A3EA5A02B4172E1E7B3BC050
+			B95180F14A3208C1EBF30F6AFAA7E0DFC7FF00057C54D52E174FB61A3789EE63533DB5CC6AB2DC2A038DB20FF581413C1C1033C62B9B055E756A479EBB53BEB1
+			6B4F447B1C4396E1F0584A9F56CBA33A1CAB92AC2576B6F7A5D5ADFCBCFB7C9DFB4C7C4CF12F8F3C4C961AEE97069F67A35E5E41612436F2C46742EAA598BB10
+			C711A72A07DE3EA2BD7FF65CF8D1E32D6756F0D783AEB43B483C350D9B451DFC76932C8C238C952642E509240CFCBCE6AB7EDFDD7C07FF006FFF00FB6F5EBFF0
+			8F549343FD99748D462FF5B67A24B709F545761FCA951A552398D4BD47EED9BF35A6869986370B5785708E3858FEF1CA3157D212BC9732D37BABFCCF38F8D7FB
+			615C7867C4D71E1CF05D85BEA1776B2182E2FAE959D3CDCE0C712291920F1B89EB9001EA78CD17F6C8F1E784F5A860F19E810CD68F86789AD5ED2E429FE24C9C
+			11F55E7D4562FEC4FA1DBEBBF172F750BD41712E9FA7C97309906E2266744DFCF7C33FE26BDCFF006D4F0FDA6A7F075F529624377A6DE43243363E601DBCB650
+			7D0EE048FF00647A528D4C5E2284F1AAA5AD7B2E964555C3E4795E654387A78453E75152A8DFBDCD2DADF86CD6FE5AFB168FE2BB1F1378461F106913ADD58DCD
+			B1B982420F2304E08EC411823B10457C99E17FDBA35CFF0089AC9E20D274A658EC99ACA1B08A58DA5B9F3102AB3348E02052EC78CFCA0035DCFEC6BAC4D7DF04
+			35DB3958B258DEDC2459E8A8D123E07FC08B1FF8157CF5FB2EFC3FD27E237C56B7B0D6E26B9B0B6B692F1ADF385999194056FF00672D923BE315AE23175EA2C3
+			BA0ECE77F4BE87165591E598396690CC69F3C30EE367F6ADEF3D36D5AB27FA1EEDE06FDA27C75E27F83FE36F16A5BE9771A968B7313476AD6CFE50808064E15C
+			365412D927A29AEF3F667F8E97DF1A745D65B58B7B2B5D534EB84052C51D2330BAFC870CCC73B91F3CFA57A9C9E17D29B41BAD162B082D34CB881ED9EDEDA258
+			D7CB652A400060704D7C4DFB31DFDC7C2CFDA22F7C2DA83EC172D71A4CBBB8532A36E8DBF12981FF005D2BA252AF83AD41549F345E8FD7A7E7F81E4D0A39767D
+			97E633C2E1D53A94ED385B751495D79FC2DFAC8F77FDA6BF682D4FE0BBE8569A1DAD8DDEA17C259665BF8DDD638D7685C0575E4927BFF09AE961F8BF71E17F81
+			FA7F8E3C5F6A82F2E2D52E1AD34C89D558C8731200CCC57E52B92C7039F615F2DFC60693E36FED4C9A0DBBB49691DDC5A4AB29CEC8A224CEC3E87CE3F857DBBE
+			24D5B43F09F866E6EB5A9ADAC743B68B64A67198C263685DBDF3C00A01CF4C56987AD56BD5AF353B4568BB7AFF005DCE6CD30183CB7039761A5479AB54F7E76D
+			24D37A47AEF7B6DBA3E4B87F69EF8C3E3C967BCF09F8454E9913118B4D3E5BAC639DAD2742DCF603E95DC7C05FDAC6EBC7DE2A8BC2DE2AD360D3F559F725BDCD
+			A0648DE450498DD1892AD8079CE33C60564DCFED8FA3E97E4E81F0F3C1171A8C10A98ED900F21001FDC86356623BFF0009E79AF0EF036B17FAE7ED39A46A5A95
+			8B695A8DDF88126B8B328C86176972C843723A9EB5E57D6E746AC1C2BB9B6ECF4D3E47DB4723A18EC2626389CBA38751839536A5EFE9FCCAF7FBFD3CCF78FDBD
+			BFE451F0B7FD7F49FF00A2EADFC38F1A6B5F0FFF0063BD135AF0FD8C5A8EA90C92AC76F342F2AB06BE9558ED420F0093D6AA7EDEDFF228F85BFEBFA4FF00D175
+			E8FF00B25FFC9BEF857FEDEFFF004AE6AEE5173CCAAC62ECDC37EDB1F3552AC28708606AD4873C635EEE2F6697B4D3E67C33E19F1D6BBA1FC525F1558E9F0DC6
+			BE2F26B9164F0C8C9E63EFDEBB0306C0DCDC673C57DADE0DF8C9E29D63E03F893C65ABE956961ADE9A2E5A1B5FB3CB1C4C238D594B2B39620927A30AF9AFE14F
+			FC9DEC7FF61DBFFE5357D8FF001DBFE48CF8D3FEC1571FFA01AE5CB215234AAD453D15F4F3B6E7B7C6388C356C6E0B093C3ABCD537CD7D545C9AE4B763E74F0D
+			FEDC9AD5C68F7D1EA1E1EB5D43C412CB1C7A75AE9B1C91C6720EE326E776639DB8551CF3C8AC8B8FDAFBE28F8475E88789BC3B6B6D0CA049FD9F75612DA398F3
+			8CA163BB9C1E4EE1573F60DD36D2EBC49E29BC9ADA296EADADE058267405E20CD26EDA7B670338F4ADEFDBEA24FECDF064BB479825BA50D8E71B6238FD2B3E7C
+			54B05F5B755E9D3E76D4E9787C9297117F622C0C5A9EF26DE9EE732E55D17CEF7773E8EB3F195BEB9F0F57C51A5E1E09F4F37D02CA3FE99960AD83D8F0707B1A
+			F11FD9B7F692F137C62F1D5F68BAD58E936B6B069B25E2BD8432A39759624009691863121EDD85755F04493FB2CE9B939FF8955DFF00E852D7CFBFB09FFC95CD
+			5BFEC0737FE945BD7A5531355D6C359D94D6BF81F2583CA3071C066FCD05295195A2DEEACE4BF43D63F692FDA4BC4DF077C7563A2E8B63A4DD5ACFA6C778CF7F
+			0CAEE1DA595080564518C463B7735CB78B7F6B8F1A789A6BD7F877E13B89345B324C9A94D6325CBE00C96213E58C63B1C9C60E474AE43F6ECFF92B9A4FFD80E1
+			FF00D28B8AFB27E1F69B69A3F81B41B5B1B68AD2DD6CA12228502AE4A024E07724924F735941E231389AD4A355C628EDAF1CAB27C9F018EA983556A544F76D2E
+			976D757DBA6E7897ECDBFB4FDF7C52D7A5F0E788ED2D6DF54F25A6B5B9B4051260BF791949386C65B20E300F03BF6BF1FBE3F58FC14D2AD556D46A7AEDF0636D
+			665F6A2A8E0C9211C8504E001CB1CF4C123E55FD9DE34B7FDAAB4E8A2511C6B79A8AAAA8C000413E07D2BA5FDBABC3BA85BF8FF47D71E377D32E74F5B58E6C1D
+			A9223C8C533DB870C3D727D0D610C7622397CEA5EF24ED7FBB53D2C4F0E6573E28A185E5E5A5529F3F2DEC9BF7B45E5A5F4F3B1657F6A0F8CB69A7A789AE7C31
+			0B7871C86F34E97325B15247224DD903B06248C9EF5DAFC35FDA0BC7DF19BE2169BFD89A145A77846D658D354D856675DCA73B9DB1C641C6D50702B5FC51FB54
+			7C38BEF8537F15B5C992F2EB4E7B54D13ECCE1959A32A2363B760519E4E7181C64F15C57EC13A3DF2CFE2DD50AB269AEB05B063F7649416638F75047FDF629D3
+			9CFEB34E8C2BB9A96AEDE5FA791388A186FEC9C5E3F1196C6854A7EEC7993B352695EDA5E4BA4B5D76EA7D7F451457D59F880514514005145140051451400514
+			5140051451400514514005145140051451400514514005145140051451400514514005145140051451400514514005145140057E7C4774FF00B3A7ED392DDEA3
+			6D27F675BDECCF844E5ED260C15D477215F3C77423D6BF41EB8CF88DF08FC2FF0015ACA2B7F1169AB732439F22EA3631CD0E7AED71DBD8E47B57998EC2CF1118
+			CA9BB4A2EE8FB1E1BCEA8E5352B51C5C1CA8D68F2CADBFAAFBDFDF7386F187ED6DE00D07C3335FE97AB26B9A83464DB58411C8ACEFDB79651B00EF9E71D01AEB
+			7E0CFC5AB5F8C7E13FED9B6D36EB4C68E4F2258AE065378009F2DFA38E7AE01F515C1695FB14FC3AD3AF04F3FF006B6A5186DDF67BABB511FD3F768AD8FC6BDB
+			B47D1EC7C3FA6DBE9FA6DA4363636EBB22B7B740A883D001461D6325539ABB4A3D90B34970FD3C32A3964673A8DDF9E76565DACB7FBBE7D0F82FF67BFF0093B0
+			B0FF00AFED4BFF00445C5747FB6E7846F345F889A678A608D85A6A16E919982E42DC444F07EABB08CF5DADE95F46F85FF671F06783FC6F178AF4E82F17578E49
+			A55692E4B26E91595FE5C7A3B5779E26F0BE93E32D16E349D6AC21D474E9C624826191EC411C823B11823B579D4F2C9BC24E84DD9B95D7E07D66278C70F1CEE8
+			665878B74E34D5392764DEB26EDAF9A6BBDADE67977877F6B2F879AA785E0D4AFF005B4D36F4440DC58490C8644931CAA80A770CF423DB38A67C14FDA5EC3E32
+			788B52D1E1D16F2C26B7DF343371244D086C29908FF56E7238E41E707B5644BFB11FC3B92FBCF5975A8A2FF9F55BB431F5F53196FF00C7ABD6FC0BF0E7C3BF0D
+			74A3A7F8774C8B4F8588691972D24ADEAEE725BF13C76C576D158F94E3ED9C5456F6EA7CF6613E19A786A8B031A93A93F879AC943EEDFE77F55B9F11FED55FF2
+			72179FF6E5FF00A2D2BEF6D63FE4117DFF005C1FFF004135E75E35FD9C7C19E3EF1649E23D5A0BC7D4DFCBCB4572513E4002FCB8F402BD32E215B986485FEE48
+			A51B1E84629E130B3A356B4E5B4DDD7E3FE646799CE1B30C1E5F428DF9A842D2BAEB68EDAEBB33E0EFD887FE4B34FF00F60A9FFF00438E9DFB55681A87C39F8F
+			3078AADA3C417D241A95A4847C9E745B03A93EA19158FB38AFA9BE1D7ECEFE0FF85BAFB6B3A143791DEB40D6E4CF70645D8C413C63AFCA2BACF1C780742F88FA
+			1BE91E20B04BFB363BD41255E371D191872A7E9EB83C1C570432CA9F53F61269493BA3E9EBF18E157107F6952839519439249A49DBADB5B76EBAEAB43CCA3FDB
+			0BE1C3785D7547D4675BD31EE3A48B790CE24C7DCCE367FC0B763F957CD9FB17FF00C970B6FF00AF1B8FFD0457D17A07EC63F0EF43D596FA58F52D5951B7ADA5
+			FDC2B420F519088A587B3120F7CD763A07C05F08F867E204FE31D3ADA7B7D626796460B31F2732021F098C01C9AB785C657AB4AAD7E5F71F4FC59CF0CE387F2D
+			C163307972A8FDBC6D795AC9EBCABA3B6AEEDDFE67CADFB5E786F50F057C6CB7F15C1115B7D4041776F3018513C215597EBF2237FC0ABDD352FDB1FC069E0793
+			54B4BD964D6DA0CC7A435BBF9826238566C6CDA0F56CF4E993C57AFF008C3C17A2F8FB449749D7F4F8B51B090EEF2E4C82ADD995872AC3279041E6BC6A3FD88F
+			E1DA6A1F68336B4F0E73F646BB4F2BE9911EFC7FC0AAA585C5E1EACE7856AD3EFD198D1CEB24CD30386A19D466A787564E36B4A3A593F924BA793D4F20FD87FC
+			1F77AB7C40D4FC4F2C6C6CB4FB66844EE09DD3C847009EA426F27D370F5AE77F6AAFF9390BCFFB72FF00D1695F767867C2FA4F83745B7D2745B0874ED3A0188E
+			084607B924F249EE4E49EF5C278D7F671F0678FBC592788F5682F1F537F2F2D15C944F9000BF2E3D00ACEA65935838E1E0EEEF7675E178C70F2CFAAE69898B54
+			DC1C22959B4AE9ABEABCDBED7B1D77C49FF9277E29FF00B055D7FE896AF913F60FFF00928BE20FFB057FED68EBED2D5F4B835AD26F74EBA0C6DAF207B79429C1
+			28EA54E0F6E0D709F0D7E02784FE13EAD75A8F87E1BA8EE6E60FB3C867B8320D9B83700FB815DF88C2CEAE2A9568ED1BDCF98CAF38C360F26C6E02A27CF56DCB
+			65A69DF53C5BF6FAFF00903F837FEBBDD7FE831D7A1FC14F15DAF81FF65FD0F5EBD86E6E2D6C6CE59648ED2232484099FA01FA93800649200AED7E277C1DF0EF
+			C5C82C21F10C5712258B3BC3F6798C782C0039C75FBA2B73C21E10D3BC0FE17B2D034C471A6DA23471ACCDBCE0B162093D7963531C2D58E32A62135692B2F5D3
+			A7C8D6B67383A9906172C945B9D3A8E525B26AF2D13D75D7B1E21E0DFDA73E1EFC5CD1EEB4EF1ADA586912AC8E56D355025B7923E76B2BB2E0301C107073C8F6
+			F9EAD6D3447FDA83468BE1BBC8DA40D5ED5AD990B15001433105BE6318C49D7F841EA2BEA2F157EC7FF0EBC517D2DE259DE6892CADB9D74A9C471E73D9195957
+			E8A00AEABE19FC06F077C279A4B9D0F4F63A848BB1AFAEE432CDB7FBA0F0147FBA067BE6B8A783C5E22508D7E5F75DF996ECFA3C3E7F916554ABD5CBBDADEA45
+			C7D94ADC89BEBBBBFE2ED75D74F07FDBFBAF80FF00EDFF00FF006DEBDABE04E9F1EAFF00B3EF86EC66FF005575A5981F8CFCADB94FE86B5BE287C17F0D7C5EFE
+			CCFF00848A2B993FB3FCDF23ECF398F1E66CDD9C75FB8B5D2F853C3363E0CF0ED8687A6ABAD858C7E542B236E60BCF53DFAD7753C2CE38CA95E5F0C925F97F91
+			F338BCEB0F5787F0996D3BFB5A52727A69AB935677F35D0F827E09F8C0FECEDF1AAFADBC4F14B6D6EA926997DB10B18C165659428FBC32AA7233F2B12335E8FF
+			00B567ED11E18F1B782E0F0D785EF9B536B8B849EEAE16278E3444C909F3004B16DA78181B7D6BE83F899F01FC1FF16248EE35CD3D97508D762DFDA3F9536DFE
+			E93C861FEF038ED8AE53C23FB1FF00C3CF09EA51DEBDB5EEB9344C1E35D5675923523BEC45556FA3022BCDFA8E329539616935C8FABDD23EB9F126418CC552CE
+			71909AC4D34BDD56E59496CFFA6BD1DB5ABFB2D7832E7C21F015E4BC89A0B8D59A7D47CB718611B46163CFD55030FF007ABC07F621FF0092CD3FFD82A7FF00D0
+			E3AFBC67B74B8B792161FBB752840E382315E6DF0EBF677F07FC2DD7DB59D0A1BC8EF5A06B7267B8322EC6209E31D7E515D93C0494F0FECF6A7BFE078386E26A
+			32C3E67F5A4FDA627E1B6A97C5A37E5748F4EAF883F6B4D1A6F873F1C743F1A58C585BC30DEAFF00083716ECA187E2A2227FDE35F6FD719F133E13F87BE2D69B
+			6965E20825962B598CD0BC1298DD49041191D8FA7B0AEBC7E1A58AA3C90F8934D7A9E1F0CE6F4F26CC157AE9BA724E324BAA6BFCEC7CBDFB11F8565F1178F3C4
+			1E30BECCCD67118D2471F7AE2624B303EA15581FFAE95D57EDED777F1F877C256D1161A64B753BCF8FBA65544F2B3F834BFAD7BF7C37F865A17C29D0E5D2B408
+			2486D659DAE1CCD2191D9C855C927B6147157FC65E0AD17E20683368FAFD826A1A7C8C18C6C4A9561D195810548E7907B91D0D72470128E05E1AF693EBE77BFF
+			00C03DCADC4F46A712C337706E942C92D2EA3CB6DB6BDDB92D773E76F801F18BE16FC33F8416266D421B1D6B6B1D4215B766BA9E6DC70385F98608DBCE00EB8E
+			6BC27C17E268BC69FB4FE93AEC10BDB43A8F8892E5229082CAAD2E4038EF8AFAB346FD8E7E1B6937C2E64B0BDD482B6E582F2EC98C1CFA285C8F624D6CC7FB33
+			7812D7C696FE28B4B09EC751B7B98EEA28ED66F2E047420A8118180BF28E3A75AE3960B195234A12E54A0D68BF33DFA5C4590E12B632BD1F6B29D78CAEE56B2B
+			EC92BDEDE6F64924798FEDEDFF00228F85BFEBFA4FFD175E8FFB25FF00C9BEF857FEDEFF00F4AE6AEABE267C25F0FF00C5AB1B2B4F104771243692996216F318
+			C86230738EBC56AF81FC17A6FC3DF0BD9787F4859534EB3DFE52CCFBD86F7676C9EFF331AF4E186A91C74F10FE16ADF97F91F1F88CE30D5787286551BFB48547
+			27A696F7FADFFBCBA1F04785FC4B61E07FDA86E357D6656B4B0B3D76F45C49B0B18C1695325473C1619C0CD7D7DF117C71A1F8FF00E0278DB53F0FDFA6A562BA
+			7DCC26644651BC479230C01E847E7547E217ECA3E07F88DE21B8D6AEFF00B434CBFB96DF70DA6CE88B2B631B8ABA3004F7C633D7AE6BA6F0BFC13F0EF84FE1DE
+			A3E0BB4379368D7FE679E6798194F98A15B0C1463803B571E170989A1ED293B72CAFAF5BB3DECE73CCA332784C6C5CD56A5C89C6CB96D1777EAFB6A7CEFF00B0
+			2FFC85BC65FF005C2D7FF4296B63F6FAFF00903F837FEBBDD7FE831D7B87C31F823E18F8473EA13787A2B98DEF95126FB44E6404292463D3EF1AB1F13BE0EF87
+			7E2E41610F8862B8912C59DE1FB3CC63C16001CE3AFDD1571C0D5597BC2E9CDF86F731A9C478297152CE5297B25E5AFC1CBB5FBF99C77C11FF009359D37FEC15
+			77FF00A14B5F3EFEC27FF257356FFB01CDFF00A516F5F64F877C0BA5785BC170F85AC1255D262864B75579373ED72C5BE6F5F98D72DF0D7F67DF08FC29D727D5
+			F4086EE3BC9AD9AD5CCF70645F2CB2B1183DF28BCD54B0751CF0F2D3DC5AFE073D2E20C1C30D9A5269DF1126E1A79B7AEBA6FE67CBFF00B767FC95CD27FEC070
+			FF00E945C57DA7E0FF00F914744FFAF183FF0045AD719F12BF67DF08FC56D720D5F5F86EE4BC86D96D50C170635F2C3330181DF2EDCD7A169F67169B636D6908
+			221B78D624C9C9DAA0019FC056F86C34E8E26AD596D2B58F3B37CE30D8ECA70382A57E7A29F35D69ADB6D4F81BF67BFF0093B0B0FF00AFED4BFF00445C5767FB
+			6F78D75F5F1469DE18904D6BE1936E97588C605DC9B8E496EFB381B7B1393D457BEF85FF00671F06783FC6F178AF4E82F17578E49A55692E4B26E91595FE5C7A
+			3B57CC5FB4978EAF3C49F1CCF867C537D75A7F83B4FBE811ADEDD79485950BCD8C7CCC43310483807007AF875A84F0782952A8ECE52E9FAFDC7E8F9766387CFF
+			0088A96330D0E68D1A3AF32D534DEB14AF77EF2B7CFAD89B43D43F66C692096EB4EF10C5B42868AF1A465270325BCA73F8E0E39E057D53F09BC7DF0FFC49A4A6
+			99E06BEB116D66991A7C11B40F1AE796F2D806232796C1E4F5E6BC86EBE1AFECD4BA5ACFFDA7A4468177168B5E91A56E3BC7E6939F60B5E2DF01EC6DA4FDA734
+			F5F06BDD4DA241773BC534E086FB204604BF03820803201C95EF5AD2AB530756117183E676F7773931D82C2F1060F11563531117462E4BDAFC174B6EBAFCEFEA
+			7E83D14515F587E1C145145001451450014514500145145001451450014514500145145001451450014514500145145001451450014514500145145001451450
+			01451450014514500145145001451450014514500145145001451450014514500145145001451450014514500145145001451450014514500145145001451450
+			014514500145145001451450014514500145145001451450014514500145145001451450015C0FC4AF81FE10F8AED1CBAF69A5EF625F2E3BEB790C532AE73B72
+			3861C9E181C64E28A2B3A94E1523CB35747561B155F075556C34DC24BAA76679A47FB0CF80127F31B51F1048B9CF94D750EDFA71083FAD7ACFC3DF84FE16F85D
+			692C1E1CD2A3B269B026B866324D2E3A6E7624E3D871ED4515852C1E1E8CB9A9C1267A78CCF733CC29FB2C5622528F66F4F9AEA76145145759E11FFFD9]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblTlf"
+		Left="7100"
+		Top="645"
+		Width="300"
+		Height="213"
+		Text="Tlf:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblFax"
+		Left="7100"
+		Top="855"
+		Width="345"
+		Height="213"
+		Text="Fax:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		Left="5955"
+		Top="4035"
+		Width="1560"
+		Height="210"
+		Text="AvtaleGiroreferanse:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblPrisinkmva"
+		DataField="lblPrisinkmva"
+		Left="8646"
+		Top="4760"
+		Width="992"
+		Height="284"
+		Visible="0"
+		Tag="prisinkmva"
+		Text="lblPrisinkmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblMomsprosent"
+		DataField="lblMomsprosent"
+		Left="8079"
+		Top="4760"
+		Width="992"
+		Height="283"
+		Visible="0"
+		Tag="momsprosent"
+		Text="lblmomsprosent"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblMvaKr"
+		DataField="lblMvaKr"
+		Left="6803"
+		Top="4760"
+		Width="992"
+		Height="283"
+		Visible="0"
+		Tag="mvakr"
+		Text="lblMvaKr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumInkMva"
+		DataField="lblSumLinjeexmva"
+		Left="8955"
+		Top="4760"
+		Width="1134"
+		Height="284"
+		Tag="suminkmva"
+		Text="lblSumLinjeexmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="lblbankgiro"
+		Left="9075"
+		Top="4350"
+		Width="1125"
+		Height="210"
+		Visible="0"
+		Text="Field3"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldRefFaktnr"
+		Left="45"
+		Top="3060"
+		Width="1365"
+		Height="210"
+		Visible="0"
+		Text="Ref Faktnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="kid"
+		Left="7500"
+		Top="4035"
+		Width="2115"
+		Height="210"
+		Text="kid"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; ddo-char-set: 1; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field6"
+		Left="5953"
+		Top="2429"
+		Width="1559"
+		Height="213"
+		Text="Kundenummer:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="fldKundenr"
+		Left="7512"
+		Top="2429"
+		Width="2126"
+		Height="213"
+		Text="fldKundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblmvanr"
+		DataField="lblmvanr"
+		Left="4005"
+		Top="105"
+		Width="1400"
+		Height="213"
+		Visible="0"
+		Text="lblmvanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblbilagsnr"
+		DataField="lblBilagsnr"
+		Left="5625"
+		Top="75"
+		Width="1559"
+		Height="213"
+		Visible="0"
+		Text="lblBilagsnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field11"
+		Left="5953"
+		Top="3779"
+		Width="1700"
+		Height="213"
+		Text="eFakturareferanse:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field12"
+		DataField="fldKundenr"
+		Left="7512"
+		Top="3779"
+		Width="2126"
+		Height="213"
+		Text="fldKundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+<Script>
+<![CDATA[Option Explicit
+
+Dim Valutakurs
+
+Sub OnFormat
+Dim lblOrgTxt 
+	if m_data.sfcurr( m_data.getvalue("valutasum")) <> 0 then
+		lblOrgTxt = m_data.GetCheckField("DefValValuta","Org.No")
+	else
+		lblOrgTxt = m_data.GetCheckField("DefaultVal","Organisasjonsnr.")
+	end if
+	if trim(lblOrgTxt) <> "" then rpt.Sections("GroupHeader1").Controls("lblmvanr").text = lblOrgTxt	
+
+	if m_data.sfcurr(m_data.getvalue("Koblet_til_faktnr")) <> 0 then 
+		rpt.Sections("GroupHeader1").Controls("fldRefFaktnr").text = "(Ref fakturanr: " & m_data.getvalue("Koblet_til_faktnr") & ")"
+	else
+		rpt.Sections("GroupHeader1").Controls("fldRefFaktnr").text = ""
+	end if
+End Sub
+
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="750"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="fldFritekstlinje"
+		DataField="fritekstlinje"
+		Left="0"
+		Top="535"
+		Width="10063"
+		Height="220"
+		Text="Varetekst"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-weight: bold; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKompLinje"
+		DataField="KompVare"
+		Left="30"
+		Top="267"
+		Width="5669"
+		Height="220"
+		Text="KompVare"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-style: italic; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldVarenr"
+		DataField="Varenr"
+		Left="0"
+		Top="0"
+		Width="1095"
+		Height="225"
+		Tag="Varenr"
+		Text="Varenr"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldVaretekst"
+		DataField="Varetekst"
+		Left="1140"
+		Top="0"
+		Width="4380"
+		Height="225"
+		Tag="Varetekst"
+		Text="Varetekst"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvalinje"
+		DataField="mvafelt"
+		Left="8070"
+		Top="0"
+		Width="880"
+		Height="220"
+		Text="mvafelt"
+		OutputFormat="0.00%"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; text-align: center; vertical-align: middle; white-space: nowrap; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldPrisExMva"
+		DataField="PrisExMva"
+		Left="7230"
+		Top="0"
+		Width="1050"
+		Height="220"
+		Tag="prisexmva"
+		Text="PrisExMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldEnhet"
+		DataField="Enhet"
+		Left="6600"
+		Top="0"
+		Width="567"
+		Height="220"
+		Text="Enhet"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; text-align: left; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldRabatt"
+		DataField="rabfelt"
+		Left="8305"
+		Top="0"
+		Width="620"
+		Height="220"
+		Tag="rabatt"
+		Text="rab"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumExMva"
+		DataField="SumExMva"
+		Left="8950"
+		Top="0"
+		Width="1180"
+		Height="220"
+		Tag="sum"
+		Text="SumExMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 9pt; vertical-align: middle; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAntall"
+		DataField="Antallfelt"
+		Left="5608"
+		Top="0"
+		Width="992"
+		Height="220"
+		Tag="antall"
+		Text="Antallfelt"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 9pt; vertical-align: middle; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldPrisInkMva"
+		DataField="PrisInkMva"
+		Left="7230"
+		Top="735"
+		Width="1050"
+		Height="225"
+		Visible="0"
+		Tag="prisinkmva"
+		Text="PrisInkMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumInkMva"
+		DataField="SumInkMva"
+		Left="8950"
+		Top="735"
+		Width="1180"
+		Height="220"
+		Visible="0"
+		Tag="suminkmva"
+		Text="SumInkMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvaPsnt"
+		DataField="Momsprosent"
+		Left="7228"
+		Top="1134"
+		Width="992"
+		Height="220"
+		Visible="0"
+		Tag="momsprosent"
+		Text="Mva%"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvaKr"
+		DataField="mvabelop"
+		Left="7228"
+		Top="1417"
+		Width="992"
+		Height="220"
+		Visible="0"
+		Tag="mvakr"
+		Text="MvaKr"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+	
+
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="1770"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="fldFritekst"
+		DataField="FritekstFelt"
+		Left="0"
+		Top="15"
+		Width="5400"
+		Height="510"
+		Text="FritekstFelt"
+		CanShrink="-1"
+		ClassName="Normal"
+		Style="font-style: italic; font-family: &apos;Segoe UI&apos;; font-size: 9pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumNetto"
+		DataField="NettosumFelt"
+		Left="8670"
+		Top="60"
+		Width="1455"
+		Height="225"
+		Text="NettosumFelt"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 9pt; font-family: &apos;Segoe UI Semibold&apos;; white-space: nowrap; background-color: rgb(128,128,128); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldTotalsum"
+		DataField="TotalSumFelt"
+		Left="8670"
+		Top="1065"
+		Width="1455"
+		Height="225"
+		Text="TotalSumFelt"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 9pt; white-space: nowrap; background-color: rgb(128,128,128); color: rgb(255,255,255); font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumMellomMva"
+		DataField="LavMva"
+		Left="5565"
+		Top="570"
+		Width="3105"
+		Height="225"
+		Text="LavMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumHoyMva"
+		DataField="HoyMva"
+		Left="5565"
+		Top="795"
+		Width="3120"
+		Height="225"
+		Text="HoyMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumMellomMva"
+		DataField="MomsLavFelt"
+		Left="8670"
+		Top="570"
+		Width="1455"
+		Height="225"
+		Text="MomsLavFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumHoyMva"
+		DataField="MomsHoyFelt"
+		Left="8670"
+		Top="795"
+		Width="1455"
+		Height="225"
+		Text="MomsHoyFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblInnbetsum"
+		DataField="InnbetKredTxt"
+		Left="5565"
+		Top="1300"
+		Width="3120"
+		Height="225"
+		Text="InnbetKredTxt"
+		ClassName="Normal"
+		Style="color: rgb(255,0,0); font-family: &apos;Segoe UI&apos;; font-size: 8pt; background-color: rgb(205,219,232); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldInnbetsum"
+		DataField="InnbetKred"
+		Left="8670"
+		Top="1300"
+		Width="1455"
+		Height="225"
+		Text="InnbetKred"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; color: rgb(255,0,0); white-space: nowrap; font-family: &apos;Segoe UI&apos;; font-size: 8pt; background-color: rgb(205,219,232); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKamptext"
+		DataField="KampText"
+		Left="0"
+		Top="555"
+		Width="5385"
+		Height="495"
+		Text="KampText"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 9pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumLavMva"
+		DataField="personmvatekst"
+		Left="5565"
+		Top="345"
+		Width="3120"
+		Height="225"
+		Text="LavMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumLavMva"
+		DataField="personmva"
+		Left="8670"
+		Top="345"
+		Width="1455"
+		Height="225"
+		Text="MomsLavFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblTotalsum"
+		DataField="lbltotalsum"
+		Left="5565"
+		Top="1065"
+		Width="3120"
+		Height="225"
+		Text="lbltotalsum"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 9pt; white-space: nowrap; background-color: rgb(128,128,128); color: rgb(255,255,255); font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumNetto"
+		DataField="lblSumNetto"
+		Left="5565"
+		Top="60"
+		Width="3120"
+		Height="225"
+		Text="lblSumNetto"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-size: 9pt; font-family: &apos;Segoe UI Semibold&apos;; white-space: nowrap; background-color: rgb(128,128,128); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblNokLav"
+		DataField="NokLavText"
+		Left="870"
+		Top="1095"
+		Width="3105"
+		Height="225"
+		Text="lblNokLav"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblNokMellom"
+		DataField="NokMellomText"
+		Left="870"
+		Top="1305"
+		Width="3105"
+		Height="225"
+		Text="lblNokMellom"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblNokHoy"
+		DataField="NokHoyText"
+		Left="870"
+		Top="1530"
+		Width="3105"
+		Height="225"
+		Text="lblNokHoy"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldNokLav"
+		DataField="NokLavSum"
+		Left="3975"
+		Top="1095"
+		Width="1425"
+		Height="225"
+		Text="fldNokLav"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldNokMellom"
+		DataField="NokMellomSum"
+		Left="3975"
+		Top="1305"
+		Width="1425"
+		Height="225"
+		Text="fldNokMellom"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldNokHoy"
+		DataField="NokHoySum"
+		Left="3975"
+		Top="1530"
+		Width="1425"
+		Height="225"
+		Text="fldNokHoy"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldbetalsum2"
+		DataField="tot"
+		Left="8670"
+		Top="1530"
+		Width="1455"
+		Height="225"
+		Text="tot"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 9pt; white-space: nowrap; background-color: rgb(128,128,128); color: rgb(255,255,255); font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblbetalsum2"
+		DataField="lblbetalsum"
+		Left="5565"
+		Top="1530"
+		Width="3120"
+		Height="225"
+		Text="lblbetalsum"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 9pt; white-space: nowrap; background-color: rgb(128,128,128); color: rgb(255,255,255); font-weight: bold; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		PrintAtBottom="1"
+		Height="6150"
+		KeepTogether="-1"
+		CanGrow="0"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="fldTot"
+		DataField="Tot"
+		Left="3405"
+		Top="705"
+		Width="1980"
+		Height="285"
+		Text="Totalsum"
+		OutputFormat="0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldFrakonto"
+		DataField="FraKonto"
+		Left="6375"
+		Top="705"
+		Width="2265"
+		Height="285"
+		Visible="0"
+		Text="FraKonto"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldTilKonto"
+		DataField="TilKonto"
+		Left="0"
+		Top="705"
+		Width="2415"
+		Height="285"
+		Text="TilKonto"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldTot2"
+		DataField="tot2"
+		Left="3915"
+		Top="5190"
+		Width="1635"
+		Height="285"
+		Text="Totalsum"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Courier&apos;; ddo-char-set: 0; font-size: 12pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="KID"
+		Left="0"
+		Top="5190"
+		Width="3600"
+		Height="285"
+		Text="KID"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Courier&apos;; ddo-char-set: 0; font-size: 12pt; text-align: right; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundenr2"
+		DataField="Kundenr"
+		Left="1605"
+		Top="1665"
+		Width="2190"
+		Height="210"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsendernavn"
+		DataField="Avsendernavn"
+		Left="0"
+		Top="2985"
+		Width="3825"
+		Height="225"
+		Text="Avsendernavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsenderAdresse"
+		DataField="AvsenderAdresse"
+		Left="0"
+		Top="3210"
+		Width="3825"
+		Height="225"
+		Text="AvsenderAdresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsenderadresse2"
+		DataField="AvsenderAdresse2"
+		Left="0"
+		Top="3435"
+		Width="3825"
+		Height="225"
+		Text="AvsenderAdresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsenderpostnr"
+		DataField="AvsenderPostnr"
+		Left="0"
+		Top="3660"
+		Width="870"
+		Height="225"
+		Text="AvsenderPostnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsenderpoststed"
+		DataField="AvsenderPoststed"
+		Left="855"
+		Top="3660"
+		Width="2940"
+		Height="225"
+		Text="AvsenderPoststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvsenderland"
+		DataField="AvsenderLand"
+		Left="0"
+		Top="3885"
+		Width="3825"
+		Height="225"
+		Text="AvsenderLand"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKsiff"
+		DataField="ksiff"
+		Left="6000"
+		Top="5190"
+		Width="420"
+		Height="285"
+		Text="kontrollsiffer"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Courier&apos;; ddo-char-set: 0; font-size: 12pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakernavn"
+		DataField="MottakerNavn"
+		Left="5745"
+		Top="2985"
+		Width="4260"
+		Height="225"
+		Text="MottakerNavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakeradresse"
+		DataField="MottakerAdresse"
+		Left="5745"
+		Top="3210"
+		Width="4260"
+		Height="225"
+		Text="MottakerAdresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakeradresse2"
+		DataField="MottakerAdresse2"
+		Left="5745"
+		Top="3435"
+		Width="4260"
+		Height="225"
+		Text="MottakerAdresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakerpostnr"
+		DataField="MottakerPostnr"
+		Left="5745"
+		Top="3660"
+		Width="870"
+		Height="225"
+		Text="MottakerPostnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakerpoststed"
+		DataField="MottakerPoststed"
+		Left="6630"
+		Top="3660"
+		Width="3345"
+		Height="225"
+		Text="MottakerPoststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="ddo-char-set: 0; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldTilKontoOCR"
+		DataField="TilKonto"
+		Left="6705"
+		Top="5190"
+		Width="3390"
+		Height="285"
+		Text="TilKonto"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Courier&apos;; ddo-char-set: 0; font-size: 12pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldFakturanr2"
+		DataField="Fakturanr"
+		Left="1605"
+		Top="1890"
+		Width="2190"
+		Height="225"
+		Text="Fakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldvar_ref2"
+		DataField="Vaar_Ref"
+		Left="1605"
+		Top="2115"
+		Width="2190"
+		Height="225"
+		Text="Vaar_Ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldFakturadato2"
+		DataField="Fakturadato"
+		Left="1605"
+		Top="2340"
+		Width="2190"
+		Height="225"
+		Text="Fakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldForfallsdato2"
+		DataField="Forfallsdato"
+		Left="8925"
+		Top="1290"
+		Width="1050"
+		Height="255"
+		Text="Forfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 9pt; font-family: &apos;Arial&apos;; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMottakerland"
+		DataField="MottakerLand"
+		Left="5745"
+		Top="3885"
+		Width="4260"
+		Height="225"
+		Text="MottakerLand"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblFakturanr2"
+		DataField="FaktTxt"
+		Left="15"
+		Top="1890"
+		Width="1605"
+		Height="225"
+		Text="FaktTxt"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedrifttxt"
+		DataField="Bedrifttxt"
+		Left="15"
+		Top="1185"
+		Width="1095"
+		Height="225"
+		Visible="0"
+		Text="Bedrifttxt"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblKundenr2"
+		DataField="lblkundenr"
+		Left="15"
+		Top="1665"
+		Width="1605"
+		Height="210"
+		Text="Kundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblvar_ref2"
+		DataField="lblvar_ref"
+		Left="15"
+		Top="2115"
+		Width="1605"
+		Height="225"
+		Text="Vaar_Ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblfakturadato2"
+		DataField="lblfakturadato"
+		Left="15"
+		Top="2340"
+		Width="1605"
+		Height="225"
+		Text="Fakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvtalegiroVarsel"
+		DataField="fldAvtalegiroVarsel"
+		Left="135"
+		Top="4560"
+		Width="9930"
+		Height="750"
+		Text="fldAvtalegiroVarsel"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-weight: bold; font-size: 34pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="9045"
+		Top="720"
+		Width="885"
+		Height="225"
+		Visible="0"
+		Caption="Beløp"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; ddo-char-set: 1; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label34"
+		Left="0"
+		Top="1410"
+		Width="3690"
+		Height="270"
+		Caption="Ved betaling må KID alltid benyttes"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-size: 8.5pt; font-style: italic; font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+		CanShrink="1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
