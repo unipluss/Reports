@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9DrBoURWQ5zpR5zMSkyif4ts0aNZBWntRke5CHM9sSrDWrnPRmcBjUFE0dxjAKjn81pp4+VkS91qW6XUSwDrL/5w2StncZOk7Xi9bGPMtQ==</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Dr5oUQFQzXpR5zJYkzjf4tw+y5ZV9PtRke5CHM9sS/DNLnPRlEB9WxchPBjAKjn3GppK+ZUS91qQKX4aQDrL/5w2WhNCZKYYnj1bGPM4Q==</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -26,7 +26,7 @@ SELECT ak.kontrakts_id as id FROM e..t_arealkontrakt ak where ak.kontrakts_id be
       </Kontrakter>
       <DataKilde1 Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>DataKilde1</Alias>
-        <Columns isList="true" count="28">
+        <Columns isList="true" count="29">
           <value>id,System.Int32</value>
           <value>jobbnr,System.Int32</value>
           <value>kontrakts_id,System.Int32</value>
@@ -55,6 +55,7 @@ SELECT ak.kontrakts_id as id FROM e..t_arealkontrakt ak where ak.kontrakts_id be
           <value>antallkvm,System.Decimal</value>
           <value>pris,System.Decimal</value>
           <value>tidsfaktor,System.Decimal</value>
+          <value>inkmva,System.Boolean</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -64,7 +65,7 @@ SELECT ak.kontrakts_id as id FROM e..t_arealkontrakt ak where ak.kontrakts_id be
         <SqlCommand>SET DATEFORMAT ymd
 DECLARE @dato DATETIME  
 set @dato='{Year}.12.31' 
-select l.id,l.jobbnr,l.kontrakts_id,ak.kundenummer,c.name,dim.Navn as Felleskost,
+select distinct l.id,l.jobbnr,l.kontrakts_id,ak.kundenummer,c.name,dim.Navn as Felleskost,
 	round(l.kostnad,2) kostnad,Round(l.fakturert,2)fakturert,round(l.differanse,2) differanse,j.dato,j.bruker ,
 isnull(isNull(k.fritekst,j.fritekst),'') as Fritekst,l.felleskostid,ak.kontrakt_fra,ak.kontrakt_til ,
 round(l.kostnadavd,2) kostnad_avd,Round(l.fakturertavd,2)fakturert_avd,
@@ -79,8 +80,8 @@ round((isNull(l.differanse,0)+isNull(l.differanseavd,0)),2) as diff_tot ,
 (Select sum(Case when va2.momsind=8 then kostnad else l2.kostnad * 0.8 end) from e..t_ak_felleskostavregning_linje l2 left join e..t_arealvaredim av2 on av2.dimrecordid=l2.felleskostid 
 left join c..VARER va2 on va2.varenr=(case when isNull(l2.momsind ,0)=0 then av2.vareavgiftsfri else av2.vareavgiftspliktig end) where kontrakts_id=k.kontrakts_id  and jobbnr=j.jobbnr) as pris,
 (datediff(day,( ( case when ak.kontrakt_fra&lt;=j.klientAar then j.klientAar else ak.kontrakt_fra end ) ), 
-    (Case when isNull(ak.fakturerfktil,ak.kontrakt_til)&gt;@dato then @dato else isNull(ak.fakturerfktil,ak.kontrakt_til) end)) +1)/365.0 tidsfaktor
-
+    (Case when isNull(ak.fakturerfktil,ak.kontrakt_til)&gt;@dato then @dato else isNull(ak.fakturerfktil,ak.kontrakt_til) end)) +1)/365.0 tidsfaktor,
+ares.inkmva
 from e..t_ak_felleskostavregning_jobb j 
 left join e..t_ak_felleskostavregning_kontrakt k on k.jobbnr=j.jobbnr 
 left join e..t_ak_felleskostavregning_linje l on k.jobbnr=l.jobbnr and l.kontrakts_id=k.kontrakts_id 
@@ -89,7 +90,9 @@ left join c..DEBITOR d on ak.kundenummer=d.kontonr
 left join c..c_name c on c.id=d.nameid 
 left join y..Dimensjon dim on dim.dimtall=l.felleskostid 
 left join e..t_arealvaredim av on av.dimrecordid=dim.dimtall 
-left join c..VARER va on va.varenr=(case when isNull(l.momsind ,0)=0 then av.vareavgiftsfri else av.vareavgiftspliktig end) where k.kontrakts_id in ({ContractFrom}) and j.jobbnr =(Select top 1 jobbnr from e..t_ak_felleskostavregning_kontrakt where kontrakts_id in ({ContractFrom}) order by jobbnr desc) 
+left join c..VARER va on va.varenr=(case when isNull(l.momsind ,0)=0 then av.vareavgiftsfri else av.vareavgiftspliktig end)
+left join e..t_arealres ares ON ares.kontrakts_id = ak.kontrakts_id
+where k.kontrakts_id in ({ContractFrom}) and j.jobbnr =(Select top 1 jobbnr from e..t_ak_felleskostavregning_kontrakt where kontrakts_id in ({ContractFrom}) order by jobbnr desc) 
 order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
       </DataKilde1>
       <Bedrift Ref="5" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
@@ -174,7 +177,7 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="12">
-      <value>,ContractFrom,Kontrakt,text_x007C_,System.String,_x0031_6,False,False,False</value>
+      <value>,ContractFrom,Kontrakt,text_x007C_,System.String,_x0031_,False,False,False</value>
       <value>,ContractTo,ContractTo,System.String,,False,False</value>
       <value>,Felleskostnad,Felleskostnad_x0020_tekst:,System.String,_x0020_,False,False</value>
       <value>,SkjulFelleskostnad,Felleskostnader_x0020_uten_x0020_sum,System.String,True,False,False</value>
@@ -184,7 +187,7 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0031_54,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0032_,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_019,True,False</value>
     </Variables>
   </Dictionary>
@@ -232,7 +235,7 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
             </Text11>
             <Text31 Ref="11" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>25.2,0.2,2.2,0.6</ClientRectangle>
+              <ClientRectangle>24,0.2,3.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Guid>456ec762a56b4976b76fbda1484da65e</Guid>
@@ -241,7 +244,7 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
               <Name>Text31</Name>
               <Page isRef="7" />
               <Parent isRef="8" />
-              <Text>{Year}</Text>
+              <Text>Avregning for {Year}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -951,7 +954,7 @@ avdeling</Text>
           <Brush>Transparent</Brush>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,8,27.7,4.8</ClientRectangle>
-          <Components isList="true" count="24">
+          <Components isList="true" count="26">
             <Text5 Ref="71" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.4,3.2,0.6</ClientRectangle>
@@ -1276,7 +1279,9 @@ avdeling</Text>
             <Text57 Ref="98" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,2,6.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Italic</Font>
               <Guid>66f61dc0501648c28d2d3770a39264cf</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1291,7 +1296,9 @@ avdeling</Text>
             <Text58 Ref="99" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>8,2,3.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>69742d4702cd48cea21a7d8905b1e559</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1352,7 +1359,9 @@ avdeling</Text>
             <Text59 Ref="104" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>8,2.6,3.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>251f37cfede141e08143155ebc3129cc</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1375,7 +1384,9 @@ avdeling</Text>
             <Text60 Ref="106" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,3.8,6.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Italic</Font>
               <Guid>25878ca84cba4a1989e9d37fbb328357</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1390,7 +1401,9 @@ avdeling</Text>
             <Text61 Ref="107" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>8,3.8,3.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>25744e0c04e14d2aa58a019a208c199c</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1413,7 +1426,9 @@ avdeling</Text>
             <Text34 Ref="109" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,2.6,6.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Italic</Font>
               <Guid>afbb726919d44c038d3e6cd2243fe13f</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1425,17 +1440,59 @@ avdeling</Text>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text34>
-            <HorizontalLinePrimitive2 Ref="110" type="HorizontalLinePrimitive" isKey="true">
+            <Text23 Ref="110" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.2,2.6,6.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020__x0020_true_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
+              <Font>Arial,10,Italic</Font>
+              <Guid>9d338992d0fb48638aa16a105a23bf5d</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text23</Name>
+              <Page isRef="40" />
+              <Parent isRef="70" />
+              <Text>Kostnader pr kvm inkl. mva:</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text23>
+            <Text26 Ref="111" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>8,2.6,3.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020__x0020_true_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
+              <Font>Arial,10</Font>
+              <Guid>ed87f4003a0f48078edbe8774e46e315</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text26</Name>
+              <Page isRef="40" />
+              <Parent isRef="70" />
+              <Text>{(Sum(dbCosts,DataKilde1.kostnad)/DataKilde1.antallkvm)/DataKilde1.tidsfaktor}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="112" type="CurrencyFormat" isKey="true">
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text26>
+            <HorizontalLinePrimitive2 Ref="113" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0.2,0.2,27.2,0.0254</ClientRectangle>
               <Color>Black</Color>
-              <EndCap Ref="111" type="Cap" isKey="true">
+              <EndCap Ref="114" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Guid>d98a9cfd3be648ae97d6125747fb7fa8</Guid>
               <Name>HorizontalLinePrimitive2</Name>
               <Page isRef="40" />
               <Parent isRef="70" />
-              <StartCap Ref="112" type="Cap" isKey="true">
+              <StartCap Ref="115" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive2>
@@ -1454,13 +1511,13 @@ avdeling</Text>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="113" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="116" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </subCosts>
   </Pages>
-  <PrinterSettings Ref="114" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="117" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -1472,10 +1529,10 @@ avdeling</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>3/18/2019 2:32:07 PM</ReportChanged>
+  <ReportChanged>6/11/2019 9:34:22 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\ny_nering_avregnfelleskost_avd_kontrakt1.mrt</ReportFile>
-  <ReportGuid>f8f6cd84c3694b69aedf2bbe685d2a0b</ReportGuid>
+  <ReportFile>C:\Users\solan\AppData\Local\Temp\ny_nering_avregnfelleskost_avd_kontrakt_1.mrt</ReportFile>
+  <ReportGuid>7774f2446573461e80331057bca9f648</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -1504,7 +1561,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="6">
-    <lightBlue Ref="115" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <lightBlue Ref="118" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[222:233:244]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -1512,7 +1569,7 @@ namespace Reports
       <Name>lightBlue</Name>
       <TextBrush>Black</TextBrush>
     </lightBlue>
-    <Style1 Ref="116" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="119" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[146:187:205]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -1520,7 +1577,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <LightGrey Ref="117" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <LightGrey Ref="120" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -1528,7 +1585,7 @@ namespace Reports
       <Name>LightGrey</Name>
       <TextBrush>Black</TextBrush>
     </LightGrey>
-    <EvenStyle Ref="118" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <EvenStyle Ref="121" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[234:234:234]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -1536,7 +1593,7 @@ namespace Reports
       <Name>EvenStyle</Name>
       <TextBrush>Black</TextBrush>
     </EvenStyle>
-    <Style2 Ref="119" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style2 Ref="122" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;Transparent;1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Conditions isList="true" count="0" />
@@ -1545,7 +1602,7 @@ namespace Reports
       <Name>Style2</Name>
       <TextBrush>Black</TextBrush>
     </Style2>
-    <OddStyle Ref="120" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <OddStyle Ref="123" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[252:252:252]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
