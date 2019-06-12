@@ -189,19 +189,19 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="13">
-      <value>,ContractFrom,Kontrakt,text_x007C_,System.String,_x0032_,False,False,False</value>
+      <value>,ContractFrom,Kontrakt,text_x007C_,System.String,_x0031_,False,False,False</value>
       <value>,ContractTo,ContractTo,System.String,,False,False</value>
       <value>,Felleskostnad,Felleskostnad_x0020_tekst:,System.String,_x0020_,False,False</value>
       <value>,SkjulFelleskostnad,Felleskostnader_x0020_uten_x0020_sum,System.String,True,False,False</value>
       <value>,SamleFelleskost,Samle_x0020_felleskostnader:,System.String,_x0032_,False,False</value>
       <value>,EksMva,EksMva,System.Decimal,_x0031_.25,False,False</value>
       <value>,Year,År,text_x007C_,System.String,_x0032_018,False,False,False</value>
+      <value>,SkjulFelleskost,Skjul_x0020_linjer_x0020_uten_x0020_kostnad,check_x007C__x0020_,System.String,False,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
       <value>System,ClientNr,ClientNr,System.Int32,_x0032_,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_018,True,False</value>
-      <value>,SkjulFelleskost,Skjul_x0020_linjer_x0020_uten_x0020_kostnad,check_x007C__x0020_,System.String,False,False,False,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -248,7 +248,7 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
             </Text11>
             <Text31 Ref="11" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>23.8,0.2,3.6,0.6</ClientRectangle>
+              <ClientRectangle>22.6,0.2,4.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10</Font>
               <Guid>456ec762a56b4976b76fbda1484da65e</Guid>
@@ -257,7 +257,7 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
               <Name>Text31</Name>
               <Page isRef="7" />
               <Parent isRef="8" />
-              <Text>Avregning for {Year}</Text>
+              <Text>Avregning for {Bedrift.Arstall}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -920,7 +920,9 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
             <Text9 Ref="67" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>11,1,1.8,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Bold</Font>
               <Guid>14a530595548473c8d90769fbeaac163</Guid>
               <Margins>0,0,0,0</Margins>
@@ -958,7 +960,9 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
             <Text50 Ref="70" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>25,1,2.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>c1d073862b474bf8bc2e9f70cb1bf305</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1004,7 +1008,9 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
             <Text52 Ref="74" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>20,1,2.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>c6954d283238400e844b5d6f9e053868</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1050,7 +1056,9 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
             <Text54 Ref="78" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>14.8,1,2.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>711e094c15f441f3951019adb8ef44cc</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1218,10 +1226,10 @@ order by name,l.kontrakts_id,samler,felleskost</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>6/11/2019 3:17:36 PM</ReportChanged>
+  <ReportChanged>6/12/2019 8:31:47 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\Users\solan\AppData\Local\Temp\ny_nering_avregnfelleskost_kontrakt_1.mrt</ReportFile>
-  <ReportGuid>d71fc9501f594d62a0f36331a822911c</ReportGuid>
+  <ReportFile>C:\Users\solan\AppData\Local\Temp\ny_nering_avregnfelleskost_kontrakt_2.mrt</ReportFile>
+  <ReportGuid>b97b9ecf6d074b498cfda9fcfc2229fa</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
