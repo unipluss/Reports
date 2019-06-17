@@ -65,8 +65,9 @@ SELECT ak.kontrakts_id as id FROM e..t_arealkontrakt ak where ak.kontrakts_id be
         <SqlCommand>declare @queryToRun as nvarchar(max)
 declare @queryWithSingleCostsParameter as nvarchar(max)
 declare @queryWithSingleCostsNoParameter as nvarchar(max)
+declare @mainQuery as nvarchar(max)
 
-set @queryWithSingleCostsParameter = N'
+set @mainQuery = N'
 SET DATEFORMAT ymd
 	DECLARE @dato DATETIME  
 set @dato=''{Year}.12.31''
@@ -99,53 +100,25 @@ select distinct l.id,l.jobbnr,l.kontrakts_id,ak.kundenummer,c.name,dim.Navn as F
 	left join c..VARER va on va.varenr=(case when isNull(l.momsind ,0)=0 then av.vareavgiftsfri else av.vareavgiftspliktig end)
 	left join e..t_arealres ares ON ares.kontrakts_id = ak.kontrakts_id
 where k.kontrakts_id in ({ContractFrom}) and j.jobbnr =(Select top 1 jobbnr from e..t_ak_felleskostavregning_kontrakt where kontrakts_id in ({ContractFrom}) order by jobbnr desc) 
+'
+
+set @queryWithSingleCostsParameter = N'
 	and l.felleskostid not in ({SamleFelleskostnader})
 	order by name,l.kontrakts_id,samler,felleskost
 '
 
 set @queryWithSingleCostsNoParameter = N'
-SET DATEFORMAT ymd
-	DECLARE @dato DATETIME  
-set @dato=''{Year}.12.31''
-
-select distinct l.id,l.jobbnr,l.kontrakts_id,ak.kundenummer,c.name,dim.Navn as Felleskost,
-	round(l.kostnad,2) kostnad,Round(l.fakturert,2)fakturert,round(l.differanse,2) differanse,j.dato,j.bruker ,
-	isnull(isNull(k.fritekst,j.fritekst),'''') as Fritekst,l.felleskostid,ak.kontrakt_fra,ak.kontrakt_til ,
-	round(l.kostnadavd,2) kostnad_avd,Round(l.fakturertavd,2)fakturert_avd,
-	round(l.differanseavd,2) differanse_avd,
-	round((isNull(l.differanse,0)+isNull(l.differanseavd,0)),2) as diff_tot ,
-	(Case when isNull(ak.fakturerfktil,@dato)&gt;@dato then @dato else ak.fakturerfktil end) as fakturerfktil ,
-	(Case when dim.dimtall not in (-1 ) then dim.dimtall else 0 end) as samler	, 
-	1 as momsprct, 
-(''1''+(Select UtgMvaPSats from y..SYSTEM)/100) as momsprctOld,va.varenr, va.momsind,
-(Select sum(antall+tillegg) as antallkvm from e..t_arealres where kontrakts_id=k.kontrakts_id) as antallkvm,
-
-(Select sum(Case when va2.momsind=8 then kostnad else l2.kostnad * 0.8 end) from e..t_ak_felleskostavregning_linje l2 left join e..t_arealvaredim av2 on av2.dimrecordid=l2.felleskostid 
-	left join c..VARER va2 on va2.varenr=(case when isNull(l2.momsind ,0)=0 then av2.vareavgiftsfri else av2.vareavgiftspliktig end) where kontrakts_id=k.kontrakts_id  and jobbnr=j.jobbnr) as pris,
-	(datediff(day,( ( case when ak.kontrakt_fra&lt;=j.klientAar then j.klientAar else ak.kontrakt_fra end ) ), 
-		(Case when isNull(ak.fakturerfktil,ak.kontrakt_til)&gt;@dato then @dato else isNull(ak.fakturerfktil,ak.kontrakt_til) end)) +1)/365.0 tidsfaktor,
-	ares.inkmva
-	from e..t_ak_felleskostavregning_jobb j 
-	left join e..t_ak_felleskostavregning_kontrakt k on k.jobbnr=j.jobbnr 
-	left join e..t_ak_felleskostavregning_linje l on k.jobbnr=l.jobbnr and l.kontrakts_id=k.kontrakts_id 
-	left join e..t_arealkontrakt ak on ak.kontrakts_id=l.kontrakts_id 
-	left join c..DEBITOR d on ak.kundenummer=d.kontonr 
-	left join c..c_name c on c.id=d.nameid 
-	left join y..Dimensjon dim on dim.dimtall=l.felleskostid 
-	left join e..t_arealvaredim av on av.dimrecordid=dim.dimtall 
-	left join c..VARER va on va.varenr=(case when isNull(l.momsind ,0)=0 then av.vareavgiftsfri else av.vareavgiftspliktig end)
-	left join e..t_arealres ares ON ares.kontrakts_id = ak.kontrakts_id
-where k.kontrakts_id in ({ContractFrom}) and j.jobbnr =(Select top 1 jobbnr from e..t_ak_felleskostavregning_kontrakt where kontrakts_id in ({ContractFrom}) order by jobbnr desc) 
 	and l.felleskostid not in (0)
 	order by name,l.kontrakts_id,samler,felleskost
 '
 
-IF LEN('{SamleFelleskostnader}') &gt; 0 BEGIN
-Set @queryToRun = N'' + @queryWithSingleCostsParameter
+IF LEN('{SamleFelleskostnader}') &gt; 0 
+BEGIN
+Set @queryToRun = N'' + @mainQuery + @queryWithSingleCostsParameter
 END
 ELSE 
 BEGIN 
-Set @queryToRun = N'' + @queryWithSingleCostsNoParameter
+Set @queryToRun = N'' + @mainQuery + @queryWithSingleCostsNoParameter
 END
 
 exec sp_executesql @queryToRun</SqlCommand>
@@ -234,65 +207,48 @@ exec sp_executesql @queryToRun</SqlCommand>
 declare @queryWithCollapsedCostsParameter as nvarchar(max)
 declare @queryWithCollapsedCostsNoParameter as nvarchar(max)
 
+declare @mainQuery as nvarchar(max)
 
-set @queryWithCollapsedCostsParameter = N'	
+set @mainQuery = N'
 SET DATEFORMAT ymd
-	DECLARE @dato DATETIME  
+DECLARE @dato DATETIME  
 
 set @dato=''{Year}.12.31''
 
 select distinct l.kontrakts_id,
-	SUM(l.kostnad) kostnad,Sum(l.fakturert)fakturert,Sum(l.differanse) differanse,
-	sum(l.kostnadavd) kostnad_avd,sum(l.fakturertavd)fakturert_avd,
-	sum(l.differanseavd) differanse_avd,
-	sum((isNull(l.differanse,0)+isNull(l.differanseavd,0))) as diff_tot
-	from e..t_ak_felleskostavregning_jobb j 
-	left join e..t_ak_felleskostavregning_kontrakt k on k.jobbnr=j.jobbnr 
-	left join e..t_ak_felleskostavregning_linje l on k.jobbnr=l.jobbnr and l.kontrakts_id=k.kontrakts_id 
-	left join e..t_arealkontrakt ak on ak.kontrakts_id=l.kontrakts_id 
-	left join c..DEBITOR d on ak.kundenummer=d.kontonr 
-	left join c..c_name c on c.id=d.nameid 
-	left join y..Dimensjon dim on dim.dimtall=l.felleskostid 
-	left join e..t_arealvaredim av on av.dimrecordid=dim.dimtall 
-	left join c..VARER va on va.varenr=(case when isNull(l.momsind ,0)=0 then av.vareavgiftsfri else av.vareavgiftspliktig end)
-	left join e..t_arealres ares ON ares.kontrakts_id = ak.kontrakts_id
+	round(l.kostnad,2) kostnad,round(l.fakturert,2)fakturert,round(l.differanse,2) differanse,
+		round(l.kostnadavd, 2) kostnad_avd,round(l.fakturertavd,2)fakturert_avd,
+		round(l.differanseavd, 2) differanse_avd,
+		round((isNull(l.differanse,0)+isNull(l.differanseavd,0)),2) as diff_tot
+		from e..t_ak_felleskostavregning_jobb j 
+		left join e..t_ak_felleskostavregning_kontrakt k on k.jobbnr=j.jobbnr 
+		left join e..t_ak_felleskostavregning_linje l on k.jobbnr=l.jobbnr and l.kontrakts_id=k.kontrakts_id 
+		left join e..t_arealkontrakt ak on ak.kontrakts_id=l.kontrakts_id 
+		left join c..DEBITOR d on ak.kundenummer=d.kontonr 
+		left join c..c_name c on c.id=d.nameid 
+		left join y..Dimensjon dim on dim.dimtall=l.felleskostid 
+		left join e..t_arealvaredim av on av.dimrecordid=dim.dimtall 
+		left join c..VARER va on va.varenr=(case when isNull(l.momsind ,0)=0 then av.vareavgiftsfri else av.vareavgiftspliktig end)
+		left join e..t_arealres ares ON ares.kontrakts_id = ak.kontrakts_id
 where k.kontrakts_id in ({ContractFrom}) and j.jobbnr =(Select top 1 jobbnr from e..t_ak_felleskostavregning_kontrakt where kontrakts_id in ({ContractFrom}) order by jobbnr desc) 
+'
+
+set @queryWithCollapsedCostsParameter = N'	
 	and l.felleskostid in ({SamleFelleskostnader})
-	group by l.kontrakts_id
+	--group by l.kontrakts_id
 '
 
 set @queryWithCollapsedCostsNoParameter = N'
-SET DATEFORMAT ymd
-	DECLARE @dato DATETIME  
-
-set @dato=''{Year}.12.31''
-
-select distinct l.kontrakts_id,
-	SUM(l.kostnad) kostnad,Sum(l.fakturert)fakturert,Sum(l.differanse) differanse,
-	sum(l.kostnadavd) kostnad_avd,sum(l.fakturertavd)fakturert_avd,
-	sum(l.differanseavd) differanse_avd,
-	sum((isNull(l.differanse,0)+isNull(l.differanseavd,0))) as diff_tot
-	from e..t_ak_felleskostavregning_jobb j 
-	left join e..t_ak_felleskostavregning_kontrakt k on k.jobbnr=j.jobbnr 
-	left join e..t_ak_felleskostavregning_linje l on k.jobbnr=l.jobbnr and l.kontrakts_id=k.kontrakts_id 
-	left join e..t_arealkontrakt ak on ak.kontrakts_id=l.kontrakts_id 
-	left join c..DEBITOR d on ak.kundenummer=d.kontonr 
-	left join c..c_name c on c.id=d.nameid 
-	left join y..Dimensjon dim on dim.dimtall=l.felleskostid 
-	left join e..t_arealvaredim av on av.dimrecordid=dim.dimtall 
-	left join c..VARER va on va.varenr=(case when isNull(l.momsind ,0)=0 then av.vareavgiftsfri else av.vareavgiftspliktig end)
-	left join e..t_arealres ares ON ares.kontrakts_id = ak.kontrakts_id
-where k.kontrakts_id in ({ContractFrom}) and j.jobbnr =(Select top 1 jobbnr from e..t_ak_felleskostavregning_kontrakt where kontrakts_id in ({ContractFrom}) order by jobbnr desc) 
 	and l.felleskostid in (0)
-	group by l.kontrakts_id
+	--group by l.kontrakts_id
 '
 
 IF LEN('{SamleFelleskostnader}') &gt; 0 BEGIN
-Set @queryToRun = N'' + @queryWithCollapsedCostsParameter
+Set @queryToRun = N'' + @mainQuery + @queryWithCollapsedCostsParameter
 END
 ELSE 
 BEGIN 
-Set @queryToRun = N'' + @queryWithCollapsedCostsNoParameter
+Set @queryToRun = N'' + @mainQuery + @queryWithCollapsedCostsNoParameter
 END
 
 exec sp_executesql @queryToRun</SqlCommand>
@@ -387,8 +343,8 @@ where k.kontrakts_id in ({ContractFrom}) and j.jobbnr =(Select top 1 jobbnr from
       <value>,EksMva,EksMva,System.Decimal,_x0031_.25,False,False</value>
       <value>,Year,År,text_x007C_,System.String,_x0032_018,False,False,False</value>
       <value>,SkjulFelleskost,Skjul_x0020_linjer_x0020_uten_x0020_kostnad,check_x007C__x0020_Skjul_x0020_tomme_x0020_linjer,System.String,False,False,False,False</value>
-      <value>,Felleskostnad,Samlet_x0020_felleskostnad_x0020_tekst,text_x007C_,System.String,Samlede_x0020_kostnader,False,False,False</value>
-      <value>,SamleFelleskostnader,Velg_x0020_felleskostnader_x0020_som_x0020_skal_x0020_samles,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_kost_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020__x002F__x002A__x002A__x002F_CASE_x0020_WHEN_x0020__x0028_ISNULL_x0028_felleskostid_x002C__x0020_0_x0029__x0020__x003D__x0020_0_x0029__x0020_THEN_x0020__x0027_0_x0027__x0020__x002F__x002A__x002A__x002F_ELSE_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_felleskostid_x0029__x0020_end_x002F__x002A__x002A__x002F_FROM_x0020_e..t_ak_felleskostavregning_linje_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_kost_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_kost_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C__x0020_l.felleskostid_x0029__x002C__x0020_dim.Navn_x002F__x002A__x002A__x002F_from_x0020_e..t_ak_felleskostavregning_jobb_x0020_j_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_k_x0020_on_x0020_k.jobbnr_x003D_j.jobbnr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_linje_x0020_l_x0020_on_x0020_k.jobbnr_x003D_l.jobbnr_x0020_and_x0020_l.kontrakts_id_x003D_k.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealkontrakt_x0020_ak_x0020_on_x0020_ak.kontrakts_id_x003D_l.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..DEBITOR_x0020_d_x0020_on_x0020_ak.kundenummer_x003D_d.kontonr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..c_name_x0020_c_x0020_on_x0020_c.id_x003D_d.nameid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_y..Dimensjon_x0020_dim_x0020_on_x0020_dim.dimtall_x003D_l.felleskostid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealvaredim_x0020_av_x0020_on_x0020_av.dimrecordid_x003D_dim.dimtall_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..VARER_x0020_va_x0020_on_x0020_va.varenr_x003D__x0028_case_x0020_when_x0020_isNull_x0028_l.momsind_x0020__x002C_0_x0029__x003D_0_x0020_then_x0020_av.vareavgiftsfri_x0020_else_x0020_av.vareavgiftspliktig_x0020_end_x0029__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealres_x0020_ares_x0020_ON_x0020_ares.kontrakts_id_x0020__x003D__x0020_ak.kontrakts_id_x002F__x002A__x002A__x002F_where_x0020_k.kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_and_x0020_j.jobbnr_x0020__x003D__x0028_Select_x0020_top_x0020_1_x0020_jobbnr_x0020_from_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_where_x0020_kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_order_x0020_by_x0020_jobbnr_x0020_desc_x0029__x0020_DEALLOCATE_x0020_MY_CURSOR,System.String,_x0034_025_x002C_4025_x002C_4030_x002C_4030_x002C_4035_x002C_4035_x002C_4040_x002C_4040,False,False,False</value>
+      <value>,Felleskostnad,Samlet_x0020_felleskostnad_x0020_tekst,text_x007C_,System.String,Samlet_x0020_felleskost,False,False,False</value>
+      <value>,SamleFelleskostnader,Samle_x0020_felleskost_x0020_på_x0020_én_x0020_linje,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_kost_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020__x002F__x002A__x002A__x002F_CASE_x0020_WHEN_x0020__x0028_ISNULL_x0028_felleskostid_x002C__x0020_0_x0029__x0020__x003D__x0020_0_x0029__x0020_THEN_x0020__x0027_0_x0027__x0020__x002F__x002A__x002A__x002F_ELSE_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_felleskostid_x0029__x0020_end_x002F__x002A__x002A__x002F_FROM_x0020_e..t_ak_felleskostavregning_linje_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_kost_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_kost_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_distinct_x0020_convert_x0028_varchar_x0028_5_x0029__x002C__x0020_l.felleskostid_x0029__x002C__x0020_dim.Navn_x002F__x002A__x002A__x002F_from_x0020_e..t_ak_felleskostavregning_jobb_x0020_j_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_k_x0020_on_x0020_k.jobbnr_x003D_j.jobbnr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_linje_x0020_l_x0020_on_x0020_k.jobbnr_x003D_l.jobbnr_x0020_and_x0020_l.kontrakts_id_x003D_k.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealkontrakt_x0020_ak_x0020_on_x0020_ak.kontrakts_id_x003D_l.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..DEBITOR_x0020_d_x0020_on_x0020_ak.kundenummer_x003D_d.kontonr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..c_name_x0020_c_x0020_on_x0020_c.id_x003D_d.nameid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_y..Dimensjon_x0020_dim_x0020_on_x0020_dim.dimtall_x003D_l.felleskostid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealvaredim_x0020_av_x0020_on_x0020_av.dimrecordid_x003D_dim.dimtall_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..VARER_x0020_va_x0020_on_x0020_va.varenr_x003D__x0028_case_x0020_when_x0020_isNull_x0028_l.momsind_x0020__x002C_0_x0029__x003D_0_x0020_then_x0020_av.vareavgiftsfri_x0020_else_x0020_av.vareavgiftspliktig_x0020_end_x0029__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealres_x0020_ares_x0020_ON_x0020_ares.kontrakts_id_x0020__x003D__x0020_ak.kontrakts_id_x002F__x002A__x002A__x002F_where_x0020_k.kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_and_x0020_j.jobbnr_x0020__x003D__x0028_Select_x0020_top_x0020_1_x0020_jobbnr_x0020_from_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_where_x0020_kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_order_x0020_by_x0020_jobbnr_x0020_desc_x0029__x0020_DEALLOCATE_x0020_MY_CURSOR,System.String,,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
@@ -449,7 +405,7 @@ where k.kontrakts_id in ({ContractFrom}) and j.jobbnr =(Select top 1 jobbnr from
               <Name>Text31</Name>
               <Page isRef="10" />
               <Parent isRef="11" />
-              <Text>Avregning for {Bedrift.Arstall}</Text>
+              <Text>Avregning for {Year}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -2811,10 +2767,10 @@ avdeling</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>6/17/2019 9:26:14 AM</ReportChanged>
+  <ReportChanged>6/17/2019 3:15:36 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\Users\solan\AppData\Local\Temp\ny_nering_avregnfelleskost_avd_kontrakt_5.mrt</ReportFile>
-  <ReportGuid>46dd687b15e24c7fba4c0607a759a99e</ReportGuid>
+  <ReportFile>C:\Users\solan\AppData\Local\Temp\ny_nering_avregnfelleskost_avd_kontrakt_6.mrt</ReportFile>
+  <ReportGuid>f9648a4dcbe24ad5baaafb8d8ce5b048</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
