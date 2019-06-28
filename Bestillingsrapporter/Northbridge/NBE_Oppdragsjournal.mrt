@@ -124,17 +124,17 @@ set @dt = '01.'+convert(varchar(2),{Mnd})+'.'+convert(varchar(4),{Aar})
 
 set dateformat dmy
 set @query = @query + 
-N' select oa.Id, oa.Oppdragsnr, convert(varchar(20), oa.startdato, 104)as startdato, na.Name, convert(varchar(20), oa.akseptertdato, 104)as akseptdato,
-	bo.Objekt_adresse + '' '' + convert(varchar(8),bo.Objekt_postnummer) + '' ''+ bo.Objekt_poststed+ '', ''+bo.BoligNummer+ '', ''+ convert(varchar(8),byg.gnr)+'', ''+ convert(varchar(8),byg.bnr) as adresse,
+N' select oa.Id, oa.Oppdragsnr, convert(varchar(20), oa.startdato, 104)as startdato, na.Name collate Danish_Norwegian_CI_AS, convert(varchar(20), oa.akseptertdato, 104)as akseptdato,
+	bo.Objekt_adresse collate Danish_Norwegian_CI_AS + '' '' + convert(varchar(8),bo.Objekt_postnummer) collate Danish_Norwegian_CI_AS + '' ''+ bo.Objekt_poststed collate Danish_Norwegian_CI_AS + '', ''+bo.BoligNummer collate Danish_Norwegian_CI_AS + '', ''+ convert(varchar(8),byg.gnr) collate Danish_Norwegian_CI_AS+'', ''+ convert(varchar(8),byg.bnr) collate Danish_Norwegian_CI_AS as adresse,
 	byg.kommuneNr  collate Danish_Norwegian_CI_AS + '' ''+ ko.Kommunenavn  collate Danish_Norwegian_CI_AS as kommune,
-	ko.Kommunenavn kortkommune,
-	typ.BoligType, DATEDIFF(DAY, isnull(oa.signert_dato_kunde,oa.startdato), oa.sluttdato) as varighet, 
-	convert(varchar(10),oa.statusId)+ ''-''+ st.Status as status, case when oa.statusid=19025 then ''Trukket'' else st.Status end kortstatus,
-	bo.seksjonsnr, bo.Objekt_adresse + '', '' + convert(varchar(8),bo.Objekt_postnummer) + '' ''+ bo.Objekt_poststed kortadr
-	, byg.bnr, byg.gnr, bo.BoligNummer hnr, bo.andelsnr, bo.aksjenummer,
-(select top 1 name from c..c_contacts where id=fa.MedeierKontaktId) eier2,
-convert(varchar(20), oa.signert_dato_kunde, 104)as kundesignertdato, (select navn from e..t_ansatte where ansatte_id = oa.ansvarligMeglerId) as ansvarligMegler
-, (select top 1  isnull(case len(akskjeselskapNavn) when 0 then null else akskjeselskapNavn end, case len( borettslagNavn) when 0 then null else borettslagNavn end)from e..t_bygg where ID = byg.id) as aksjeBorettslag
+	ko.Kommunenavn collate Danish_Norwegian_CI_AS kortkommune,
+	typ.BoligType collate Danish_Norwegian_CI_AS, DATEDIFF(DAY, isnull(oa.signert_dato_kunde,oa.startdato), oa.sluttdato) as varighet, 
+	convert(varchar(10),oa.statusId)+ ''-''+ st.Status collate Danish_Norwegian_CI_AS as status, case when oa.statusid=19025 then ''Trukket'' else st.Status end  collate Danish_Norwegian_CI_AS kortstatus,
+	bo.seksjonsnr, bo.Objekt_adresse collate Danish_Norwegian_CI_AS + '', '' + convert(varchar(8),bo.Objekt_postnummer) collate Danish_Norwegian_CI_AS + '' ''+ bo.Objekt_poststed collate Danish_Norwegian_CI_AS kortadr
+	, byg.bnr, byg.gnr, bo.BoligNummer collate Danish_Norwegian_CI_AS hnr, bo.andelsnr, bo.aksjenummer collate Danish_Norwegian_CI_AS,
+(select top 1 name from  uni_' + convert(varchar,@id) + '..c_contacts where id=fa.MedeierKontaktId) collate Danish_Norwegian_CI_AS eier2,
+convert(varchar(20), oa.signert_dato_kunde, 104)as kundesignertdato, (select navn from unie_' + convert(varchar,@id) + '..t_ansatte where ansatte_id = oa.ansvarligMeglerId) collate Danish_Norwegian_CI_AS as ansvarligMegler
+, (select top 1  isnull(case len(akskjeselskapNavn) when 0 then null else akskjeselskapNavn end, case len( borettslagNavn) when 0 then null else borettslagNavn end) collate Danish_Norwegian_CI_AS from unie_' + convert(varchar,@id) + '..t_bygg where ID = byg.id) as aksjeBorettslag
 	from unie_' + convert(varchar,@id) + '..t_oppdragsAvtale oa
 inner join unie_' + convert(varchar,@id) + '..t_status st on oa.statusId = st.Status_id
 left join unie_' + convert(varchar,@id) + '..t_oppdragsAvtaleHarBolig harbo on oa.Id = harbo.OppdragsAvtaleId
@@ -143,7 +143,7 @@ left join unie_' + convert(varchar,@id) + '..t_bygg byg on byg.ID = bo.Bygg_id
 left join unie_' + convert(varchar,@id) + '..t_forvaltningsAvtale fa on fa.Id = oa.forvaltningsAvtaleId
 left join unie_' + convert(varchar,@id) + '..t_kunde ei on ei.Kundenummer = fa.kreditorId
 left join uni_' + convert(varchar,@id) + '..c_Name na on ei.NameID = na.ID
-left join m..Kommune ko on ko.Kommunenr  collate Danish_Norwegian_CI_AS = case when len(byg.kommuneNr)=3 then ''0''+byg.kommuneNr else byg.kommuneNr end collate Danish_Norwegian_CI_AS
+left join m..Kommune ko on ko.Kommunenr  collate Danish_Norwegian_CI_AS = case when len(byg.kommuneNr)=3 then ''0''+byg.kommuneNr collate Danish_Norwegian_CI_AS else byg.kommuneNr end collate Danish_Norwegian_CI_AS
 left join unie_' + convert(varchar,@id) + '..t_boligtype typ on bo.Boligtype_id = typ.BoligType_id
 where 
 (month(oa.akseptertdato)={Mnd} and year(oa.akseptertdato)={Aar})
@@ -151,7 +151,7 @@ and (oa.ansvarligMeglerId in ({Ansatt}) or oa.ansvarligMegler is null)
 and isnull(oa.oppdragsnr,0)&gt;0
 --nærings kontrakter
 union 
-select ak.kontrakts_id,ak.oppdragsNr, ak.kontrakt_fra,b.Navn,ak.akseptdato
+select ak.kontrakts_id,ak.oppdragsNr, ak.kontrakt_fra,b.Navn collate Danish_Norwegian_CI_AS, ak.akseptdato
 	,byg.kommuneNr,null,null,''Næringsareal'',null
 , case when statusid = 1011 then ''Akseptert'' else  ''Ukjent'' end 
 , case when statusid = 1011 then ''Akseptert'' else  ''Ukjent'' end 
@@ -207,7 +207,7 @@ While exists (Select * From @Ids)
 Select @Id = Min(id) from @Ids
 select @cnt= count(*) from @Ids 
 set @query = @query + 
-'select system,	slettet, utfort, sorteringsvekt, fk_table, fk_id, id, lagtTilDato endretDato, convert(varchar(max),tekst) as tekst, endretAv, lagtTilAv from uni_' + convert(varchar,@id) + '..kommentar
+'select system,	slettet, utfort, sorteringsvekt, fk_table, fk_id, id, lagtTilDato, endretDato, convert(varchar(max),tekst)COLLATE Danish_Norwegian_CI_AS as tekst, endretAv COLLATE Danish_Norwegian_CI_AS, lagtTilAv COLLATE Danish_Norwegian_CI_AS from uni_' + convert(varchar,@id) + '..kommentar
 	where fk_table = 22 and abs(system) = 1
 	and id in
 (
@@ -1097,10 +1097,10 @@ nummer
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>3/29/2019 9:02:38 AM</ReportChanged>
+  <ReportChanged>6/28/2019 8:39:28 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\unierikf\AppData\Local\Temp\2\NBE_Oppdragsjournal.mrt</ReportFile>
-  <ReportGuid>5cf92640f8da45c9a6c417ad832a4312</ReportGuid>
+  <ReportGuid>1f6bb54890fe43cc8c1497459ab45e2d</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
