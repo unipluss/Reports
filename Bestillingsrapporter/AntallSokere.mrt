@@ -5,12 +5,120 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9Fb5oU1NQjVhfOVEekzhF4twwQ9NV5KZ7Hu5XORE60/R8vtJ5lTzXWkVuexNEa4T2Vr37VsFAZ3pCP3s9FQqL8J40cLJSns=</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Fb5oU1NQjVhfOVEekzhF4twwQ9NV5KZ7Hu5XORE60/R8vtJ5VTzXWkVuexNLa4T2Vr37VsFAZ3pCP3s9FQqL8J40cLJSns=</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
-    <DataSources isList="true" count="1">
-      <Telling Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+    <DataSources isList="true" count="2">
+      <TellingInternasjonale Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>TellingInternasjonale</Alias>
+        <Columns isList="true" count="5">
+          <value>antall,System.Int32</value>
+          <value>navn,System.String</value>
+          <value>sortParam,System.Int32</value>
+          <value>FraDato,System.DateTime</value>
+          <value>TilDato,System.DateTime</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Name>TellingInternasjonale</Name>
+        <NameInSource>Connection</NameInSource>
+        <Parameters isList="true" count="0" />
+        <SqlCommand>set dateformat ymd
+select COUNT(distinct kundenummer) as antall
+,case when 0 = {boligomrade} then 'Alle internasjonale' else (select Omrade from e..t_boligomraade where BoligOmrade_id = {boligomrade})  + ' internasjonale'  end as navn  
+, 40 as sortParam
+, convert(datetime, '{FraDato}') as fraDato
+, convert(datetime, '{TilDato}') as tilDato
+from e..t_soeknad s
+inner join e..t_boligonske bo on s.ID = bo.SoknadsNummer
+inner join e..t_boligomraade om on bo.BoligOmrade_id = om.Boligomrade_id
+inner join e..t_boligtype ty on bo.BoligType = ty.BoligType_id
+where isnull(s.SoeknadAktivFra, GETDATE() +1) &gt;= GETDATE()
+and ISNULL(s.SoeknadAktivTil, getdate() +1) &gt;= GETDATE()
+and isnull(s.type,0) = 0
+and s.Kundenummer &gt; 0
+and abs(isnull(s.slettet,0)) = 0
+and s.Fra_dato between '{FraDato}' and '{TilDato}'
+and s.kundenummer not in (select kd.Kundenummer from e..t_kontraktsdata kd where statusId in (1001,1002,1003,1006))
+and isnull(s.resKode,'')  &lt;&gt; ''
+and bo.OnskeNr = 1
+and bo.BoligOmrade_id &gt;= (case when 0 = {boligomrade} then 0 else {boligomrade} end)
+and bo.BoligOmrade_id &lt;= (case when 0 = {boligomrade} then 2147483647 else {boligomrade} end)
+
+union
+
+select COUNT(distinct kundenummer) as antall
+, 'Singelbolig - Internasjonale'
+, 100 as sortParam
+, convert(datetime, '{FraDato}') as fraDato
+, convert(datetime, '{TilDato}') as tilDato
+from e..t_soeknad s
+inner join e..t_boligonske bo on s.ID = bo.SoknadsNummer
+inner join e..t_boligomraade om on bo.BoligOmrade_id = om.Boligomrade_id
+inner join e..t_boligtype ty on bo.BoligType = ty.BoligType_id
+where isnull(s.SoeknadAktivFra, GETDATE() +1) &gt;= GETDATE()
+and ISNULL(s.SoeknadAktivTil, getdate() +1) &gt;= GETDATE()
+and isnull(s.type,0) = 0
+and s.Kundenummer &gt; 0
+and abs(isnull(s.slettet,0)) = 0
+and s.Fra_dato between '{FraDato}' and '{TilDato}'
+and s.kundenummer not in (select kd.Kundenummer from e..t_kontraktsdata kd where statusId in (1001,1002,1003,1006))
+and isnull(s.resKode,'')  &lt;&gt; ''
+and bo.OnskeNr = 1
+and bo.BoligOmrade_id &gt;= (case when 0 = {boligomrade} then 0 else {boligomrade} end)
+and bo.BoligOmrade_id &lt;= (case when 0 = {boligomrade} then 2147483647 else {boligomrade} end)
+and ISNULL(ty.Barn,0) = 0
+and ISNULL(ty.Samboer,0) = 0
+union
+--Par
+select COUNT(distinct kundenummer) as antall
+, 'Par - Internasjonale'
+, 110 as sortParam
+, convert(datetime, '{FraDato}') as fraDato
+, convert(datetime, '{TilDato}') as tilDato
+from e..t_soeknad s
+inner join e..t_boligonske bo on s.ID = bo.SoknadsNummer
+inner join e..t_boligomraade om on bo.BoligOmrade_id = om.Boligomrade_id
+inner join e..t_boligtype ty on bo.BoligType = ty.BoligType_id
+where isnull(s.SoeknadAktivFra, GETDATE() +1) &gt;= GETDATE()
+and ISNULL(s.SoeknadAktivTil, getdate() +1) &gt;= GETDATE()
+and isnull(s.type,0) = 0
+and s.Kundenummer &gt; 0
+and abs(isnull(s.slettet,0)) = 0
+and s.Fra_dato between '{FraDato}' and '{TilDato}'
+and s.kundenummer not in (select kd.Kundenummer from e..t_kontraktsdata kd where statusId in (1001,1002,1003,1006))
+and isnull(s.resKode,'')  &lt;&gt; ''
+and bo.OnskeNr = 1
+and bo.BoligOmrade_id &gt;= (case when 0 = {boligomrade} then 0 else {boligomrade} end)
+and bo.BoligOmrade_id &lt;= (case when 0 = {boligomrade} then 2147483647 else {boligomrade} end)
+and ISNULL(ty.Samboer,0) = 1
+union
+--Familie
+select COUNT(distinct kundenummer) as antall
+, 'Familie - Internasjonale'
+, 120 as sortParam
+, convert(datetime, '{FraDato}') as fraDato
+, convert(datetime, '{TilDato}') as tilDato
+from e..t_soeknad s
+inner join e..t_boligonske bo on s.ID = bo.SoknadsNummer
+inner join e..t_boligomraade om on bo.BoligOmrade_id = om.Boligomrade_id
+inner join e..t_boligtype ty on bo.BoligType = ty.BoligType_id
+where isnull(s.SoeknadAktivFra, GETDATE() +1) &gt;= GETDATE()
+and ISNULL(s.SoeknadAktivTil, getdate() +1) &gt;= GETDATE()
+and isnull(s.type,0) = 0
+and s.Kundenummer &gt; 0
+and abs(isnull(s.slettet,0)) = 0
+and s.Fra_dato between '{FraDato}' and '{TilDato}'
+and s.kundenummer not in (select kd.Kundenummer from e..t_kontraktsdata kd where statusId in (1001,1002,1003,1006))
+and isnull(s.resKode,'')  &lt;&gt; ''
+and bo.OnskeNr = 1
+and bo.BoligOmrade_id &gt;= (case when 0 = {boligomrade} then 0 else {boligomrade} end)
+and bo.BoligOmrade_id &lt;= (case when 0 = {boligomrade} then 2147483647 else {boligomrade} end)
+and ISNULL(ty.Barn,0) = 1
+order by sortParam</SqlCommand>
+      </TellingInternasjonale>
+      <Telling Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Telling</Alias>
         <Columns isList="true" count="5">
           <value>antall,System.Int32</value>
@@ -24,8 +132,7 @@
         <Name>Telling</Name>
         <NameInSource>Connection</NameInSource>
         <Parameters isList="true" count="0" />
-        <SqlCommand>
-set dateformat ymd
+        <SqlCommand>set dateformat ymd
 --alle
 select COUNT(distinct kundenummer) as antall
 ,case when 0 = {boligomrade} then 'Alle' else (select Omrade from e..t_boligomraade where BoligOmrade_id = {boligomrade}) end as navn  
@@ -117,27 +224,6 @@ and bo.OnskeNr = 1
 and bo.BoligOmrade_id &gt;= (case when 0 = {boligomrade} then 0 else {boligomrade} end)
 and bo.BoligOmrade_id &lt;= (case when 0 = {boligomrade} then 2147483647 else {boligomrade} end)
 and ISNULL(ty.Barn,0) = 1
-union
-select COUNT(distinct kundenummer) as antall
-,'Internasjonale'
-, 40 as sortParam
-, convert(datetime, '{FraDato}') as fraDato
-, convert(datetime, '{TilDato}') as tilDato
-from e..t_soeknad s
-inner join e..t_boligonske bo on s.ID = bo.SoknadsNummer
-inner join e..t_boligomraade om on bo.BoligOmrade_id = om.Boligomrade_id
-inner join e..t_boligtype ty on bo.BoligType = ty.BoligType_id
-where isnull(s.SoeknadAktivFra, GETDATE() +1) &gt;= GETDATE()
-and ISNULL(s.SoeknadAktivTil, getdate() +1) &gt;= GETDATE()
-and isnull(s.type,0) = 0
-and s.Kundenummer &gt; 0
-and abs(isnull(s.slettet,0)) = 0
-and s.Fra_dato between '{FraDato}' and '{TilDato}'
-and s.kundenummer not in (select kd.Kundenummer from e..t_kontraktsdata kd where statusId in (1001,1002,1003,1006))
-and isnull(s.resKode,'')  &lt;&gt; ''
-and bo.OnskeNr = 1
-and bo.BoligOmrade_id &gt;= (case when 0 = {boligomrade} then 0 else {boligomrade} end)
-and bo.BoligOmrade_id &lt;= (case when 0 = {boligomrade} then 2147483647 else {boligomrade} end)
 
 order by sortParam
 
@@ -149,13 +235,13 @@ order by sortParam
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Variables isList="true" count="8">
-      <value>,FraDato,FraDato,date_x007C_,System.String,_x0032_0190702,False,False,False</value>
-      <value>,TilDato,TilDato,date_x007C_,System.String,_x0032_0190712,False,False,False</value>
+      <value>,FraDato,FraDato,date_x007C_,System.String,_x0032_0190703,False,False,False</value>
+      <value>,TilDato,TilDato,date_x007C_,System.String,_x0032_0190717,False,False,False</value>
       <value>,boligomrade,Boligomrade,combo_x007C_sql_x003D_select_x0020_Boligomrade_id_x002C__x0020_Omrade_x0020_from_x0020_e..t_boligomraade_x002F__x002A__x002A__x002F_union_x002F__x002A__x002A__x002F_select_x0020__x0027_0_x0027__x002C__x0020__x0027_Alle_x0027__x0020__x002F__x002A__x002A__x002F_order_x0020_by_x0020_omrade,System.Int32,_x0030_,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0032_6,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0034_9,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_019,True,False</value>
     </Variables>
   </Dictionary>
@@ -163,15 +249,15 @@ order by sortParam
   <GlobalizationStrings isList="true" count="0" />
   <MetaTags isList="true" count="0" />
   <Pages isList="true" count="1">
-    <Hovedside1 Ref="4" type="Page" isKey="true">
+    <Hovedside1 Ref="5" type="Page" isKey="true">
       <Border>None;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
-      <Components isList="true" count="2">
-        <GroupHeaderBand1 Ref="5" type="GroupHeaderBand" isKey="true">
+      <Components isList="true" count="4">
+        <GroupHeaderBand1 Ref="6" type="GroupHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,0.4,17,2.6</ClientRectangle>
           <Components isList="true" count="5">
-            <Text3 Ref="6" type="Text" isKey="true">
+            <Text3 Ref="7" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.2,14.8,1.2</ClientRectangle>
@@ -179,13 +265,13 @@ order by sortParam
               <Font>Calibri,22,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text3</Name>
-              <Page isRef="4" />
-              <Parent isRef="5" />
+              <Page isRef="5" />
+              <Parent isRef="6" />
               <Text>Skjema for innrapportering av køtall</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text3>
-            <Text4 Ref="7" type="Text" isKey="true">
+            <Text4 Ref="8" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>1.8,1.4,1.8,1</ClientRectangle>
@@ -193,16 +279,16 @@ order by sortParam
               <Font>Calibri,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text4</Name>
-              <Page isRef="4" />
-              <Parent isRef="5" />
+              <Page isRef="5" />
+              <Parent isRef="6" />
               <Text>{Telling.FraDato}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="8" type="DateFormat" isKey="true">
+              <TextFormat Ref="9" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>Expression</Type>
             </Text4>
-            <Text5 Ref="9" type="Text" isKey="true">
+            <Text5 Ref="10" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3.8,1.4,3.2,1</ClientRectangle>
@@ -210,16 +296,16 @@ order by sortParam
               <Font>Calibri,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text5</Name>
-              <Page isRef="4" />
-              <Parent isRef="5" />
+              <Page isRef="5" />
+              <Parent isRef="6" />
               <Text>{Telling.TilDato}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="10" type="DateFormat" isKey="true">
+              <TextFormat Ref="11" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>Expression</Type>
             </Text5>
-            <Text6 Ref="11" type="Text" isKey="true">
+            <Text6 Ref="12" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,1.4,1.6,1</ClientRectangle>
@@ -228,16 +314,16 @@ order by sortParam
               <Guid>66000c445fc84f6d8c057babbc6b62c8</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text6</Name>
-              <Page isRef="4" />
-              <Parent isRef="5" />
+              <Page isRef="5" />
+              <Parent isRef="6" />
               <Text>I perioden</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="12" type="DateFormat" isKey="true">
+              <TextFormat Ref="13" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>Expression</Type>
             </Text6>
-            <Text7 Ref="13" type="Text" isKey="true">
+            <Text7 Ref="14" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3.6,1.4,0.4,1</ClientRectangle>
@@ -246,11 +332,11 @@ order by sortParam
               <Guid>7e1b40cc3773435ea8c1496117647784</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text7</Name>
-              <Page isRef="4" />
-              <Parent isRef="5" />
+              <Page isRef="5" />
+              <Parent isRef="6" />
               <Text>-</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="14" type="DateFormat" isKey="true">
+              <TextFormat Ref="15" type="DateFormat" isKey="true">
                 <StringFormat>dd/MM/yyyy</StringFormat>
               </TextFormat>
               <Type>Expression</Type>
@@ -258,37 +344,37 @@ order by sortParam
           </Components>
           <Conditions isList="true" count="0" />
           <Name>GroupHeaderBand1</Name>
-          <Page isRef="4" />
-          <Parent isRef="4" />
+          <Page isRef="5" />
+          <Parent isRef="5" />
         </GroupHeaderBand1>
-        <DataBand1 Ref="15" type="DataBand" isKey="true">
+        <DataBand1 Ref="16" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <ClientRectangle>0,3.8,17,1.2</ClientRectangle>
           <Components isList="true" count="2">
-            <Text1 Ref="16" type="Text" isKey="true">
+            <Text1 Ref="17" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.8,0.4,3.2,0.6</ClientRectangle>
+              <ClientRectangle>7,0.4,3.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Calibri,9,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text1</Name>
-              <Page isRef="4" />
-              <Parent isRef="15" />
+              <Page isRef="5" />
+              <Parent isRef="16" />
               <Text>{Telling.antall}</Text>
               <TextBrush>Black</TextBrush>
             </Text1>
-            <Text2 Ref="17" type="Text" isKey="true">
+            <Text2 Ref="18" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0.4,2.4,0.6</ClientRectangle>
+              <ClientRectangle>0.2,0.4,6.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Calibri,9,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text2</Name>
-              <Page isRef="4" />
-              <Parent isRef="15" />
+              <Page isRef="5" />
+              <Parent isRef="16" />
               <Text>{Telling.navn}</Text>
               <TextBrush>Black</TextBrush>
             </Text2>
@@ -298,13 +384,86 @@ order by sortParam
           <DataSourceName>Telling</DataSourceName>
           <Filters isList="true" count="0" />
           <Name>DataBand1</Name>
-          <Page isRef="4" />
-          <Parent isRef="4" />
+          <Page isRef="5" />
+          <Parent isRef="5" />
           <Sort isList="true" count="2">
             <value>ASC</value>
             <value>sortParam</value>
           </Sort>
         </DataBand1>
+        <GroupFooterBand1 Ref="19" type="GroupFooterBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,5.8,17,1.2</ClientRectangle>
+          <Components isList="true" count="1">
+            <HorizontalLinePrimitive1 Ref="20" type="HorizontalLinePrimitive" isKey="true">
+              <ClientRectangle>0.2,0.6,16.6,0.0254</ClientRectangle>
+              <Color>DimGray</Color>
+              <EndCap Ref="21" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </EndCap>
+              <Name>HorizontalLinePrimitive1</Name>
+              <Page isRef="5" />
+              <Parent isRef="19" />
+              <Size>2</Size>
+              <StartCap Ref="22" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </StartCap>
+            </HorizontalLinePrimitive1>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Name>GroupFooterBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+        </GroupFooterBand1>
+        <DataBand2 Ref="23" type="DataBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
+          <ClientRectangle>0,7.8,17,1.2</ClientRectangle>
+          <Components isList="true" count="2">
+            <Text8 Ref="24" type="Text" isKey="true">
+              <Border>All;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>7,0.4,3.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Calibri,9,Bold</Font>
+              <Guid>1091a999a1b0422ba7f24c024bbf4466</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text8</Name>
+              <Page isRef="5" />
+              <Parent isRef="23" />
+              <Text>{TellingInternasjonale.antall}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+            </Text8>
+            <Text9 Ref="25" type="Text" isKey="true">
+              <Border>All;Transparent;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.2,0.4,6.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Calibri,9,Bold</Font>
+              <Guid>69a6d8fb0e724dad92062baaebd110f5</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text9</Name>
+              <Page isRef="5" />
+              <Parent isRef="23" />
+              <Text>{TellingInternasjonale.navn}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+            </Text9>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <DataRelationName isNull="true" />
+          <DataSourceName>TellingInternasjonale</DataSourceName>
+          <Filters isList="true" count="0" />
+          <Guid>5cf1094f2cd84e73ac0d2e13573352cb</Guid>
+          <Name>DataBand2</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Sort isList="true" count="2">
+            <value>ASC</value>
+            <value>sortParam</value>
+          </Sort>
+        </DataBand2>
       </Components>
       <Conditions isList="true" count="0" />
       <Guid>b6c50d4ff7c247d18dc79b2a3796c154</Guid>
@@ -313,13 +472,13 @@ order by sortParam
       <PageHeight>29.7</PageHeight>
       <PageWidth>21</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="18" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="26" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Hovedside1>
   </Pages>
-  <PrinterSettings Ref="19" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="27" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -332,10 +491,10 @@ order by sortParam
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
   <ReportAuthor>Hans / View</ReportAuthor>
-  <ReportChanged>7/2/2019 11:02:26 AM</ReportChanged>
+  <ReportChanged>7/3/2019 9:55:32 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AntallSokere.mrt</ReportFile>
-  <ReportGuid>b2cbc8370fa24de6919e631daf54e8c0</ReportGuid>
+  <ReportGuid>4f98aba2f06345958461be48e6ec35d5</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
