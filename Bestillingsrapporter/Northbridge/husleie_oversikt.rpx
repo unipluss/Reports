@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{B29BE53F-79BF-4C5C-BACD-516188D779DA}" GUIDREP="{FCAE7612-4E3C-41F6-AC5B-58487B35B763}" 
+	LICENSE="10000000"
+	PrintWidth="14580"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[dim varer
+sub onDatainitialize
+  	dim sql
+	dim omr
+	'm_data.debugg=true
+	m_data.AddInputMacro "{OM}","Boligområde ","0",,7,"Select boligomrade_id, omrade from e..t_boligomraade union select '0','Alle' order by boligomrade_id"
+	m_data.AddInputMacro "{varer}","Velg varer ","0",,7,"select distinct tl.Varenr, VA.Varenavn1 from (c..TARIFFLINJE  TL INNER JOIN c..VARER  as VA on TL.Varenr=VA.Varenr) union  select '0','Alle' order by tl.varenr"
+	m_data.AddInputMacro "{AAR}","År","getsql(select year(getdate()))"
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+	omr=m_data.getmacrovalue("{OM}")
+	varer=m_data.getmacrovalue("{varer}")
+
+	sql = sql & " select distinct BO.Objekt_id, bo2.omrade, by1.navn, et.etasje_navn, BO.Rom_nummer, cn.name,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='31.01.{aar}' and til_dato>='31.01.{aar}' and (ab.sluttdato>='31.01.{aar}' or isNull(ab.sluttdato,0)=0)"
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'31.01.{aar}' and (ko.virkelig_utflyttet>'01.01.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as Januar,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='28.02.{aar}' and til_dato>='28.02.{aar}' and (ab.sluttdato>='28.02.{aar}' or isNull(ab.sluttdato,0)=0)" 
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'28.02.{aar}' and (ko.virkelig_utflyttet>'01.02.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as Februar,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='31.03.{aar}' and til_dato>='31.03.{aar}' and (ab.sluttdato>='31.03.{aar}' or isNull(ab.sluttdato,0)=0)" 
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'31.03.{aar}' and (ko.virkelig_utflyttet>'01.03.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as Mars,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='30.04.{aar}' and til_dato>='30.04.{aar}' and (ab.sluttdato>='30.04.{aar}' or isNull(ab.sluttdato,0)=0)" 
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'30.04.{aar}' and (ko.virkelig_utflyttet>'01.04.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as April,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='31.05.{aar}' and til_dato>='31.05.{aar}' and (ab.sluttdato>='31.05.{aar}' or isNull(ab.sluttdato,0)=0)"
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'31.05.{aar}' and (ko.virkelig_utflyttet>'01.05.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as Mai,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='30.06.{aar}' and til_dato>='30.06.{aar}' and (ab.sluttdato>='30.06.{aar}' or isNull(ab.sluttdato,0)=0)" 
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'30.06.{aar}' and (ko.virkelig_utflyttet>'01.06.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as Juni,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='31.07.{aar}' and til_dato>='31.07.{aar}' and (ab.sluttdato>='31.07.{aar}' or isNull(ab.sluttdato,0)=0)"
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'31.07.{aar}' and (ko.virkelig_utflyttet>'01.07.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as Juli,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='31.08.{aar}' and til_dato>='31.08.{aar}' and (ab.sluttdato>='31.08.{aar}' or isNull(ab.sluttdato,0)=0)"
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'31.08.{aar}' and (ko.virkelig_utflyttet>'01.08.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as August,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='30.09.{aar}' and til_dato>='30.09.{aar}' and (ab.sluttdato>='30.09.{aar}' or isNull(ab.sluttdato,0)=0)" 
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'30.09.{aar}' and (ko.virkelig_utflyttet>'01.09.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as September,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='31.10.{aar}' and til_dato>='31.10.{aar}' and (ab.sluttdato>='31.10.{aar}' or isNull(ab.sluttdato,0)=0)" 
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'31.10.{aar}' and (ko.virkelig_utflyttet>'01.10.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as Oktober,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='30.11.{aar}' and til_dato>='30.11.{aar}' and (ab.sluttdato>='30.11.{aar}' or isNull(ab.sluttdato,0)=0)"
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'30.11.{aar}' and (ko.virkelig_utflyttet>'01.11.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as November,"
+	sql = sql & " isNull((Select sum(pris)  from c..TARIFFLINJE where tariffnr=ab.tariff and fra_dato<='31.12.{aar}' and til_dato>='31.12.{aar}' and (ab.sluttdato>='31.12.{aar}' or isNull(ab.sluttdato,0)=0)"
+		if varer<>0 then sql = sql & "and varenr in ({varer})" end if
+	sql = sql & " and ko.kontrakt_fra<'31.12.{aar}' and (ko.virkelig_utflyttet>'01.12.{aar}' or isNull(ko.virkelig_utflyttet,0)=0) ),0) as Desember, "
+	sql = sql & " KO.Kontrakts_ID,  ab.id, ab.tariff,  ko.kundenummer, BO.Bygg_id, BO.Etasje, ko.Statusid, KO.Innflytting_dato, KO.Virkelig_utflyttet, KO.Kontrakt_fra, KO.Kontrakt_til, ab.startdato, ab.sluttdato"
+	sql = sql & " from (e..t_boligobjekt as BO INNER JOIN e..t_kontraktsdata as KO on BO.Objekt_id=KO.Objekt)"
+	sql = sql & " left join c..debitor d on d.kontonr=ko.kundenummer"
+	sql = sql & " left join c..c_name cn on cn.id=d.nameid"
+	sql = sql & " left join c..abonnement ab on ab.kundenr=ko.kundenummer"
+	sql = sql & " left join e..t_bygg by1 on by1.id=bo.bygg_id"
+	sql = sql & " left join e..t_etasje et on et.id = bo.etasje"
+	sql = sql & " left join unie_1..t_boligomraade bo2 on bo2.boligomrade_id=bo.boligomrade_id"
+	sql = sql & " where (ko.kontrakt_til>'01.01.{aar}' or isNull(ko.kontrakt_til,0)=0)"
+	sql = sql & " and NOT ko.statusid in (1005,1010)"
+	sql = sql & " and ab.startdato=ko.kontrakt_fra"
+	sql = sql & " and ko.kontrakt_fra<'31.12.{aar}'"
+	sql = sql & " and (ko.virkelig_utflyttet>'01.01.{aar}' or isNull(ko.virkelig_utflyttet,0)=0)"
+
+
+
+	if omr<>"0" then
+		sql=Sql & " and bo.Boligomrade_id in ({om})"
+	end if
+sql = sql & " order by bo.objekt_id, kontrakts_id"
+
+      m_data.SqlString = sql '& " order by omrade,navn,etasje"
+	m_data.setupfields rpt
+  end sub
+
+Sub OnReportStart
+
+End Sub
+
+Sub OnFetchData(eof)
+	if varer=0 then
+		rpt.fields("vare").value="Husleie sum inkluderer alle varene i tariffen"
+	else
+		rpt.fields("vare").value="Husleie sum inkluderer utvalgte varer"
+	end if
+	
+End Sub
+
+
+
+]]></Script>
+<PageSettings	LeftMargin="1080"
+	RightMargin="1080"
+	TopMargin="1080"
+	BottomMargin="1080"
+	Orientation="2"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="15"
+	>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="1110"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="0"
+		Top="0"
+		Width="2976"
+		Height="425"
+		Caption="Husleieoversikt for:"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 16pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		DataField="*y..Bedrift.navn"
+		Left="0"
+		Top="425"
+		Width="6236"
+		Height="284"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="*y..Bedrift.arstall"
+		Left="12472"
+		Top="0"
+		Width="1985"
+		Height="425"
+		Text="*y..Bedrift.arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Times New Roman&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="= &quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="12756"
+		Top="283"
+		Width="1701"
+		Height="426"
+		Text="Sidenr"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Times New Roman&apos;; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= Now"
+		Left="12756"
+		Top="567"
+		Width="1701"
+		Height="425"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="User_name"
+		Left="12756"
+		Top="850"
+		Width="1701"
+		Height="426"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="vare"
+		Left="0"
+		Top="850"
+		Width="10630"
+		Height="284"
+		Text="tekst"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="{aar}"
+		Left="2693"
+		Top="0"
+		Width="992"
+		Height="425"
+		Text="år"
+		ClassName="Normal"
+		Style="font-size: 16pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="375"
+		DataField="omrade"
+		GroupKeepTogether="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field32"
+		DataField="omrade"
+		Left="0"
+		Top="0"
+		Width="3686"
+		Height="283"
+		Text="Bygg navn"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 12pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="420"
+		DataField="bygg_id"
+		GroupKeepTogether="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="navn"
+		Left="283"
+		Top="0"
+		Width="3686"
+		Height="283"
+		Text="Bygg navn"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="bygg_id"
+		Left="3685"
+		Top="0"
+		Width="1984"
+		Height="283"
+		Visible="0"
+		Text="Rom nummer"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader3"
+		Height="570"
+		DataField="etasje"
+		RepeatStyle="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="etasje_navn"
+		Left="425"
+		Top="0"
+		Width="3685"
+		Height="283"
+		Text="Etasjenavn"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="etasje"
+		Left="3827"
+		Top="0"
+		Width="1984"
+		Height="283"
+		Visible="0"
+		Text="Rom nummer"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label3"
+		Left="5244"
+		Top="283"
+		Width="709"
+		Height="284"
+		Caption="Januar"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label6"
+		Left="5953"
+		Top="283"
+		Width="708"
+		Height="284"
+		Caption="Februar"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label7"
+		Left="12472"
+		Top="283"
+		Width="993"
+		Height="284"
+		Caption="November"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label8"
+		Left="13465"
+		Top="283"
+		Width="992"
+		Height="284"
+		Caption="Desember"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="6661"
+		Top="283"
+		Width="709"
+		Height="284"
+		Caption="Mars"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="7370"
+		Top="283"
+		Width="709"
+		Height="284"
+		Caption="April"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="8079"
+		Top="283"
+		Width="567"
+		Height="284"
+		Caption="Mai"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="8646"
+		Top="283"
+		Width="708"
+		Height="284"
+		Caption="Juni"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="9354"
+		Top="283"
+		Width="567"
+		Height="284"
+		Caption="Juli"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label14"
+		Left="9921"
+		Top="283"
+		Width="709"
+		Height="284"
+		Caption="August"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label15"
+		Left="10630"
+		Top="283"
+		Width="992"
+		Height="284"
+		Caption="September"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="11622"
+		Top="283"
+		Width="850"
+		Height="284"
+		Caption="Oktober"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-style: italic; "
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader4"
+		Height="375"
+		DataField="rom_nummer"
+		GroupKeepTogether="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field25"
+		DataField="rom_nummer"
+		Left="709"
+		Top="0"
+		Width="3685"
+		Height="283"
+		Text="Rom nummer"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line5"
+		X1="709"
+		Y1="283"
+		X2="14457"
+		Y2="283"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="360"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="name"
+		Left="1276"
+		Top="0"
+		Width="3685"
+		Height="283"
+		Text="NAME"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field13"
+		DataField="Januar"
+		Left="5244"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="Januar"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field14"
+		DataField="Juli"
+		Left="9354"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="Juli"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field15"
+		DataField="September"
+		Left="10630"
+		Top="0"
+		Width="992"
+		Height="283"
+		Text="September"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field16"
+		DataField="Oktober"
+		Left="11622"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="Oktober"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field17"
+		DataField="November"
+		Left="12472"
+		Top="0"
+		Width="993"
+		Height="283"
+		Text="November"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field18"
+		DataField="August"
+		Left="9921"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="August"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field19"
+		DataField="Desember"
+		Left="13465"
+		Top="0"
+		Width="992"
+		Height="283"
+		Text="Desember"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field20"
+		DataField="Februar"
+		Left="5953"
+		Top="0"
+		Width="708"
+		Height="283"
+		Text="Februar"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		DataField="Mars"
+		Left="6661"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="Mars"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field22"
+		DataField="April"
+		Left="7370"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="April"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field23"
+		DataField="Mai"
+		Left="7937"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="Mai"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field24"
+		DataField="Juni"
+		Left="8646"
+		Top="0"
+		Width="708"
+		Height="283"
+		Text="Juni"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter4"
+		Height="0"
+	>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter3"
+		Height="195"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="709"
+		Y1="0"
+		X2="14457"
+		Y2="0"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="105"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line4"
+		X1="283"
+		Y1="0"
+		X2="14457"
+		Y2="0"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="150"
+	>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="75"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="765"
+	>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="0"
+		Y1="142"
+		X2="14457"
+		Y2="142"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label5"
+		Left="992"
+		Top="142"
+		Width="2551"
+		Height="283"
+		Caption="Totalt antall boligobjekter:"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field12"
+		DataField="rom_nummer"
+		Left="3543"
+		Top="142"
+		Width="1134"
+		Height="283"
+		Text="rom_nummer"
+		SummaryType="1"
+		SummaryFunc="2"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

@@ -1,0 +1,1985 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{01F28403-FDFB-4163-8F66-E114AFB2C58C}" GUIDREP="{DDCB0A5E-4A5B-4454-8432-A1DA4DDA3385}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10215"
+	DocumentName="Faktura"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[Option Explicit
+dim fakturanr, bankgiro, postgiro, BankPostGiro, hoymvasats, lavmvasats, factbankgiro,IBAN,SWIFT
+dim bednavn, bedadr1, bedadr2, bedpostnr, bedpoststed, OcrAvtale, MVAnr, Landkode, Url, MailAdr
+dim factnavn, factadr1, factadr2, factpostnr, factpoststed, factgiro, factkidtype, factoringnr, factfritxt
+dim klib, Sfelt, tot, innrykk, init, Antlinje, Antlinje2, VKurs, ViseMvafelt, ViseUtenAvg,personmvasats
+dim valutakode
+ViseMvafelt = false 'Sett til true hvis mvafelt skal vise på blanketten
+ViseUtenAvg = false 'Sett til true hvis avgiftsfrie linjer skal vises med 0%
+
+Sub OnDataInitialize
+	Dim sql
+	'm_data.Debugg = True
+	m_data.Trace "/// report start /// : " & now
+
+'	Create a groupcounter
+	Antlinje = 14 
+	Antlinje2 = 35 
+'	m_data.AddGroupCounter "fakturanr",Clng(Antlinje)
+	m_data.fieldchooser = true
+
+	'Input dialog 
+	m_data.AddInputMacro "{fra}","Fra fakturanr.","getsql(select max(fakturanr) as it from c..faktura)"
+	m_data.AddInputMacro "{til}","Til fakturanr.","getsql(select max(fakturanr) as it from c..faktura)"
+	if not m_data.ShowInputDialog("Oppgi fakturaserie") then exit sub
+	
+	'Create query string
+ 	sql="object:urap_blankettdataLib.faktura:{fra}|{til}"
+
+	m_data.SqlString = sql
+	m_data.SetupFields rpt
+
+      if m_data.RunSubQuery("SELECT valutakode FROM c..faktura where fakturanr = {F.Fakturanr}","sys")>0 then  
+  	            'Hent ut prosjektnr:  
+  
+            valutakode = m_data.SubQueryValue("valutakode","sys") 
+		msgbox valutakode 
+	else
+		'valutakode = "NOK"
+  
+      end if  
+
+End Sub
+
+
+
+Sub OnReportStart
+	dim dettop
+	dettop = 0
+
+	m_data.GetControl("fldFritekstlinje").top = dettop 
+	m_data.GetControl("fldKomplinje").top = dettop 
+	m_data.GetControl("fldPrisInkMva").top = dettop 
+	m_data.GetControl("fldPrisExMva").top = dettop 
+	m_data.GetControl("fldSumInkMva").top = dettop 
+	m_data.GetControl("fldSumExMva").top = dettop 
+	m_data.GetControl("fldMvaPsnt").top = dettop 
+	m_data.GetControl("fldMvakr").top = dettop
+
+	dim lbltop
+	lbltop =  m_data.GetControl("lblvarenr").top
+	'm_data.GetControl("lblprisinkmva").top = lbltop
+	'm_data.GetControl("lblSumLinjeInkmva").top = lbltop
+End Sub
+
+Sub OnFetchData(eof)
+	
+'// Watermark for e2b or ap
+	If m_data.SFCurr(m_data.GetValue("e2bStatus")) > 0 Then
+		m_data.SetWatermark rpt, "e2bWatermark"
+	Elseif m_data.SFCurr(m_data.GetValue("APStatus")) > 0 Then
+		m_data.SetWatermark rpt, "APWatermark"
+	Else
+		rpt.Watermark = Nothing
+	End If
+	'rpt.fields("lblSumNetto").value = "Total ex. mva"
+	'rpt.fields("lblbetalsum").value = "Total amount"
+	rpt.fields("lbltotalsum").value = rpt.fields("lbltotalsum").value & " " & valutakode
+	rpt.fields("lblbetalsum").value = rpt.fields("lblbetalsum").value & " " & valutakode
+
+	rpt.fields("mvabelop").value = m_data.sfcurr(rpt.fields("Antallfelt").value) * m_data.sfcurr(rpt.fields("PrisExMva").value) * (m_data.sfcurr(rpt.fields("momsprosent").value) / 100)
+
+	rpt.fields("personmvatekst").value = DecimalFix(rpt.fields("personmvatekst").value)	
+	rpt.fields("LavMva").value = DecimalFix(rpt.fields("LavMva").value)
+	rpt.fields("HoyMva").value = DecimalFix(rpt.fields("HoyMva").value)
+	rpt.fields("mvalabel4").value = DecimalFix(rpt.fields("mvalabel4").value)	
+End Sub
+
+function DecimalFix( strValue )
+	Dim i, ub, strTmp, retVal
+
+	if Not Len(strValue) > 0 Then Exit Function 'Got nothing, return nothing
+
+	Err.Clear
+      on error resume next
+
+	strTmp = split(strValue) 	'Split it
+	ub = UBound(strTmp) 		'Get the count
+
+	for i = 0 to UBound(strTmp) 	'Iterate
+        Select Case i
+	    Case 0 				'First value
+	       retVal = strTmp(i)
+	    Case ub 			'Last Value
+	       retVal = retVal & " " & formatnumber(strTmp(i),2,,,0)
+	    Case else 			'The rest
+	       retVal = retVal & " " & strTmp(i)
+	  End Select
+	next
+
+	if Err.Count > 0 then
+		DecimalFix = strValue
+	else
+		DecimalFix = retVal
+	end if
+end function]]></Script>
+<PageSettings	LeftMargin="720"
+	RightMargin="720"
+	TopMargin="450"
+	BottomMargin="720"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: top; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="PageHeader" Name="PageHeader"
+		Visible="0"
+		Height="0"
+		BackColor="12640511"
+		CanShrink="1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="5805"
+		DataField="Fakturanr"
+		RepeatStyle="4"
+		NewPage="1"
+		KeepTogether="-1"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape2"
+		Left="0"
+		Top="3800"
+		Width="5102"
+		Height="1134"
+		BackStyle="1"
+		BackColor="14669016"
+		LineStyle="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape1"
+		Left="0"
+		Top="5435"
+		Width="10205"
+		Height="375"
+		BackStyle="1"
+		BackColor="5122359"
+		LineStyle="0"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftnavn"
+		DataField="*y..bedrift.navn"
+		Left="3975"
+		Top="0"
+		Width="6225"
+		Height="285"
+		Text="*y..bedrift.navn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 12pt; white-space: nowrap; font-weight: bold; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftadresse"
+		DataField="*y..bedrift.adresse"
+		Left="3969"
+		Top="300"
+		Width="3118"
+		Height="200"
+		Text="*y..bedrift.adresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftadresse2"
+		DataField="*y..bedrift.adresse2"
+		Left="3969"
+		Top="500"
+		Width="3118"
+		Height="200"
+		Text="*y..bedrift.adresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftpostnr"
+		DataField="*y..bedrift.postnr"
+		Left="3969"
+		Top="700"
+		Width="566"
+		Height="200"
+		Text="postnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftpoststed"
+		DataField="*y..bedrift.poststed"
+		Left="4590"
+		Top="705"
+		Width="2490"
+		Height="195"
+		Text="poststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblmvanr"
+		DataField="lblmvanr"
+		Left="3969"
+		Top="900"
+		Width="1417"
+		Height="200"
+		Text="lblmvanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvanr"
+		DataField="fldmvanr"
+		Left="5386"
+		Top="900"
+		Width="1701"
+		Height="200"
+		Text="fldmvanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblBankgiro"
+		DataField="lblbankgiro"
+		Left="6478"
+		Top="2796"
+		Width="1559"
+		Height="213"
+		Text="lblbankgiro"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBankgiro"
+		DataField="gironummer"
+		Left="8037"
+		Top="2796"
+		Width="2126"
+		Height="213"
+		Text="bankgirotext"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblIban"
+		DataField="lbliban"
+		Left="6478"
+		Top="3069"
+		Width="1559"
+		Height="213"
+		Text="lbliban"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldIban"
+		DataField="ibanvalue"
+		Left="8037"
+		Top="3069"
+		Width="2126"
+		Height="213"
+		Text="fldiban"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblswift"
+		DataField="lblswift"
+		Left="6478"
+		Top="3342"
+		Width="1559"
+		Height="213"
+		Text="swifttxt"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldswift"
+		DataField="fldswift"
+		Left="8037"
+		Top="3342"
+		Width="2126"
+		Height="213"
+		Text="fldswift"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedrifttelefon"
+		DataField="*y..bedrift.telefon"
+		Left="7969"
+		Top="300"
+		Width="1275"
+		Height="200"
+		Text="*y..bedrift.telefon"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedrifttelefax"
+		DataField="*y..bedrift.telefax"
+		Left="4924"
+		Top="1370"
+		Width="1275"
+		Height="200"
+		Visible="0"
+		Text="*y..bedrift.telefax"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedriftemail"
+		DataField="*y..bedrift.mailadr"
+		Left="7965"
+		Top="495"
+		Width="1905"
+		Height="195"
+		Text="*y..bedrift.mailadr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBedrifturl"
+		DataField="*y..bedrift.url"
+		Left="7965"
+		Top="690"
+		Width="1935"
+		Height="195"
+		Text="*y..bedrift.url"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblKundenrTop"
+		DataField="lblKundenr"
+		Left="2126"
+		Top="1750"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="lblKundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundenrTop"
+		DataField="fldKundenr"
+		Left="71"
+		Top="1750"
+		Width="2020"
+		Height="283"
+		Text="fldKundenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 12pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundenavnTop"
+		DataField="fldKundenavn"
+		Left="71"
+		Top="2055"
+		Width="3295"
+		Height="213"
+		Text="fldKundenavn"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 9pt; white-space: nowrap; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldkundeadresseTop"
+		DataField="fldkundeadresse"
+		Left="71"
+		Top="2303"
+		Width="3295"
+		Height="213"
+		Text="fldKundeadresse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundeadresse2"
+		DataField="fldkundeadresse2"
+		Left="71"
+		Top="2541"
+		Width="3295"
+		Height="213"
+		Text="fldKundeadresse2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundepostnr"
+		DataField="fldkundepostnr"
+		Left="75"
+		Top="2790"
+		Width="690"
+		Height="210"
+		Text="fldKundepostnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundepoststed"
+		DataField="fldkundepoststed"
+		Left="765"
+		Top="2790"
+		Width="2595"
+		Height="210"
+		Text="fldkundepoststed"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKundeland"
+		DataField="fldkundeland"
+		Left="71"
+		Top="3037"
+		Width="3295"
+		Height="213"
+		Text="fldKundeland"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblDeresRef"
+		DataField="lblDeres_ref"
+		Left="4183"
+		Top="1440"
+		Width="1559"
+		Height="213"
+		Visible="0"
+		Text="lblDeres_ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldDeresRef"
+		DataField="deres_ref"
+		Left="5742"
+		Top="1440"
+		Width="2126"
+		Height="213"
+		Visible="0"
+		Text="deres_ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblFakturadato"
+		DataField="lblFakturadato"
+		Left="6478"
+		Top="2303"
+		Width="1559"
+		Height="213"
+		Text="lblfakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldfakturadato"
+		DataField="fakturadato"
+		Left="8037"
+		Top="2303"
+		Width="2126"
+		Height="213"
+		Text="fakturadato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblforfallsdato"
+		DataField="lblForfallsdato"
+		Left="6478"
+		Top="2549"
+		Width="1559"
+		Height="213"
+		Text="lblforfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldLeveringsdato"
+		DataField="leveringsdato"
+		Left="5562"
+		Top="1226"
+		Width="2126"
+		Height="213"
+		Visible="0"
+		Text="leveringsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblLeveringsdato"
+		DataField="lblLeveringsdato"
+		Left="4003"
+		Top="1226"
+		Width="1559"
+		Height="213"
+		Visible="0"
+		Text="lblleveringsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldForfallsdato"
+		DataField="forfallsdato"
+		Left="8037"
+		Top="2549"
+		Width="2126"
+		Height="213"
+		Text="forfallsdato"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblvaar_ref"
+		DataField="lblVar_ref"
+		Left="4183"
+		Top="1167"
+		Width="1559"
+		Height="213"
+		Visible="0"
+		Text="lblvar_ref"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldBilagsnr"
+		DataField="bilagsnr_regnskap"
+		Left="5907"
+		Top="1308"
+		Width="1680"
+		Height="213"
+		Visible="0"
+		Text="fldBilagsnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; text-align: left; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblbilagsnr"
+		DataField="lblBilagsnr"
+		Left="4348"
+		Top="1308"
+		Width="1559"
+		Height="213"
+		Visible="0"
+		Text="lblBilagsnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldVaar_ref"
+		DataField="vaar_ref"
+		Left="5742"
+		Top="1167"
+		Width="2126"
+		Height="213"
+		Visible="0"
+		Text="referanse"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; text-align: left; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblVarenr"
+		DataField="lblVarenr"
+		Left="0"
+		Top="5495"
+		Width="2126"
+		Height="255"
+		Tag="Varenr"
+		Text="lblVarenr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblVaretekst"
+		DataField="lblVaretekst"
+		Left="2126"
+		Top="5495"
+		Width="3400"
+		Height="255"
+		Tag="Varetekst"
+		Text="lblVaretekst"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblAntall"
+		DataField="lblAntall"
+		Left="5608"
+		Top="5495"
+		Width="990"
+		Height="255"
+		Tag="antall"
+		Text="lblAntall"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblPrisExMva"
+		DataField="lblPrisexmva"
+		Left="7230"
+		Top="5495"
+		Width="1050"
+		Height="255"
+		Tag="prisexmva"
+		Text="lblPrisexmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblRabatt"
+		DataField="lblRabatt"
+		Left="8305"
+		Top="5495"
+		Width="620"
+		Height="255"
+		Tag="rabatt"
+		Text="lbl%"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblMva"
+		DataField="lblMvalinje"
+		Left="8640"
+		Top="5490"
+		Width="720"
+		Height="255"
+		Visible="0"
+		Text="lblMvalinje"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumLinje"
+		DataField="lblSumLinjeexmva"
+		Left="5102"
+		Top="5495"
+		Width="1134"
+		Height="283"
+		Visible="0"
+		Tag="sum"
+		Text="lblSumLinjeexmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSideCount"
+		Left="9496"
+		Top="300"
+		Width="284"
+		Height="200"
+		Text="1"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSdeCountTot"
+		Left="9921"
+		Top="300"
+		Width="284"
+		Height="200"
+		Text="1"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="0"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lblSideSlash"
+		Left="9780"
+		Top="300"
+		Width="141"
+		Height="200"
+		Caption="/"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldLevering"
+		DataField="leveringfelt"
+		Left="3405"
+		Top="2550"
+		Width="2895"
+		Height="990"
+		Text="fldlevering"
+		OutputFormat="m/d"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lbllevering"
+		DataField="lbllevering"
+		Left="3405"
+		Top="2310"
+		Width="2850"
+		Height="210"
+		Text="lbllevering"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 9pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKommentar"
+		DataField="kommentarer"
+		Left="0"
+		Top="5170"
+		Width="10205"
+		Height="255"
+		Text="fldKommentar"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldbankgiro2"
+		DataField="gironummer"
+		Left="1770"
+		Top="4200"
+		Width="3261"
+		Height="285"
+		Text="bankgirotext"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; text-align: right; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblbankgiro2"
+		DataField="lblbankgiro"
+		Left="75"
+		Top="4200"
+		Width="1695"
+		Height="285"
+		Text="lblbankgiro2"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldkid"
+		DataField="kid"
+		Left="780"
+		Top="4477"
+		Width="4252"
+		Height="284"
+		Text="fldkid"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; text-align: right; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblkid"
+		DataField="lblKID"
+		Left="71"
+		Top="4477"
+		Width="709"
+		Height="284"
+		Text="lblKID"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblfakturanr"
+		DataField="lblfakturanr"
+		Left="6480"
+		Top="1755"
+		Width="1365"
+		Height="420"
+		Text="lblfakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 18pt; background-color: rgb(255,255,255); white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldfakturanr"
+		DataField="fakturanr"
+		Left="8010"
+		Top="1755"
+		Width="2145"
+		Height="420"
+		Text="fakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 18pt; text-align: left; background-color: rgb(255,255,255); white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldbetalsum"
+		DataField="tot"
+		Left="1871"
+		Top="3910"
+		Width="3161"
+		Height="284"
+		Text="tot"
+		OutputFormat="#,##0.00"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; text-align: right; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblbetalsum"
+		DataField="lblbetalsum"
+		Left="71"
+		Top="3910"
+		Width="1800"
+		Height="284"
+		Text="lblbetalsum"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="imgLogo"
+		Left="71"
+		Top="0"
+		Width="3543"
+		Height="1559"
+		SizeMode="2"
+		PictureAlignment="0"
+		>
+		<Data><![CDATA[010000006C740000D81600004749463839612C018D0077000021F90401000000002C000000002C018D0087FF00FF1000291606311C0C3620113A21104224153D
+			2718402C1D442A2B4E30224834274C36284D392A513D2D573C2F5342214A42284E3F315541335844375A4A214A473B5D493C5F4D406154254E50446452426B53
+			476655496858244E584D6C5B4F6E5D517062234E605472625875665B786D214E685D796C617D6E648073184A751F4E706681736A84736B8C7A1E4E786E87796F
+			897B728A851C4E80768E847C938C7B948981978D859A90899D928A9F958DA19891A49C104A9E174D9B94A79E97AAA099ABA5104AA6164DA39CADA59CB5A8A2B2
+			AE144DACA6B6AFAAB8B0ABBAB7134DB4AEBDB8B3C0B9B5C2BE114DBBB6C3C0BBC7CA0F4DC4C0CBC7C3CECE0F4DCBC8D1CDC9D3D0CCD5D40D4CD4D1D9D6CEDED7
+			D4DCDE084ADBD9DFDDDBE1E0DEE3E5084CE3E1E6E6E4E9EAE8ECEF004AF1064CECEAEEEFEEF0F2F1F4F6054CF4F3F5F8F7F8FBFBFCFF004AFF00FFFCFBFCFEFE
+			FE000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			0000000000000000000000000000000000000000000000000000000000000000000000000000000000000008FE0001081C48B0A0C18308132A1CC8660C962641
+			6EB420C1C1C283060C1A3CB0C081448B1B449A6019C366A1C9932853AA5CC9B2A5CB973063CA9CC9860B921A242C34D8C99327839F3F7B0AB540A206122E2567
+			2A5DCAB4A9D3A750A38241020383508C40B36ADD1A5428861848C0441D4BB6ACD9B3680972F9314228D7B770B90A1DF1834BDABB78F3EA4D3B8608899E71030B
+			DEDA938411327B132B5ECC58E1151A137C0E9E4CB96B830935B034DECCB93359282524571E5D99E789289E53AB5E9DB2495BACA46393DE39020AEBDBB8554779
+			2DBBB7EC9D24A6E41E4E3C2F97163B7D2BFFDDA08597E2D0A33B65B3E3E2F2EBBF1FF0482ABDBB7795543EFE24C74E7EF4CE0F54BEAB5F6F900D8EF1E5E3976E
+			80833BFBFBD1B984802FBFFF60DA76E127E0704848009B7F08FE2701130336A85A1C37F097E08471ED848383183686060A1252E8A15C0DA080468624E6F54507
+			077EA8E25B0D7C205689309685C50529AE68A3560D5CA0458C3C3E4545643706C9220557F468E44C3FD628E4920D4860C59150B66485814B564998049A45A9A5
+			495A0069E597405D16E096641604864E60A61994056294E926006870A0A49A4C7630E29B5AC671C29C743289029E5AD6C0679F4C5E08A891497448A8953B3178
+			688C5C50B9689F4D7EF168896C8837E9A20D80D0C6A51946B8E9A4F481EA20158A8EFAE54E599A7A1F1BFE1A0CAA6A950D74609FABDFE920EBACB4F280EB7A5F
+			58C72BA70FBCF86B771C0EBB6973C77687AAB2A336905EB3D081B02BB44C8E406D71505C8B2D93A86D8B5B1C9A7E4B2A08E2E2D62D790B28A0000208B8EBDB02
+			0B249000BDCA36106EBAAAB5751D02072840C1072490D0C104002B90D1BBF036AC8092F77A6082091E30702FAF0D90C0AF6A58781B57C02310A1451A71941C07
+			1A54D42041C01814EC320918289C55BD2B48118619668421C50BF80AD6800207042DF4D0441F205F033B6E3C501C6B7C9A980C1E1306340A56986CB5D564D020
+			401057C7B183D140D13B841A398761B6196A0CD1735C0A5880C3DB70C72D770B3293D7800C30A1C1C4FEDE7CF7ED77DF5040610518B7329646E088237E274158
+			C8D081051AC8302D5E64483ADB010F30D1F5E625EFF043D75F6795800F6A986DBAE96AF89080600890C039E716D47D5D938BB3D4F155B8E7CEC005280031E662
+			5CE49EF44044E0AE435EC5FF7600065FBCCEF919A0836DB107659F7EBA1922AC1E57EBCE77AD8301F13580C44B5AA4EA734F2808B79817FCEDF47BB729EEA404
+			5ED6C6D60002178CD1FDFE9D4B9FC010D5B3DED986A03DB8708F7F2503C3DA66A72D97942F6A2CDA890C6A9717F61DC87D4B2B178E3050B8B1040F823F51C002
+			B880C0FD858E01F49242000568862AA0707BAE2B611C5A20BDD935C0522D79A0DD3A8043BD58302BFE1814081852D580DF95E50720FCC9018820C3EE9D700111
+			C88200059885082C00864D9C420D67F703079ACF7EF9DBCB0FC354C481740C2ED24A4BFD4883800E740F0C4AD8010F98003DE73D91012A9CE2E9B2F04203C650
+			861D90DD721AD04096E81047B9030C1A4710071FB6AF8C42545410CD32C4241E0009AF23430B1630B4077CEE7527B4D81156683D332CE18A586C2211C067B706
+			B4C9901DA200062E40CB5AD69202A221CCF82AF8C831914B490DD04007A18284242A400268E0DC182C4000548690003500A5FF5640CAEBADA0806F5980043EC0
+			4D0DB4807F6890802095D38024E450420D98021BD6C9CE76A2010C4C48812439C8CB0B42522051FE4067031C7516E4C4E6002878DD090C50A30510A0099C0B25
+			BD9E50CD9B3D6181D974970206F0C9FDD5608BE4C41B2CE3D7AA8540C14B3852DF5DC6D8152322F12A3B480B1BD0449A03E880735A40005C0EF08184D6108A55
+			289DF5D45045670EE698C9E49F16C6E99B06D07325870CD393508205CB85C95023EDA541AC10030C4C00032D10E9593EF84F23708E08180DDB02C8B0B91F6C31
+			011118C2CD7096B32344009B83394034BBA6B9CD9120ACCC31E249921A94A5A26407350A513D8178CF82B0010DC3244B31657380BA468F6D44A08264274B0519
+			C8542BF5CAC00C7CE0831964E06295699717BA2686078861734CC0EB6FF89912BE66C4AF2721FE83B0C2F481C19251AF8B11146331B939B00686610D83D7C3B2
+			692F7BF9943200EDAD0098D8B59512F53735D8288E607B127F0191032D69431AD09086C42A84A419292C530E8B589658B7A515BD1A1744E81B89BAF7BDF2AACC
+			01A2B0B9101020049CFB9EDD3486547452D724FE04626D5132159C68C00214A0800646200322E01621E09DA440DA4961947081082DF8C00512AC81A240818214
+			6E272E192B83D7B58000BD59802C31C0E216BB98C59551801BBBB6DE7691B06B0A3C6E6F1A6001EF1EC4B50DF8EF429205C43F2D840D4A084D227902022250F0
+			201116EF0E66694B0CD0C0244D5072222DA083330CA40654AEA506C6F045B669000E9C4B03FE0908F0DCC05C32C421E6421F056300E65E0D07463B000E384743
+			ECECC4582801B29013B2D2F84115214D405199C37B01267E57AA04A98103AE6264847081435FDC09066C0380FD5CE58CBD41C0159CF7030A04ADCD5C69ECFEC0
+			3067B621B3B93163800238B8392DDA6D7281F6AF4A9A10585C17240D5083E04E4A00E88244D988A202620B12D204909ECF08008815101FC06BDF1CE09BCE4B03
+			135A60EA032040C75B398012F6F78556CF74AE578B82F40E3005CE75E0B283DC656B758D1234481B88B642C818D608C68E12E4D805497698967D90620A5B7CF7
+			0ECA039297625183730A38F80027E19DEA7177AFDCE0C6AC0246DBB53E2BB1C4BD65E520FE53AA122017E9245FD80F61386D103224FC371318DEBF213D108107
+			85E0059942998189CE07D83C3608D0C01A64B81610000DDCE226B7B9531DD0AE9DE1017503EAE6C2896ACA34E0CA2547E7C91392062CE0C0D941D1687BCE8B48
+			DCB1C802883136CD05F2736615840C230691D9C34498070478C700457313A940378C26FDE24B0F377DBB86842D1E20099CBBE8EC58D0DFF8690004DC8C7CE441
+			D0015CEA1305C3CCC19C80B303264081093F4081818059E981009C206DC7F940A006220CE0000A5AE002158CC0824C3FE02FD739C00982DAC42B8CE0003E3D80
+			13949E71A02880039CBBAB56740FD3AA4F26638D27CC9225D9801A0C93AB886C81CC07FE2286F700B3096AB727B2E3A77A00B836BC40E820176ABFF907BCDCDA
+			18A042134DC6837819BF067B4B0213D8B0398C07A6CE9BE305EC35330B0006C9A75A563760F39644383201E9A31077474644B010531077D7651FA75773E45710
+			ACD780BE6610BAC2221BC18084112F35705AF3A704F6B73041C36664D535FE071752E73D22971507905E56935A83244C5947826142023D741095441813681258
+			305B61B22F0090816CB78103114E81C5720AA15B758784CBC1490F9019F3670418754C75743531F81672B5396C8001DF462F68B8006DC439CE454E47956B3E18
+			2659F86402814484C17828C170CA3673E217704E2810EB822330801265185856881DFE40A30020C0035AC07F08E471C627015F683561B815A2B539EA065F1275
+			00F2B739FA555417E06305717ED3A74864A401FE2610649711C592127120273842016B607A6B0700A9877AF1235E0A61048698206A18301A50031FB63F64263B
+			5ED87F81A7444DD7350EC105CEF88CCF88052F485AC9F87CA1D88338F21137B08DDCD88D32F01AF12301BE068538527A27110481D52A4C688B7F0800A18123E8
+			9212B2153F87D81F4073001440035AD03D8A178993683295B87C83377FCE038960248A0401640F6626BA123F130068A00644D0A612D81726F2B68EB728106DF0
+			7ED5B712ABA8114E352189687DAF8305C62889C89871C7A77704F93A5480803EF3FE867B456F2781052C1526254010D58623A9786437191424B784B598917062
+			8141518429D18172F8931E625024E088B01675280983C908802DD93DEFB6633CB880D3A51256804E22B55884F54A2AA14141115D0281917F488E40246F284185
+			7288224142007BC63928203DC74895E0368357F93AABB4630A08875DA91230F0877AD81569A7121F899642D987B8988D4F08760D309149498FB8F71BF758340B
+			30280A3001BC7735FD286B5309868137867DE93C54F71BFCC59540346809914FB1388B00209664546C27219740C4986A099902B1064CD900C7A312EF386D1138
+			1A0AA00172033713507C2184059C8367FE989296A80037769AAF139AE68187ACFEA9542BF10590168840F4810B910646991141B99B7B3810B8192627A012E449
+			8F3F275F30C0391F507508D0895D730378399A94B874C9B5396AD6019237A092C7012CF03A43055DD1D79A2B2106198123E112916112042B21A141313F693994
+			ED587B382201896912E0298787391AD7C6670868639C2303FBF98F2513900C305F9CC30404102F9AF85E086000F8D935CA371B4129980CAA12169A119CC69661
+			52482811823C498B8EA981BC598781159C27A17238F200214AA2D8465735B815B30695574302F09697A4795CC7D9069C730230698320875A672A176E3993F1E3
+			9A08C10381B52F9709443D8910BE193F14C01DE839708C135812F01C2631A2FE0A17A4C875A557032B07302704808326439E52C9A271109056896310C5360F20
+			A971D086E6219E0A21682A8106BF893403818E8461A40B119F77C38784357E4D0A001B19581D30060BC16BC0F40064C68025CA392689514EC9A556F3925901A6
+			FDE9537C79353B90A574666734681E0D609B0B01AA2891064406449E39106370880D700327C1041D92464ADAAA7EF8AA00608784A1019ECA0627258285C65888
+			DA35568001061030EF12343000AC56839DC40A907DF42ED094661240000133283FD3823DC63962003414171846859009894E0B49106C0005661926E6A894B9E9
+			5DC5135835C5AAB735AEE9F984E5D9152D000524C1066970618A86460F00FE00756AA5DDC3064690021DB060355035AFF3742729A9FEA70048400553F0995673
+			064040044410486C4302466BB4426B355A00B414E07C1991930B1A2635B0B4588BB53B2003B1B279520800A5054C1FC00469605854806972A1558D29AE8F19B2
+			03419B65F700187060B924172D0B97306B9D56A39F5AB1AF2D8A42ED62808F88807AD644B1E63387E6A384558A7CD2298D5410A60A2217C00238C0033AC0B544
+			3488E1C7B64CEAB603519C65F7AD7507004AA0ABEF7A9A2629A6FCC9AFF4429D2574971F836EFC538652BB4FD2551E1AF1601C1A416EC1221AF0647D7A730791
+			06526A1EEBA970005091F275BA57890617B0B0A2C9B380EBBA0804BBE7FE2643B47B3E41A8B836F4B512BB8AB37101DB9BA14BDA84E4FA847F113557079BD306
+			0085F84FA78BAFE0F4018BAAA5ABFBB7AD5B9DFB63BD6228BBFB93BD0CAB018F8B8D3674016A6B10D4BA682CD201826A10C19B11E527B182722D3B115D3A37A5
+			025198F0CB8C3540A625C4051A50BFF62BBDF9FBBA84EBBF317BB8152276045C54154CAB2611070DE9AC2D4087E4CBB9E6EBB90641057B52B73DF1019C56A51A
+			211089B2C189BA0023A03FFF8B8E226CBF43C78CD32BB8FCC302847B0386EB7CB66B3B8CCBB8C819B10771053D2C2B3CF101E0A7101F7415DB570391D1130F60
+			8E08E1751F7011421139F4351042DCB260ABC05A810027008DCE7805FE14600012F003D3C88C4410C2C3F516C744057EEC8C5000B80B00055F30C9945CC996EC
+			A51F23036060C99C5CC95C103B0C8BAB2D01C22F56CAA63CB71F800235600458E0B0075159969748128002FB67126030B72FA6010D2C103BA001B9CC9827E110
+			51D004504005846310773C10E03B199AC88212D00241100557800554C0043B70020F1030CCAC89CC4928D0D7129B0A67E25C614C810653C0033040021FA0011D
+			30022DA00326AB12E23CC00211CE14E6344CC1BE723810E64A1A698886C32A34EE0230A7165AFF0CD06275D00ADDCD09BDD007FD1F48F92AF8E1AD38620103E1
+			9D71682E2AF2674AB3104C909CAFB7129A8723AB0900CBACD1DE4CFEB51D9D105F271413805D65193FC00CB7284D2AE6B4D2AF998E29F12C38C25A680076354D
+			270D4001368CD3702299F875126C70BCE105C35F96D141ED1F1D69D409A1C182E8636CB0BB4084AAE6A7C751BDD1BA48D566044C23E09A5350B14151C605B127
+			5F2DD46E2CD60401BAE145023F10055AE0055800053BE069720102F43C1017DCD66902AE707D106300D496711511B47D04C16F829D2D85AD103A47B0622C3E0A
+			A1CF8F2D24841DD907E1AD24B81314BA102F9BD92BF2CD9C9D10546015073701AC95105700D5A4EDAC777ADA034106134CC13BD102D08A10721DDB08B2AAB46D
+			125C50033A518A1420035B8712621092BE2DD512E0D4C1BD1068FE10053870021A60790FA06028F07A45BD10FDDCDCBF1DD1D14D886830066230066880CF2F91
+			29B00DDE7DFDD7E3AD17B7E3DE4713D6F19D178045DFE1D345F7CD187170D2FA3D1B25DDDF8A2106881DE0A54101D04DE08A013F08CE1C4AC8E08B81A40F6E1E
+			3D2AE18CD1DB15CE22118CE18AC106C5BBE1153202AEECE1673106EF27E238A2011F6AE28DF1054CA9E2417101BBEDE28AA105232BE243EDC536BE1738DEDE1A
+			CD638CDDE39BA105318EE046C5E3449E185E90E2FADD001C50E34BDE186300E0BE9D312D3EE5A9C106C801E4CB723725AEE58901585EEECD0DC0DF623E1C5090
+			E36D9D23119EE6B801063D9CD93B81026409E7C5B1AE6DFE00C84080E7DEA105E91BD4C336E47E4E1C71400496672E3B4101E25DE8DD210634E0D5835D7D0BEE
+			E8DF8105F254E6FDB1132C30DB96EE1D675BB7931E229EFAE9ECC177A2CE24B90DA7A67E1F5C80033422E9E1B313178003BBDCEA25A2372820C79ACEBB0FC002
+			648BEB5122064680026B2CEBCFC7130E8804952EEC504206505003E2D1BBF6C3C620208C59EEEC6E22067A8D021AC0EB5BDC1312A00128B0035070E7DA8E2B68
+			E00554A0043F50032D5002EBDC621AF00125D00235F0034C40055ED0DDE9BE170101003B]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblTlf"
+		Left="7440"
+		Top="300"
+		Width="405"
+		Height="195"
+		Text="Tlf:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblFax"
+		Left="5383"
+		Top="1250"
+		Width="284"
+		Height="200"
+		Visible="0"
+		Text="Fax:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		Left="4063"
+		Top="1170"
+		Width="1559"
+		Height="213"
+		Visible="0"
+		Text="Ref. fakturanr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldRefFaktnr"
+		Left="5622"
+		Top="1170"
+		Width="2126"
+		Height="213"
+		Visible="0"
+		Text="Ref Faktnr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblPrisinkmva"
+		DataField="lblPrisinkmva"
+		Left="8646"
+		Top="5495"
+		Width="992"
+		Height="284"
+		Visible="0"
+		Tag="prisinkmva"
+		Text="lblPrisinkmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblMomsprosent"
+		DataField="lblMomsprosent"
+		Left="8079"
+		Top="5495"
+		Width="992"
+		Height="283"
+		Visible="0"
+		Tag="momsprosent"
+		Text="lblmomsprosent"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblMvaKr"
+		DataField="lblMvaKr"
+		Left="6803"
+		Top="5495"
+		Width="992"
+		Height="283"
+		Visible="0"
+		Tag="mvakr"
+		Text="lblMvaKr"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumInkMva"
+		DataField="lblSumLinjeexmva"
+		Left="8955"
+		Top="5495"
+		Width="1134"
+		Height="284"
+		Tag="suminkmva"
+		Text="lblSumLinjeexmva"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; font-size: 10pt; white-space: nowrap; font-weight: bold; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		Left="4063"
+		Top="1400"
+		Width="1559"
+		Height="213"
+		Visible="0"
+		Text="Rekvisisjon"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field3"
+		DataField="Rekvisisjon"
+		Left="5622"
+		Top="1400"
+		Width="2126"
+		Height="213"
+		Visible="0"
+		Text="rekvisisjon"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field6"
+		Left="7440"
+		Top="480"
+		Width="435"
+		Height="195"
+		Text="Mail:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		Left="7440"
+		Top="675"
+		Width="375"
+		Height="195"
+		Text="Web:"
+		Multiline="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; white-space: nowrap; color: rgb(0,0,0); text-align: left; "
+		>
+		</Control>
+<Script>
+<![CDATA[Option Explicit
+
+Dim Valutakurs
+
+Sub OnFormat
+Dim lblOrgTxt 
+	if m_data.sfcurr( m_data.getvalue("valutasum")) <> 0 then
+		lblOrgTxt = m_data.GetCheckField("DefValValuta","Org.No")
+		rpt.Sections("GroupHeader1").Controls("Field1").text = "Ref.Invoicenumber"
+		rpt.Sections("GroupHeader1").Controls("Field2").text = "Requisition"
+	else
+		lblOrgTxt = m_data.GetCheckField("DefaultVal","Organisasjonsnr.")
+	end if
+
+	if trim(lblOrgTxt) <> "" then rpt.Sections("GroupHeader1").Controls("lblmvanr").text = lblOrgTxt	
+
+	if m_data.sfcurr(m_data.getvalue("Koblet_til_faktnr")) <> 0 then 
+		rpt.Sections("GroupHeader1").Controls("fldRefFaktnr").text = "(Ref fakturanr: " & m_data.getvalue("Koblet_til_faktnr") & ")"
+	else
+		rpt.Sections("GroupHeader1").Controls("fldRefFaktnr").text = ""
+	end if
+
+rpt.Sections("GroupHeader1").Controls("lblBankgiro").text = "Kontonr:"
+rpt.Sections("GroupHeader1").Controls("lblbankgiro2").text = "Kontonr:"
+rpt.Sections("GroupHeader1").Controls("lblIban").text = "IBAN:"
+rpt.Sections("GroupHeader1").Controls("lblswift").text = "SWIFT:"
+
+End Sub]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="360"
+		CanShrink="1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="1860"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="fldFritekstlinje"
+		DataField="fritekstlinje"
+		Left="0"
+		Top="535"
+		Width="10063"
+		Height="220"
+		Text="Varetekst"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-weight: bold; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKompLinje"
+		DataField="KompVare"
+		Left="30"
+		Top="267"
+		Width="5669"
+		Height="220"
+		Text="KompVare"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-style: italic; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldVarenr"
+		DataField="Varenr"
+		Left="0"
+		Top="0"
+		Width="2126"
+		Height="220"
+		Tag="Varenr"
+		Text="Varenr"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldVaretekst"
+		DataField="Varetekst"
+		Left="2126"
+		Top="0"
+		Width="3400"
+		Height="220"
+		Tag="Varetekst"
+		Text="Varetekst"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvalinje"
+		DataField="mvafelt"
+		Left="8070"
+		Top="0"
+		Width="880"
+		Height="220"
+		Text="mvafelt"
+		OutputFormat="0.00%"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 10pt; text-align: center; vertical-align: middle; white-space: nowrap; color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldPrisExMva"
+		DataField="PrisExMva"
+		Left="7230"
+		Top="0"
+		Width="1050"
+		Height="220"
+		Tag="prisexmva"
+		Text="PrisExMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldEnhet"
+		DataField="Enhet"
+		Left="6600"
+		Top="0"
+		Width="567"
+		Height="220"
+		Text="Enhet"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; text-align: left; vertical-align: middle; white-space: nowrap; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldRabatt"
+		DataField="rabfelt"
+		Left="8305"
+		Top="0"
+		Width="620"
+		Height="220"
+		Tag="rabatt"
+		Text="rab"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumExMva"
+		DataField="SumExMva"
+		Left="8950"
+		Top="0"
+		Width="1180"
+		Height="220"
+		Tag="sum"
+		Text="SumExMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldAntall"
+		DataField="Antallfelt"
+		Left="5608"
+		Top="0"
+		Width="992"
+		Height="220"
+		Tag="antall"
+		Text="Antallfelt"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldPrisInkMva"
+		DataField="PrisInkMva"
+		Left="7230"
+		Top="735"
+		Width="1050"
+		Height="220"
+		Visible="0"
+		Tag="prisinkmva"
+		Text="PrisInkMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumInkMva"
+		DataField="SumInkMva"
+		Left="8950"
+		Top="735"
+		Width="1180"
+		Height="220"
+		Visible="0"
+		Tag="suminkmva"
+		Text="SumInkMva"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvaPsnt"
+		DataField="Momsprosent"
+		Left="7228"
+		Top="1134"
+		Width="992"
+		Height="220"
+		Visible="0"
+		Tag="momsprosent"
+		Text="Mva%"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldMvaKr"
+		DataField="mvabelop"
+		Left="7228"
+		Top="1417"
+		Width="992"
+		Height="220"
+		Visible="0"
+		Tag="mvakr"
+		Text="MvaKr"
+		OutputFormat="0.00"
+		Multiline="0"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; text-align: right; vertical-align: middle; white-space: nowrap; font-family: &apos;Verdana&apos;; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+	
+
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="3285"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="fldFritekst"
+		DataField="FritekstFelt"
+		Left="0"
+		Top="165"
+		Width="10095"
+		Height="300"
+		Text="FritekstFelt"
+		CanShrink="-1"
+		ClassName="Normal"
+		Style="font-style: italic; font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumNetto"
+		DataField="NettosumFelt"
+		Left="8670"
+		Top="645"
+		Width="1455"
+		Height="225"
+		Text="NettosumFelt"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; font-family: &apos;Segoe UI Semibold&apos;; white-space: nowrap; background-color: rgb(216,212,223); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldTotalsum"
+		DataField="TotalSumFelt"
+		Left="8646"
+		Top="1861"
+		Width="1417"
+		Height="283"
+		Text="TotalSumFelt"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; background-color: rgb(55,41,78); color: rgb(255,255,255); font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumMellomMva"
+		DataField="LavMva"
+		Left="5565"
+		Top="1155"
+		Width="3105"
+		Height="225"
+		Text="LavMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumHoyMva"
+		DataField="HoyMva"
+		Left="5565"
+		Top="1380"
+		Width="3120"
+		Height="225"
+		Text="HoyMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumMellomMva"
+		DataField="MomsLavFelt"
+		Left="8670"
+		Top="1155"
+		Width="1455"
+		Height="225"
+		Text="MomsLavFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumHoyMva"
+		DataField="MomsHoyFelt"
+		Left="8670"
+		Top="1380"
+		Width="1455"
+		Height="225"
+		Text="MomsHoyFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblInnbetsum"
+		DataField="InnbetKredTxt"
+		Left="5528"
+		Top="2144"
+		Width="3118"
+		Height="284"
+		Text="InnbetKredTxt"
+		ClassName="Normal"
+		Style="color: rgb(255,0,0); font-family: &apos;Segoe UI&apos;; font-size: 7pt; background-color: rgb(205,219,232); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldInnbetsum"
+		DataField="InnbetKred"
+		Left="8646"
+		Top="2144"
+		Width="1417"
+		Height="284"
+		Text="InnbetKred"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; color: rgb(255,0,0); white-space: nowrap; font-family: &apos;Segoe UI&apos;; font-size: 7pt; background-color: rgb(205,219,232); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldKamptext"
+		DataField="KampText"
+		Left="30"
+		Top="1425"
+		Width="5250"
+		Height="975"
+		Text="KampText"
+		CanGrow="0"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumLavMva"
+		DataField="personmvatekst"
+		Left="5565"
+		Top="930"
+		Width="3120"
+		Height="225"
+		Text="LavMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldSumLavMva"
+		DataField="personmva"
+		Left="8670"
+		Top="930"
+		Width="1455"
+		Height="225"
+		Text="MomsLavFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblTotalsum"
+		DataField="lbltotalsum"
+		Left="5528"
+		Top="1861"
+		Width="3118"
+		Height="283"
+		Text="lbltotalsum"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; background-color: rgb(55,41,78); color: rgb(255,255,255); font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblSumNetto"
+		DataField="lblSumNetto"
+		Left="5565"
+		Top="645"
+		Width="3120"
+		Height="225"
+		Text="lblSumNetto"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-size: 8.5pt; font-family: &apos;Segoe UI Semibold&apos;; white-space: nowrap; background-color: rgb(216,212,223); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblNokLav"
+		DataField="NokLavText"
+		Left="5528"
+		Top="2711"
+		Width="3118"
+		Height="142"
+		Text="lblNokLav"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblNokMellom"
+		DataField="NokMellomText"
+		Left="5528"
+		Top="2853"
+		Width="3118"
+		Height="283"
+		Text="lblNokMellom"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblNokHoy"
+		DataField="NokHoyText"
+		Left="5528"
+		Top="3136"
+		Width="3118"
+		Height="142"
+		Text="lblNokHoy"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldNokLav"
+		DataField="NokLavSum"
+		Left="8646"
+		Top="2711"
+		Width="1417"
+		Height="142"
+		Text="fldNokLav"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldNokMellom"
+		DataField="NokMellomSum"
+		Left="8646"
+		Top="2853"
+		Width="1417"
+		Height="283"
+		Text="fldNokMellom"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldNokHoy"
+		DataField="NokHoySum"
+		Left="8646"
+		Top="3136"
+		Width="1417"
+		Height="142"
+		Text="fldNokHoy"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; vertical-align: middle; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="fldbetalsum2"
+		DataField="tot"
+		Left="8646"
+		Top="2428"
+		Width="1417"
+		Height="141"
+		Text="tot"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; background-color: rgb(55,41,78); color: rgb(255,255,255); font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="lblbetalsum2"
+		DataField="lblbetalsum"
+		Left="5528"
+		Top="2428"
+		Width="3118"
+		Height="141"
+		Text="lblbetalsum"
+		OutputFormat="#,##0.00"
+		BackStyle="1"
+		Multiline="0"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Segoe UI&apos;; ddo-char-set: 0; font-size: 8.5pt; white-space: nowrap; background-color: rgb(55,41,78); color: rgb(255,255,255); font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="mvalabel4"
+		Left="5565"
+		Top="1605"
+		Width="3118"
+		Height="225"
+		Text="HoyMva"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="mvasum4"
+		Left="8670"
+		Top="1605"
+		Width="1455"
+		Height="225"
+		Text="MomsHoyFelt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 8.5pt; white-space: nowrap; font-family: &apos;Segoe UI&apos;; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		PrintAtBottom="1"
+		Height="1110"
+		KeepTogether="-1"
+		CanGrow="0"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="fldAvtalegiroVarsel"
+		DataField="fldAvtalegiroVarsel"
+		Left="142"
+		Top="142"
+		Width="9921"
+		Height="708"
+		Text="fldAvtalegiroVarsel"
+		CanShrink="-1"
+		ClassName="Normal"
+		Style="font-family: &apos;Segoe UI&apos;; font-weight: bold; font-size: 34pt; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+		CanShrink="1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
