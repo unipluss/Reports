@@ -1,0 +1,1322 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{82ACED99-D5B1-4B3E-97CF-EDC1FC2321F3}" GUIDREP="{F3991A63-11B3-43E6-B866-E7B00CF51974}" 
+	LICENSE="10000000"
+	PrintWidth="9780"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[dim kategori 
+'<summary>
+'  Returns a hidden parameter which contains additional information
+'</summary>
+function p_CheckMultiInput()
+
+	'Create c_text object
+	set ct = CreateObject("c_text.c_text.1")
+
+	'Get the macrochunk
+	ct.textdata = m_data.MacroChunk
+
+
+	'More than one param?
+	if ct.rows>1 then
+		'Is this special information for multiprints?
+		set tt = createobject("c_text.c_text.1")
+		tt.textdatacolumndivider = asc("|")
+		tt.textdata = ct.textarray(5,ct.rows)
+		if tt.cols=2 then
+			'Yes, it contains a PIPE, lets return the second parameter
+			kategori=3
+			p_CheckMultiInput= tt.textarray(2,1)
+		end if
+	end if
+	
+end function
+
+sub onDatainitialize
+  	dim sql
+	dim JobbNr
+	
+	kategori=2
+	valgteEiere=p_CheckMultiInput()
+	 
+	m_data.AddInputMacro "{JobbNr}", "Jobnr:","" ,""
+	m_data.AddInputMacro "{JobbNr2}", "","" ,""
+
+	if not m_data.ShowInputDialog("") then exit sub
+	
+	JobbNr = m_data.getmacrovalue("{JobbNr}")
+	
+	sql = sql & " select "
+	sql = sql & " /**/ isnull('0'+bo.Objekt_adresse, '999999') as sortParameter, "
+	sql = sql & " /**/ huav.EierNr,huav.InnbetalingDennePerioden, huav.Id,huav.Aar aar,huav.Jobnr,(huav.husleie *-1) as leiepris,"
+	sql = sql & " /**/ (select isnull(sum(nettoUtbetalt),0) from e..t_husleieAvregning where UtbetaltAar = (select max(UtbetaltAar) from e..t_husleieAvregning where Jobnr = " & JobbNr &") and UtbetaltMnd = (select max(UtbetaltMnd) from e..t_husleieAvregning where Jobnr = " & JobbNr &") and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID) as nettoUtbetalt,"
+	sql = sql & " /**/ (select sum(provisjon) from e..t_husleieAvregning where UtbetaltAar = huav.UtbetaltAar and UtbetaltMnd = huav.UtbetaltMnd and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID) as provisjon,"
+	sql = sql & " /**/ (select isnull((sum(husleie) * -1),0) from e..t_husleieAvregning where UtbetaltAar = huav.UtbetaltAar and UtbetaltMnd =  huav.UtbetaltMnd  and EierNr = huAv.EierNr and huav.KontraktsID = KontraktsID) as husleie,"
+	sql = sql & " /**/ (select isnull((sum(isnull(husleie,0)) * -1),0) from e..t_husleieAvregning where UtbetaltAar = (select max(UtbetaltAar) from e..t_husleieAvregning where Jobnr = " & JobbNr &") and UtbetaltMnd = (select max(UtbetaltMnd) from e..t_husleieAvregning where Jobnr = " & JobbNr &") and EierNr = huAv.EierNr ) as totalHusleie," 	
+	sql = sql & " /**/ (select isnull(sum(isnull(provisjon,0))* -1,0) from e..t_husleieAvregning where UtbetaltAar = (select max(UtbetaltAar) from e..t_husleieAvregning where Jobnr = " & JobbNr &") and UtbetaltMnd = (select max(UtbetaltMnd) from e..t_husleieAvregning where Jobnr = " & JobbNr &") and EierNr = huAv.EierNr ) as SumForvHonorar ,"
+	sql = sql & " /**/ (select isnull(sum (isnull(EkstraKostnadPris,0)),0) from e..t_logHusleieAvregningEkstraKostnader where EierId = huAv.EierNr and JobNr = " & JobbNr &" and (EkstraKostnadPris < 0 and isnull(EkstraKostnadTypeId,1) = 1)) as SumAndreTrekkKostnader,"
+	sql = sql & " /**/ (select isnull(sum (isnull(EkstraKostnadPris,0)),0) from e..t_logHusleieAvregningEkstraKostnader where EierId = huAv.EierNr and JobNr = " & JobbNr &" and (EkstraKostnadPris > 0 or isnull(EkstraKostnadTypeId,0) = 4)) as sumAndreInntekter,"
+	sql = sql & " /**/ (select case when huav.HusleieBetalt=1 then 'Ja' "
+	sql = sql & " 		else 'Nei' end ) forskutteringDenneMd,"
+	sql = sql & " /**/ huav.depositum, huav.husleie,huav.StatusTekst,"
+	sql = sql & " /**/ maa.navn as maanedeNavn, (maa.navn + ' ' + convert(varchar,huAv.Aar)) mdAar,"
+	sql = sql & "/**/  eina.Name as eierNavn, eiad.Address as eierAdresse, eiAd.Address2 as eierAdresse2, eiAd.City as eierPostSted, eiad.Postal_code as eierPostNr,"
+	sql = sql & " /**/ (select top 1 phone from c..c_Phone where NameLink = eier.NameID and ABS(standard) = 1 and phonetype = 150101) as eierTlf,"
+	sql = sql & " /**/ (select top 1 phone from c..c_Phone where NameLink = eier.NameID and ABS(standard) = 1 and phonetype = 150102) as eierMobil,"
+	sql = sql & " /**/ (select top 1 mailadr from c..c_email where namelink= eier.NameID and ABS(standard) = 1) as eierEpost,"
+	sql = sql & " /**/ eier.bankgiro as eierKontoNr,"
+	sql = sql & " /**/ fa.Id as forvaltningsavtaleId,fa.forvaltningsHonorarProsent,"
+	sql = sql & " /**/ isnull(bo.Objekt_adresse,'Ukjent bolig') as Objekt_adresse, bo.Objekt_postnummer,bo.Objekt_poststed,bo.Rom_nummer,"
+	sql = sql & " /**/ isNull(leiNavn.Name,'Ingen leietaker') as leietakerNavn, "
+	sql = sql & " /**/ kd.Kontrakt_fra, kd.Kontrakt_til,kd.Kontrakts_ID,kd.FormidlingsNr, "
+	sql = sql & " /**/ case when UtbetaltMnd = 2 and utb.UtbetalingsDato=30 then '28' else utb.UtbetalingsDato end as Utbetalingsdato, "
+	sql = sql & " /**/ st.Status as kontrakt_status, "
+	sql = sql & " /**/ isnull(ekstra.EkstraKostnad,'')EkstraKostnad, ekstra.EkstraKostnadPris, ekstra.EkstraKostnadType,"	
+	sql= sql &  " /**/(Select count(*) from e..t_logHusleieAvregningEkstraKostnader where e..t_logHusleieAvregningEkstraKostnader.JobNr = huav.Jobnr and "
+	sql= sql &  "  e..t_logHusleieAvregningEkstraKostnader.KontraktsID =huAv.KontraktsID and huav.EierNr=e..t_logHusleieAvregningEkstraKostnader.eierid) as antallkost,"
+	sql = sql & " /**/ STUFF("
+	sql = sql & " 	(select ',' + navn as [text()]"
+	sql = sql & " 	from utool..maaneder "
+	sql = sql & " 	where id in "
+	sql = sql & " 	(select Mnd from e..t_husleieAvregning "
+	sql = sql & " 		where KontraktsID = huAv.KontraktsID" 
+	sql = sql & " 		and utbetaltaar = (select max(UtbetaltAar) from e..t_husleieAvregning where Jobnr = " & JobbNr &")  "
+	sql = sql & " 		and UtbetaltMnd= (select max(UtbetaltMnd) from e..t_husleieAvregning where Jobnr = " & JobbNr &") )"
+	sql = sql & " 	order by id"
+	sql = sql & " 	for xml PATH('')), 1,1,'') as avregneteManeder"
+	sql = sql & " /**/ from e..t_husleieAvregning huAv"
+	sql = sql & " /**/ inner join utool..maaneder maa on huAv.Mnd= maa.id"
+	sql = sql & " /**/ left join e..t_kunde eier on huAv.EierNr = eier.Kundenummer"
+	sql = sql & " /**/ left join c..c_Name eiNa on eier.NameID = eiNa.ID"
+	sql = sql & " /**/ left join c..c_Address eiAd on eiad.NameLink = eier.NameID and eiad.id=(Select top 1 id from c..c_Address eiAd2 where eiAd2.NameLink= eier.NameID and abs(isnull(eiAd2.mail,0))=1 )"
+	sql = sql & " /**/ left join e..t_kontraktsdata kd on huAv.KontraktsID = kd.Kontrakts_ID"
+	sql = sql & " /**/ left join e..t_forvaltningsAvtale fa on kd.ForvaltningsavtaleId = fa.Id"
+	sql = sql & " /**/ left join e..t_boligobjekt bo on kd.Objekt = bo.Objekt_id"
+	sql = sql & " /**/ left join e..t_kunde leietaker on leietaker.Kundenummer = kd.Kundenummer"
+	sql = sql & " /**/ left join c..c_Name leiNavn on leiNavn.ID = leietaker.NameID"
+	sql = sql & " /**/ left join e..t_utbetalingsdato utb  on utb.ID = huav.UtbetalingsTidspunkt"
+	sql = sql & " /**/ left join e..t_status st on st.Status_id = huav.kontraktsstatus_id"
+	sql = sql & " /**/ left join e..t_logHusleieAvregningEkstraKostnader ekstra on ekstra.JobNr = huav.Jobnr and ekstra.KontraktsID =huAv.KontraktsID and huav.EierNr=ekstra.eierid and (ekstra.HusleieManed = huav.mnd or isnull(ekstra.HusleieManed,0) =0)"
+	sql = sql & " /**/ where huav.Jobnr =" & JobbNr 	
+	sql = sql & " /**/ and ISNULL(huAv.status,0)>0"	
+
+	if kategori = 3 then
+		sql = sql & " /**/ and huav.EierNr = " & valgteEiere
+	end if
+	sql = sql & " /**/ order by huav.EierNr, sortParameter, bo.Rom_nummer, kd.Kontrakts_ID desc, ekstra.EkstraKostnadPris desc, huav.mnd desc"
+  
+	m_data.SqlString = sql 
+	m_data.setupfields rpt
+	
+  end sub
+
+Sub OnReportStart
+End Sub
+
+Sub OnFetchData(eof)
+	
+End Sub
+
+Function sflong(v)
+    Dim rv
+    On Error Resume Next
+    rv = Clng(v)
+    If Err Then rv = 0
+    sflong = rv
+End Function
+]]></Script>
+<PageSettings	LeftMargin="1080"
+	RightMargin="1080"
+	TopMargin="200"
+	BottomMargin="200"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="855"
+		CanGrow="0"
+	>
+		<Control 
+		Type="AR.Image"
+		Name="Image1"
+		Left="0"
+		Top="0"
+		Width="9780"
+		Height="850"
+		SizeMode="2"
+		PictureAlignment="1"
+		>
+		<Data><![CDATA[010000006C740000B71000004749463839611F02CA00F70000000000455560EF3E35000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+			0000000000000000000000000000000000000000000000000021F904010000FF002C000000001F02CA000008FF00FF091C48B0A0C18308132A5CC8B0A1C38710
+			234A9C48B1A2C58B182506D8C8B1A3C78F20438ACC48B2A4C9932853AA5CC9B2A5CB973063261449B3A6CD9B2365EADCC9B3A7CF9F40830A2589B3A8D1A34687
+			2A5DCAB4A9D3A75053229D4AB56ACDA858B36ADDCAB56B45AB60C38AFDE8B5ACD9B368D3AE1CCBB6AD5BB570E3CA9DCBD56D470178F3EADDCBB7AF5F0176A7D2
+			1D4CB8B061946EFF2A5ECC5871E0A287234B9E1C996DE3CB9833F37D6C93B2E7CFA0A38AD54CBAB469C09C43865ECDBA75CBB0A763CB2E9D9AACEBDBB8732F04
+			3BDBAFC3DEB16B7BD44DBC7868DEB35D02BF2C9CA3F1E7D0E322373D74F9DFE61BA36BDF2EBAEA69ADD6F76249E74EBE7C4FEFA5D386CF3BDEBCFBF725D16B2E
+			BC1E756DF8F8F33BA49ADEF3FAE6FA0518E054FDB5161E800226C81D81F33D679D700A46481C52A499B71C821266E8198599E9772184E41A864818879765F861
+			6A22A69816898DA9F80F7020BA282354477538E34030DE77E38E40D588198F06E5C8199044C2E4638B4526D49B8E493699D1918C39C9D092284A69254446FD78
+			6543B3C5B8E59703658924980F75C924994E8A19259A139939249B4442F9179C17B9F9189D33AAA9189E24C9E6259F0AEA3927A026F95925A103E23426A22719
+			FA26A3E615B528A429057728A5D149BA26A62C397A27A7132ABA29A8CA9D7626A9AB89BA18AA3B59FA28AB9369BA27AC3D997A29AD23DE342AAE3CB9FA29AFD2
+			A93A28B040D9FA2AB16509EB1BB2D5191B18B35DC9BA2CB44B39FBCF2CB534EABA2AB64D596B17B74C29CB17B85179FB16B93E893B2EBAE59A762ABB2EA9AB17
+			BC5BB97B2BBD52D9B42BBEEDD2762CBF4F6A3B2CC05CD9FB2FC11A093C2DC25D19FC2BC358EA3B2BC46699CB16C5FB493C30C615FBFB30C70429DC17C87139FC
+			2DC90289BC2ECA70997C32C62ACFCBF2601E7F0CB0C60BCF4C97CB6D218CF3C83A1FC6F3C5F4C69C57D0FE91762FB546E385346835BFCC744DDB3E0DB5D207E3
+			FAF35E56BB16F5B9C06E2D73D75E639D35A6621F4DB66E66DB4C29D513AFCDB666EF129AB6D37243D7F6B5BB88DE2D40DEDBED2D359D7E034EDED73D130E77CE
+			866B8738D16416DEB87B8F8F05E6E2404F8E9FE0894B89F9CA9AE747F7D23B7ECE75E8098E7EB68AA68F8D7AEA99D59D62EB6ABF2EA1EA6E6B483BDEB66B88FB
+			E0BAD3B471EFBEC7BEBA7EBB133FE3EF60072A3CE3CAA7C87CE7898A347CF42E4E0F397EC9634FA4F696C3D7BDF745822F967BE3939FA4F96191F73CF4EA7F8F
+			99ECB9BD9F79FC561A7F7CAAD65F8FBF93FAE35BFDFA07BFFF492980C0E35F48E266403221B079B90AFC08031BE8C00752EF3304BC1F05E164C10B4AC67EA7DB
+			20A03AB8BDC380D075221CE1FCF6A79613D62E858C22E1F90AE342DEC190522B6461B43218C21B722A87026C210F51E8C3229E67882F34A2127782441B2EF189
+			465A6001A148C59334F16F55CCE25AA4A8412D7A316020F1DF17C798B0304E918C686CC815D3C8C6324AF08C6D8C6398B8083A39DAD1206BBCA31E0B92C73DFA
+			F11F74ECE11FD5A81A2B764429C33149222365C62E0E92213951E42187B248A24CFFD27D814CA21D233993424AD23994BCA42541B99D3EEE919308412518B313
+			4A528E9295DAC9A426F5A84A3C7A323EA2EC512E315249E3C8D2897FAC251F6FF9CA0020729717E9A56E7E89C547CE11249024E62A8DD94A5816D3978DACA333
+			01294D5B42D390AE3421325BF3CB6D1E449821EB6632C7391865B2A69CE63CA73AD3F9CD4F5A539CE18CE05DE0F848743ED336F6A4E607D919AB6C0A329EC3AC
+			6727157ACD82E67343069D2542E909D08556B4A1037DE82A9B024F9F31942613B90A212F5A49AA24B4A2207D482F531ACD705E949B1AF5E647097A5285BEB4A6
+			375DE71BB579B37AE244A53FDD8D4F512A188A2632A82D8525522D2A5069BA13A7FF9E7CAA51AFC2D0A9FA3322116D26CCA07994A44286A9A0BCA549AD9A9DA4
+			7815A64B9567589D4AD3AE4A3565ED536B5A436AD0999510AA73FDE721393956BD5AC5AB454DE55E55F9D6B80AD6B06415295D77AA5596DDD5AF5D95EB52FB0A
+			D7F0815599F3CC2B5A052AD35D2AB6B3F7842C67413BDACAD2F4B055B5EB63678857966EF6ABA2A5AC64A59ADAD7BE75B3A88DA96D436B5ADDD6D6B6978D584E
+			83E6C1DD46B6B57C0D6C6FC122D4E14276B6BAD56B6E4B4B5AEABE16B0D3C5EE484FAB33A47E76B900ED0C72C5AA5CE32E52BCD3B52E68A1ABDE9ACE3663EE74
+			EE54DFAB5D85DCD66AE84DEC685D1BDBD22225BDBC1D2F75F98B53E1F2F6B79D9549AC810FCC5DE91618BE017EA6ED08DC5FFD5ED6A59A8D2D60D949610703D5
+			B3F235EA7A17ACE00F87F6BEF335A03F5DDB61F30AB8BD1A6EAE7C57DC60113F18C2FEADB1876D8CE30493FF58C5F304AF35AF8ACAEFDA37C84286318DA35BE2
+			14F7D8BD5845268A776C5A37C2987844262F828D8BDC059F36CB089EB2937B1B650CEB98CC3E7E3295B77BE5DE8139BC6F26EA96AB7BE5381354CC3C46B389F7
+			7B663DE7F9AC7F667303ED4CCA162799B357A5F386239CE42333B9C97E1674A0250D65351FBABCE423B45291DCE818EFF9CB485E32A3995A694BE3D6CA900674
+			7F31ED3D4D3795D35CF6348E41BD6551B739CD915675AE293D66479BD9B2F173B5AC2F8C68582776D14A0E329EA9BCEC95F6F9D423F6F5898B8B3D61775AC625
+			35F6B0D99BEC303FDBD98FFEF3B2770DDCE0BED8ACF8B376ACB12DCA44B716D9ECF6EDB773D96C7ACF3BA6FF6CBDE9B861A86E772777CEEF8EF7A86DBDD87BD6
+			FBD7B72E359D8D4CEE2AF6DBD5C506F8B105DE6DE7EE1BDCA3C635B47F0C6086379C8A0F0FF5BF431C7069B755D9F736F899319EF0499BD7D0FB4EA1BAD7DDF1
+			92CF9AC933D7B8A90FAEF23E3FF5B82647E3CC73EEEE899B3CBA042FF3B4C3BDE671C7F7D9F41DE3D0D1C9DFA26F5BD14767B4D341CCF45C6FFDA1314F75C628
+			38F5CC1659DBD72636C5A58D6A85EB7AB94ACF71D7EB0BE1418B7CA6DD24B0D50FBDF6ACB797E47ED539B6A3CD66B9439DF074571FD13B7313AC7FFAA83D9F31
+			CAA7ACEF954B99F22F057AE16F0EE45AE7FBAF8EBFF9D93DEFED10A796E70336FDE9419FDECD775EF2556546ADD11F4FCC9C77B9F5621F3C74FDCE6D7493F6E8
+			64BF7BE5AB52F3B8575DF885FDAE30517F610113DBF764ADEE066D7FE916EFBDFA083F79E98D295B9793BAE3D05F75F85FEEFFF14C239FC3FF55BB95470F7B8B
+			AF75FC6BD63DF80B7979F79B1DFEC13E3FD2337CF5C2E3BDFDC9B7698D277FA6D67BE7954F12B75BCF0778D1437D0B776BD7A75F91775BA2365E0548807E1779
+			829778063851CA137661E7810D7878212882584682876782273877DEA78276977219E782F9877A3128838A0770686783D5C678FCA783FFF3583E2842CC15843C
+			552C07D53147D83049988199A48345F8134F582FFCD42F2F1485B26685E68485ADB28452E8484AE83A5AC8255C184F61281365F81462D48555388665C286DB74
+			863001874C31415E013A728810771884319187CD42446861876EA8873B13886848885901887E28887898886D28514AC2883848A2364F68882F324B9058891215
+			859458897DC28888E88841028A107189986843A2D83813A44DA9C835FE5322054187AE783D13332AAB382FB678509FD845EBB226AC9833B9588A49FFE88AC4B3
+			2B75448C5A4210361289B5281BAFB82D9B628C73A28A213429BBE88CC7088C5A958CCAB82FA1238CD8888C8BD220DB488BD4081CE3188DD6488EE84844D5188E
+			A7C38BD7988B552310DAF83AC7288FC3228ED85835DAB81CE7E81B51928CE9E844EDE88E32038FDE888FB3588FDDB8320E398D0F393683828FF4983940733F00
+			B92C1629916028481719911AD94320C93BF25891B3129210D99105593B23094C0D894229C9921EF98E256992301993A6D892E0289238D98CCD78932A299318C9
+			9337198A6B1894C0548C38998D35F98DE7A83CB848931CA9492BD958C0F8943F29894A39950439935CE9923B7994542995512994A768934C899456FF59966699
+			9340D99659099693D3202D399049F9956B499677F99571D9587509964D89958E54958FB83081899646D9966999443A8995B653214EB98F27C996CD248D074999
+			95F9965D89979819967BA995894898896998443996A6A9989EE9974BF98FC348974B699779899A7D8996B10997A9399BFF589A6E799A78338997C99B03739857
+			899B91599C91798DF6E89A9C3999EC8897A3894596699B8E499B7DD998D4899BBEC940F1A89BB5D99D99A996C429997CA833613892BF4199D3799DD149929AA9
+			9A7EB890E0899D4BA88E3D399DEBF99CF6E9958C398FBD1388E62986CD299BB7699CC7D99EE1F99CDF29969FD99B5CA89DFAB998BBB9A0F8799D14FF5AA1DC98
+			9CEC38A104EA9DA3999E4EB99E09EA9EFB0993132A9CA2B988BE18A0110AA1DDA9A187F997673997FA39A0C6199F9EC99A344A918849A316BA99A0A9A02BEAA1
+			A9A999E169A22ACA9E364AA19BA8391BA997218AA4BFC99B434A9B50FAA30A7AA055F9A415BA8F542AA443CAA192C9A31AD4993D6AA054BAA46B63230A899252
+			9A9BF9B89D231AA70C3A265B49A763C838FDC89D510AA6C559A755CA9F18FA8C7A3A2DF7F9A5A4098D3E9AA84F4AA89879A8A288A7700AA47BEAA2DC499CFAF8
+			98F4A9A84379A4D5B931FBF2A022BAA2C2299E726A951A6AA89B5AAA564AA949DAA7C889A99EDAA8667AA308AA8BB238AB5BEAA0A1393C585884EB2F28A0670A
+			9D47AAA5E909A353888AA4B810687A9E727910E35911CFFAAC1411A353B2AC9542A68AB844C198ACD96A401520DAADDA7AA9E00A43E23AAEE4FAAAE67AAE5513
+			10003B]]>
+		</Data>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="1695"
+		DataField="eierNr"
+		GroupKeepTogether="2"
+		BackStyle="1"
+		BackColor="12632256"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field7"
+		DataField="eierNr"
+		Left="0"
+		Top="142"
+		Width="1276"
+		Height="425"
+		Text="eierNr"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-weight: bold; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field8"
+		DataField="eierNavn"
+		Left="1276"
+		Top="142"
+		Width="6803"
+		Height="425"
+		Text="eierNavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-weight: bold; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		Left="0"
+		Top="567"
+		Width="2693"
+		Height="283"
+		Text="Adresse:"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="eierAdresse"
+		Left="0"
+		Top="850"
+		Width="4394"
+		Height="284"
+		Text="eierAdresse"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="eierAdresse2"
+		Left="0"
+		Top="1134"
+		Width="4394"
+		Height="283"
+		Text="eierAdresse2"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="eierPostSted"
+		Left="709"
+		Top="1417"
+		Width="1842"
+		Height="284"
+		Text="eierPostSted"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="eierPostNr"
+		Left="0"
+		Top="1417"
+		Width="709"
+		Height="284"
+		Text="eierPostNr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		Left="4535"
+		Top="1134"
+		Width="1418"
+		Height="283"
+		Text="E-post:"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field35"
+		Left="4535"
+		Top="1417"
+		Width="1418"
+		Height="284"
+		Text="Kontonummer:"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field38"
+		DataField="eierEpost"
+		Left="6520"
+		Top="1134"
+		Width="3118"
+		Height="283"
+		Text="eierEpost"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field39"
+		DataField="eierKontoNr"
+		Left="6520"
+		Top="1417"
+		Width="2693"
+		Height="284"
+		Text="eierKontoNr"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field70"
+		DataField="UtbetalingsDato"
+		Left="6520"
+		Top="850"
+		Width="283"
+		Height="284"
+		Text="UtbetalingsDato"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field26"
+		DataField="mdAar"
+		Left="6803"
+		Top="850"
+		Width="1701"
+		Height="284"
+		Text="mdAar"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 10pt; vertical-align: top; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="4535"
+		Top="850"
+		Width="1985"
+		Height="284"
+		Caption="Utbetalingstidspunkt:"
+		ClassName="Normal"
+		>
+		</Control>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader2"
+		Height="3255"
+		DataField="Kontrakts_ID"
+		GroupKeepTogether="2"
+		BackStyle="1"
+		BackColor="16051688"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="0"
+		Top="0"
+		Width="9354"
+		Height="567"
+		Visible="0"
+		Caption="Andre kostnader - inntekter"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 11.5pt; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field18"
+		DataField="kontrakt_fra"
+		Left="0"
+		Top="1276"
+		Width="1276"
+		Height="283"
+		Text="kontrakt_fra"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field19"
+		Left="0"
+		Top="992"
+		Width="2835"
+		Height="284"
+		Text="Kontraktsperiode:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field20"
+		DataField="kontrakt_til"
+		Left="1559"
+		Top="1276"
+		Width="1276"
+		Height="283"
+		Text="kontrakt_til"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field21"
+		Left="1276"
+		Top="1276"
+		Width="141"
+		Height="283"
+		Text="-"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field40"
+		Left="0"
+		Top="0"
+		Width="2409"
+		Height="283"
+		Text="Leietaker:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field41"
+		DataField="leietakerNavn"
+		Left="0"
+		Top="283"
+		Width="3118"
+		Height="567"
+		Text="leietakerNavn"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field42"
+		Left="0"
+		Top="1701"
+		Width="3685"
+		Height="283"
+		Text="Forvalt /Formidlingsavtalenr:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field43"
+		DataField="forvaltningsavtaleId"
+		Left="0"
+		Top="1984"
+		Width="850"
+		Height="284"
+		Text="forvaltningsavtaleId"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field44"
+		DataField="StatusTekst"
+		Left="0"
+		Top="2976"
+		Width="4252"
+		Height="284"
+		Text="StatusTekst"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field45"
+		Left="3118"
+		Top="0"
+		Width="2410"
+		Height="283"
+		Text="Boligadresse:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field46"
+		DataField="Objekt_adresse"
+		Left="3118"
+		Top="283"
+		Width="2835"
+		Height="284"
+		Text="Objekt_adresse"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field49"
+		Left="3118"
+		Top="1701"
+		Width="2835"
+		Height="283"
+		Text="Innbetalt denne perioden:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field50"
+		DataField="InnbetalingDennePerioden"
+		Left="3118"
+		Top="1984"
+		Width="2410"
+		Height="284"
+		Text="InnbetalingDennePerioden"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field51"
+		Left="6094"
+		Top="0"
+		Width="2410"
+		Height="283"
+		Text="Sikkerhetsstillelse:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field52"
+		DataField="depositum"
+		Left="6094"
+		Top="283"
+		Width="2410"
+		Height="284"
+		Text="depositum"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field53"
+		Left="6094"
+		Top="992"
+		Width="3402"
+		Height="284"
+		Text="Kontraktsleie / Husleie i perioden"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field54"
+		DataField="leiepris"
+		Left="6094"
+		Top="1276"
+		Width="1701"
+		Height="283"
+		Text="leiepris"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field55"
+		Left="6094"
+		Top="1701"
+		Width="3260"
+		Height="283"
+		Text="Forvaltningshonorar inkl. MVA"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field56"
+		DataField="provisjon"
+		Left="6945"
+		Top="1984"
+		Width="1984"
+		Height="284"
+		Text="provisjon"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field57"
+		DataField="forvaltningsHonorarProsent"
+		Left="6094"
+		Top="1984"
+		Width="567"
+		Height="284"
+		Text="forvaltningsHonorarProsent"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field58"
+		Left="6661"
+		Top="1984"
+		Width="284"
+		Height="284"
+		Text="%"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field59"
+		Left="6094"
+		Top="2976"
+		Width="1843"
+		Height="284"
+		Text="Netto husleie:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-weight: bold; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field60"
+		DataField="NettoUtbetalt"
+		Left="7937"
+		Top="2976"
+		Width="1701"
+		Height="284"
+		Text="nettoUtbetalt"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-weight: bold; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field64"
+		DataField="Rom_nummer"
+		Left="3118"
+		Top="567"
+		Width="1843"
+		Height="283"
+		Text="Rom_nummer"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field66"
+		DataField="Kontrakts_ID"
+		Left="3402"
+		Top="2976"
+		Width="1842"
+		Height="284"
+		Visible="0"
+		Text="Kontrakts_ID"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field67"
+		DataField="FormidlingsNr"
+		Left="992"
+		Top="1984"
+		Width="992"
+		Height="284"
+		Text="FormidlingsNr"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="850"
+		Top="1984"
+		Width="142"
+		Height="284"
+		Caption="/"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field71"
+		Left="3118"
+		Top="992"
+		Width="2126"
+		Height="284"
+		Text="Kontraktsstatus:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field72"
+		DataField="kontrakt_status"
+		Left="3118"
+		Top="1276"
+		Width="1843"
+		Height="283"
+		Text="kontrakt_status"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field73"
+		DataField="antallkost"
+		Left="1701"
+		Top="2268"
+		Width="1275"
+		Height="283"
+		Visible="0"
+		Text="antallkost"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field76"
+		Left="0"
+		Top="2551"
+		Width="2268"
+		Height="284"
+		Text="Avregningsmåneder"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field77"
+		DataField="avregneteManeder"
+		Left="2409"
+		Top="2551"
+		Width="7087"
+		Height="284"
+		Text="avregneteManeder"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field78"
+		DataField="husleie"
+		Left="7937"
+		Top="1276"
+		Width="1559"
+		Height="283"
+		Text="husleie"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+
+Sub OnFormat
+	rpt.Sections("GroupHeader2").Controls("Field18").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field19").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field20").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field21").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field40").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field41").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field42").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field43").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field44").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field45").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field46").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field67").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field49").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field50").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field51").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field52").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field53").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field54").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field55").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)			
+	rpt.Sections("GroupHeader2").Controls("Field56").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field57").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field58").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field59").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field64").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field71").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field76").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	rpt.Sections("GroupHeader2").Controls("Field77").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	
+	rpt.Sections("GroupHeader2").Controls("Label9").Visible = (sflong(rpt.fields("Kontrakts_ID").value)>0)
+	
+	rpt.Sections("GroupHeader2").Controls("Label11").Visible = (sflong(rpt.fields("Kontrakts_ID").value)=0)
+	
+	if sflong(rpt.fields("Kontrakts_ID").value)=0 then
+		rpt.Sections("GroupHeader2").Height=600		
+	else	
+		rpt.Sections("GroupHeader2").Height=3405	
+	end if
+End Sub
+
+
+Function sflong(v)
+    Dim rv
+    On Error Resume Next
+    rv = Clng(v)
+    If Err Then rv = 0
+    sflong = rv
+End Function]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="345"
+		BackStyle="1"
+		BackColor="14737632"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field6"
+		DataField="EkstraKostnad"
+		Left="142"
+		Top="25"
+		Width="5102"
+		Height="283"
+		Text="EkstraKostnad"
+		ClassName="Normal"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field9"
+		DataField="EkstraKostnadPris"
+		Left="5244"
+		Top="25"
+		Width="1276"
+		Height="283"
+		Text="ekstraKostnadPris"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field63"
+		DataField="EkstraKostnadType"
+		Left="6520"
+		Top="25"
+		Width="2976"
+		Height="283"
+		Text="EkstraKostnadType"
+		ClassName="Normal"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+	rpt.Sections("Detail").Visible =(sflong(rpt.fields("antallkost").value)>0)	
+	
+End Sub
+Function sflong(v)
+		Dim rv
+		On Error Resume Next
+		rv = Clng(v)
+		If Err Then rv = 0
+		sflong = rv
+End Function]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter2"
+		Height="45"
+	>
+<Script>
+<![CDATA[
+
+Sub OnFormat
+		
+		'rpt.Sections("GroupFooter2").Visible =(sflong(rpt.fields("antallkost").value)>0)	
+End Sub
+
+Function sflong(v)
+    Dim rv
+    On Error Resume Next
+    rv = Clng(v)
+    If Err Then rv = 0
+    sflong = rv
+End Function
+
+
+Sub OnAfterPrint
+
+End Sub]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="3195"
+		NewPage="2"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape4"
+		Left="0"
+		Top="0"
+		Width="9730"
+		Height="2268"
+		BackStyle="1"
+		BackColor="14737632"
+		LineColor="14737632"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label7"
+		Left="0"
+		Top="2976"
+		Width="9638"
+		Height="284"
+		Caption="Vennligst ta kontakt ved endringer av eierdata, navn, tlf. e-post og/eller adresse"
+		ClassName="Normal"
+		Style="font-style: italic; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field61"
+		Left="4535"
+		Top="1843"
+		Width="2977"
+		Height="283"
+		Text="Netto utbetalt:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-weight: bold; font-size: 11.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field62"
+		Left="7512"
+		Top="1843"
+		Width="1559"
+		Height="283"
+		Text="totaltNettoUtbetalt"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-weight: bold; font-size: 11.5pt; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field79"
+		Left="4535"
+		Top="425"
+		Width="2977"
+		Height="284"
+		Text="Sum andre inntekter:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field80"
+		DataField="totalHusleie"
+		Left="7512"
+		Top="0"
+		Width="1559"
+		Height="283"
+		Text="totalHusleie"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field81"
+		Left="4535"
+		Top="0"
+		Width="2977"
+		Height="283"
+		Text="Sum husleie:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field82"
+		DataField="sumAndreInntekter"
+		Left="7512"
+		Top="425"
+		Width="1559"
+		Height="283"
+		Text="sumAndreInntekter"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field83"
+		Left="4535"
+		Top="850"
+		Width="2977"
+		Height="284"
+		Text="Sum forv. honorar:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field84"
+		DataField="SumForvHonorar"
+		Left="7512"
+		Top="850"
+		Width="1559"
+		Height="284"
+		Text="SumForvHonorar"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field85"
+		Left="4535"
+		Top="1276"
+		Width="2977"
+		Height="283"
+		Text="Sum andre trekk/kostnader:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field86"
+		DataField="SumAndreTrekkKostnader"
+		Left="7512"
+		Top="1276"
+		Width="1559"
+		Height="284"
+		Text="SumAndreTrekkKostnader"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial Narrow&apos;; font-size: 11.5pt; font-weight: bold; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line1"
+		X1="4110"
+		Y1="1559"
+		X2="9354"
+		Y2="1559"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line2"
+		X1="4110"
+		Y1="2126"
+		X2="9354"
+		Y2="2126"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+	dim sumHusleie
+	dim sumAndreInntekter
+	dim sumForvHonorar
+	dim sumAndreTrekk
+	dim sum
+
+	sumhusleie = sfcurr(rpt.Sections("GroupFooter1").Controls("Field80").Text)
+	sumAndreInntekter = sfcurr(rpt.Sections("GroupFooter1").Controls("Field82").Text)
+	sumForvHonorar = sfcurr(rpt.Sections("GroupFooter1").Controls("Field84").Text)
+	sumAndreTrekk = sfcurr(rpt.Sections("GroupFooter1").Controls("Field86").Text)
+	
+	sum = sumhusleie + sumAndreInntekter + sumForvHonorar + sumAndreTrekk
+	
+	rpt.Sections("GroupFooter1").Controls("Field62").Text = FormatNumber(sum, 2, True, False, True)
+End Sub
+
+Function sfcurr(v)
+    Dim rv
+    On Error Resume Next
+    rv = CCur(v)
+    If Err Then rv = 0
+    sfcurr = rv
+End Function]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="285"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label2"
+		Left="0"
+		Top="0"
+		Width="992"
+		Height="283"
+		Caption="Rapportdato:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= Now"
+		Left="990"
+		Top="0"
+		Width="1845"
+		Height="285"
+		Text="Dato"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label3"
+		Left="2955"
+		Top="0"
+		Width="1305"
+		Height="285"
+		Caption="Utskriftsansvarlig:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="User_name"
+		Left="4275"
+		Top="0"
+		Width="2220"
+		Height="285"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: left; font-family: &apos;Arial&apos;; font-size: 8pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label8"
+		Left="7007"
+		Top="0"
+		Width="420"
+		Height="285"
+		Caption="Side:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field65"
+		DataField="= Now"
+		Left="7402"
+		Top="0"
+		Width="720"
+		Height="285"
+		Text="Side1"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="8079"
+		Top="0"
+		Width="1559"
+		Height="283"
+		Caption="* Beløp inkl. mva."
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 8pt; text-align: left; ddo-char-set: 1; "
+		>
+		</Control>
+<Script>
+<![CDATA[	]]></Script>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>

@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{A8120D08-27CC-43BF-8D8E-220A6DA40AED}" GUIDREP="{9829D0FA-1644-4D75-86CF-EE6F65C70E05}" 
+	LICENSE="10000000"
+	PrintWidth="10200"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[Sub onDatainitialize
+
+	'm_data.debugg = true
+
+
+	'Input "date"
+	m_data.AddInputMacro "{VGR}", "Varegruppe","80", ,2 , "Select gruppeID as varegr, Beskrivelse from c..Varegruppe"
+	
+	if not m_data.ShowInputDialog("Pass og stell av barn") then exit sub
+
+
+
+'	'Insert query'	
+	m_data.sqlstring = "object:uBarnePass.ReportSource:{VGR}"
+
+	m_data.setupfields rpt
+
+
+	subsql = "Select A.id, name, address, address2, postal_code, city, country_code, "
+	subsql = subsql + "country,mail, delivery from (c..DEBITOR as D left join c..c_address "
+	subsql = subsql + "as A on d.nameid=a.namelink) inner join c..c_name as N on D.nameid=n.id where kontonr={KNR} "
+	subsql = subsql + "order by mail, delivery, a.id desc"
+	m_data.AddSubQuery subsql, "bet"
+
+
+
+	'Add "Altinn menus"
+	m_data.Altinnsupport = "UBarnePass.Export.ExportAltinn " & m_data.getMacroValue("{VGR}")
+	'm_data.Altinnsupport = "uLNssbLib.Export.ExportAltinn " & "80"
+
+End Sub
+
+
+Sub OnFetchData(eof)
+
+	
+	
+
+End Sub
+
+Sub OnReportStart
+
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="900"
+	RightMargin="700"
+	TopMargin="900"
+	BottomMargin="1000"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Arial&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="3705"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label1"
+		Left="2835"
+		Top="0"
+		Width="7370"
+		Height="425"
+		Caption="Oppgave over betaling for pass og stell av barn"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 14.5pt; ddo-char-set: 0; text-align: right; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field2"
+		DataField="*y..Bedrift.arstall"
+		Left="9071"
+		Top="1276"
+		Width="1134"
+		Height="283"
+		Text="*y..Bedrift.arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 14.5pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label14"
+		Left="7654"
+		Top="1276"
+		Width="1417"
+		Height="283"
+		Caption="Inntektsår:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 14.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label15"
+		Left="0"
+		Top="1276"
+		Width="3402"
+		Height="425"
+		Caption="Oppgavegivernummer:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 14.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field27"
+		DataField="*y..Bedrift.MVAnr"
+		Left="3402"
+		Top="1276"
+		Width="2267"
+		Height="425"
+		Text="*y..Bedrift.mvanr"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 14.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="0"
+		Top="1843"
+		Width="3685"
+		Height="283"
+		Caption="Oppgavegivers navn og adresse:"
+		ClassName="Normal"
+		Style="font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape1"
+		Left="0"
+		Top="2126"
+		Width="5102"
+		Height="1417"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field1"
+		DataField="*y..Bedrift.navn"
+		Left="142"
+		Top="2268"
+		Width="4960"
+		Height="283"
+		Text="*y..Bedrift.navn"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="*y..Bedrift.adresse"
+		Left="142"
+		Top="2551"
+		Width="4960"
+		Height="284"
+		Text="*y..Bedrift.adresse"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="*y..Bedrift.adresse2"
+		Left="142"
+		Top="2835"
+		Width="4960"
+		Height="283"
+		Text="*y..Bedrift.adresse2"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="*y..Bedrift.postnr"
+		Left="142"
+		Top="3118"
+		Width="1275"
+		Height="284"
+		Text="*y..Bedrift.postnr"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="*y..Bedrift.poststed"
+		Left="1417"
+		Top="3118"
+		Width="3544"
+		Height="284"
+		Text="*y..Bedrift.poststed"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+
+Sub OnBeforePrint
+
+End Sub
+
+Sub OnAfterPrint
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Visible="0"
+		Height="315"
+		DataField="EmployeeNumber"
+		GroupKeepTogether="1"
+		CanShrink="1"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="3330"
+		NewPage="2"
+		KeepTogether="-1"
+		CanShrink="1"
+	>
+		<Control 
+		Type="AR.Shape"
+		Name="Shape2"
+		Left="0"
+		Top="1417"
+		Width="5102"
+		Height="1418"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field32"
+		DataField="knavn"
+		Left="142"
+		Top="1559"
+		Width="4960"
+		Height="284"
+		Text="betalnavn"
+		ClassName="Normal"
+		Style="font-size: 10pt; font-family: &apos;Arial&apos;; ddo-char-set: 0; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field33"
+		DataField="bet.address"
+		Left="142"
+		Top="1843"
+		Width="4960"
+		Height="283"
+		Text="adresse1"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		DataField="bet.address2"
+		Left="142"
+		Top="2126"
+		Width="4960"
+		Height="283"
+		Text="adresse02"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field35"
+		DataField="bet.postal_code"
+		Left="142"
+		Top="2409"
+		Width="1275"
+		Height="284"
+		Text="postnr"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field36"
+		DataField="bet.city"
+		Left="1417"
+		Top="2409"
+		Width="3544"
+		Height="284"
+		Text="sted"
+		ClassName="Normal"
+		Style="font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label18"
+		Left="0"
+		Top="1134"
+		Width="3685"
+		Height="283"
+		Caption="Betalers navn og adresse:"
+		ClassName="Normal"
+		Style="font-size: 10pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label17"
+		Left="0"
+		Top="425"
+		Width="3402"
+		Height="425"
+		Caption="Betalers fødselsnummer:"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 14.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field37"
+		DataField="orgnr"
+		Left="3402"
+		Top="425"
+		Width="2267"
+		Height="425"
+		Text="pnr"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 14.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label19"
+		Left="5669"
+		Top="425"
+		Width="3544"
+		Height="425"
+		Caption="Betalt beløp (i hele kroner):"
+		ClassName="Normal"
+		Style="font-family: &apos;Arial&apos;; font-size: 14.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field38"
+		DataField="SumBelop"
+		Left="9213"
+		Top="425"
+		Width="992"
+		Height="425"
+		Text="SumBelop"
+		ClassName="Normal"
+		Style="font-size: 14.5pt; text-align: right; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+
+
+Sub OnBeforePrint
+	
+End Sub
+
+Sub OnFormat
+
+		
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Visible="0"
+		Height="720"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
