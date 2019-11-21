@@ -124,14 +124,14 @@ set @dt = '01.'+convert(varchar(2),{Mnd})+'.'+convert(varchar(4),{Aar})
 
 set dateformat dmy
 set @query = @query + 
-N' select oa.Id, oa.Oppdragsnr, convert(varchar(20), oa.startdato, 104)as startdato, na.Name collate Danish_Norwegian_CI_AS, convert(varchar(20), oa.akseptertdato, 104)as akseptdato,
+N' select oa.Id, oa.Oppdragsnr, convert(varchar(20), oa.startdato, 104)as startdato, na.Name collate Danish_Norwegian_CI_AS as Name, convert(varchar(20), oa.akseptertdato, 104)as akseptdato,
 	bo.Objekt_adresse collate Danish_Norwegian_CI_AS + '' '' + convert(varchar(8),bo.Objekt_postnummer) collate Danish_Norwegian_CI_AS + '' ''+ bo.Objekt_poststed collate Danish_Norwegian_CI_AS + '', ''+bo.BoligNummer collate Danish_Norwegian_CI_AS + '', ''+ convert(varchar(8),byg.gnr) collate Danish_Norwegian_CI_AS+'', ''+ convert(varchar(8),byg.bnr) collate Danish_Norwegian_CI_AS as adresse,
 	byg.kommuneNr  collate Danish_Norwegian_CI_AS + '' ''+ ko.Kommunenavn  collate Danish_Norwegian_CI_AS as kommune,
 	ko.Kommunenavn collate Danish_Norwegian_CI_AS kortkommune,
-	typ.BoligType collate Danish_Norwegian_CI_AS, DATEDIFF(DAY, isnull(oa.signert_dato_kunde,oa.startdato), oa.sluttdato) as varighet, 
+	typ.BoligType collate Danish_Norwegian_CI_AS as BoligType, DATEDIFF(DAY, isnull(oa.signert_dato_kunde,oa.startdato), oa.sluttdato) as varighet, 
 	convert(varchar(10),oa.statusId)+ ''-''+ st.Status collate Danish_Norwegian_CI_AS as status, case when oa.statusid=19025 then ''Trukket'' else st.Status end  collate Danish_Norwegian_CI_AS kortstatus,
 	bo.seksjonsnr, bo.Objekt_adresse collate Danish_Norwegian_CI_AS + '', '' + convert(varchar(8),bo.Objekt_postnummer) collate Danish_Norwegian_CI_AS + '' ''+ bo.Objekt_poststed collate Danish_Norwegian_CI_AS kortadr
-	, byg.bnr, byg.gnr, bo.BoligNummer collate Danish_Norwegian_CI_AS hnr, bo.andelsnr, bo.aksjenummer collate Danish_Norwegian_CI_AS,
+	, byg.bnr, byg.gnr, bo.BoligNummer collate Danish_Norwegian_CI_AS hnr, bo.andelsnr, bo.aksjenummer collate Danish_Norwegian_CI_AS as aksjenummer,
 (select top 1 name from  uni_' + convert(varchar,@id) + '..c_contacts where id=fa.MedeierKontaktId) collate Danish_Norwegian_CI_AS eier2,
 convert(varchar(20), oa.signert_dato_kunde, 104)as kundesignertdato, (select navn from unie_' + convert(varchar,@id) + '..t_ansatte where ansatte_id = oa.ansvarligMeglerId) collate Danish_Norwegian_CI_AS as ansvarligMegler
 , (select top 1  isnull(case len(akskjeselskapNavn) when 0 then null else akskjeselskapNavn end, case len( borettslagNavn) when 0 then null else borettslagNavn end) collate Danish_Norwegian_CI_AS from unie_' + convert(varchar,@id) + '..t_bygg where ID = byg.id) as aksjeBorettslag
@@ -1097,10 +1097,10 @@ nummer
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>6/28/2019 8:39:28 AM</ReportChanged>
+  <ReportChanged>9/20/2019 6:15:40 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\unierikf\AppData\Local\Temp\2\NBE_Oppdragsjournal.mrt</ReportFile>
-  <ReportGuid>1f6bb54890fe43cc8c1497459ab45e2d</ReportGuid>
+  <ReportGuid>0e9a3244df0f437888c687d6796352a9</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>

@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{31768A6A-AFB6-41EA-9F88-46171079AE44}" GUIDREP="{39DA76F8-F7D4-480B-97C0-D671CD2FB1F5}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED2000640065006D006F006C0069006300410052003400350036003200330034000000"
+	PrintWidth="16260"
+	DocumentName="ActiveReports Document"
+	ScriptLang="VBScript"
+>
+<Watermark
+		>
+</Watermark>
+<Script>
+<![CDATA[Sub OnDataInitialize
+  'm_data.debugg=true
+
+  dim sql
+  dim valgtManede
+  dim eierWhere
+  dim valgteEiere
+  	
+	m_data.AddInputMacro "{ansvarligmegler}" , "Ansvarlig megler", "", "" , 7, "select '0' id , ' Alle' navn  union select Ansatte_id, Navn from e..t_ansatte order by Navn"
+	m_data.AddInputMacro "{Aar}","År: ",Year(Now),,2,"select 0 as y1, 'Velg formidlingsnr' union select distinct year y1, convert(varchar,year) y2 from uniadmin..adm_Client order by y1 desc"	
+	m_data.AddInputMacro "{Md}","Måned: ",Month(Now),,2,"select id, navn from utool..maaneder"
+	m_data.AddInputMacro "{fraFormidlingsNr}", "Fra formidlingsnr","",""
+	m_data.AddInputMacro "{tilFormidlingsNr}", "Til formidlingsnr","",""
+
+
+  if not m_data.ShowInputDialog("Velg periode") then exit sub
+  m_data.sqlstring = "object:ef_RapFormidlingLib.ef_Rap_Formidlinger:NBE_FormidlingsRapportMd;{Aar};{ansvarligmegler};{Md};{fraFormidlingsNr};{tilFormidlingsNr}"
+  m_data.setupfields rpt
+
+
+	
+  end sub
+
+Sub OnReportStart
+End Sub
+
+Sub OnFetchData(eof)
+end Sub
+
+Sub OnReportEnd
+
+End Sub
+]]></Script>
+<PageSettings	LeftMargin="120"
+	RightMargin="90"
+	TopMargin="200"
+	BottomMargin="200"
+	Orientation="2"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Arial&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading4"
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="ReportHeader" Name="ReportHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageHeader" Name="PageHeader"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="1845"
+		DataField="eierId"
+		GroupKeepTogether="2"
+		RepeatStyle="4"
+		KeepTogether="-1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label21"
+		Left="0"
+		Top="990"
+		Width="16305"
+		Height="855"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="background-color: rgb(224,224,224); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field4"
+		DataField="= Now"
+		Left="13890"
+		Top="425"
+		Width="1559"
+		Height="425"
+		Text="Dato"
+		OutputFormat="dd.mm.yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lblOverskrift"
+		Left="0"
+		Top="0"
+		Width="16157"
+		Height="425"
+		Caption="Meglerjournal"
+		BackStyle="1"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 16pt; background-color: rgb(224,224,224); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field17"
+		DataField="beskrivelse"
+		Left="3543"
+		Top="0"
+		Width="12189"
+		Height="425"
+		Text="beskrivelse"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 16pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lblRapportDato"
+		Left="12472"
+		Top="425"
+		Width="993"
+		Height="425"
+		Caption="Rapportdato:"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="lblUtskriftsansvarlig"
+		Left="142"
+		Top="425"
+		Width="1417"
+		Height="284"
+		Caption="Utskriftsansvarlig:"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field5"
+		DataField="User_name"
+		Left="1559"
+		Top="425"
+		Width="1701"
+		Height="284"
+		Text="User_name"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label8"
+		Left="142"
+		Top="1134"
+		Width="850"
+		Height="709"
+		Caption="Formid- lings- nummer"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label9"
+		Left="6661"
+		Top="1559"
+		Width="2552"
+		Height="284"
+		Caption="Bolig adresse"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label10"
+		Left="1035"
+		Top="1410"
+		Width="870"
+		Height="435"
+		Caption="Oppdrags- nummer"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label11"
+		Left="1920"
+		Top="1410"
+		Width="765"
+		Height="435"
+		Caption="Signert-  dato"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label12"
+		Left="2805"
+		Top="1560"
+		Width="1995"
+		Height="285"
+		Caption="Eier"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label13"
+		Left="12614"
+		Top="1276"
+		Width="851"
+		Height="567"
+		Caption="Om-       settnings-beløp"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label15"
+		Left="13606"
+		Top="1417"
+		Width="709"
+		Height="426"
+		Caption="Utleie- honorar"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label16"
+		Left="11339"
+		Top="1417"
+		Width="1275"
+		Height="426"
+		Caption="Ansvarlig megler"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field36"
+		Left="13890"
+		Top="709"
+		Width="1701"
+		Height="283"
+		Text="Side"
+		SummaryType="4"
+		SummaryFunc="0"
+		SummaryRunning="1"
+		SummaryGroup="GroupHeader1"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label17"
+		Left="12472"
+		Top="709"
+		Width="1418"
+		Height="283"
+		Caption="Side:"
+		ClassName="Normal"
+		Style="font-family: &apos;Times New Roman&apos;; font-size: 8pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label19"
+		Left="14315"
+		Top="1134"
+		Width="850"
+		Height="709"
+		Caption="Sikkerhet-stillelses- honorar  mm."
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label24"
+		Left="15307"
+		Top="1417"
+		Width="992"
+		Height="426"
+		Caption="Kontrakt- start"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label26"
+		Left="4819"
+		Top="1559"
+		Width="850"
+		Height="284"
+		Caption="Leietaker"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label27"
+		Left="9354"
+		Top="1559"
+		Width="992"
+		Height="284"
+		Caption="Boligtype"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label28"
+		Left="10346"
+		Top="1276"
+		Width="993"
+		Height="567"
+		Caption="Register- betegnelse"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; "
+		>
+		</Control>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="390"
+	>
+		<Control 
+		Type="AR.Field"
+		Name="Field40"
+		DataField="omsettningsBelop"
+		Left="12614"
+		Top="0"
+		Width="851"
+		Height="283"
+		Text="omsettningsBelop"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field41"
+		DataField="formidlingsNr"
+		Left="142"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="formidlingsNr"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field42"
+		DataField="oppdragsNr"
+		Left="1036"
+		Top="0"
+		Width="870"
+		Height="283"
+		Text="oppdragsNr"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field43"
+		DataField="Kontrakt_Akseptert_Dato"
+		Left="1914"
+		Top="0"
+		Width="851"
+		Height="283"
+		Text="Kontrakt_Akseptert_Dato"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field44"
+		DataField="eierNavn"
+		Left="2805"
+		Top="0"
+		Width="2010"
+		Height="285"
+		Text="eierNavn"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field45"
+		DataField="boligAdresse"
+		Left="6661"
+		Top="0"
+		Width="2552"
+		Height="283"
+		Text="boligAdresse"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field46"
+		DataField="saksBehandler"
+		Left="11339"
+		Top="0"
+		Width="1275"
+		Height="283"
+		Text="saksBehandler"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field47"
+		DataField="utleieHonorar"
+		Left="13606"
+		Top="0"
+		Width="709"
+		Height="283"
+		Text="utleieHonorar"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field48"
+		DataField="sikkerhetsStillelsesHonorar"
+		Left="14315"
+		Top="0"
+		Width="850"
+		Height="283"
+		Text="sikkerhetsStillelsesHonorar"
+		OutputFormat="#,##0.00"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field51"
+		DataField="kontrakt_start"
+		Left="15307"
+		Top="0"
+		Width="992"
+		Height="283"
+		Text="kontrakt_start"
+		OutputFormat="dd.mm.YYYY"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field53"
+		DataField="leietakernavn"
+		Left="4819"
+		Top="0"
+		Width="1842"
+		Height="283"
+		Text="leietakerNavn"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field54"
+		DataField="boligtype"
+		Left="9354"
+		Top="0"
+		Width="992"
+		Height="283"
+		Text="boligAdresse"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field55"
+		DataField="matrikkel"
+		Left="10346"
+		Top="0"
+		Width="993"
+		Height="283"
+		Text="matrikkel"
+		ClassName="Normal"
+		Style="font-size: 8.5pt; font-family: &apos;Times New Roman&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="PageFooter" Name="PageFooter"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="ReportFooter" Name="ReportFooter"
+		Height="15"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
