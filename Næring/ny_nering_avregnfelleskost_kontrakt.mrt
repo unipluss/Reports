@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9Dr5oUQFQzXpR5zJYkzjf4tw+y5ZV9PtRke5CHM9sS/DNLnPRlEB9WxchPBjAKjn3GppK+ZUS91qQKX4aQDrL/5w2WhNCZKYYnj1bGPM4Q==</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9FbNoU1U2fFhfKHMdgDjF4s0gc9NTLqka0y5TGlc60/XYNnPUFsxCf9EqPBjFe17xHDBK8hRc8XiZ4RE/T31Yo14+WzvWWmZaUn1BA==</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -359,18 +359,18 @@ exec sp_executesql @queryToRun</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="12">
-      <value>,ContractFrom,Kontrakt,text_x007C_,System.String,_x0031_4,False,False,False</value>
+      <value>,ContractFrom,Kontrakt,text_x007C_,System.String,_x0032_34,False,False,False</value>
       <value>,ContractTo,ContractTo,System.String,,False,False</value>
       <value>,EksMva,EksMva,System.Decimal,_x0031_.25,False,False</value>
       <value>,Year,År,text_x007C_,System.String,_x0032_018,False,False,False</value>
-      <value>,Felleskostnad,Felleskostnad_x0020_tekst:,text_x007C_,System.String,Samlet_x0020_kostnad,False,False,False</value>
+      <value>,Felleskostnad,Felleskostnad_x0020_tekst:,text_x007C_,System.String,Samlet_x0020_felleskost,False,False,False</value>
       <value>,SkjulFelleskost,Skjul_x0020_linjer_x0020_uten_x0020_kostnad,check_x007C__x0020_,System.String,False,False,False,False</value>
-      <value>,SamleFelleskost,Samle_x0020_felleskostnader,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_kost_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020__x002F__x002A__x002A__x002F_CASE_x0020_WHEN_x0020__x0028_ISNULL_x0028_felleskostid_x002C__x0020_0_x0029__x0020__x003D__x0020_0_x0029__x0020_THEN_x0020__x0027_0_x0027__x0020__x002F__x002A__x002A__x002F_ELSE_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_felleskostid_x0029__x0020_end_x002F__x002A__x002A__x002F_FROM_x0020_e..t_ak_felleskostavregning_linje_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_kost_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_kost_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_distinct_x0020_convert_x0028_varchar_x0028_5_x0029__x002C__x0020_l.felleskostid_x0029__x002C__x0020_dim.Navn_x002F__x002A__x002A__x002F_from_x0020_e..t_ak_felleskostavregning_jobb_x0020_j_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_k_x0020_on_x0020_k.jobbnr_x003D_j.jobbnr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_linje_x0020_l_x0020_on_x0020_k.jobbnr_x003D_l.jobbnr_x0020_and_x0020_l.kontrakts_id_x003D_k.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealkontrakt_x0020_ak_x0020_on_x0020_ak.kontrakts_id_x003D_l.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..DEBITOR_x0020_d_x0020_on_x0020_ak.kundenummer_x003D_d.kontonr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..c_name_x0020_c_x0020_on_x0020_c.id_x003D_d.nameid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_y..Dimensjon_x0020_dim_x0020_on_x0020_dim.dimtall_x003D_l.felleskostid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealvaredim_x0020_av_x0020_on_x0020_av.dimrecordid_x003D_dim.dimtall_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..VARER_x0020_va_x0020_on_x0020_va.varenr_x003D__x0028_case_x0020_when_x0020_isNull_x0028_l.momsind_x0020__x002C_0_x0029__x003D_0_x0020_then_x0020_av.vareavgiftsfri_x0020_else_x0020_av.vareavgiftspliktig_x0020_end_x0029__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealres_x0020_ares_x0020_ON_x0020_ares.kontrakts_id_x0020__x003D__x0020_ak.kontrakts_id_x002F__x002A__x002A__x002F_where_x0020_k.kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_and_x0020_j.jobbnr_x0020__x003D__x0028_Select_x0020_top_x0020_1_x0020_jobbnr_x0020_from_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_where_x0020_kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_order_x0020_by_x0020_jobbnr_x0020_desc_x0029__x0020_DEALLOCATE_x0020_MY_CURSOR,System.String,_x0034_010,False,False,False</value>
+      <value>,SamleFelleskost,Samle_x0020_felleskostnader,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_kost_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020__x002F__x002A__x002A__x002F_CASE_x0020_WHEN_x0020__x0028_ISNULL_x0028_felleskostid_x002C__x0020_0_x0029__x0020__x003D__x0020_0_x0029__x0020_THEN_x0020__x0027_0_x0027__x0020__x002F__x002A__x002A__x002F_ELSE_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_felleskostid_x0029__x0020_end_x002F__x002A__x002A__x002F_FROM_x0020_e..t_ak_felleskostavregning_linje_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_kost_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_kost_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_distinct_x0020_convert_x0028_varchar_x0028_5_x0029__x002C__x0020_l.felleskostid_x0029__x002C__x0020_dim.Navn_x002F__x002A__x002A__x002F_from_x0020_e..t_ak_felleskostavregning_jobb_x0020_j_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_k_x0020_on_x0020_k.jobbnr_x003D_j.jobbnr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_linje_x0020_l_x0020_on_x0020_k.jobbnr_x003D_l.jobbnr_x0020_and_x0020_l.kontrakts_id_x003D_k.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealkontrakt_x0020_ak_x0020_on_x0020_ak.kontrakts_id_x003D_l.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..DEBITOR_x0020_d_x0020_on_x0020_ak.kundenummer_x003D_d.kontonr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..c_name_x0020_c_x0020_on_x0020_c.id_x003D_d.nameid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_y..Dimensjon_x0020_dim_x0020_on_x0020_dim.dimtall_x003D_l.felleskostid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealvaredim_x0020_av_x0020_on_x0020_av.dimrecordid_x003D_dim.dimtall_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..VARER_x0020_va_x0020_on_x0020_va.varenr_x003D__x0028_case_x0020_when_x0020_isNull_x0028_l.momsind_x0020__x002C_0_x0029__x003D_0_x0020_then_x0020_av.vareavgiftsfri_x0020_else_x0020_av.vareavgiftspliktig_x0020_end_x0029__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealres_x0020_ares_x0020_ON_x0020_ares.kontrakts_id_x0020__x003D__x0020_ak.kontrakts_id_x002F__x002A__x002A__x002F_where_x0020_k.kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_and_x0020_j.jobbnr_x0020__x003D__x0028_Select_x0020_top_x0020_1_x0020_jobbnr_x0020_from_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_where_x0020_kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_order_x0020_by_x0020_jobbnr_x0020_desc_x0029__x0020_DEALLOCATE_x0020_MY_CURSOR,System.String,,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
-      <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0032_,True,False</value>
-      <value>System,ClientYear,ClientYear,System.Int32,_x0032_019,True,False</value>
+      <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0037_,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_017,True,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -532,6 +532,7 @@ exec sp_executesql @queryToRun</SqlCommand>
         </PageFooter>
         <ContractHeader Ref="22" type="GroupHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
+          <CanBreak>True</CanBreak>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,3.48,27.7,1.2</ClientRectangle>
           <Components isList="true" count="3">
@@ -860,6 +861,7 @@ exec sp_executesql @queryToRun</SqlCommand>
         </dbContract>
         <ContractFooter Ref="52" type="GroupFooterBand" isKey="true">
           <Brush>Transparent</Brush>
+          <CanBreak>True</CanBreak>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,11.28,27.7,3.4</ClientRectangle>
           <Components isList="true" count="15">
@@ -1632,10 +1634,10 @@ Sum(DataBand1,DatakildeSum.kostnad))/EksMva}</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/9/2019 12:05:58 PM</ReportChanged>
+  <ReportChanged>12/9/2019 2:59:07 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\Users\solan\AppData\Local\Temp\ny_nering_avregnfelleskost_kontrakt_3.mrt</ReportFile>
-  <ReportGuid>6d87c93391e7412d893a6524aecb3a07</ReportGuid>
+  <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\ny_nering_avregnfelleskost_kontrakt_2.mrt</ReportFile>
+  <ReportGuid>6bb01cac4bc2484a98c7bd6f62c2cb5f</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
