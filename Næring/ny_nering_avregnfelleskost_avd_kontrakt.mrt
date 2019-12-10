@@ -189,7 +189,7 @@ exec sp_executesql @queryToRun</SqlCommand>
       </Bedrift>
       <DatakildeSum Ref="6" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>DatakildeSum</Alias>
-        <Columns isList="true" count="8">
+        <Columns isList="true" count="9">
           <value>kontrakts_id,System.Int32</value>
           <value>kostnad,System.Decimal</value>
           <value>fakturert,System.Decimal</value>
@@ -198,6 +198,7 @@ exec sp_executesql @queryToRun</SqlCommand>
           <value>fakturert_avd,System.Decimal</value>
           <value>differanse_avd,System.Decimal</value>
           <value>diff_tot,System.Decimal</value>
+          <value>tidsfaktor,System.Decimal</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -220,7 +221,9 @@ select distinct l.kontrakts_id,
 	round(l.kostnad,2) kostnad,round(l.fakturert,2)fakturert,round(l.differanse,2) differanse,
 		round(l.kostnadavd, 2) kostnad_avd,round(l.fakturertavd,2)fakturert_avd,
 		round(l.differanseavd, 2) differanse_avd,
-		round((isNull(l.differanse,0)+isNull(l.differanseavd,0)),2) as diff_tot
+		round((isNull(l.differanse,0)+isNull(l.differanseavd,0)),2) as diff_tot,
+		(datediff(day,( ( case when ak.kontrakt_fra&lt;=j.klientAar then j.klientAar else ak.kontrakt_fra end ) ), 
+		(Case when isNull(ak.fakturerfktil,ak.kontrakt_til)&gt;@dato then @dato else isNull(ak.fakturerfktil,ak.kontrakt_til) end)) +1)/365.0 tidsfaktor
 		from e..t_ak_felleskostavregning_jobb j 
 		left join e..t_ak_felleskostavregning_kontrakt k on k.jobbnr=j.jobbnr 
 		left join e..t_ak_felleskostavregning_linje l on k.jobbnr=l.jobbnr and l.kontrakts_id=k.kontrakts_id 
@@ -338,19 +341,20 @@ where k.kontrakts_id in ({ContractFrom}) and j.jobbnr =(Select top 1 jobbnr from
       </KontraktTilKostnadsum>
     </Relations>
     <Report isRef="0" />
-    <Variables isList="true" count="12">
+    <Variables isList="true" count="13">
       <value>,ContractFrom,Kontrakt,text_x007C_,System.String,_x0032_34,False,False,False</value>
       <value>,ContractTo,ContractTo,System.String,,False,False</value>
       <value>,EksMva,EksMva,System.Decimal,_x0031_.25,False,False</value>
       <value>,Year,År,text_x007C_,System.String,_x0032_018,False,False,False</value>
-      <value>,SkjulFelleskost,Skjul_x0020_linjer_x0020_uten_x0020_kostnad,check_x007C__x0020_Skjul_x0020_tomme_x0020_linjer,System.String,True,False,False,False</value>
-      <value>,Felleskostnad,Samlet_x0020_felleskostnad_x0020_tekst,text_x007C_,System.String,Samlet,False,False,False</value>
-      <value>,SamleFelleskost,Samle_x0020_felleskost_x0020_på_x0020_én_x0020_linje,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_kost_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020__x002F__x002A__x002A__x002F_CASE_x0020_WHEN_x0020__x0028_ISNULL_x0028_felleskostid_x002C__x0020_0_x0029__x0020__x003D__x0020_0_x0029__x0020_THEN_x0020__x0027_0_x0027__x0020__x002F__x002A__x002A__x002F_ELSE_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_felleskostid_x0029__x0020_end_x002F__x002A__x002A__x002F_FROM_x0020_e..t_ak_felleskostavregning_linje_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_kost_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_kost_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_distinct_x0020_convert_x0028_varchar_x0028_5_x0029__x002C__x0020_l.felleskostid_x0029__x002C__x0020_dim.Navn_x002F__x002A__x002A__x002F_from_x0020_e..t_ak_felleskostavregning_jobb_x0020_j_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_k_x0020_on_x0020_k.jobbnr_x003D_j.jobbnr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_linje_x0020_l_x0020_on_x0020_k.jobbnr_x003D_l.jobbnr_x0020_and_x0020_l.kontrakts_id_x003D_k.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealkontrakt_x0020_ak_x0020_on_x0020_ak.kontrakts_id_x003D_l.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..DEBITOR_x0020_d_x0020_on_x0020_ak.kundenummer_x003D_d.kontonr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..c_name_x0020_c_x0020_on_x0020_c.id_x003D_d.nameid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_y..Dimensjon_x0020_dim_x0020_on_x0020_dim.dimtall_x003D_l.felleskostid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealvaredim_x0020_av_x0020_on_x0020_av.dimrecordid_x003D_dim.dimtall_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..VARER_x0020_va_x0020_on_x0020_va.varenr_x003D__x0028_case_x0020_when_x0020_isNull_x0028_l.momsind_x0020__x002C_0_x0029__x003D_0_x0020_then_x0020_av.vareavgiftsfri_x0020_else_x0020_av.vareavgiftspliktig_x0020_end_x0029__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealres_x0020_ares_x0020_ON_x0020_ares.kontrakts_id_x0020__x003D__x0020_ak.kontrakts_id_x002F__x002A__x002A__x002F_where_x0020_k.kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_and_x0020_j.jobbnr_x0020__x003D__x0028_Select_x0020_top_x0020_1_x0020_jobbnr_x0020_from_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_where_x0020_kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_order_x0020_by_x0020_jobbnr_x0020_desc_x0029__x0020_DEALLOCATE_x0020_MY_CURSOR,System.String,,False,False,False</value>
+      <value>,SkjulKvmPris,Skjul_x0020_kvadratmeterpris,check_x007C_,System.String,False,False,False,False</value>
+      <value>,SkjulFelleskost,Skjul_x0020_linjer_x0020_uten_x0020_kostnad,check_x007C__x0020_Skjul_x0020_tomme_x0020_linjer,System.String,False,False,False,False</value>
+      <value>,Felleskostnad,Samlet_x0020_felleskostnad_x0020_tekst,text_x007C_,System.String,,False,False,False</value>
+      <value>,SamleFelleskost,Samle_x0020_felleskost_x0020_på_x0020_én_x0020_linje,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_kost_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F_FOR_x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020__x002F__x002A__x002A__x002F_CASE_x0020_WHEN_x0020__x0028_ISNULL_x0028_felleskostid_x002C__x0020_0_x0029__x0020__x003D__x0020_0_x0029__x0020_THEN_x0020__x0027_0_x0027__x0020__x002F__x002A__x002A__x002F_ELSE_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_felleskostid_x0029__x0020_end_x002F__x002A__x002A__x002F_FROM_x0020_e..t_ak_felleskostavregning_linje_x002F__x002A__x002A__x002F_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_kost_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_kost_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_kost_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_distinct_x0020_convert_x0028_varchar_x0028_5_x0029__x002C__x0020_l.felleskostid_x0029__x002C__x0020_dim.Navn_x002F__x002A__x002A__x002F_from_x0020_e..t_ak_felleskostavregning_jobb_x0020_j_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_k_x0020_on_x0020_k.jobbnr_x003D_j.jobbnr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_ak_felleskostavregning_linje_x0020_l_x0020_on_x0020_k.jobbnr_x003D_l.jobbnr_x0020_and_x0020_l.kontrakts_id_x003D_k.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealkontrakt_x0020_ak_x0020_on_x0020_ak.kontrakts_id_x003D_l.kontrakts_id_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..DEBITOR_x0020_d_x0020_on_x0020_ak.kundenummer_x003D_d.kontonr_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..c_name_x0020_c_x0020_on_x0020_c.id_x003D_d.nameid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_y..Dimensjon_x0020_dim_x0020_on_x0020_dim.dimtall_x003D_l.felleskostid_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealvaredim_x0020_av_x0020_on_x0020_av.dimrecordid_x003D_dim.dimtall_x0020__x002F__x002A__x002A__x002F_left_x0020_join_x0020_c..VARER_x0020_va_x0020_on_x0020_va.varenr_x003D__x0028_case_x0020_when_x0020_isNull_x0028_l.momsind_x0020__x002C_0_x0029__x003D_0_x0020_then_x0020_av.vareavgiftsfri_x0020_else_x0020_av.vareavgiftspliktig_x0020_end_x0029__x002F__x002A__x002A__x002F_left_x0020_join_x0020_e..t_arealres_x0020_ares_x0020_ON_x0020_ares.kontrakts_id_x0020__x003D__x0020_ak.kontrakts_id_x002F__x002A__x002A__x002F_where_x0020_k.kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_and_x0020_j.jobbnr_x0020__x003D__x0028_Select_x0020_top_x0020_1_x0020_jobbnr_x0020_from_x0020_e..t_ak_felleskostavregning_kontrakt_x0020_where_x0020_kontrakts_id_x0020_in_x0020__x0028__x007B_ContractFrom_x007D__x0029__x0020_order_x0020_by_x0020_jobbnr_x0020_desc_x0029__x0020_DEALLOCATE_x0020_MY_CURSOR,System.String,_x0036_206_x002C_6206_x002C_6210_x002C_6210_x002C_6310_x002C_6310_x002C_6311_x002C_6311_x002C_6312_x002C_6312_x002C_6313_x002C_6313_x002C_6314_x002C_6314_x002C_6315_x002C_6315_x002C_6316_x002C_6316_x002C_6319_x002C_6319_x002C_6320_x002C_6320_x002C_6323_x002C_6323_x002C_6360_x002C_6360_x002C_6420_x002C_6420_x002C_6610_x002C_6610_x002C_6618_x002C_6618_x002C_6620_x002C_6620_x002C_6621_x002C_6621_x002C_6710_x002C_6710_x002C_6720_x002C_6720,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
       <value>System,ClientNr,ClientNr,System.Int32,_x0037_,True,False</value>
-      <value>System,ClientYear,ClientYear,System.Int32,_x0032_017,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_019,True,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -1213,8 +1217,9 @@ Sum(DataBand1,DatakildeSum.kostnad)}</Text>
             <Text97 Ref="80" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,1.92,6.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="1">
+              <Conditions isList="true" count="2">
                 <value>_x007B_Kontraktsinfo.inkmva_x0020__x003D__x003D__x0020__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+                <value>_x007B_SkjulKvmPris_x0020__x003D__x003D__x0020__x0022_True_x0022__x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
               </Conditions>
               <Font>Arial,10,Italic</Font>
               <Guid>adae926d91ff449d875db4ce1813ad8d</Guid>
@@ -1230,8 +1235,9 @@ Sum(DataBand1,DatakildeSum.kostnad)}</Text>
             <Text98 Ref="81" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>8,1.92,3.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="1">
+              <Conditions isList="true" count="2">
                 <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+                <value>_x007B_SkjulKvmPris_x0020__x003D__x003D__x0020__x0022_True_x0022__x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
               </Conditions>
               <Font>Arial,10</Font>
               <Guid>02a6076a369f47e78e2d95196c69c86f</Guid>
@@ -1255,7 +1261,9 @@ Sum(DataBand1,DatakildeSum.kostnad)}</Text>
             <Text99 Ref="83" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>8,3.12,3.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_SkjulKvmPris_x0020__x003D__x003D__x0020__x0022_True_x0022__x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10</Font>
               <Guid>524d8a1263e64aff81d09edbf2d7bfdb</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1278,7 +1286,9 @@ Sum(DataBand1,DatakildeSum.kostnad)}</Text>
             <Text100 Ref="85" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,3.12,6.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
+              <Conditions isList="true" count="1">
+                <value>_x007B_SkjulKvmPris_x0020__x003D__x003D__x0020__x0022_True_x0022__x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+              </Conditions>
               <Font>Arial,10,Italic</Font>
               <Guid>869b725175b24ab49866dcb629767b13</Guid>
               <Margins>0,0,0,0</Margins>
@@ -1293,8 +1303,9 @@ Sum(DataBand1,DatakildeSum.kostnad)}</Text>
             <Text101 Ref="86" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>8,2.52,3.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="1">
+              <Conditions isList="true" count="2">
                 <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+                <value>_x007B_SkjulKvmPris_x0020__x003D__x003D__x0020__x0022_True_x0022__x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
               </Conditions>
               <Font>Arial,10</Font>
               <Guid>09b40157cab74cc6ad41e24cc6cc3a30</Guid>
@@ -1318,8 +1329,9 @@ Sum(DataBand1,DatakildeSum.kostnad)}</Text>
             <Text102 Ref="88" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,3.72,6.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="1">
+              <Conditions isList="true" count="2">
                 <value>_x007B_Kontraktsinfo.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+                <value>_x007B_SkjulKvmPris_x0020__x003D__x003D__x0020__x0022_True_x0022__x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
               </Conditions>
               <Font>Arial,10,Italic</Font>
               <Guid>60891e139f5d4bcc9ca61ec69b30bfdc</Guid>
@@ -1335,8 +1347,9 @@ Sum(DataBand1,DatakildeSum.kostnad)}</Text>
             <Text103 Ref="89" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>8,3.72,3.2,0.6</ClientRectangle>
-              <Conditions isList="true" count="1">
+              <Conditions isList="true" count="2">
                 <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+                <value>_x007B_SkjulKvmPris_x0020__x003D__x003D__x0020__x0022_True_x0022__x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
               </Conditions>
               <Font>Arial,10</Font>
               <Guid>8125a887912a4a55991c3d5cdb0d6378</Guid>
@@ -1360,8 +1373,9 @@ Sum(DataBand1,DatakildeSum.kostnad)}</Text>
             <Text104 Ref="91" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,2.52,6.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="1">
+              <Conditions isList="true" count="2">
                 <value>_x007B_Kontraktsinfo.inkmva_x0020__x003D__x003D__x0020_false_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+                <value>_x007B_SkjulKvmPris_x0020__x003D__x003D__x0020__x0022_True_x0022__x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
               </Conditions>
               <Font>Arial,10,Italic</Font>
               <Guid>91fb629fee9a4473882d58c9c7dd6465</Guid>
@@ -1377,8 +1391,9 @@ Sum(DataBand1,DatakildeSum.kostnad)}</Text>
             <Text105 Ref="92" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,2.52,6.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="1">
+              <Conditions isList="true" count="2">
                 <value>_x007B_Kontraktsinfo.inkmva_x0020__x003D__x003D__x0020__x0020_true_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+                <value>_x007B_SkjulKvmPris_x0020__x003D__x003D__x0020__x0022_True_x0022__x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
               </Conditions>
               <Font>Arial,10,Italic</Font>
               <Guid>b4b520be190c40a5ae939bf133cb6d35</Guid>
@@ -1394,8 +1409,9 @@ Sum(DataBand1,DatakildeSum.kostnad)}</Text>
             <Text106 Ref="93" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>8,2.52,3,0.6</ClientRectangle>
-              <Conditions isList="true" count="1">
+              <Conditions isList="true" count="2">
                 <value>_x007B_DataKilde1.inkmva_x0020__x003D__x003D__x0020__x0020_true_x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
+                <value>_x007B_SkjulKvmPris_x0020__x003D__x003D__x0020__x0022_True_x0022__x007D_,Red,Transparent,Arial_x002C_8,False,False,,,None</value>
               </Conditions>
               <Font>Arial,10</Font>
               <Guid>a782d887cf7a4758a0164db52cd041d5</Guid>
@@ -2771,10 +2787,10 @@ avdeling</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/9/2019 2:57:03 PM</ReportChanged>
+  <ReportChanged>12/10/2019 10:43:07 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
   <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\ny_nering_avregnfelleskost_avd_kontrakt_2.mrt</ReportFile>
-  <ReportGuid>ab3f364c7dcc4ac797442d9ce97463b4</ReportGuid>
+  <ReportGuid>7153186a271e472bbe75267479025850</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
