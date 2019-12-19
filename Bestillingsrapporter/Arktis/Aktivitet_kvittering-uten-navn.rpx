@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ActiveReportsLayout 
+	GUIDLIB="{70AC2D2D-857D-4D81-A5E4-048D91DD52FD}" GUIDREP="{9A8F30C2-C835-4C7E-8221-5003B74D94D8}" 
+	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
+		740066000000"
+	PrintWidth="10080"
+	DocumentName="Utskrift av aktivitet"
+	TOCEnabled="0"
+	ScriptLang="VBScript"
+RulerVisible="0"
+
+>
+<Watermark
+		PictureAlignment="0"
+		>
+</Watermark>
+<Script>
+<![CDATA[Sub OnDataInitialize
+
+	Dim strdelt
+	Dim strdeltt
+	Dim pos
+	Dim post
+
+	'm_data.Debugg=true
+	dim sql
+	m_data.AddInputMacro "{FD}","Fra aktivitet","getsql(select max(id) as it from c..activity)"
+	m_data.AddInputMacro "{TD}","Til aktivitet","getsql(select max(id) as it from c..activity)"
+
+	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
+
+
+	sql="object:uactivityreportlib.uactivityreport:{FD}|{TD}"
+
+	
+	m_data.SqlString = sql 
+	m_data.SetupFields rpt
+End Sub
+
+Sub OnReportStart
+
+End Sub
+
+Sub OnFetchData(eof)
+
+	if left(rpt.fields("deltakertype").value, 5)="Kunde" then
+		strdelt = rpt.fields("deltaker").value
+		pos = InStr(1, strdelt, vbCrLf, 1)
+		rpt.fields("deltaker").value = Mid(strdelt,pos)
+		
+		strdeltt = rpt.fields("deltakertype").value
+		poss = InStr(1, strdeltt, vbCrLf, 1)
+		rpt.fields("deltakertype").value = Mid(strdeltt,poss)
+		
+	end if
+End Sub]]></Script>
+<PageSettings	LeftMargin="1000"
+	RightMargin="800"
+	TopMargin="1000"
+	BottomMargin="720"
+	Orientation="1"
+>
+</PageSettings>
+<StyleSheet>
+	<Style Name="Normal"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: normal; font-variant: inherit; font-weight: normal; font-size: 10pt; font-size-adjust: inherit; font-stretch: inherit; color: rgb(0,0,0); background-color: rgb(255,255,255); background-image: inherit; background-repeat: inherit; background-attachment: inherit; background-x-position: inherit; background-y-position: inherit; opacity: inherit; word-spacing: inherit; letter-spacing: inherit; text-decoration: none; vertical-align: inherit; text-transform: inherit; text-align: inherit; text-indent: inherit; unicode-bidi: inherit; line-height: inherit; white-space: inherit; ddo-can-grow: inherit; ddo-can-shrink: inherit; ddo-char-set: 0; "
+	/>
+	<Style Name="Heading1"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 16pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading2"
+	Value="font-family: &apos;Times New Roman&apos;; font-style: italic; font-variant: inherit; font-weight: bold; font-size: 14pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+	<Style Name="Heading3"
+	Value="font-family: &apos;inherit&apos;; font-style: inherit; font-variant: inherit; font-weight: bold; font-size: 13pt; font-size-adjust: inherit; font-stretch: inherit; "
+	/>
+</StyleSheet>
+<Sections>
+	<Section Type="GroupHeader" Name="GroupHeader1"
+		Height="14400"
+		DataField="aktid"
+		NewPage="1"
+	>
+		<Control 
+		Type="AR.Label"
+		Name="Label21"
+		Left="0"
+		Top="10630"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Caption="Tittel:"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field28"
+		DataField="name"
+		Left="1276"
+		Top="10630"
+		Width="4393"
+		Height="283"
+		Visible="0"
+		Text="name"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label22"
+		Left="0"
+		Top="850"
+		Width="1984"
+		Height="284"
+		Caption="Ansvarlig:"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field29"
+		DataField="ansvarlig"
+		Left="1984"
+		Top="850"
+		Width="4394"
+		Height="284"
+		Text="Responsible"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label23"
+		Left="0"
+		Top="1559"
+		Width="4535"
+		Height="284"
+		Caption="Tilknyttet denne aktiviteten:"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label24"
+		Left="8646"
+		Top="2409"
+		Width="1275"
+		Height="284"
+		Visible="0"
+		Caption="Kontakt"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label25"
+		Left="8079"
+		Top="12472"
+		Width="425"
+		Height="284"
+		Visible="0"
+		Caption="Fra dato"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label26"
+		Left="8362"
+		Top="12189"
+		Width="425"
+		Height="283"
+		Visible="0"
+		Caption="Til dato"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field30"
+		DataField="contact"
+		Left="7228"
+		Top="1843"
+		Width="2693"
+		Height="283"
+		Visible="0"
+		Text="contact"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field31"
+		DataField="from_date"
+		Left="8220"
+		Top="12756"
+		Width="1843"
+		Height="283"
+		Visible="0"
+		Text="from_date"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field32"
+		DataField="to_date"
+		Left="7937"
+		Top="12614"
+		Width="1843"
+		Height="284"
+		Visible="0"
+		Text="to_date"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field33"
+		DataField="deltakertype"
+		Left="0"
+		Top="1843"
+		Width="1843"
+		Height="1700"
+		Text="deltakertype"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field34"
+		DataField="deltaker"
+		Left="1843"
+		Top="1843"
+		Width="8220"
+		Height="1700"
+		Text="deltaker"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label27"
+		Left="0"
+		Top="3543"
+		Width="3402"
+		Height="284"
+		Caption="Beskrivelse av oppgaven"
+		ClassName="Normal"
+		Style="font-style: italic; font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field35"
+		DataField="Description"
+		Left="0"
+		Top="3827"
+		Width="9921"
+		Height="1984"
+		Text="description"
+		ClassName="Normal"
+		Style="font-style: italic; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label30"
+		Left="0"
+		Top="283"
+		Width="2693"
+		Height="567"
+		Caption="Type oppdrag:"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-size: 14pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field39"
+		DataField="type_sak"
+		Left="2551"
+		Top="283"
+		Width="4677"
+		Height="567"
+		Text="type_sak"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-style: italic; font-size: 14pt; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line11"
+		X1="0"
+		Y1="142"
+		X2="10063"
+		Y2="142"
+		LineWeight="2"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field40"
+		DataField="*y..Bedrift.Arstall"
+		Left="8079"
+		Top="0"
+		Width="1984"
+		Height="283"
+		Visible="0"
+		Text="*y..Bedrift.Arstall"
+		ClassName="Normal"
+		Style="text-align: right; font-size: 10pt; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field41"
+		DataField="=&quot;Side &quot; &amp; rpt.Pagenumber"
+		Left="8362"
+		Top="283"
+		Width="1701"
+		Height="284"
+		Visible="0"
+		Text="Sidenr"
+		SummaryType="4"
+		SummaryFunc="11"
+		SummaryRunning="2"
+		ClassName="Normal"
+		Style="font-size: 8pt; font-family: &apos;Verdana&apos;; text-align: right; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field42"
+		DataField="=Now"
+		Left="7937"
+		Top="10346"
+		Width="1701"
+		Height="284"
+		Visible="0"
+		Text="Dato"
+		OutputFormat="dd/mm/yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 10pt; text-align: right; ddo-char-set: 0; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field43"
+		DataField="User_name"
+		Left="8362"
+		Top="850"
+		Width="1701"
+		Height="284"
+		Visible="0"
+		Text="User_name"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; font-size: 8pt; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label31"
+		Left="8079"
+		Top="12331"
+		Width="708"
+		Height="283"
+		Visible="0"
+		Caption="Status:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field44"
+		DataField="status"
+		Left="8362"
+		Top="12756"
+		Width="1276"
+		Height="283"
+		Visible="0"
+		Text="status"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line12"
+		X1="0"
+		Y1="9780"
+		X2="10063"
+		Y2="9780"
+		Visible="0"
+		LineStyle="2"
+		LineWeight="4"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label32"
+		Left="0"
+		Top="9921"
+		Width="2551"
+		Height="425"
+		Visible="0"
+		Caption="Til interntbruk"
+		ClassName="Normal"
+		Style="font-size: 14pt; font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line16"
+		X1="142"
+		Y1="6378"
+		X2="10063"
+		Y2="6378"
+		LineWeight="2"
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line18"
+		X1="142"
+		Y1="6945"
+		X2="10063"
+		Y2="6945"
+		LineWeight="2"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field47"
+		DataField="ansvarlig"
+		Left="0"
+		Top="8646"
+		Width="4394"
+		Height="283"
+		Text="Responsible"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field48"
+		DataField="=Now"
+		Left="4394"
+		Top="9213"
+		Width="1559"
+		Height="283"
+		Text="Dato"
+		OutputFormat="dd/mm/yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 10pt; text-align: left; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field49"
+		DataField="*y..bedrift.navn"
+		Left="0"
+		Top="8929"
+		Width="4394"
+		Height="284"
+		Text="*y..bedrift.navn"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field50"
+		DataField="*y..bedrift.telefon"
+		Left="0"
+		Top="9213"
+		Width="2268"
+		Height="283"
+		Text="*y..bedrift.telefon"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label34"
+		Left="142"
+		Top="6094"
+		Width="1842"
+		Height="284"
+		Caption="Kommentar:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field51"
+		DataField="*y..bedrift.poststed"
+		Left="4677"
+		Top="12898"
+		Width="1843"
+		Height="283"
+		Visible="0"
+		Text="*y..bedrift.poststed"
+		ClassName="Normal"
+		Style="text-align: right; font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Image"
+		Name="Image1"
+		Left="0"
+		Top="9210"
+		Width="705"
+		Height="1140"
+		Visible="0"
+		>
+		<Data><![CDATA[010000006C74000024030000FFD8FFE000104A46494600010001006000600000FFFE001F4C45414420546563686E6F6C6F6769657320496E632E2056312E3031
+			00FFDB00840008050607060508070607090808090C140D0C0B0B0C1811120E141D191E1E1C191C1B20242E2720222B221B1C2836282B2F313334331F26383C38
+			323C2E323331010809090C0A0C170D0D1731211C2131313131313131313131313131313131313131313131313131313131313131313131313131313131313131
+			31313131313131FFC401A20000010501010101010100000000000000000102030405060708090A0B010003010101010101010101000000000000010203040506
+			0708090A0B100002010303020403050504040000017D01020300041105122131410613516107227114328191A1082342B1C11552D1F02433627282090A161718
+			191A25262728292A3435363738393A434445464748494A535455565758595A636465666768696A737475767778797A838485868788898A92939495969798999A
+			A2A3A4A5A6A7A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6D7D8D9DAE1E2E3E4E5E6E7E8E9EAF1F2F3F4F5F6F7F8F9FA1100020102040403
+			040705040400010277000102031104052131061241510761711322328108144291A1B1C109233352F0156272D10A162434E125F11718191A262728292A353637
+			38393A434445464748494A535455565758595A636465666768696A737475767778797A82838485868788898A92939495969798999AA2A3A4A5A6A7A8A9AAB2B3
+			B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6D7D8D9DAE2E3E4E5E6E7E8E9EAF2F3F4F5F6F7F8F9FAFFC00011080014001303011100021101031101FFDA
+			000C03010002110311003F00F6BD57C43A669370B05F4F223EC12394824916042480F2B2A911270DF33955F95B9F94E00352800A00E1FE2669697BE406B69D21
+			B989E1BABA821BC9F7A8C6D86486D64477560F210CC4AAE18633250061D9F803C4325BE937BADCD69E22744124FA36B5713182D5D84C488DC3481CAF9A1332A4
+			8C42643AF00007A669B0FD9F4EB683ECD05A7951227916E731458006C4385F94741C0E0741D2802C50014005007FFFD9]]>
+		</Data>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label35"
+		Left="6520"
+		Top="12898"
+		Width="283"
+		Height="283"
+		Visible="0"
+		Caption=","
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field52"
+		DataField="Created_date"
+		Left="1984"
+		Top="1134"
+		Width="3685"
+		Height="283"
+		Text="Created_date"
+		OutputFormat="dd/mm/yyyy"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line20"
+		X1="0"
+		Y1="709"
+		X2="10063"
+		Y2="709"
+		LineWeight="2"
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label37"
+		Left="0"
+		Top="1134"
+		Width="1984"
+		Height="283"
+		Caption="Registrert dato:"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field53"
+		DataField="deltakertype"
+		Left="0"
+		Top="10913"
+		Width="1843"
+		Height="1701"
+		Visible="0"
+		Text="deltakertype"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field54"
+		DataField="deltaker"
+		Left="1843"
+		Top="10913"
+		Width="7795"
+		Height="1701"
+		Visible="0"
+		Text="deltaker"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label38"
+		Left="0"
+		Top="8362"
+		Width="3260"
+		Height="284"
+		Caption="Med vennlig hilsen"
+		ClassName="Normal"
+		Style="font-weight: bold; font-family: &apos;Verdana&apos;; ddo-char-set: 1; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label39"
+		Left="6661"
+		Top="9213"
+		Width="1134"
+		Height="283"
+		Caption="Sign:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 1; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line21"
+		X1="7087"
+		Y1="9496"
+		X2="9213"
+		Y2="9496"
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field55"
+		DataField="aktid"
+		Left="1276"
+		Top="10346"
+		Width="1133"
+		Height="284"
+		Visible="0"
+		Text="id"
+		ClassName="Normal"
+		Style="font-weight: bold; font-size: 10pt; font-family: &apos;Verdana&apos;; ddo-char-set: 0; background-color: rgb(255,255,255); "
+		>
+		</Control>
+		<Control 
+		Type="AR.Label"
+		Name="Label40"
+		Left="0"
+		Top="10346"
+		Width="992"
+		Height="284"
+		Visible="0"
+		Caption="Saksnr:"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; font-size: 10pt; font-weight: bold; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Field"
+		Name="Field56"
+		DataField="ansvarlig"
+		Left="2409"
+		Top="10346"
+		Width="4394"
+		Height="284"
+		Visible="0"
+		Text="Responsible"
+		ClassName="Normal"
+		Style="font-family: &apos;Verdana&apos;; ddo-char-set: 0; font-weight: bold; text-align: left; "
+		>
+		</Control>
+		<Control 
+		Type="AR.Line"
+		Name="Line23"
+		X1="142"
+		Y1="7654"
+		X2="10063"
+		Y2="7654"
+		LineWeight="2"
+		>
+		</Control>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="Detail" Name="Detail"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+	<Section Type="GroupFooter" Name="GroupFooter1"
+		Height="0"
+	>
+<Script>
+<![CDATA[
+Sub OnFormat
+
+End Sub
+]]></Script>
+	</Section>
+</Sections>
+</ActiveReportsLayout>
