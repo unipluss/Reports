@@ -254,8 +254,8 @@ SELECT
 	FROM c..VARELNFAKT vlf
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
 WHERE ISNULL(vlf.dim7, 0) &lt;&gt; 0
-	AND vlf.Varenr IN ('3035', '3032', '3036', '3135', '3120', '3125')
-	AND fak.Fakturadato between '{fraDato}' and DATEADD(y, 1, '{TilDato}')</SqlCommand>
+	AND vlf.Varenr IN ('3035', '3032', '3036', '3120', '3125')
+	AND fak.Fakturadato between '{fraDato}' and '{TilDato}'</SqlCommand>
       </VlfOa>
       <VlfKd Ref="8" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>VlfKd</Alias>
@@ -289,10 +289,12 @@ SELECT
 	ISNULL(vlf.Netto, 0) = 0) THEN 0
 	ELSE vlf.Netto END as Netto,
 	fak.Fakturadato
-	FROM c..VARELNFAKT vlf
+FROM c..VARELNFAKT vlf
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
+	LEFT JOIN e..t_kontraktsdata kd on kd.FormidlingsNr = vlf.dim6
+	INNER JOIN e..t_ansatte an ON an.Navn = fak.Vaar_Ref
 WHERE ISNULL(vlf.dim6, 0) &lt;&gt; 0 AND ISNULL(vlf.dim7, 0) = 0
-	AND vlf.Varenr IN ('3035', '3032', '3036', '3135', '3120', '3125')
+	AND vlf.Varenr IN ('3035', '3032', '3036', '3120', '3125')
 	AND fak.Fakturadato between '{fraDato}' and DATEADD(y, 1, '{TilDato}')</SqlCommand>
       </VlfKd>
       <VlfAuK Ref="9" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
@@ -313,7 +315,8 @@ WHERE ISNULL(vlf.dim6, 0) &lt;&gt; 0 AND ISNULL(vlf.dim7, 0) = 0
         <Name>VlfAuK</Name>
         <NameInSource>Connection</NameInSource>
         <Parameters isList="true" count="0" />
-        <SqlCommand>DECLARE @fradato as varchar(1000)
+        <SqlCommand>-- dim8
+DECLARE @fradato as varchar(1000)
 DECLARE @tildato as varchar(1000)
 set @fradato = '{fraDato}'
 set @tildato = '{TilDato}'
@@ -328,15 +331,14 @@ SELECT distinct an.navn, an.Ansatte_id,
 	vlf.Netto,		
 	vlf.Varetekst
 	FROM c..Activity ac
-	LEFT JOIN c..ORDRE ord ON ord.dim8 = ac.ID
 	LEFT JOIN c..VARELNFAKT vlf ON vlf.dim8 = ac.ID
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
-	LEFT JOIN e..t_ansatte an ON an.Navn = ord.Vaar_Ref
+	INNER JOIN e..t_ansatte an ON an.Navn = fak.Vaar_Ref
 WHERE ISNULL(an.ansatte_id, 0) &lt;&gt; 0
 	AND an.ansatte_id IN ({Ansatt})
 	AND ISNULL(fak.fakturadato, '') &lt;&gt; ''
 	AND fak.fakturadato between @fradato and @tildato
-	AND vlf.Varenr in ('3035', '3032', '3036', '3135', '3120', '3125')
+	AND vlf.Varenr in ('3035', '3032', '3036', '3120', '3125')
 ORDER BY vlf.Fakturanr</SqlCommand>
       </VlfAuK>
       <AktiveBoliger Ref="10" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
@@ -417,10 +419,11 @@ SELECT
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
 	LEFT JOIN e..t_forvaltningsAvtale fa ON fa.Id = kd.ForvaltningsavtaleId
 	LEFT JOIN e..t_ansatte an ON an.Ansatte_id = fa.ansvarligUtleieKonsulentId
-WHERE vlf.Varenr IN ('3035', '3032', '3036', '3135', '3120', '3125')
-	AND fak.Fakturadato between @fradato and DATEADD(y, 1, @tildato)
+WHERE vlf.Varenr IN ('3035', '3032', '3036', '3120', '3125')
+	AND fak.Fakturadato between @fradato and @tildato
 	AND (kd.godkjentInnflyttingsmappeDato NOT BETWEEN @fradato AND @tildato OR ISNULL(kd.godkjentInnflyttingsmappeDato, '') = '')
-	AND ISNULL(kd.FormidlingsNr, 0) &lt;&gt; 0</SqlCommand>
+	AND ISNULL(kd.FormidlingsNr, 0) &lt;&gt; 0
+	AND an.Navn = fak.Vaar_Ref</SqlCommand>
       </AuGs>
     </DataSources>
     <Relations isList="true" count="6">
@@ -511,14 +514,14 @@ WHERE vlf.Varenr IN ('3035', '3032', '3036', '3135', '3120', '3125')
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="8">
-      <value>,Ansatt,Ansatt,checklist_x007C_sql_x003D__x002F__x002A__x002A__x002F_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x0020__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020_FOR_x0020__x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F__x0020_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_ans_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_ans_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020__x002F__x002A__x002A__x002F_from_x0020_e..t_ansatte_x0020_an_x0020_where_x0020_isnull_x0028_an.ErMegler_x002C__x0020_0_x0029__x0020__x003C__x003E__x0020_0_x002F__x002A__x002A__x002F_order_x0020_by_x0020_navn_x0020_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0034_8,False,False,False</value>
-      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0190426,False,False,False</value>
-      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0190529,False,False,False</value>
+      <value>,Ansatt,Ansatt,checklist_x007C_sql_x003D__x002F__x002A__x002A__x002F_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x0020__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020_FOR_x0020__x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F__x0020_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_ans_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_ans_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020__x002F__x002A__x002A__x002F_from_x0020_e..t_ansatte_x0020_an_x0020_where_x0020_isnull_x0028_an.ErMegler_x002C__x0020_0_x0029__x0020__x003C__x003E__x0020_0_x002F__x002A__x002A__x002F_order_x0020_by_x0020_navn_x0020_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031__x002C_13_x002C_14_x002C_16_x002C_18_x002C_19_x002C_21_x002C_25_x002C_29_x002C_3_x002C_30_x002C_33_x002C_36_x002C_37_x002C_39_x002C_40_x002C_41_x002C_42_x002C_43_x002C_44_x002C_45_x002C_46_x002C_47_x002C_48_x002C_49_x002C_5_x002C_51_x002C_52_x002C_53_x002C_54_x002C_55_x002C_57_x002C_58_x002C_59_x002C_6_x002C_60_x002C_61_x002C_62_x002C_63_x002C_64_x002C_8_x002C_9_x002C_57_x002C_30_x002C_14_x002C_49_x002C_44_x002C_29_x002C_43_x002C_54_x002C_48_x002C_63_x002C_9_x002C_64_x002C_42_x002C_40_x002C_36_x002C_39_x002C_46_x002C_58,False,False,False</value>
+      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0191101,False,False,False</value>
+      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0191130,False,False,False</value>
       <value>System,UserName,UserName,System.String,unipluss,True,False</value>
       <value>System,UserId,UserId,System.String,_x0035_7,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
       <value>System,ClientNr,ClientNr,System.Int32,_x0031_4,True,False</value>
-      <value>System,ClientYear,ClientYear,System.Int32,_x0032_019,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_020,True,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -2694,10 +2697,10 @@ Sum(DbOppdrag,OaKost.totalsum)
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>5/22/2019 6:45:01 AM</ReportChanged>
+  <ReportChanged>12/23/2019 8:58:05 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\Users\PN-3PU~1\AppData\Local\Temp\2\v_2LonnAnsvarligUtleiekonsulentAnsatt.mrt</ReportFile>
-  <ReportGuid>883b964be40d46ed9aa23df71f6ab5b6</ReportGuid>
+  <ReportFile>C:\Users\PN-3PU~1\AppData\Local\Temp\2\v_3LonnAnsvarligUtleiekonsulentAnsatt2.mrt</ReportFile>
+  <ReportGuid>44b887e28ce9433291f29ff48c054027</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
