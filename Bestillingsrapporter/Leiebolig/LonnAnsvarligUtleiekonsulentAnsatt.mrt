@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9FZpoU1f2d1hfOXJ9ADjF4tawQ1NVFnxa0y5gORc63vRaq3PZ017KUVBqOxpGW0TjVrViUNdAYFhBdXM8VQ1j+B40YliFXsFwGs=</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9G5Tz0pKwx36RPnsyFj2J9EYzYhIAdP5fBrtXGeE5D+NxK3raUv6QWts1QhiSeEv125pzUtMsYHsCFHMS4gif/la96vFXVmIYmW57OoB4wvXyPXCyU/zmO1H0dz/JetG0Q==</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -335,6 +335,7 @@ SELECT distinct an.navn, an.Ansatte_id,
 	LEFT JOIN c..FAKTURA fak ON fak.Fakturanr = vlf.Fakturanr
 	INNER JOIN e..t_ansatte an ON an.Navn = fak.Vaar_Ref
 WHERE ISNULL(an.ansatte_id, 0) &lt;&gt; 0
+	AND ISNULL(vlf.dim6, 0) = 0
 	AND an.ansatte_id IN ({Ansatt})
 	AND ISNULL(fak.fakturadato, '') &lt;&gt; ''
 	AND fak.fakturadato between @fradato and @tildato
@@ -514,11 +515,11 @@ WHERE vlf.Varenr IN ('3035', '3032', '3036', '3120', '3125')
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="8">
-      <value>,Ansatt,Ansatt,checklist_x007C_sql_x003D__x002F__x002A__x002A__x002F_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x0020__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020_FOR_x0020__x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F__x0020_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_ans_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_ans_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020__x002F__x002A__x002A__x002F_from_x0020_e..t_ansatte_x0020_an_x0020_where_x0020_isnull_x0028_an.ErMegler_x002C__x0020_0_x0029__x0020__x003C__x003E__x0020_0_x002F__x002A__x002A__x002F_order_x0020_by_x0020_navn_x0020_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031__x002C_13_x002C_14_x002C_16_x002C_18_x002C_19_x002C_21_x002C_25_x002C_29_x002C_3_x002C_30_x002C_33_x002C_36_x002C_37_x002C_39_x002C_40_x002C_41_x002C_42_x002C_43_x002C_44_x002C_45_x002C_46_x002C_47_x002C_48_x002C_49_x002C_5_x002C_51_x002C_52_x002C_53_x002C_54_x002C_55_x002C_57_x002C_58_x002C_59_x002C_6_x002C_60_x002C_61_x002C_62_x002C_63_x002C_64_x002C_8_x002C_9_x002C_57_x002C_30_x002C_14_x002C_49_x002C_44_x002C_29_x002C_43_x002C_54_x002C_48_x002C_63_x002C_9_x002C_64_x002C_42_x002C_40_x002C_36_x002C_39_x002C_46_x002C_58,False,False,False</value>
-      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0191101,False,False,False</value>
-      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0191130,False,False,False</value>
-      <value>System,UserName,UserName,System.String,unipluss,True,False</value>
-      <value>System,UserId,UserId,System.String,_x0035_7,True,False</value>
+      <value>,Ansatt,Ansatt,checklist_x007C_sql_x003D__x002F__x002A__x002A__x002F_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x0020__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020_FOR_x0020__x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ansatte_id_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_ansatte_x002F__x002A__x002A__x002F__x0020_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_ans_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_ans_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ansatte_id_x0029__x002C__x0020_navn_x0020__x002F__x002A__x002A__x002F_from_x0020_e..t_ansatte_x0020_an_x0020_where_x0020_isnull_x0028_an.ErMegler_x002C__x0020_0_x0029__x0020__x003C__x003E__x0020_0_x002F__x002A__x002A__x002F_order_x0020_by_x0020_navn_x0020_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0033_0_x002C_14_x002C_49_x002C_44_x002C_29_x002C_43_x002C_54_x002C_48_x002C_63_x002C_9_x002C_64_x002C_42_x002C_40_x002C_36_x002C_39_x002C_46_x002C_58,False,False,False</value>
+      <value>,fraDato,Fra_x0020_dato,date_x007C_sql_x003D_Select_x0020_GetDate_x0028__x0029_,System.String,_x0032_0191225,False,False,False</value>
+      <value>,TilDato,Til_x0020_dato,date_x007C_sql_x003D_Select_x0020_dateadd_x0028_yy_x002C_1_x002C_GetDate_x0028__x0029__x0029_,System.String,_x0032_0210127,False,False,False</value>
+      <value>System,UserName,UserName,System.String,uniplusstest,True,False</value>
+      <value>System,UserId,UserId,System.String,_x0035_8,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
       <value>System,ClientNr,ClientNr,System.Int32,_x0031_4,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_020,True,False</value>
@@ -1806,7 +1807,7 @@ Sum(DbOppdrag,OaKost.totalsum)
           <Parent isRef="110" />
         </HeaderBand1>
         <DbAmkOa Ref="117" type="DataBand" isKey="true">
-          <Brush>Transparent</Brush>
+          <Brush>RosyBrown</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,2.6,27.7,1</ClientRectangle>
@@ -2203,7 +2204,7 @@ Sum(DbOppdrag,OaKost.totalsum)
           <Parent isRef="140" />
         </HeaderBand3>
         <DataBand1 Ref="147" type="DataBand" isKey="true">
-          <Brush>Transparent</Brush>
+          <Brush>NavajoWhite</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,2.8,27.7,1</ClientRectangle>
@@ -2518,7 +2519,7 @@ Sum(DbOppdrag,OaKost.totalsum)
           <Parent isRef="163" />
         </HbAuGs>
         <DbAugs Ref="171" type="DataBand" isKey="true">
-          <Brush>Transparent</Brush>
+          <Brush>LightSteelBlue</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,2.6,27.7,0.8</ClientRectangle>
@@ -2697,10 +2698,10 @@ Sum(DbOppdrag,OaKost.totalsum)
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/23/2019 8:58:05 AM</ReportChanged>
+  <ReportChanged>2/5/2020 12:20:10 PM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\Users\PN-3PU~1\AppData\Local\Temp\2\v_3LonnAnsvarligUtleiekonsulentAnsatt2.mrt</ReportFile>
-  <ReportGuid>44b887e28ce9433291f29ff48c054027</ReportGuid>
+  <ReportFile>C:\Users\PN-3P-~4\AppData\Local\Temp\7\v_3LonnAnsvarligUtleiekonsulentAnsatt2.mrt</ReportFile>
+  <ReportGuid>cac2624b9a434c7d9b2c6325007a7fad</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
