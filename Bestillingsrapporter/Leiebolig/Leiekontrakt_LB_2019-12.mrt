@@ -143,7 +143,7 @@ for xml Path ('')
 addr1.namelink=ku.nameid and (mail=1 or mail=-1)) as postal_code,(select top 1 addr1.city from c..c_address as addr1 where addr1.namelink=ku.nameid and (mail=1 or mail=-1)) as city,(select top 1 addr1.country from c..c_address as addr1 where 
 addr1.namelink=ku.nameid and (mail=1 or mail=-1)) as country
 ,b.Oppgang,b.Rom_nummer,b.Objekt_adresse Objekt_adresse,b.Objekt_postnummer,b.Objekt_poststed,e.etasje_navn,h.navn as byggnavn
-,k.grunnprisleie + (select sum(pris) as it From e..t_KostnaderLeieAvtale
+,k.grunnprisleie + (select isnull(sum(pris),0) as it From e..t_KostnaderLeieAvtale
 	where KontraktsID =  k.kontrakts_id
 	and Varenr = (select top 1 Varenr_inkludertIHusleie as it from e..t_klientParametre) ) pris
 ,'' pris2,'#pris2fra#' pris2fra,'#pris2til#' pris2til
@@ -447,8 +447,8 @@ and Varenr not in (select Varenr_inkludertIHusleie  from e..t_klientParametre)
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="7">
-      <value>,Kontrakts_ID_INN,Kontrakts_x0020_id_x0020_fra,text_x007C_,System.String,_x0031_5554,False,False,False</value>
-      <value>,KontraktsIDtil,KontraktsID_x0020_til_x0020_,text_x007C_,System.String,_x0031_5554,False,False,False</value>
+      <value>,Kontrakts_ID_INN,Kontrakts_x0020_id_x0020_fra,text_x007C_,System.String,_x0031_5747,False,False,False</value>
+      <value>,KontraktsIDtil,KontraktsID_x0020_til_x0020_,text_x007C_,System.String,_x0031_5747,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,no,True,False</value>
@@ -1597,10 +1597,10 @@ and Varenr not in (select Varenr_inkludertIHusleie  from e..t_klientParametre)
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
   <ReportAuthor>Sylvi-Ann / View</ReportAuthor>
-  <ReportChanged>2/14/2020 8:04:42 AM</ReportChanged>
+  <ReportChanged>2/14/2020 9:49:46 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\PN-3P-~2\AppData\Local\Temp\3\Leiekontrakt_LB_2019-12.mrt</ReportFile>
-  <ReportGuid>28c0ad9d8263414fa656496a60b6c846</ReportGuid>
+  <ReportGuid>20376d04c48a43dea34c392ef6b8c0d2</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
