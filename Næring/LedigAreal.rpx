@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ActiveReportsLayout 
-	GUIDLIB="{7BE91A24-FD90-4E13-BE06-233502AF7146}" GUIDREP="{D54F7AEC-CC49-42FE-B01D-4588D1C37CC1}" 
+	GUIDLIB="{BFA7A1DB-2395-47E7-A474-E45A1818BB82}" GUIDREP="{649EB7DE-6490-4ABD-A6D2-A3282128F15C}" 
 	LICENSE="100001003B7FD2001B26564594C48DAC4C674BED30006400790033007400680078006900750069006F0071007200340035003200660068006700640072003400
 		740066000000"
 	PrintWidth="15465"
@@ -23,49 +23,48 @@ Sub OnDataInitialize
 	dim subSql
 
 	m_data.AddInputMacro "{OM}","Velg bygg ","0",,7,"Select ID, navn  from e..t_bygg union select '0','Alle' order by navn"
-	m_data.AddInputMacro "{status}","Velg status ","0",,7,"select ST.status_id, ST.Status from (e..t_arealkontrakt as AR INNER JOIN e..t_status as ST on AR.statusid=ST.Status_id) GROUP BY ST.Status, st.status_id union select '0','Alle' order by st.status_id"
+	'm_data.AddInputMacro "{status}","Velg status ","0",,7,"select ST.status_id, ST.Status from (e..t_arealkontrakt as AR INNER JOIN e..t_status as ST on AR.statusid=ST.Status_id) GROUP BY ST.Status, st.status_id union select '0','Alle' order by st.status_id"
 	m_data.AddInputMacro "{FRA_DATO}","Kontrakt fra dato","now()","date"
 	m_data.AddInputMacro "{TIL_DATO}","Kontrakt til dato","now()","date"
 	m_data.AddInputMacro "{MIN_AR}","Vis kun når ledig arealet er større enn","5","txt"
 	if not m_data.ShowInputDialog("Oppgi utvalg") then exit sub
 
 	typpe = m_data.GetMacroValue("{OM}")
-	statusType =  m_data.GetMacroValue("{status}")
+	'statusType =  m_data.GetMacroValue("{status}")
 	
 	subsql = "select ea.nettokvm - (select isnull(sum(isnull(ar.antall,0)),0) "
-    subsql = subsql & "from e..t_arealres ar "
-	subsql = subsql & "inner join e..t_arealkontrakt kon on "
-	subsql = subsql & "kon.kontrakts_id = ar.kontrakts_id "
-	subsql = subsql & "where ar.etasjearealid=ea.id and "
-	if statusType <> "0" then
-		subsql = subsql & "kon.statusid in ({status}) and "
-	end if
-	subsql = subsql & "kon.kontrakt_til > '{FRA_DATO}' and "
-	subsql = subsql & "kon.kontrakt_fra < '{TIL_DATO}' )"
+    SqlAdd subsql, "from e..t_arealres ar "
+	SqlAdd subsql, "inner join e..t_arealkontrakt kon on kon.kontrakts_id = ar.kontrakts_id "
+	SqlAdd subsql, "where ar.etasjearealid=ea.id and "
+	'if statusType <> "0" then
+	'	SqlAdd subsql, "kon.statusid in ({status}) and "
+	'end if
+	SqlAdd subsql, "isnull(ar.utgaar, kon.kontrakt_til) > '{FRA_DATO}' and "
+	SqlAdd subsql, "kon.kontrakt_fra < '{TIL_DATO}' )"
 	
 	sql = "select kt.Navn, Etasje_navn, b.navn as byggNavn, nettokvm, om.omrade,"
 	sql = sql & "( "
-	sql = sql & subsql
-    sql = sql & " ) as ledig "
-	sql = sql & "from e..t_etasjeareal ea "
-	sql = sql & "inner join t_kvadratmetertype kt on "
-	sql = sql & "ea.kvadratmetertypeid=kt.id "
-	sql = sql & "inner join e..t_etasje e on "
-	sql = sql & "ea.etasjeid=e.id "
-	sql = sql & "inner join t_bygg b on "
-	sql = sql & "e.bygg_id=b.id "
-	sql = sql & "inner join t_boligomraade om on "
-	sql = sql & "b.Omrade_id = om.Boligomrade_id "
-	sql = sql & "where kt.ID not in(select id from e..t_kvadratmetertype where fellesareal = 1) "
+	SqlAdd sql, subsql
+    SqlAdd sql, " ) as ledig "
+	SqlAdd sql, "from e..t_etasjeareal ea "
+	SqlAdd sql, "inner join t_kvadratmetertype kt on ea.kvadratmetertypeid=kt.id "
+	SqlAdd sql, "inner join e..t_etasje e on ea.etasjeid=e.id "
+	SqlAdd sql, "inner join t_bygg b on e.bygg_id=b.id "
+	SqlAdd sql, "inner join t_boligomraade om on b.Omrade_id = om.Boligomrade_id "
+	SqlAdd sql, "where kt.ID not in(select id from e..t_kvadratmetertype where fellesareal = 1) "
 	if typpe<>"0" then
-		sql = sql & "and b.ID in({OM}) "
+		SqlAdd sql, "and b.ID in({OM}) "
 	end if
-	sql = sql & "and (" & subsql & ") > {MIN_AR} "
-	sql = sql & "order by ledig desc "
+	SqlAdd sql, "and (" & subsql & ") > {MIN_AR} "
+	SqlAdd sql, "order by ledig desc "
 	
 	m_data.SqlString = sql
 	m_data.SetupFields rpt
 
+End Sub
+
+Sub SqlAdd(ByRef sql, code)
+        sql = sql & Replace(Replace(code, "\n", vbCrLf), "\t", vbTab) & vbCrLf
 End Sub]]></Script>
 <PageSettings	LeftMargin="800"
 	RightMargin="360"
