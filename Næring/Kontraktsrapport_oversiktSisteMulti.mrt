@@ -5,12 +5,12 @@
     <Databases isList="true" count="2">
       <Klient_x0020_87 Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Klient 87</Alias>
-        <ConnectionStringEncrypted>9DrBoURWQ5DpR5zMSkyif4ts0aNZBWntRke5CHM9sSrDWrnPRmcBjUFE0dxjAKjn81pp4+RkS91qW6XUSwDrL/5w2StncZOk7Xi9bGPMtQ==</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9CjBoUhWQ6TpbKGYc0yxF4ts0Y3YBQHtRlu5vXxcsRvRcLnPRnHSmEV4TZlhXGSP8RLVKFYFS4FhHL3U/QQie/Jw0c1Le/plcUk=</ConnectionStringEncrypted>
         <Name>Klient 87</Name>
       </Klient_x0020_87>
       <Connection2 Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection2</Alias>
-        <ConnectionStringEncrypted>9DrBoURWQ5DpR5zMSkyif4ts0aNZBWntRke5CHM9sSrDWrnPRmcBjUFE0dxjAKjn81pp4+RkS91qW6XUSwDrL/5w2StncZOk7Xi9bGPMtQ==</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9CjBoUhWQ6TpbKGYc0yxF4ts0Y3YBQHtRlu5vXxcsRvRcLnPRnHSmEV4TZlhXGSP8RLVKFYFS4FhHL3U/QQie/Jw0c1Le/plcUk=</ConnectionStringEncrypted>
         <Name>Connection2</Name>
       </Connection2>
     </Databases>
@@ -80,7 +80,7 @@ select distinct
 	, sum(arl.tillegg) as FellesKvm
 	,sum(arl.antall+arl.tillegg) as brutto
 	,ak.kontrakt_fra
-	,ak.kontrakt_til
+	,isnull(ak.fakturerhusleietil,ak.kontrakt_til)kontrakt_til
 	, st.Status
 	, ak.justeringsdato
 	,ak.startdatokpi
@@ -232,19 +232,19 @@ exec sp_executesql @query;</SqlCommand>
     <Report isRef="0" />
     <Variables isList="true" count="15">
       <value>,Omrade,Omrade,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_boligOmr_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020__x0020_FOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_Boligomrade_id_x0029__x0020__x002F__x002A__x002A__x002F__x0020__x0020_FROM_x0020_e..t_boligomraade_x002F__x002A__x002A__x002F__x0020__x0020_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_boligOmr_x002F__x002A__x002A__x002F__x0020__x0020_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020__x0020_BEGIN_x0020__x002F__x002A__x002A__x002F__x0020__x0020_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_boligOmr_x002F__x002A__x002A__x002F__x0020__x0020_else_x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_boligOmr_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_boligOmr_x002F__x002A__x002A__x002F__x0020__x0020_END_x002F__x002A__x002A__x002F__x0020__x0020_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_Omrade_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_Boligomrade_id_x0029__x002C__x0020_Omrade_x0020_from_x0020_e..t_boligomraade_x0020_order_x0020_by_x0020_Omrade_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0032__x002C_2,False,False,False</value>
-      <value>,Bygg,Bygg,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_byggNavn_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020__x0020_FOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_id_x0029__x0020__x002F__x002A__x002A__x002F__x0020__x0020_FROM_x0020_e..t_bygg_x002F__x002A__x002A__x002F__x0020__x0020_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_byggNavn_x002F__x002A__x002A__x002F__x0020__x0020_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020__x0020_BEGIN_x0020__x002F__x002A__x002A__x002F__x0020__x0020_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_byggNavn_x002F__x002A__x002A__x002F__x0020__x0020_else_x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_byggNavn_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_byggNavn_x002F__x002A__x002A__x002F__x0020__x0020_END_x002F__x002A__x002A__x002F__x0020__x0020_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_Bygg_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_id_x0029__x002C__x0020_Navn_x0020_from_x0020_e..t_bygg_x0020_order_x0020_by_x0020_Bygg_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0034__x002C_3_x002C_1_x002C_2,False,False,False</value>
-      <value>,StatusId,StatusId,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_StatusId_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020__x0020_FOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_status_id_x0029__x0020__x002F__x002A__x002A__x002F__x0020__x0020_FROM_x0020__x0020__x0028_e..t_arealkontrakt_x0020_as_x0020_AR_x0020_INNER_x0020_JOIN_x0020_e..t_status_x0020_as_x0020_ST_x0020_on_x0020_AR.statusid_x003D_ST.Status_id_x0029__x0020_GROUP_x0020_BY_x0020_ST.Status_x002C__x0020_st.status_id_x002F__x002A__x002A__x002F__x0020__x0020_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_StatusId_x002F__x002A__x002A__x002F__x0020__x0020_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020__x0020_BEGIN_x0020__x002F__x002A__x002A__x002F__x0020__x0020_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_StatusId_x002F__x002A__x002A__x002F__x0020__x0020_else_x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_StatusId_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_StatusId_x002F__x002A__x002A__x002F__x0020__x0020_END_x002F__x002A__x002A__x002F__x0020__x0020_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_StatusId_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ST.status_id_x0029__x002C__x0020__x0020_ST.Status_x0020_from_x0020__x0028_e..t_arealkontrakt_x0020_as_x0020_AR_x0020_INNER_x0020_JOIN_x0020_e..t_status_x0020_as_x0020_ST_x0020_on_x0020_AR.statusid_x003D_ST.Status_id_x0029__x0020_GROUP_x0020_BY_x0020_ST.Status_x002C__x0020_st.status_id_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031_012,False,False,False</value>
-      <value>,aar,År,text,System.String,_x0032_019,False,False,False</value>
-      <value>,gruppe,gruppe,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_klientid_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020__x0020_FOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_Select_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_GroupId_x0029__x0020_from_x0020_m..t_viewGroup_x002F__x002A__x002A__x002F__x0020__x0020_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_klientid_x002F__x002A__x002A__x002F__x0020__x0020_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020__x0020_BEGIN_x0020__x002F__x002A__x002A__x002F__x0020__x0020_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_klientid_x002F__x002A__x002A__x002F__x0020__x0020_else_x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_klientid_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_klientid_x002F__x002A__x002A__x002F__x0020__x0020_END_x002F__x002A__x002A__x002F__x0020__x0020_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_Select_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_GroupId_x0029__x0020__x002C__x0020_GroupName_x0020_from_x0020_m..t_viewGroup_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0037_,False,False,False</value>
-      <value>,Dim_kontrakt,Dimensjon_x0020_kontrakt,text_x007C_sql_x003D_select_x0020__x0020_dimKontrakt_x0020_from_x0020_e..t_klientParametre,System.String,_x0037_,False,False,False</value>
+      <value>,Bygg,Bygg,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_byggNavn_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020__x0020_FOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_id_x0029__x0020__x002F__x002A__x002A__x002F__x0020__x0020_FROM_x0020_e..t_bygg_x002F__x002A__x002A__x002F__x0020__x0020_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_byggNavn_x002F__x002A__x002A__x002F__x0020__x0020_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020__x0020_BEGIN_x0020__x002F__x002A__x002A__x002F__x0020__x0020_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_byggNavn_x002F__x002A__x002A__x002F__x0020__x0020_else_x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_byggNavn_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_byggNavn_x002F__x002A__x002A__x002F__x0020__x0020_END_x002F__x002A__x002A__x002F__x0020__x0020_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_Bygg_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_id_x0029__x002C__x0020_Navn_x0020_from_x0020_e..t_bygg_x0020_order_x0020_by_x0020_Bygg_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031__x002C_1,False,False,False</value>
+      <value>,StatusId,StatusId,checklist_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_StatusId_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020__x0020_FOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_status_id_x0029__x0020__x002F__x002A__x002A__x002F__x0020__x0020_FROM_x0020__x0020__x0028_e..t_arealkontrakt_x0020_as_x0020_AR_x0020_INNER_x0020_JOIN_x0020_e..t_status_x0020_as_x0020_ST_x0020_on_x0020_AR.statusid_x003D_ST.Status_id_x0029__x0020_GROUP_x0020_BY_x0020_ST.Status_x002C__x0020_st.status_id_x002F__x002A__x002A__x002F__x0020__x0020_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_StatusId_x002F__x002A__x002A__x002F__x0020__x0020_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020__x0020_BEGIN_x0020__x002F__x002A__x002A__x002F__x0020__x0020_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_StatusId_x002F__x002A__x002A__x002F__x0020__x0020_else_x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_StatusId_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_StatusId_x002F__x002A__x002A__x002F__x0020__x0020_END_x002F__x002A__x002A__x002F__x0020__x0020_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_StatusId_x002F__x002A__x002A__x002F_union_x0020_all_x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ST.status_id_x0029__x002C__x0020__x0020_ST.Status_x0020_from_x0020__x0028_e..t_arealkontrakt_x0020_as_x0020_AR_x0020_INNER_x0020_JOIN_x0020_e..t_status_x0020_as_x0020_ST_x0020_on_x0020_AR.statusid_x003D_ST.Status_id_x0029__x0020_GROUP_x0020_BY_x0020_ST.Status_x002C__x0020_st.status_id_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031_011_x002C_1012_x002C_1013,False,False,False</value>
+      <value>,aar,År,text,System.String,_x0032_020,False,False,False</value>
+      <value>,gruppe,gruppe,combo_x007C_sql_x003D_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_klientid_x0020_as_x0020_varchar_x0028_8_x0029__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020__x0020_FOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020_Select_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_GroupId_x0029__x0020_from_x0020_m..t_viewGroup_x002F__x002A__x002A__x002F__x0020__x0020_OPEN_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_klientid_x002F__x002A__x002A__x002F__x0020__x0020_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020__x0020_BEGIN_x0020__x002F__x002A__x002A__x002F__x0020__x0020_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002B__x0040_klientid_x002F__x002A__x002A__x002F__x0020__x0020_else_x002F__x002A__x002A__x002F__x0020__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x0040_klientid_x002F__x002A__x002A__x002F__x0020__x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_klientid_x002F__x002A__x002A__x002F__x0020__x0020_END_x002F__x002A__x002A__x002F__x0020__x0020_CLOSE_x0020_MY_CURSOR_x002F__x002A__x002A__x002F__x0020__x0020_Select_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_GroupId_x0029__x0020__x002C__x0020_GroupName_x0020_from_x0020_m..t_viewGroup_x002F__x002A__x002A__x002F_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031_,False,False,False</value>
+      <value>,Dim_kontrakt,Dimensjon_x0020_kontrakt,text_x007C_sql_x003D_select_x0020__x0020_dimKontrakt_x0020_from_x0020_e..t_klientParametre,System.String,_x0036_,False,False,False</value>
       <value>,DimFelleskostnad,Dim_x0020_Felleskostnad,text_x007C_sql_x003D_select_x0020_dimFelleskostnad_x0020_from_x0020_e..t_klientParametre,System.String,_x0035_,False,False,False</value>
-      <value>,dimAreal,dimAreal,text_x007C_sql_x003D_select_x0020__x0020_dimEtasjeArealId_x0020_from_x0020_e..t_klientParametre,System.String,_x0036_,False,False,False</value>
-      <value>,fraDato,Fradato,date_x007C_sql_x003D_select_x0027_01.01._x0027__x0020__x002B__x0020_convert_x0028_varchar_x002C__x0028_select_x0020_year_x0028_getdate_x0028__x0029__x0029__x0029__x0029__x0020_,System.String,_x0032_0190101,False,False,False</value>
-      <value>,tilDato,Tildato,date_x007C_sql_x003D_select_x0027_31.12._x0027__x0020__x002B__x0020_convert_x0028_varchar_x002C__x0028_select_x0020_year_x0028_getdate_x0028__x0029__x0029__x0029__x0029_,System.String,_x0032_0191231,False,False,False</value>
+      <value>,dimAreal,dimAreal,text_x007C_sql_x003D_select_x0020__x0020_dimEtasjeArealId_x0020_from_x0020_e..t_klientParametre,System.String,_x0037_,False,False,False</value>
+      <value>,fraDato,Fradato,date_x007C_sql_x003D_select_x0027_01.01._x0027__x0020__x002B__x0020_convert_x0028_varchar_x002C__x0028_select_x0020_year_x0028_getdate_x0028__x0029__x0029__x0029__x0029__x0020_,System.String,_x0032_0200101,False,False,False</value>
+      <value>,tilDato,Tildato,date_x007C_sql_x003D_select_x0027_31.12._x0027__x0020__x002B__x0020_convert_x0028_varchar_x002C__x0028_select_x0020_year_x0028_getdate_x0028__x0029__x0029__x0029__x0029_,System.String,_x0032_0201231,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0031_66,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0034_,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_020,True,False</value>
     </Variables>
   </Dictionary>
@@ -347,14 +347,14 @@ exec sp_executesql @query;</SqlCommand>
             <Text4 Ref="15" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,-0.02,11.27,0.8</ClientRectangle>
+              <ClientRectangle>0,-0.02,20.67,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,20,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text4</Name>
               <Page isRef="7" />
               <Parent isRef="13" />
-              <Text>Kontraktsrapport for {aar} </Text>
+              <Text>Kontraktsrapport flerklient med estimert leieinntekt for {aar} </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text4>
@@ -498,7 +498,7 @@ exec sp_executesql @query;</SqlCommand>
             <Text22 Ref="28" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>3.4,0,2,0.6</ClientRectangle>
+              <ClientRectangle>4.4,0,2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Verdana,7,Bold</Font>
               <Guid>eeb90d7082bc4ba3856951c60666b8d2</Guid>
@@ -516,7 +516,7 @@ exec sp_executesql @query;</SqlCommand>
             <Text23 Ref="30" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.4,0,1.6,0.6</ClientRectangle>
+              <ClientRectangle>7.8,0,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Verdana,7,Bold</Font>
               <Guid>23331dcc8fb04d9b90ecc6e42f3b493d</Guid>
@@ -534,7 +534,7 @@ exec sp_executesql @query;</SqlCommand>
             <Text8 Ref="32" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.8,0,1.8,0.6</ClientRectangle>
+              <ClientRectangle>10.6,0,1.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Verdana,7,Bold</Font>
               <Guid>e68e237955624c8690aa34bdb84cf9c3</Guid>
@@ -552,7 +552,7 @@ exec sp_executesql @query;</SqlCommand>
             <Text9 Ref="34" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>11.8,0,1.8,0.6</ClientRectangle>
+              <ClientRectangle>12.4,0,1.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Verdana,7,Bold</Font>
               <Guid>5bae439fcdd644548ec60ac1b5659c98</Guid>
@@ -570,7 +570,7 @@ exec sp_executesql @query;</SqlCommand>
             <Text10 Ref="36" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>13.8,0,1.8,0.6</ClientRectangle>
+              <ClientRectangle>14.2,0,1.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Verdana,7,Bold</Font>
               <Guid>3fc9475474c24eda861f998b2402fa41</Guid>
@@ -690,7 +690,7 @@ exec sp_executesql @query;</SqlCommand>
               <Name>Text27</Name>
               <Page isRef="7" />
               <Parent isRef="25" />
-              <Text>Estimert 
+              <Text>Estimert
 leieinntekt</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -698,7 +698,7 @@ leieinntekt</Text>
             <Text39 Ref="50" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.6,0,1.8,0.6</ClientRectangle>
+              <ClientRectangle>1.4,0,1.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Verdana,7,Bold</Font>
               <Guid>4401ddf0d18648ba81bb5651061398bf</Guid>
@@ -742,7 +742,7 @@ leieinntekt</Text>
             <Text3 Ref="54" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>3.4,0,2.8,0.6</ClientRectangle>
+              <ClientRectangle>4.4,0,3,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -756,7 +756,7 @@ leieinntekt</Text>
             <Text5 Ref="55" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.4,0,3.2,0.6</ClientRectangle>
+              <ClientRectangle>7.8,0,3.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -773,7 +773,7 @@ leieinntekt</Text>
             <Text7 Ref="57" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.75,0,1.4,0.6</ClientRectangle>
+              <ClientRectangle>10.55,0,1.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Margins>0,0,0,0</Margins>
@@ -810,7 +810,7 @@ leieinntekt</Text>
             <Text12 Ref="61" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>11.8,0,1.4,0.6</ClientRectangle>
+              <ClientRectangle>12.4,0,1.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>892d322b45a847f2b56233e3642e66d5</Guid>
@@ -831,7 +831,7 @@ leieinntekt</Text>
             <Text15 Ref="63" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>13.8,0,1.4,0.6</ClientRectangle>
+              <ClientRectangle>14.2,0,1.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>cbf58cd301e14cf5906c188a9b9bcfaa</Guid>
@@ -949,7 +949,7 @@ leieinntekt</Text>
             <Text38 Ref="75" type="Text" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.6,0,1.6,0.6</ClientRectangle>
+              <ClientRectangle>1.4,0,2.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,7,Bold</Font>
               <Guid>8ecaf08fee69434890b39595a6a2069b</Guid>
@@ -1068,7 +1068,7 @@ leieinntekt</Text>
               <Name>Text32</Name>
               <Page isRef="7" />
               <Parent isRef="77" />
-              <Text>Total årsleie:</Text>
+              <Text>Total:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text32>
@@ -1145,10 +1145,10 @@ leieinntekt</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>2/26/2020 12:57:35 PM</ReportChanged>
+  <ReportChanged>3/17/2020 11:31:23 AM</ReportChanged>
   <ReportCreated>8/8/2014 1:52:06 PM</ReportCreated>
-  <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\Kontraktsrapport_oversiktSisteMulti3.mrt</ReportFile>
-  <ReportGuid>63fb419481974437b69815228366d8ca</ReportGuid>
+  <ReportFile>C:\Users\solan\AppData\Local\Temp\2\Kontraktsrapport_oversiktSisteMulti.mrt</ReportFile>
+  <ReportGuid>42675ac3766f4febbda7fefdd5999615</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
