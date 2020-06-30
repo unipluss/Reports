@@ -5,11 +5,11 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9FbNoU1U2fFhfKHMdgDjF4s0gc9NTLqka0y5TGlc60/XYNnPUFsxCf9EqPBjBe17xHDBK8hRc8XiZ4RE/T31Yo14+WzvWWmZaUn1BA==</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Cj5oURxQ5jpR5xEckzhF4tw+y3YX7LtRlu5CHw94+fDVrnPRlEBQfpchPBjSaiv3BLNL+8Kc91qdFVYcQDrL/Fw2QJNc0lt7Fqc+GPM</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
-    <DataSources isList="true" count="3">
+    <DataSources isList="true" count="4">
       <Bedrift Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Bedrift</Alias>
         <Columns isList="true" count="52">
@@ -115,9 +115,28 @@ LEFT JOIN e..t_status st ON st.Status_id = bo.Status
 WHERE ISNULL(bo.ExtNokkelId, '') &lt;&gt; ''
 order by bo.Rom_nummer</SqlCommand>
       </Boligobjekt>
+      <AntallObjekter Ref="6" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>AntallObjekter</Alias>
+        <Columns isList="true" count="1">
+          <value>totalt,System.Int32</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Name>AntallObjekter</Name>
+        <NameInSource>Connection</NameInSource>
+        <Parameters isList="true" count="0" />
+        <SqlCommand>SELECT count(bo.ExtNokkelId) as totalt
+	FROM e..t_boligobjekt bo
+LEFT JOIN e..t_status st ON st.Status_id = bo.Status
+inner join e..t_bygg bygg on bygg.ID	 = bo.Bygg_id
+WHERE ISNULL(bo.ExtNokkelId, '') &lt;&gt; ''
+and bygg.NokkelSystemId = 21003
+and bygg.ID in ({Bygg_var})
+</SqlCommand>
+      </AntallObjekter>
     </DataSources>
     <Relations isList="true" count="1">
-      <ByggTilBolig Ref="6" type="DataRelation" isKey="true">
+      <ByggTilBolig Ref="7" type="DataRelation" isKey="true">
         <Alias>ByggTilBolig</Alias>
         <ChildColumns isList="true" count="1">
           <value>Bygg_id</value>
@@ -134,11 +153,11 @@ order by bo.Rom_nummer</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="6">
-      <value>,Bygg_var,Velg_x0020_bygg,checklist_x007C_sql_x003D__x002F__x002A__x002A__x002F_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x0020__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020_FOR_x0020__x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ID_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_bygg_x0020_where_x0020_NokkelSystemId_x0020__x003D__x0020_21003_x002F__x002A__x002A__x002F__x0020_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_ans_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_ans_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ID_x0029__x002C__x0020_Navn_x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_from_x0020_e..t_bygg_x0020_where_x0020_NokkelSystemId_x0020__x003D__x0020_21003_x002F__x002A__x002A__x002F_order_x0020_by_x0020_Navn_x0020_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0034_6_x002C_244_x002C_225_x002C_229_x002C_66_x002C_6_x002C_1_x002C_2,False,False,False</value>
+      <value>,Bygg_var,Velg_x0020_bygg,checklist_x007C_sql_x003D__x002F__x002A__x002A__x002F_declare_x0020__x0040_alle_x0020_as_x0020_varchar_x0028_1000_x0029__x002F__x002A__x002A__x002F_declare_x0020__x0040_ans_x0020_as_x0020_varchar_x0028_8_x0029__x0020__x002F__x002A__x002A__x002F_DECLARE_x0020_MY_CURSOR_x0020_CURSOR_x0020__x002F__x002A__x002A__x002F__x0020__x0020__x0020_LOCAL_x0020_STATIC_x0020_READ_ONLY_x0020_FORWARD_ONLY_x002F__x002A__x002A__x002F__x0020_FOR_x0020__x0020__x002F__x002A__x002A__x002F_SELECT_x0020_DISTINCT_x0020_convert_x0028_varchar_x0028_8_x0029__x002C_ID_x0029__x0020__x002F__x002A__x002A__x002F_FROM_x0020_e..t_bygg_x0020_where_x0020_NokkelSystemId_x0020__x003D__x0020_21003_x002F__x002A__x002A__x002F__x0020_OPEN_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x002F__x002A__x002A__x002F_WHILE_x0020__x0040__x0040_FETCH_STATUS_x0020__x003D__x0020_0_x002F__x002A__x002A__x002F__x0020_BEGIN_x0020__x0020__x002F__x002A__x002A__x002F_if_x0020_isnull_x0028__x0040_alle_x002C__x0020__x0027__x0027__x0029__x0020__x003D__x0020__x0027__x0027__x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0027__x0027__x0020__x002F__x002A__x002A__x002F__x002B__x0040_ans_x0020_else_x0020_set_x0020__x0040_alle_x0020__x003D__x0020__x0040_alle_x0020__x002B__x0020__x0027__x002C__x0027__x0020__x002B__x0020__x002F__x002A__x002A__x002F__x0040_ans_x0020_FETCH_x0020_NEXT_x0020_FROM_x0020_MY_CURSOR_x0020_INTO_x0020__x0040_ans_x0020_END_x0020__x002F__x002A__x002A__x002F_CLOSE_x0020_MY_CURSOR_x0020__x002F__x002A__x002A__x002F_select_x0020__x0040_alle_x002C__x0020__x0027_Alle_x0027__x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_union_x0020_all_x0020__x002F__x002A__x002A__x002F_select_x0020_convert_x0028_varchar_x0028_5_x0029__x002C_ID_x0029__x002C__x0020_Navn_x0020_as_x0020_navn_x0020__x002F__x002A__x002A__x002F_from_x0020_e..t_bygg_x0020_where_x0020_NokkelSystemId_x0020__x003D__x0020_21003_x002F__x002A__x002A__x002F_order_x0020_by_x0020_Navn_x0020_DEALLOCATE_x0020_MY_CURSOR_x0020_,System.String,_x0031__x002C_105_x002C_106_x002C_28_x002C_33_x002C_6_x002C_66_x002C_99_x002C_33_x002C_66_x002C_28,False,False,False</value>
       <value>System,UserName,UserName,System.String,Administrator,True,False</value>
       <value>System,UserId,UserId,System.String,_x0032_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0033_,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0034_,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_020,True,False</value>
     </Variables>
   </Dictionary>
@@ -147,30 +166,30 @@ order by bo.Rom_nummer</SqlCommand>
   <MetaTags isList="true" count="0" />
   <NumberOfPass>DoublePass</NumberOfPass>
   <Pages isList="true" count="2">
-    <MainPage Ref="7" type="Page" isKey="true">
+    <MainPage Ref="8" type="Page" isKey="true">
       <Border>None;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Components isList="true" count="7">
-        <PageHeaderBand1 Ref="8" type="PageHeaderBand" isKey="true">
+        <PageHeaderBand1 Ref="9" type="PageHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,0.4,27.7,1.28</ClientRectangle>
-          <Components isList="true" count="3">
-            <Text22 Ref="9" type="Text" isKey="true">
+          <Components isList="true" count="2">
+            <Text22 Ref="10" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.06,8.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,12,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text22</Name>
-              <Page isRef="7" />
-              <Parent isRef="8" />
+              <Page isRef="8" />
+              <Parent isRef="9" />
               <Text>Boligobjekter med Assa Abloy</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text22>
-            <Text26 Ref="10" type="Text" isKey="true">
+            <Text26 Ref="11" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>23,0.06,4.6,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -178,31 +197,18 @@ order by bo.Rom_nummer</SqlCommand>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text26</Name>
-              <Page isRef="7" />
-              <Parent isRef="8" />
+              <Page isRef="8" />
+              <Parent isRef="9" />
               <ShrinkFontToFit>True</ShrinkFontToFit>
               <ShrinkFontToFitMinimumSize>5</ShrinkFontToFitMinimumSize>
               <Text>{Bedrift.Navn}</Text>
               <TextBrush>Black</TextBrush>
             </Text26>
-            <Text27 Ref="11" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>25.6,0.46,2,0.39</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,8,Bold</Font>
-              <HorAlignment>Right</HorAlignment>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text27</Name>
-              <Page isRef="7" />
-              <Parent isRef="8" />
-              <Text>{Bedrift.Arstall}</Text>
-              <TextBrush>Black</TextBrush>
-            </Text27>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>PageHeaderBand1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="8" />
+          <Parent isRef="8" />
           <PrintOn>OnlyFirstPage</PrintOn>
         </PageHeaderBand1>
         <PageFooterBand1 Ref="12" type="PageFooterBand" isKey="true">
@@ -218,7 +224,7 @@ order by bo.Rom_nummer</SqlCommand>
               <Font>Arial,8</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text3</Name>
-              <Page isRef="7" />
+              <Page isRef="8" />
               <Parent isRef="12" />
               <Text>Side &lt;b&gt;{PageNumber}&lt;/b&gt; av &lt;b&gt;{TotalPageCount}&lt;/b&gt;</Text>
               <TextBrush>Black</TextBrush>
@@ -234,7 +240,7 @@ order by bo.Rom_nummer</SqlCommand>
               <Guid>ba927a26a2f241168b584bca48e2c073</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text28</Name>
-              <Page isRef="7" />
+              <Page isRef="8" />
               <Parent isRef="12" />
               <Text>&lt;b&gt;{Time}&lt;/b&gt;</Text>
               <TextBrush>Black</TextBrush>
@@ -250,7 +256,7 @@ order by bo.Rom_nummer</SqlCommand>
               <Guid>fd67c8a5c5bb44679a43b01a9fa1d8ad</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text29</Name>
-              <Page isRef="7" />
+              <Page isRef="8" />
               <Parent isRef="12" />
               <Text>Utskriftstidspunkt</Text>
               <TextBrush>Black</TextBrush>
@@ -260,8 +266,8 @@ order by bo.Rom_nummer</SqlCommand>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>PageFooterBand1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="8" />
+          <Parent isRef="8" />
         </PageFooterBand1>
         <ghBygg Ref="16" type="GroupHeaderBand" isKey="true">
           <Brush>LightSteelBlue</Brush>
@@ -274,7 +280,7 @@ order by bo.Rom_nummer</SqlCommand>
               <Font>Arial,12,Bold</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text1</Name>
-              <Page isRef="7" />
+              <Page isRef="8" />
               <Parent isRef="16" />
               <Text>{Bygg.byggNavn} - {Bygg.Omraade}</Text>
               <TextBrush>Black</TextBrush>
@@ -289,7 +295,7 @@ order by bo.Rom_nummer</SqlCommand>
               <Guid>7286bb0d89114e97ae63d34b145ce8fd</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text2</Name>
-              <Page isRef="7" />
+              <Page isRef="8" />
               <Parent isRef="16" />
               <Text>Bolig-ID</Text>
               <TextBrush>Black</TextBrush>
@@ -298,13 +304,13 @@ order by bo.Rom_nummer</SqlCommand>
             </Text2>
             <Text4 Ref="19" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0.72,2.2,0.6</ClientRectangle>
+              <ClientRectangle>3,0.72,2.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Guid>3748472f05f6486699df8dbc64d68f9a</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text4</Name>
-              <Page isRef="7" />
+              <Page isRef="8" />
               <Parent isRef="16" />
               <Text>Bolig</Text>
               <TextBrush>Black</TextBrush>
@@ -319,7 +325,7 @@ order by bo.Rom_nummer</SqlCommand>
               <Guid>76d791a6c6c34f469dad60f67b5fad96</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text12</Name>
-              <Page isRef="7" />
+              <Page isRef="8" />
               <Parent isRef="16" />
               <Text>Status</Text>
               <TextBrush>Black</TextBrush>
@@ -334,7 +340,7 @@ order by bo.Rom_nummer</SqlCommand>
               <Guid>a03a72ee28d142c692e241c52c745078</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text13</Name>
-              <Page isRef="7" />
+              <Page isRef="8" />
               <Parent isRef="16" />
               <Text>Boliglås-ID</Text>
               <TextBrush>Black</TextBrush>
@@ -345,8 +351,8 @@ order by bo.Rom_nummer</SqlCommand>
           <Condition>{Bygg.byggNavn}</Condition>
           <Conditions isList="true" count="0" />
           <Name>ghBygg</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="8" />
+          <Parent isRef="8" />
         </ghBygg>
         <DataBand1 Ref="22" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
@@ -359,7 +365,7 @@ order by bo.Rom_nummer</SqlCommand>
               <ClientRectangle>0,-0.08,27.7,0.2</ClientRectangle>
               <Components isList="true" count="0" />
               <Name>SubReport1</Name>
-              <Page isRef="7" />
+              <Page isRef="8" />
               <Parent isRef="22" />
               <SubReportPageGuid>d41a7b265aea483fa4a0ac2b99885cd9</SubReportPageGuid>
             </SubReport1>
@@ -369,8 +375,8 @@ order by bo.Rom_nummer</SqlCommand>
           <DataSourceName>Bygg</DataSourceName>
           <Filters isList="true" count="0" />
           <Name>DataBand1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="8" />
+          <Parent isRef="8" />
           <Sort isList="true" count="0" />
         </DataBand1>
         <gfBygg Ref="24" type="GroupFooterBand" isKey="true">
@@ -380,8 +386,8 @@ order by bo.Rom_nummer</SqlCommand>
           <Components isList="true" count="0" />
           <Conditions isList="true" count="0" />
           <Name>gfBygg</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="8" />
+          <Parent isRef="8" />
         </gfBygg>
         <ChildBand1 Ref="25" type="ChildBand" isKey="true">
           <Brush>Transparent</Brush>
@@ -389,48 +395,17 @@ order by bo.Rom_nummer</SqlCommand>
           <Components isList="true" count="0" />
           <Conditions isList="true" count="0" />
           <Name>ChildBand1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="8" />
+          <Parent isRef="8" />
         </ChildBand1>
         <FooterBand1 Ref="26" type="FooterBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,9.28,27.7,0.8</ClientRectangle>
-          <Components isList="true" count="2">
-            <Text14 Ref="27" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>21.6,0.12,4.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>4033d4490e5641869fa95746b0a88c5f</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text14</Name>
-              <Page isRef="7" />
-              <Parent isRef="26" />
-              <Text>Totalt antall boligobjekter:</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text14>
-            <Text15 Ref="28" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>26.2,0.12,1.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
-              <Guid>26e930a0883a4857a38d73d7ddaaac70</Guid>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text15</Name>
-              <Page isRef="7" />
-              <Parent isRef="26" />
-              <Text>{Count(DataBand1)}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Totals</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text15>
-          </Components>
+          <ClientRectangle>0,9.28,27.7,0.6</ClientRectangle>
+          <Components isList="true" count="0" />
           <Conditions isList="true" count="0" />
           <Name>FooterBand1</Name>
-          <Page isRef="7" />
-          <Parent isRef="7" />
+          <Page isRef="8" />
+          <Parent isRef="8" />
         </FooterBand1>
       </Components>
       <Conditions isList="true" count="0" />
@@ -441,99 +416,99 @@ order by bo.Rom_nummer</SqlCommand>
       <PageHeight>21</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="29" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="27" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </MainPage>
-    <sBoligobjekt Ref="30" type="Page" isKey="true">
+    <sBoligobjekt Ref="28" type="Page" isKey="true">
       <Border>None;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Components isList="true" count="3">
-        <HeaderBand1 Ref="31" type="HeaderBand" isKey="true">
+        <HeaderBand1 Ref="29" type="HeaderBand" isKey="true">
           <Brush>Transparent</Brush>
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,0.4,27.7,0.8</ClientRectangle>
           <Components isList="true" count="0" />
           <Conditions isList="true" count="0" />
           <Name>HeaderBand1</Name>
-          <Page isRef="30" />
-          <Parent isRef="30" />
+          <Page isRef="28" />
+          <Parent isRef="28" />
         </HeaderBand1>
-        <DataBand2 Ref="32" type="DataBand" isKey="true">
+        <DataBand2 Ref="30" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <ClientRectangle>0,2,27.7,1</ClientRectangle>
           <Components isList="true" count="5">
-            <Text5 Ref="33" type="Text" isKey="true">
+            <Text5 Ref="31" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0.2,2.2,0.6</ClientRectangle>
+              <ClientRectangle>3,0.2,2.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
+              <Font>Arial,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text5</Name>
-              <Page isRef="30" />
-              <Parent isRef="32" />
+              <Page isRef="28" />
+              <Parent isRef="30" />
               <Text>{Boligobjekt.Rom_nummer}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text5>
-            <Text6 Ref="34" type="Text" isKey="true">
+            <Text6 Ref="32" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>8,0.2,10.2,0.6</ClientRectangle>
+              <ClientRectangle>5.2,0.2,10.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
+              <Font>Arial,10</Font>
               <Guid>e86bfb39502945ec96d8bdd39ea4806f</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text6</Name>
-              <Page isRef="30" />
-              <Parent isRef="32" />
+              <Page isRef="28" />
+              <Parent isRef="30" />
               <Text>{Boligobjekt.Objekt_adresse}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text6>
-            <Text7 Ref="35" type="Text" isKey="true">
+            <Text7 Ref="33" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>18.6,0.2,2.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
+              <Font>Arial,10</Font>
               <Guid>4c01a967eca740edb5f1d8e8155c85c1</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text7</Name>
-              <Page isRef="30" />
-              <Parent isRef="32" />
+              <Page isRef="28" />
+              <Parent isRef="30" />
               <Text>{Boligobjekt.Status}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text7>
-            <Text9 Ref="36" type="Text" isKey="true">
+            <Text9 Ref="34" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>21.6,0.2,6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
+              <Font>Arial,10</Font>
               <Guid>485c5043b03c44998afe5247ba4cc309</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text9</Name>
-              <Page isRef="30" />
-              <Parent isRef="32" />
+              <Page isRef="28" />
+              <Parent isRef="30" />
               <Text>{Boligobjekt.ExtNokkelId}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text9>
-            <Text8 Ref="37" type="Text" isKey="true">
+            <Text8 Ref="35" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.2,0.2,1.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
-              <Font>Arial,10,Bold</Font>
+              <Font>Arial,10</Font>
               <Guid>215d5508232b45d1b525cd614bea5586</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text8</Name>
-              <Page isRef="30" />
-              <Parent isRef="32" />
+              <Page isRef="28" />
+              <Parent isRef="30" />
               <Text>{Boligobjekt.boligobjektId}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
@@ -548,49 +523,49 @@ order by bo.Rom_nummer</SqlCommand>
           <MasterComponent isRef="22" />
           <Name>DataBand2</Name>
           <OddStyle>odd</OddStyle>
-          <Page isRef="30" />
-          <Parent isRef="30" />
+          <Page isRef="28" />
+          <Parent isRef="28" />
           <Sort isList="true" count="0" />
         </DataBand2>
-        <FooterBand2 Ref="38" type="FooterBand" isKey="true">
-          <Brush>RosyBrown</Brush>
-          <ClientRectangle>0,3.8,27.7,1</ClientRectangle>
+        <FooterBand2 Ref="36" type="FooterBand" isKey="true">
+          <Brush>Gainsboro</Brush>
+          <ClientRectangle>0,3.8,27.7,0.8</ClientRectangle>
           <Components isList="true" count="2">
-            <Text10 Ref="39" type="Text" isKey="true">
+            <Text10 Ref="37" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>26.2,0.2,1.4,0.6</ClientRectangle>
+              <ClientRectangle>26.2,0.2,1.4,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Guid>50689c9a887442e89810eb3e82074cfa</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text10</Name>
-              <Page isRef="30" />
-              <Parent isRef="38" />
+              <Page isRef="28" />
+              <Parent isRef="36" />
               <Text>{Count(DataBand2)}</Text>
-              <TextBrush>White</TextBrush>
+              <TextBrush>Black</TextBrush>
               <Type>Totals</Type>
               <VertAlignment>Center</VertAlignment>
             </Text10>
-            <Text11 Ref="40" type="Text" isKey="true">
+            <Text11 Ref="38" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>25,0.2,1.2,0.6</ClientRectangle>
+              <ClientRectangle>25,0.2,1.2,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,10,Bold</Font>
               <Guid>468ede6253df45538e92bc5bb3935740</Guid>
               <Margins>0,0,0,0</Margins>
               <Name>Text11</Name>
-              <Page isRef="30" />
-              <Parent isRef="38" />
+              <Page isRef="28" />
+              <Parent isRef="36" />
               <Text>Totalt:</Text>
-              <TextBrush>White</TextBrush>
+              <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text11>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>FooterBand2</Name>
-          <Page isRef="30" />
-          <Parent isRef="30" />
+          <Page isRef="28" />
+          <Parent isRef="28" />
         </FooterBand2>
       </Components>
       <Conditions isList="true" count="0" />
@@ -601,13 +576,13 @@ order by bo.Rom_nummer</SqlCommand>
       <PageHeight>29.7</PageHeight>
       <PageWidth>29.7</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="41" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="39" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </sBoligobjekt>
   </Pages>
-  <PrinterSettings Ref="42" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="40" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -619,10 +594,10 @@ order by bo.Rom_nummer</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>5/29/2020 9:12:59 AM</ReportChanged>
+  <ReportChanged>6/30/2020 8:37:34 AM</ReportChanged>
   <ReportCreated>4/23/2014 2:37:24 PM</ReportCreated>
-  <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\v1_Boliglåser.mrt</ReportFile>
-  <ReportGuid>9db956c3f9a3454785895f9aefa0bc27</ReportGuid>
+  <ReportFile>C:\Users\HAKON~1.RYD\AppData\Local\Temp\AssaAbloyBoliglåser.mrt</ReportFile>
+  <ReportGuid>cf17ac23e67d4b339d7028d9a8e4f5db</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -651,7 +626,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="7">
-    <lightBlue Ref="43" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <lightBlue Ref="41" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[222:233:244]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -659,7 +634,7 @@ namespace Reports
       <Name>lightBlue</Name>
       <TextBrush>Black</TextBrush>
     </lightBlue>
-    <Style1 Ref="44" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="42" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[146:187:205]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -667,7 +642,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <LightGrey Ref="45" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <LightGrey Ref="43" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -675,7 +650,7 @@ namespace Reports
       <Name>LightGrey</Name>
       <TextBrush>Black</TextBrush>
     </LightGrey>
-    <EvenStyle Ref="46" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <EvenStyle Ref="44" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>WhiteSmoke</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -683,7 +658,7 @@ namespace Reports
       <Name>EvenStyle</Name>
       <TextBrush>Black</TextBrush>
     </EvenStyle>
-    <Style2 Ref="47" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style2 Ref="45" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;Transparent;1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Conditions isList="true" count="0" />
@@ -692,7 +667,7 @@ namespace Reports
       <Name>Style2</Name>
       <TextBrush>Black</TextBrush>
     </Style2>
-    <odd Ref="48" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <odd Ref="46" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[239:239:239]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -700,7 +675,7 @@ namespace Reports
       <Name>odd</Name>
       <TextBrush>Black</TextBrush>
     </odd>
-    <even Ref="49" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <even Ref="47" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>[247:247:247]</Brush>
       <Conditions isList="true" count="0" />
       <Description />
