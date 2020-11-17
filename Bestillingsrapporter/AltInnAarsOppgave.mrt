@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9CjZoUhRQ4zpbJzM8kxpF4t8y4zYTZLNRlu5BMhcsefDWrnPRkoxOXlEzcljXHev0chlr1toc8XibaEc9MykE4JwgWxIWZNZRUYVlA==</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9FbPoU1NQoBhfOXMegCiF4tqwQ9NX5KZa3u5XGdE6y/R8vtJ5AUiXWlrhPBpDecP1XCBK8hXAZ3pCP296T0qk9l40evRenuB</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -49,7 +49,7 @@ left join e..t_altinn_naringsdrivendeUtleier nar on nar.id = fau.NaringsDrivende
 left join e..t_altinn_vegadresse vegAdr on vegAdr.id = fau.VegadresseId
 left join e..t_altinn_InternasjonalAdresse intAdr on intAdr.id = fau.InternasjonalAdresseId
 
-where el.Id = (select MAX(id) from e..t_altinn_eier_leveranse where InntektsAar = {(Aar)} and StatusId = 29001) -- siste som ikke er slettet som gjelder
+where el.Id = (select MAX(id) from e..t_altinn_eier_leveranse where InntektsAar = {(Aar)} and StatusId in (29003)) -- siste som ikke er slettet som gjelder og som er innsendt
 and fau.eierId = {(EierId)}
 </SqlCommand>
       </Eier>
@@ -72,7 +72,7 @@ inner join e..t_altinn_vegadresse veg on objekt.VegAdresseId = veg.id
 inner join e..t_altinn_oppgaveFormidlingAvUtleie fau on fau.id =  objekt.oppgaveFormidlingAvUtleieId
 inner join e..t_altinn_eier_leveranse el on fau.LeveranseId = el.Id 
 
-where el.Id = (select MAX(id) from e..t_altinn_eier_leveranse where InntektsAar = {(Aar)} and StatusId = 29001) -- siste som ikke er slettet som gjelder
+where el.Id = (select MAX(id) from e..t_altinn_eier_leveranse where InntektsAar = {(Aar)} and StatusId = 29003) -- siste som ikke er slettet som gjelder
 and fau.eierId = {(EierId)}</SqlCommand>
       </Boliger>
       <Utleieforhold Ref="5" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
@@ -170,8 +170,9 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Name>Text1</Name>
               <Page isRef="7" />
               <Parent isRef="10" />
-              <Text>{Eier.navn}</Text>
+              <Text>{Eier.idNr}</Text>
               <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
             </Text1>
             <Text2 Ref="12" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
@@ -292,7 +293,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Name>Text22</Name>
               <Page isRef="7" />
               <Parent isRef="10" />
-              <Text>{Eier.idNr}</Text>
+              <Text>{Eier.navn}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
             </Text22>
@@ -787,10 +788,10 @@ and fau.eierId = {(EierId)}</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/13/2020 8:07:18 AM</ReportChanged>
+  <ReportChanged>11/17/2020 7:20:24 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AltInnAarsOppgave.mrt</ReportFile>
-  <ReportGuid>c29f2af8ff1747e18acf10f5ca7d9eb2</ReportGuid>
+  <ReportGuid>079ae74dac0e47d1a80d648c0ed28622</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
