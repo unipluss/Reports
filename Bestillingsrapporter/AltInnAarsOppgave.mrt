@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9FbPoU1NQoBhfOXMegCiF4tqwQ9NX5KZa3u5XGdE6y/R8vtJ5AUiXWlrhPBpDecP1XCBK8hXAZ3pCP296T0qk9l40evRenuB</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9FbPoU1NQoBhfOXMegCiF4tqwQ9NX5KZa3u5XGdE6y/R8vtJZAUiXWlrhPBpFecP1XCBK8hXAZ3pCP296T0qk9l40evRenuB</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -121,7 +121,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0032_61,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0032_77,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_020,True,False</value>
     </Variables>
   </Dictionary>
@@ -700,7 +700,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
         <ReportSummaryBand1 Ref="51" type="ReportSummaryBand" isKey="true">
           <Brush>LightGray</Brush>
           <ClientRectangle>0,16,19,8.2</ClientRectangle>
-          <Components isList="true" count="4">
+          <Components isList="true" count="3">
             <Text9 Ref="52" type="Text" isKey="true">
               <Brush>LightGray</Brush>
               <ClientRectangle>6.8,0.2,4,1</ClientRectangle>
@@ -755,17 +755,6 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text13>
-            <RichText2 Ref="56" type="Stimulsoft.Report.Components.StiRichText" isKey="true">
-              <BackColor>Transparent</BackColor>
-              <ClientRectangle>0,3.4,18.8,5</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <DataColumn />
-              <Margins>0,0,0,0</Margins>
-              <Name>RichText2</Name>
-              <Page isRef="7" />
-              <Parent isRef="51" />
-              <Text>__LP___x005C_rtf1_x005C_ansi_x005C_ansicpg1252_x005C_deff0_x005C_deflang1044__LP___x005C_fonttbl__LP___x005C_f0_x005C_fnil_x005C_fcharset0_x0020_Microsoft_x0020_Sans_x0020_Serif_x003B___RP____RP___x000D__x000A__x005C_viewkind4_x005C_uc1_x005C_pard_x005C_ul_x005C_f0_x005C_fs32_x0020_Post-_x002F_temahenvisning_x0020_til_x0020_skattemeldingen_x005C_ulnone_x005C_fs17_x005C_par_x000D__x000A_Egen_x0020_bolig-_x0020__x0020_Korttidsutleie_x0020_-_x0020_Skattepliktig_x0020_overskudd_x0020_f_x005C__x0027_f8res_x0020_i_x0020_post_x0020_2.8.6_x0020_-_x0020_tema_x0020_bolig_x0020_og_x0020_eiendeler_x005C_par_x000D__x000A_Egen_x0020_bolig-_x0020__x0020_Langtidsutleie-_x0020_Skattepliktig_x0020_overskudd_x0020_f_x005C__x0027_f8res_x0020_i_x0020_Post_x0020_2.8.2_x002F_3.3.12_x0020_-_x0020_tema_x0020_bolig_x0020_og_x0020_eiendeler_x005C_par_x000D__x000A_Fritidseiendom_x0020_som_x0020_du_x0020_bruker_x0020_selv_x0020_-_x0020__x0020_Skattepliktig_x0020_overskudd_x0020_f_x005C__x0027_f8res_x0020_i_x0020_post_x0020_2.8.3_x0020__x002F__x0020_2.8.5_x0020__x0020__x0028_for_x0020_eiendommer_x0020_i_x0020_utlandet_x0029_-_x0020_tema_x0020_bolig_x0020_og_x0020_eiendeler_x005C_par_x000D__x000A_Annen_x0020_bolig_x0020_og_x0020_fritidsbolig_x0020_-_x0020_Post_x0020_2.8.2_x002F_3.3.12_x0020_-_x0020_tema_x0020_bolig_x0020_og_x0020_eiendeler_x005C_par_x000D__x000A__x005C_par_x000D__x000A__x005C_par_x000D__x000A__x005C_par_x000D__x000A___RP___x000D__x000A_</Text>
-            </RichText2>
           </Components>
           <ComponentStyle>Style1</ComponentStyle>
           <Conditions isList="true" count="0" />
@@ -781,13 +770,13 @@ and fau.eierId = {(EierId)}</SqlCommand>
       <PageHeight>29.7</PageHeight>
       <PageWidth>21</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="57" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="56" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
   </Pages>
-  <PrinterSettings Ref="58" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="57" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -799,10 +788,10 @@ and fau.eierId = {(EierId)}</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/17/2020 1:40:39 PM</ReportChanged>
+  <ReportChanged>11/23/2020 2:16:51 PM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AltInnAarsOppgave.mrt</ReportFile>
-  <ReportGuid>8803562533fb4807a9fb85caa434017c</ReportGuid>
+  <ReportGuid>c513faee15f94de2ad7c129ae9411458</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -831,7 +820,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="2">
-    <Style1 Ref="59" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="58" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>LightGray</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -839,7 +828,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <Style3 Ref="60" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style3 Ref="59" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>All;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Conditions isList="true" count="0" />
