@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9FbPoU1NQoBhfOXMegCiF4tqwQ9NX5KZa3u5XGdE6y/R8vtJZAUiXWlrhPBpFecP1XCBK8hXAZ3pCP296T0qk9l40evRenuB</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9CjZoUhRQ5TpbJzM8kxpF4t8y4zYTZLNRlu5BEhcsefDWrnPRkoxOXlEzcljXHev0chlr1toc8XibaEc9MykE4JwgWxIWZNZRUYVlA==</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -66,7 +66,7 @@ and fau.eierId = {(EierId)}
         <Name>Boliger</Name>
         <NameInSource>Connection</NameInSource>
         <Parameters isList="true" count="0" />
-        <SqlCommand>select objekt.id, veg.AdresseNavn +' '+ veg.GateNummer + ' ' + veg.HusBokstav + case when veg.BruksEnehtsNummer is null then  '' else '-' end+ isnull(veg.BruksEnehtsNummer,'H0111') as adresse , veg.PostSted, veg.PostNummer, veg.GateNummer
+        <SqlCommand>select objekt.id, veg.AdresseNavn +' '+ veg.GateNummer + ' ' + veg.HusBokstav + case when veg.BruksEnhetsNummer is null then  '' else '-' end+ isnull(veg.BruksEnhetsNummer,'H0111') as adresse , veg.PostSted, veg.PostNummer, veg.GateNummer
 from e..t_altinn_utleieobjekt objekt 
 inner join e..t_altinn_vegadresse veg on objekt.VegAdresseId = veg.id
 inner join e..t_altinn_oppgaveFormidlingAvUtleie fau on fau.id =  objekt.oppgaveFormidlingAvUtleieId
@@ -116,7 +116,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="7">
-      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_0000248,False,False,False</value>
+      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_000000,False,False,False</value>
       <value>,Aar,Aar,Text_x007C_,System.String,_x0032_020,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
@@ -788,10 +788,10 @@ and fau.eierId = {(EierId)}</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/23/2020 2:16:51 PM</ReportChanged>
+  <ReportChanged>11/26/2020 7:53:34 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AltInnAarsOppgave.mrt</ReportFile>
-  <ReportGuid>c513faee15f94de2ad7c129ae9411458</ReportGuid>
+  <ReportGuid>fdfe3ea3c24245a385bf1788058b638c</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
