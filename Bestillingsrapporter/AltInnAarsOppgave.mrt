@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9CjZoUhRQ5TpbJzM8kxpF4t8y4zYTZLNRlu5BEhcsefDWrnPRkoxOXlEzcljXHev0chlr1toc8XibaEc9MykE4JwgWxIWZNZRUYVlA==</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9FbPoU1NQoBhfOXMegCiF4tqwQ9NX5KZa3u5XGdE6y/R8vtJ4wUiXWlrhPBpGecP1XCBK8hXAZ3pCP296T0qk9l40evRenuB</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -66,7 +66,7 @@ and fau.eierId = {(EierId)}
         <Name>Boliger</Name>
         <NameInSource>Connection</NameInSource>
         <Parameters isList="true" count="0" />
-        <SqlCommand>select objekt.id, veg.AdresseNavn +' '+ veg.GateNummer + ' ' + veg.HusBokstav + case when veg.BruksEnhetsNummer is null then  '' else '-' end+ isnull(veg.BruksEnhetsNummer,'H0111') as adresse , veg.PostSted, veg.PostNummer, veg.GateNummer
+        <SqlCommand>select objekt.id, veg.AdresseNavn +' '+ veg.Husnummer + ' ' + veg.HusBokstav + case when veg.BruksEnhetsNummer is null then  '' else '-' end+ isnull(veg.BruksEnhetsNummer,'0') as adresse , veg.PostSted, veg.PostNummer, veg.Husnummer
 from e..t_altinn_utleieobjekt objekt 
 inner join e..t_altinn_vegadresse veg on objekt.VegAdresseId = veg.id
 inner join e..t_altinn_oppgaveFormidlingAvUtleie fau on fau.id =  objekt.oppgaveFormidlingAvUtleieId
@@ -116,12 +116,12 @@ and fau.eierId = {(EierId)}</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="7">
-      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_000000,False,False,False</value>
+      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_0000002,False,False,False</value>
       <value>,Aar,Aar,Text_x007C_,System.String,_x0032_020,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0032_77,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0032_84,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_020,True,False</value>
     </Variables>
   </Dictionary>
@@ -700,7 +700,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
         <ReportSummaryBand1 Ref="51" type="ReportSummaryBand" isKey="true">
           <Brush>LightGray</Brush>
           <ClientRectangle>0,16,19,8.2</ClientRectangle>
-          <Components isList="true" count="3">
+          <Components isList="true" count="4">
             <Text9 Ref="52" type="Text" isKey="true">
               <Brush>LightGray</Brush>
               <ClientRectangle>6.8,0.2,4,1</ClientRectangle>
@@ -755,6 +755,30 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text13>
+            <Text27 Ref="56" type="Text" isKey="true">
+              <Brush>LightGray</Brush>
+              <ClientRectangle>6.6,1.4,4,1</ClientRectangle>
+              <ComponentStyle>Style1</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,12,Bold,Point,False,0</Font>
+              <Guid>c256976056d34d7a85b1bc417f2bbcdb</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text27</Name>
+              <Page isRef="7" />
+              <Parent isRef="51" />
+              <Text>{SumRunning(DataBand2,Utleieforhold.GebyrBetaltAvLeietakerForUtleieforholdet)}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="57" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+            </Text27>
           </Components>
           <ComponentStyle>Style1</ComponentStyle>
           <Conditions isList="true" count="0" />
@@ -770,13 +794,13 @@ and fau.eierId = {(EierId)}</SqlCommand>
       <PageHeight>29.7</PageHeight>
       <PageWidth>21</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="56" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="58" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
   </Pages>
-  <PrinterSettings Ref="57" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="59" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -788,10 +812,10 @@ and fau.eierId = {(EierId)}</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/26/2020 7:53:34 AM</ReportChanged>
+  <ReportChanged>1/22/2021 8:49:40 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AltInnAarsOppgave.mrt</ReportFile>
-  <ReportGuid>fdfe3ea3c24245a385bf1788058b638c</ReportGuid>
+  <ReportGuid>0523162d7a1a41f9be2f9edc36cf9d66</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -820,7 +844,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="2">
-    <Style1 Ref="58" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="60" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>LightGray</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -828,7 +852,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <Style3 Ref="59" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style3 Ref="61" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>All;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Conditions isList="true" count="0" />
