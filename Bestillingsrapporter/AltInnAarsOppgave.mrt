@@ -116,7 +116,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="7">
-      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_0000386,False,False,False</value>
+      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_0003160,False,False,False</value>
       <value>,Aar,Aar,Text_x007C_,System.String,_x0032_020,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
@@ -789,7 +789,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Name>Text9</Name>
               <Page isRef="7" />
               <Parent isRef="57" />
-              <Text>{SumRunning(DataBand2,Utleieforhold.ProvisjonBetaltAvUtleierForUtleieforholdet)}</Text>
+              <Text>{SumRunning(Table1,Utleieforhold.ProvisjonBetaltAvUtleierForUtleieforholdet)}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="59" type="CurrencyFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
@@ -843,7 +843,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Name>Text27</Name>
               <Page isRef="7" />
               <Parent isRef="57" />
-              <Text>{SumRunning(DataBand2,Utleieforhold.GebyrBetaltAvLeietakerForUtleieforholdet)}</Text>
+              <Text>{SumRunning(Table1,Utleieforhold.GebyrBetaltAvLeietakerForUtleieforholdet)}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="63" type="CurrencyFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
@@ -854,7 +854,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
                 <Symbol>kr</Symbol>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
-              <Type>Expression</Type>
+              <Type>Totals</Type>
             </Text27>
             <Text32 Ref="64" type="Text" isKey="true">
               <Brush>LightGray</Brush>
@@ -867,7 +867,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Name>Text32</Name>
               <Page isRef="7" />
               <Parent isRef="57" />
-              <Text>Total månedsleie betalt for {(Aar)}
+              <Text>Total månedsleie for {(Aar)}
 </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -883,7 +883,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Name>Text33</Name>
               <Page isRef="7" />
               <Parent isRef="57" />
-              <Text>{SumRunning(DataBand2,Utleieforhold.Utleiebelop)}</Text>
+              <Text>{SumRunning(Table1,Utleieforhold.Utleiebelop)}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="66" type="CurrencyFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
@@ -894,7 +894,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
                 <Symbol>kr</Symbol>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
-              <Type>Expression</Type>
+              <Type>Totals</Type>
             </Text33>
           </Components>
           <ComponentStyle>Style1</ComponentStyle>
@@ -929,10 +929,10 @@ and fau.eierId = {(EierId)}</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>2/2/2021 7:00:51 AM</ReportChanged>
+  <ReportChanged>2/2/2021 7:13:50 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AltInnAarsOppgave.mrt</ReportFile>
-  <ReportGuid>e35ec6f4628d4745b01b9fbd70b66370</ReportGuid>
+  <ReportGuid>a3f40bf631a545019f7dc692571cd138</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
