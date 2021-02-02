@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9FbPoU1NQoBhfOXMegCiF4tqwQ9NX5KZa3u5XGdE6y/R8vtJ4wUiXWlrhPBpGecP1XCBK8hXAZ3pCP296T0qk9l40evRenuB</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9FbPoU1NQoBhfOXMegCiF4tqwQ9NX5KZa3u5XGdE6y/R8vtJ4wUiXWlrhPBpEecP1XCBK8hXAZ3pCP296T0qk9l40evRenuB</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -116,12 +116,12 @@ and fau.eierId = {(EierId)}</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="7">
-      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_0000002,False,False,False</value>
+      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_0000386,False,False,False</value>
       <value>,Aar,Aar,Text_x007C_,System.String,_x0032_020,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0032_84,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0032_86,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_020,True,False</value>
     </Variables>
   </Dictionary>
@@ -390,7 +390,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Name>Text25</Name>
               <Page isRef="7" />
               <Parent isRef="23" />
-              <Text>Gebyr betalt</Text>
+              <Text>Form.kost betalt</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text25>
@@ -482,7 +482,6 @@ and fau.eierId = {(EierId)}</SqlCommand>
                 <NegativePattern>12</NegativePattern>
                 <PositivePattern>2</PositivePattern>
                 <Symbol>kr</Symbol>
-                <UseGroupSeparator>False</UseGroupSeparator>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
               <Type>DataColumn</Type>
@@ -544,7 +543,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
           <DataRelationName>Relation</DataRelationName>
           <DataSourceName>Utleieforhold</DataSourceName>
           <Filters isList="true" count="0" />
-          <MasterComponent isRef="47" />
+          <MasterComponent isRef="53" />
           <Name>Table1</Name>
           <NumberID>30</NumberID>
           <Page isRef="7" />
@@ -555,7 +554,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
         <FooterBand1 Ref="40" type="FooterBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,10.4,19,2.6</ClientRectangle>
-          <Components isList="true" count="4">
+          <Components isList="true" count="8">
             <Text15 Ref="41" type="Text" isKey="true">
               <Border>None;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
@@ -583,7 +582,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
             <Text16 Ref="43" type="Text" isKey="true">
               <Border>None;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>8.8,0,6.2,0.6</ClientRectangle>
+              <ClientRectangle>7.4,0,7.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9.75,Bold,Point,False,0</Font>
               <Guid>2e4736b172a145c8abb14494a3f47eed</Guid>
@@ -598,7 +597,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
             <Text17 Ref="44" type="Text" isKey="true">
               <Border>None;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>8.8,0.6,6.2,0.6</ClientRectangle>
+              <ClientRectangle>7.4,0.6,7.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Font>Arial,9.75,Bold,Point,False,0</Font>
               <Guid>4d5875d734eb4f1eb5b37f1af1e0b0cb</Guid>
@@ -606,7 +605,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Name>Text17</Name>
               <Page isRef="7" />
               <Parent isRef="40" />
-              <Text>Total gebyr for denne boligen:</Text>
+              <Text>Total formidlingskostander for denne boligen:</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text17>
@@ -634,19 +633,97 @@ and fau.eierId = {(EierId)}</SqlCommand>
               </TextFormat>
               <Type>Totals</Type>
             </Text18>
+            <Text28 Ref="47" type="Text" isKey="true">
+              <Border>None;Black;2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>7.4,0.6,7.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,9.75,Bold,Point,False,0</Font>
+              <Guid>a0e9fb1fa9874f2da723d8df61f838b0</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text28</Name>
+              <Page isRef="7" />
+              <Parent isRef="40" />
+              <Text>Total formidlingskostander for denne boligen:</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text28>
+            <Text29 Ref="48" type="Text" isKey="true">
+              <Border>None;Black;2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>15,0.6,4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,9.75,Bold,Point,False,0</Font>
+              <Guid>988eedd438d5457ca64f9587f45b525e</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text29</Name>
+              <Page isRef="7" />
+              <Parent isRef="40" />
+              <Text>{Sum(Table1,Utleieforhold.GebyrBetaltAvLeietakerForUtleieforholdet)}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="49" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Totals</Type>
+            </Text29>
+            <Text30 Ref="50" type="Text" isKey="true">
+              <Border>None;Black;2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>7.4,1.2,7.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,9.75,Bold,Point,False,0</Font>
+              <Guid>4750d96275b64f7db95c7f9a4090b0e7</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text30</Name>
+              <Page isRef="7" />
+              <Parent isRef="40" />
+              <Text>Total månedsleie for denne boligen:</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text30>
+            <Text31 Ref="51" type="Text" isKey="true">
+              <Border>None;Black;2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>15,1.2,4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,9.75,Bold,Point,False,0</Font>
+              <Guid>cd07e3b21ed846a7845a71a641295082</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text31</Name>
+              <Page isRef="7" />
+              <Parent isRef="40" />
+              <Text>{Sum(Table1,Utleieforhold.Utleiebelop)}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="52" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Totals</Type>
+            </Text31>
           </Components>
           <Conditions isList="true" count="0" />
           <Name>FooterBand1</Name>
           <Page isRef="7" />
           <Parent isRef="7" />
         </FooterBand1>
-        <DataBand2 Ref="47" type="DataBand" isKey="true">
+        <DataBand2 Ref="53" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
           <CanShrink>True</CanShrink>
           <ClientRectangle>0,13.8,19,1.4</ClientRectangle>
           <Components isList="true" count="3">
-            <Text7 Ref="48" type="Text" isKey="true">
+            <Text7 Ref="54" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,0,11.2,0.6</ClientRectangle>
@@ -655,11 +732,11 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>Text7</Name>
               <Page isRef="7" />
-              <Parent isRef="47" />
+              <Parent isRef="53" />
               <Text>{Boliger.adresse}</Text>
               <TextBrush>Black</TextBrush>
             </Text7>
-            <Text8 Ref="49" type="Text" isKey="true">
+            <Text8 Ref="55" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0.4,0.6,1.6,0.6</ClientRectangle>
@@ -668,11 +745,11 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>Text8</Name>
               <Page isRef="7" />
-              <Parent isRef="47" />
+              <Parent isRef="53" />
               <Text>{Boliger.PostNummer}</Text>
               <TextBrush>Black</TextBrush>
             </Text8>
-            <Text11 Ref="50" type="Text" isKey="true">
+            <Text11 Ref="56" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>2,0.6,3.8,0.6</ClientRectangle>
@@ -681,7 +758,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>Text11</Name>
               <Page isRef="7" />
-              <Parent isRef="47" />
+              <Parent isRef="53" />
               <Text>{Boliger.PostSted}</Text>
               <TextBrush>Black</TextBrush>
             </Text11>
@@ -697,13 +774,13 @@ and fau.eierId = {(EierId)}</SqlCommand>
           <Parent isRef="7" />
           <Sort isList="true" count="0" />
         </DataBand2>
-        <ReportSummaryBand1 Ref="51" type="ReportSummaryBand" isKey="true">
+        <ReportSummaryBand1 Ref="57" type="ReportSummaryBand" isKey="true">
           <Brush>LightGray</Brush>
           <ClientRectangle>0,16,19,8.2</ClientRectangle>
-          <Components isList="true" count="4">
-            <Text9 Ref="52" type="Text" isKey="true">
+          <Components isList="true" count="6">
+            <Text9 Ref="58" type="Text" isKey="true">
               <Brush>LightGray</Brush>
-              <ClientRectangle>6.8,0.2,4,1</ClientRectangle>
+              <ClientRectangle>9.2,0.2,4,1</ClientRectangle>
               <ComponentStyle>Style1</ComponentStyle>
               <Conditions isList="true" count="0" />
               <Font>Arial,12,Bold,Point,False,0</Font>
@@ -711,10 +788,10 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>Text9</Name>
               <Page isRef="7" />
-              <Parent isRef="51" />
+              <Parent isRef="57" />
               <Text>{SumRunning(DataBand2,Utleieforhold.ProvisjonBetaltAvUtleierForUtleieforholdet)}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="53" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="59" type="CurrencyFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
@@ -725,7 +802,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
               </TextFormat>
               <Type>Totals</Type>
             </Text9>
-            <Text10 Ref="54" type="Text" isKey="true">
+            <Text10 Ref="60" type="Text" isKey="true">
               <Brush>LightGray</Brush>
               <ClientRectangle>0.4,0.2,6.2,1</ClientRectangle>
               <ComponentStyle>Style1</ComponentStyle>
@@ -734,14 +811,14 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>Text10</Name>
               <Page isRef="7" />
-              <Parent isRef="51" />
+              <Parent isRef="57" />
               <Text>Total provisjon betalt for {(Aar)}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text10>
-            <Text13 Ref="55" type="Text" isKey="true">
+            <Text13 Ref="61" type="Text" isKey="true">
               <Brush>LightGray</Brush>
-              <ClientRectangle>0.4,1.4,6.2,1</ClientRectangle>
+              <ClientRectangle>0.4,1.4,8.6,1</ClientRectangle>
               <ComponentStyle>Style1</ComponentStyle>
               <Conditions isList="true" count="0" />
               <Font>Arial,12,Bold,Point,False,0</Font>
@@ -749,15 +826,15 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>Text13</Name>
               <Page isRef="7" />
-              <Parent isRef="51" />
-              <Text>Total gebyr betalt for {(Aar)}
+              <Parent isRef="57" />
+              <Text>Total formidlingskostnad betalt for {(Aar)}
 </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text13>
-            <Text27 Ref="56" type="Text" isKey="true">
+            <Text27 Ref="62" type="Text" isKey="true">
               <Brush>LightGray</Brush>
-              <ClientRectangle>6.6,1.4,4,1</ClientRectangle>
+              <ClientRectangle>9.2,1.4,4,1</ClientRectangle>
               <ComponentStyle>Style1</ComponentStyle>
               <Conditions isList="true" count="0" />
               <Font>Arial,12,Bold,Point,False,0</Font>
@@ -765,10 +842,10 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>Text27</Name>
               <Page isRef="7" />
-              <Parent isRef="51" />
+              <Parent isRef="57" />
               <Text>{SumRunning(DataBand2,Utleieforhold.GebyrBetaltAvLeietakerForUtleieforholdet)}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="57" type="CurrencyFormat" isKey="true">
+              <TextFormat Ref="63" type="CurrencyFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <DecimalSeparator>,</DecimalSeparator>
                 <GroupSeparator> </GroupSeparator>
@@ -779,6 +856,46 @@ and fau.eierId = {(EierId)}</SqlCommand>
               </TextFormat>
               <Type>Expression</Type>
             </Text27>
+            <Text32 Ref="64" type="Text" isKey="true">
+              <Brush>LightGray</Brush>
+              <ClientRectangle>0.4,2.6,8.6,1</ClientRectangle>
+              <ComponentStyle>Style1</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,12,Bold,Point,False,0</Font>
+              <Guid>a1a475a9af8b45be92c548e5ca1005c1</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text32</Name>
+              <Page isRef="7" />
+              <Parent isRef="57" />
+              <Text>Total månedsleie betalt for {(Aar)}
+</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text32>
+            <Text33 Ref="65" type="Text" isKey="true">
+              <Brush>LightGray</Brush>
+              <ClientRectangle>9.2,2.6,4,1</ClientRectangle>
+              <ComponentStyle>Style1</ComponentStyle>
+              <Conditions isList="true" count="0" />
+              <Font>Arial,12,Bold,Point,False,0</Font>
+              <Guid>ec8955b322a6414297ff37f59ebc5bcb</Guid>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text33</Name>
+              <Page isRef="7" />
+              <Parent isRef="57" />
+              <Text>{SumRunning(DataBand2,Utleieforhold.Utleiebelop)}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="66" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>,</DecimalSeparator>
+                <GroupSeparator> </GroupSeparator>
+                <NegativePattern>12</NegativePattern>
+                <PositivePattern>2</PositivePattern>
+                <Symbol>kr</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+            </Text33>
           </Components>
           <ComponentStyle>Style1</ComponentStyle>
           <Conditions isList="true" count="0" />
@@ -794,13 +911,13 @@ and fau.eierId = {(EierId)}</SqlCommand>
       <PageHeight>29.7</PageHeight>
       <PageWidth>21</PageWidth>
       <Report isRef="0" />
-      <Watermark Ref="58" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+      <Watermark Ref="67" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
         <Font>Arial,100</Font>
         <TextBrush>[50:0:0:0]</TextBrush>
       </Watermark>
     </Page1>
   </Pages>
-  <PrinterSettings Ref="59" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <PrinterSettings Ref="68" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
   <ReferencedAssemblies isList="true" count="8">
     <value>System.Dll</value>
     <value>System.Drawing.Dll</value>
@@ -812,10 +929,10 @@ and fau.eierId = {(EierId)}</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>1/22/2021 8:49:40 AM</ReportChanged>
+  <ReportChanged>2/2/2021 7:00:51 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AltInnAarsOppgave.mrt</ReportFile>
-  <ReportGuid>0523162d7a1a41f9be2f9edc36cf9d66</ReportGuid>
+  <ReportGuid>e35ec6f4628d4745b01b9fbd70b66370</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
@@ -844,7 +961,7 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="2">
-    <Style1 Ref="60" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style1 Ref="69" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Brush>LightGray</Brush>
       <Conditions isList="true" count="0" />
       <Description />
@@ -852,7 +969,7 @@ namespace Reports
       <Name>Style1</Name>
       <TextBrush>Black</TextBrush>
     </Style1>
-    <Style3 Ref="61" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Style3 Ref="70" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>All;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <Conditions isList="true" count="0" />
