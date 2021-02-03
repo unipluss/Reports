@@ -5,41 +5,42 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9CjBoURxQ5TpR5yY8kyxF4ts0Q/YTZLtRlu5CE89oufDVrnPRmcBiHlE0dxjTKiv8xJpLu92c91qGYRY9ADrL/Fw2QJnfZLt4VrR1GOE</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9CjZoUhRQ5TpbJzM8kxpF4t8y4zYTZLNRlu5BM9csefDWrnPRkoxOXlEzcljXHev0chlr1toc8XibaEc9MykE4JwgWxIWZNZRUYVlA==</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
     <DataSources isList="true" count="1">
       <Datakilde1 Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Datakilde1</Alias>
-        <Columns isList="true" count="27">
-          <value>Year,System.string</value>
-          <value>SumOther,System.string</value>
-          <value>OwnerId,System.string</value>
-          <value>OtherIncome,System.string</value>
-          <value>OtherExpenses,System.string</value>
-          <value>Fee,System.string</value>
-          <value>Name,System.string</value>
-          <value>Adress,System.string</value>
-          <value>Adress2,System.string</value>
-          <value>AreaCode,System.string</value>
-          <value>PostalArea,System.string</value>
-          <value>Email,System.string</value>
-          <value>january,System.string</value>
-          <value>februray,System.string</value>
-          <value>march,System.string</value>
-          <value>april,System.string</value>
-          <value>may,System.string</value>
-          <value>june,System.string</value>
-          <value>july,System.string</value>
-          <value>august,System.string</value>
-          <value>september,System.string</value>
-          <value>october,System.string</value>
-          <value>november,System.string</value>
-          <value>december,System.string</value>
-          <value>SumRent,System.string</value>
-          <value>SumNetPayment,System.string</value>
-          <value>today,System.Nullable`1[System.DateTime]</value>
+        <Columns isList="true" count="28">
+          <value>Year,System.String</value>
+          <value>OwnerId,System.String</value>
+          <value>OtherIncome,System.String</value>
+          <value>OtherExpenses,System.String</value>
+          <value>Fee,System.String</value>
+          <value>Name,System.String</value>
+          <value>Adress,System.String</value>
+          <value>Adress2,System.String</value>
+          <value>AreaCode,System.String</value>
+          <value>PostalArea,System.String</value>
+          <value>Email,System.String</value>
+          <value>january,System.String</value>
+          <value>februray,System.String</value>
+          <value>march,System.String</value>
+          <value>april,System.String</value>
+          <value>may,System.String</value>
+          <value>june,System.String</value>
+          <value>july,System.String</value>
+          <value>august,System.String</value>
+          <value>september,System.String</value>
+          <value>october,System.String</value>
+          <value>november,System.String</value>
+          <value>december,System.String</value>
+          <value>SumNetPayment,System.String</value>
+          <value>SumOther,System.String</value>
+          <value>SumRent,System.String</value>
+          <value>ManagmentExpenses,System.String</value>
+          <value>today,System.DateTime</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -47,70 +48,72 @@
         <NameInSource>Connection</NameInSource>
         <Parameters isList="true" count="0" />
         <SqlCommand>select 
-'{Year}' as Year,
-'{OwnerId}' as OwnerId,
-'{OtherIncome}' as OtherIncome,
-'{OtherExpenses}' as OtherExpenses,
-'{Fee}' as Fee ,
-'{Name}' as Name,
-'{Adress}' as Adress ,
-'{Adress2}' as Adress2,
-'{AreaCode}' as AreaCode,
-'{PostalArea}' as PostalArea,
-'{Email}' as Email,
-'{incomeMonth_1}' as january,
-'{incomeMonth_2}' as februray,
-'{incomeMonth_3}' as march,
-'{incomeMonth_4}' as april,
-'{incomeMonth_5}' as may,	
-'{incomeMonth_6}' as june,
-'{incomeMonth_7}' as july,
-'{incomeMonth_8}' as august,
-'{incomeMonth_9}'as september,
-'{incomeMonth_10}' as october ,
-'{incomeMonth_11}' as november,
-'{incomeMonth_12}' as december,
-'{SumNetPayment}' as SumNetPayment,
-'{SumOther}' as SumOther,
-'{SumRent}' as SumRent,
-GetDate() as today
+	'{Year}' as Year,
+	'{OwnerId}' as OwnerId,
+	'{OtherIncome}' as OtherIncome,
+	'{OtherExpenses}' as OtherExpenses,
+	'{Fee}' as Fee ,
+	'{Name}' as Name,
+	'{Adress}' as Adress ,
+	'{Adress2}' as Adress2,
+	'{AreaCode}' as AreaCode,
+	'{PostalArea}' as PostalArea,
+	'{Email}' as Email,
+	'{incomeMonth_1}' as january,
+	'{incomeMonth_2}' as februray,
+	'{incomeMonth_3}' as march,
+	'{incomeMonth_4}' as april,
+	'{incomeMonth_5}' as may,	
+	'{incomeMonth_6}' as june,
+	'{incomeMonth_7}' as july,
+	'{incomeMonth_8}' as august,
+	'{incomeMonth_9}'as september,
+	'{incomeMonth_10}' as october ,
+	'{incomeMonth_11}' as november,
+	'{incomeMonth_12}' as december,
+	'{SumNetPayment}' as SumNetPayment,
+	'{SumOther}' as SumOther,
+	'{SumRent}' as SumRent,
+	'{ManagmentExpenses}' as ManagmentExpenses,
+	GetDate() as today
 </SqlCommand>
       </Datakilde1>
     </DataSources>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
-    <Variables isList="true" count="31">
+    <Variables isList="true" count="32">
       <value>,Year,Year,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,SumNetPayment,SumNetPayment,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,OwnerId,OwnerId,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,OtherIncome,OtherIncome,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,OtherExpenses,OtherExpenses,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,Fee,Fee,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,Name,Name,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,Adress,Adress,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,Adress2,Adress2,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,AreaCode,AreaCode,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,PostalArea,PostalArea,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,Email,Email,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,SumRent,SumRent,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_1,incomeMonth_1,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_2,incomeMonth_2,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_3,incomeMonth_3,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_4,incomeMonth_4,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_5,incomeMonth_5,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_6,incomeMonth_6,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_7,incomeMonth_7,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_8,incomeMonth_8,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_9,incomeMonth_9,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_10,incomeMonth_10,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_11,incomeMonth_11,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,incomeMonth_12,incomeMonth_12,text_x007C_,System.String,_x0031_,False,False,False</value>
-      <value>,SumOther,SumOther,text_x007C_,System.String,_x0031_,False,False,False</value>
+      <value>,SumNetPayment,SumNetPayment,text_x007C_,System.String,_x0032_,False,False,False</value>
+      <value>,OwnerId,OwnerId,text_x007C_,System.String,_x0033_,False,False,False</value>
+      <value>,OtherIncome,OtherIncome,text_x007C_,System.String,_x0034_,False,False,False</value>
+      <value>,OtherExpenses,OtherExpenses,text_x007C_,System.String,_x0035_,False,False,False</value>
+      <value>,Fee,Fee,text_x007C_,System.String,_x0036_,False,False,False</value>
+      <value>,Name,Name,text_x007C_,System.String,_x0037_,False,False,False</value>
+      <value>,Adress,Adress,text_x007C_,System.String,_x0038_,False,False,False</value>
+      <value>,Adress2,Adress2,text_x007C_,System.String,_x0039_,False,False,False</value>
+      <value>,AreaCode,AreaCode,text_x007C_,System.String,_x0031_0,False,False,False</value>
+      <value>,PostalArea,PostalArea,text_x007C_,System.String,_x0031_1,False,False,False</value>
+      <value>,Email,Email,text_x007C_,System.String,_x0031_2,False,False,False</value>
+      <value>,SumRent,SumRent,text_x007C_,System.String,_x0031_3,False,False,False</value>
+      <value>,incomeMonth_1,incomeMonth_1,text_x007C_,System.String,_x0031_4,False,False,False</value>
+      <value>,incomeMonth_2,incomeMonth_2,text_x007C_,System.String,_x0031_5,False,False,False</value>
+      <value>,incomeMonth_3,incomeMonth_3,text_x007C_,System.String,_x0031_6,False,False,False</value>
+      <value>,incomeMonth_4,incomeMonth_4,text_x007C_,System.String,_x0031_7,False,False,False</value>
+      <value>,incomeMonth_5,incomeMonth_5,text_x007C_,System.String,_x0031_8,False,False,False</value>
+      <value>,incomeMonth_6,incomeMonth_6,text_x007C_,System.String,_x0031_9,False,False,False</value>
+      <value>,incomeMonth_7,incomeMonth_7,text_x007C_,System.String,_x0032_0,False,False,False</value>
+      <value>,incomeMonth_8,incomeMonth_8,text_x007C_,System.String,_x0032_1,False,False,False</value>
+      <value>,incomeMonth_9,incomeMonth_9,text_x007C_,System.String,_x0032_2,False,False,False</value>
+      <value>,incomeMonth_10,incomeMonth_10,text_x007C_,System.String,_x0032_3,False,False,False</value>
+      <value>,incomeMonth_11,incomeMonth_11,text_x007C_,System.String,_x0032_4,False,False,False</value>
+      <value>,incomeMonth_12,incomeMonth_12,text_x007C_,System.String,_x0032_5,False,False,False</value>
+      <value>,SumOther,SumOther,text_x007C_,System.String,_x0032_6,False,False,False</value>
+      <value>,ManagmentExpenses,ManagmentExpenses,text_x007C_,System.String,_x0032_7,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0031_97,True,False</value>
-      <value>System,ClientYear,ClientYear,System.Int32,_x0032_016,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0032_87,True,False</value>
+      <value>System,ClientYear,ClientYear,System.Int32,_x0032_020,True,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -1810,6 +1813,7 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>Formidlingskostander</Text>
               <TextBrush>Black</TextBrush>
             </Table2_Cell17>
             <Table2_Cell18 Ref="123" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
@@ -1840,7 +1844,9 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{Datakilde1.ManagmentExpenses}</Text>
               <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
             </Table2_Cell19>
             <Table2_Cell20 Ref="125" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>Right;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
@@ -2201,10 +2207,10 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>10/18/2016 7:51:59 AM</ReportChanged>
+  <ReportChanged>2/2/2021 2:40:17 PM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\aarsrapport.mrt</ReportFile>
-  <ReportGuid>75808e569efc4a7eb95cc78a7722db24</ReportGuid>
+  <ReportGuid>94da5dbc762f43c0962278f7fd67b194</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
