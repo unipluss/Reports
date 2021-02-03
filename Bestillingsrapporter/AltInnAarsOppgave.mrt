@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9FbPoU1NQoBhfOXMegCiF4tqwQ9NX5KZa3u5XGdE6y/R8vtJ4wUiXWlrhPBpEecP1XCBK8hXAZ3pCP296T0qk9l40evRenuB</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9CjZoUhRQ5TpbJzM8kxpF4t8y4zYTZLNRlu5BM9csefDWrnPRkoxOXlEzcljXHev0chlr1toc8XibaEc9MykE4JwgWxIWZNZRUYVlA==</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -23,7 +23,7 @@
           <value>postnr,System.String</value>
           <value>landkode,System.String</value>
           <value>id,System.Int32</value>
-          <value>eierId,System.Int32</value>
+          <value>eierId,System.String</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -34,12 +34,12 @@
 	el.OppgaveGiver_OrganisasjonsNavn
 	,el.OppgaveGiver_OrganisasjonsNummer
 	,el.InntektsAar
-	, ISNULL(nar.OrganisasjonsNavn, pers.Fornavn + ' ' + pers.Etternavn) as navn
-	, ISNULL(nar.Organisasjonsnummer, pers.FoedselsNummer )as idNr
-	, ISNULL(intAdr.AdresseNavn ,vegAdr.AdresseNavn +' ' + vegAdr.GateNummer) as adresse
-	, ISNULL(intadr.postkode, vegadr.PostNummer) as postnr
-	, ISNULL(intadr.ByEllerStedsNavn, vegadr.PostSted) as postSted
-	, ISNULL(intAdr.Landkode, 'No') as landkode
+	, COALESCE(nar.OrganisasjonsNavn, pers.Fornavn + ' ' + pers.Etternavn) as navn
+	, COALESCE(nar.Organisasjonsnummer, pers.FoedselsNummer )as idNr
+	, COALESCE(intAdr.AdresseNavn ,vegAdr.AdresseNavn +' ' + vegAdr.GateNummer) as adresse
+	, COALESCE(intadr.postkode, vegadr.PostNummer) as postnr
+	, COALESCE(intadr.ByEllerStedsNavn, vegadr.PostSted) as postSted
+	, COALESCE(intAdr.Landkode, 'No') as landkode
 	, fau.id
 	,fau.eierId
 	from e..t_altinn_eier_leveranse el
@@ -116,12 +116,12 @@ and fau.eierId = {(EierId)}</SqlCommand>
     </Relations>
     <Report isRef="0" />
     <Variables isList="true" count="7">
-      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_0003160,False,False,False</value>
+      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_0000248,False,False,False</value>
       <value>,Aar,Aar,Text_x007C_,System.String,_x0032_020,False,False,False</value>
       <value>System,UserName,UserName,System.String,Esben_x0020_Føllesdal,True,False</value>
       <value>System,UserId,UserId,System.String,_x0033_,True,False</value>
       <value>System,UserCountryCode,UserCountryCode,System.String,NO,True,False</value>
-      <value>System,ClientNr,ClientNr,System.Int32,_x0032_86,True,False</value>
+      <value>System,ClientNr,ClientNr,System.Int32,_x0032_87,True,False</value>
       <value>System,ClientYear,ClientYear,System.Int32,_x0032_020,True,False</value>
     </Variables>
   </Dictionary>
@@ -196,7 +196,7 @@ and fau.eierId = {(EierId)}</SqlCommand>
               <Parent isRef="12" />
               <Text>{Eier.idNr}</Text>
               <TextBrush>Black</TextBrush>
-              <Type>DataColumn</Type>
+              <Type>Expression</Type>
             </Text1>
             <Text2 Ref="14" type="Text" isKey="true">
               <Border>All;Transparent;1;Solid;False;4;Black</Border>
@@ -929,10 +929,10 @@ and fau.eierId = {(EierId)}</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>2/2/2021 7:13:50 AM</ReportChanged>
+  <ReportChanged>2/3/2021 7:47:15 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AltInnAarsOppgave.mrt</ReportFile>
-  <ReportGuid>a3f40bf631a545019f7dc692571cd138</ReportGuid>
+  <ReportGuid>90ddcdd44a0c47eda93ba74f64f14d87</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
