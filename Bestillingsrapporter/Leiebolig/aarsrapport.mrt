@@ -168,7 +168,7 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Name>Text1</Name>
               <Page isRef="4" />
               <Parent isRef="7" />
-              <Text>Årsrapport for {Datakilde1.Year}</Text>
+              <Text>Årsoversikt for {Datakilde1.Year}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text1>
@@ -303,7 +303,7 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="16" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>Husleieinntekter</Text>
+              <Text>Utbetalt husleieinntekt</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Table1_Cell2>
@@ -1582,7 +1582,7 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>Kostnader</Text>
+              <Text>Fratrukkne kostnader</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Table2_Cell2>
@@ -1736,8 +1736,9 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>Andre kostnader</Text>
+              <Text>Øvrige kostnader</Text>
               <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
             </Table2_Cell12>
             <Table2_Cell13 Ref="118" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
@@ -1753,6 +1754,7 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
               <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
             </Table2_Cell13>
             <Table2_Cell14 Ref="119" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
@@ -1813,8 +1815,9 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>Formidlingskostander</Text>
+              <Text>(fra Leiebolig og evt. underleverandører)</Text>
               <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
             </Table2_Cell17>
             <Table2_Cell18 Ref="123" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
@@ -1844,7 +1847,6 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>{Datakilde1.ManagmentExpenses}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Table2_Cell19>
@@ -1891,8 +1893,9 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>Forvaltningshonorar</Text>
+              <Text>Formidlingskostander</Text>
               <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
             </Table2_Cell22>
             <Table2_Cell23 Ref="128" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
@@ -1922,8 +1925,9 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>{Datakilde1.Fee}</Text>
+              <Text>{Datakilde1.ManagmentExpenses}</Text>
               <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
             </Table2_Cell24>
             <Table2_Cell25 Ref="130" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>Right;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
@@ -1968,7 +1972,9 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>Forvaltningshonorar</Text>
               <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
             </Table2_Cell27>
             <Table2_Cell28 Ref="133" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>None;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
@@ -1998,7 +2004,9 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
               <Page isRef="4" />
               <Parent isRef="105" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{Datakilde1.Fee}</Text>
               <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
             </Table2_Cell29>
             <Table2_Cell30 Ref="135" type="Stimulsoft.Report.Components.Table.StiTableCell" isKey="true">
               <Border>Right;[105:105:105];1;Solid;False;4;[105:105:105]</Border>
@@ -2207,10 +2215,10 @@ Utleier er selv ansvarlig for innrapportering på skjema RF1189</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>2/2/2021 2:40:17 PM</ReportChanged>
+  <ReportChanged>2/3/2021 12:43:31 PM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\aarsrapport.mrt</ReportFile>
-  <ReportGuid>94da5dbc762f43c0962278f7fd67b194</ReportGuid>
+  <ReportGuid>3188f2e594d0403598652868c291fa67</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
