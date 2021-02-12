@@ -49,8 +49,16 @@ left join e..t_altinn_naringsdrivendeUtleier nar on nar.id = fau.NaringsDrivende
 left join e..t_altinn_vegadresse vegAdr on vegAdr.id = fau.VegadresseId
 left join e..t_altinn_InternasjonalAdresse intAdr on intAdr.id = fau.InternasjonalAdresseId
 
-where el.Id = (select MAX(id) from e..t_altinn_eier_leveranse where InntektsAar = {(Aar)} and StatusId in (29002,29003)) -- siste som ikke er slettet som gjelder og som er innsendt
-and fau.eierId = {(EierId)}
+where el.Id = 
+(
+select top 1 j.id from e..t_altinn_eier_leveranse j 
+inner join e..t_altinn_oppgaveFormidlingAvUtleie k on j.id = k.LeveranseId
+where j.InntektsAar = {Aar} 
+and j.StatusId in(29002, 29003) 
+and k.eierId = {EierId}
+order by j.Id desc
+) -- siste som ikke er slettet for denne eieren som gjelder og som er innsendt
+and fau.eierId = {EierId}
 </SqlCommand>
       </Eier>
       <Boliger Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
@@ -74,8 +82,16 @@ inner join e..t_altinn_vegadresse veg on objekt.VegAdresseId = veg.id
 inner join e..t_altinn_oppgaveFormidlingAvUtleie fau on fau.id =  objekt.oppgaveFormidlingAvUtleieId
 inner join e..t_altinn_eier_leveranse el on fau.LeveranseId = el.Id 
 
-where el.Id = (select MAX(id) from e..t_altinn_eier_leveranse where InntektsAar = {(Aar)} and StatusId in(29002, 29003)) -- siste som ikke er slettet som gjelder
-and fau.eierId = {(EierId)}</SqlCommand>
+where el.Id = 
+(
+select top 1 j.id from e..t_altinn_eier_leveranse j 
+inner join e..t_altinn_oppgaveFormidlingAvUtleie k on j.id = k.LeveranseId
+where j.InntektsAar = {Aar} 
+and j.StatusId in(29002, 29003) 
+and k.eierId = {EierId}
+order by j.Id desc
+) -- siste som ikke er slettet for denne eieren som gjelder og som er innsendt
+and fau.eierId = {EierId}</SqlCommand>
       </Boliger>
       <Utleieforhold Ref="5" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>Utleieforhold</Alias>
@@ -979,10 +995,10 @@ and fau.eierId = {(EierId)}</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>2/9/2021 6:55:46 AM</ReportChanged>
+  <ReportChanged>2/12/2021 10:14:51 AM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
   <ReportFile>C:\Users\ESBEN~1.FOL\AppData\Local\Temp\AltInnAarsOppgave.mrt</ReportFile>
-  <ReportGuid>6c869a9349c24ddb86795a0aa55142f9</ReportGuid>
+  <ReportGuid>1770060235a440b59abdb41d7fe437cb</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2013.1.1600</ReportVersion>
