@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <Connection Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>Connection</Alias>
-        <ConnectionStringEncrypted>9FZpoU1N2d1hfOXJegDjF4ta+y5NVHLt7Ey5XORc60/RatFJZwV7XUVBUexpCW0T11rViVBdAYFhWiXMcnStj8R40e1bdsLNRg==</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9OhTz8dKaaT8bm3cYuTkY9EY3YjaHbuERULtZGNs8w+I2M0LSlrL7WtG1TRkSaRii1a3oWFxMVlgSWXwYVzrF9Fa9e5OS8KFa03RhE4VoEbRIvuO1wWp+WFG</ConnectionStringEncrypted>
         <Name>Connection</Name>
       </Connection>
     </Databases>
@@ -138,12 +138,12 @@ and fau.eierId = {EierId}</SqlCommand>
     <Report isRef="0" />
     <Resources isList="true" count="0" />
     <Variables isList="true" count="7">
-      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_00270,False,False,False,False</value>
-      <value>,Aar,Aar,Text_x007C_,System.String,_x0032_021,False,False,False,False</value>
-      <value>System,UserName,UserName,,System.String,Administrator,True,False,False,False</value>
-      <value>System,UserId,UserId,,System.String,_x0032_,True,False,False,False</value>
-      <value>System,UserCountryCode,UserCountryCode,,System.String,,True,False,False,False</value>
-      <value>System,ClientNr,ClientNr,,System.Int32,_x0031_0,True,False,False,False</value>
+      <value>,EierId,EierId,Text_x007C_,System.String,_x0037_00108,False,False,False,False</value>
+      <value>,Aar,Aar,Text_x007C_,System.String,_x0032_022,False,False,False,False</value>
+      <value>System,UserName,UserName,,System.String,uniplusstest,True,False,False,False</value>
+      <value>System,UserId,UserId,,System.String,_x0034_,True,False,False,False</value>
+      <value>System,UserCountryCode,UserCountryCode,,System.String,NO,True,False,False,False</value>
+      <value>System,ClientNr,ClientNr,,System.Int32,_x0032_5,True,False,False,False</value>
       <value>System,ClientYear,ClientYear,,System.Int32,_x0032_022,True,False,False,False</value>
     </Variables>
   </Dictionary>
@@ -926,7 +926,7 @@ and fau.eierId = {EierId}</SqlCommand>
               <Name>Text10</Name>
               <Page isRef="7" />
               <Parent isRef="61" />
-              <Text>Total provisjon betalt for {(Aar)}</Text>
+              <Text>Total provisjon betalt for {Aar}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
             </Text10>
@@ -942,7 +942,7 @@ and fau.eierId = {EierId}</SqlCommand>
               <Name>Text13</Name>
               <Page isRef="7" />
               <Parent isRef="61" />
-              <Text>Total formidlingskostnad betalt for {(Aar)}
+              <Text>Total formidlingskostnad betalt for {Aar}
 </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -984,7 +984,7 @@ and fau.eierId = {EierId}</SqlCommand>
               <Name>Text32</Name>
               <Page isRef="7" />
               <Parent isRef="61" />
-              <Text>Total månedsleie for {(Aar)}
+              <Text>Total månedsleie for {Aar}
 </Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
@@ -1044,13 +1044,13 @@ and fau.eierId = {EierId}</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>10/3/2022 12:13:50 PM</ReportChanged>
+  <ReportChanged>1/3/2023 1:20:48 PM</ReportChanged>
   <ReportCreated>4/29/2014 9:23:04 AM</ReportCreated>
-  <ReportFile>C:\Users\esf\AppData\Local\Temp\AltInnAarsOppgave.mrt</ReportFile>
-  <ReportGuid>1206847198c2448f9d548fce55753a39</ReportGuid>
+  <ReportFile>C:\Users\UNIADM~1\AppData\Local\Temp\2\AltInnAarsOppgave.mrt</ReportFile>
+  <ReportGuid>f24a41cfd32647a0ba435ac148e2fcd9</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
-  <ReportVersion>2022.2.1.0</ReportVersion>
+  <ReportVersion>2022.3.3.0</ReportVersion>
   <Script>using System;
 using System.Drawing;
 using System.Windows.Forms;
